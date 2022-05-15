@@ -16,6 +16,16 @@
 // Contains two classes used to create a new session or new class.
 include "includes/classitem.php";
 
+if ( ! function_exists( 'formatDate' ) ) :
+    function formatDate($timestamp) {
+        $timezone = 'America/Phoenix';
+        $dt = new DateTime();
+        $dt->setTimestamp($timestamp);
+        $dt->setTimezone(new DateTimeZone($timezone));
+        return $dt->format('Y-m-d g:ia');
+    }
+
+endif;
 // Adds the one and only menu item for the plugin.
  function signup_plugin_top_menu(){
    add_menu_page('SignUps', 'SignUps', 'manage_options', __FILE__, 'signup_settings_page', plugins_url('/signups/img/frenchie.bmp',__DIR__));
@@ -79,7 +89,7 @@ function signup_settings_page() {
     }
 }
 
- function submitClass() {
+function submitClass() {
      global $wpdb;
     $where = array();
     $where["class_ID"] =$_POST["id"];
@@ -104,10 +114,10 @@ function signup_settings_page() {
     ?>
         <input class="button-primary ml-auto mr-auto" style="cursor:pointer;" type="button" onclick="   window.history.go(-0);" value="Back">
     <?php
- }
+}
 
- function submitSession() {
-     global $wpdb;
+function submitSession() {
+    global $wpdb;
      $where = array('session_ID' => $_POST['id']);
      unset($_POST['id']);
      unset($_POST['submitSession']);
@@ -123,7 +133,7 @@ function signup_settings_page() {
  function editClass() {
     global $wpdb;
     $query = "SELECT *
-        FROM bitnami_wordpress.wp_scw_classes
+        FROM awp.wp_scw_classes
         WHERE class_ID = " . $_POST['editClass'];
     $results = $wpdb->get_results($query  , OBJECT );
     createClassForm($results[0]);
@@ -138,7 +148,7 @@ function editSession() {
     global $wpdb;
     $dateTimeZone = new DateTimeZone("America/Phoenix");
     $query = "SELECT *
-        FROM bitnami_wordpress.wp_scw_sessions
+        FROM awp.wp_scw_sessions
         WHERE session_ID = " . $_POST['editSession'];
     
     $results = $wpdb->get_results($query  , OBJECT );
@@ -148,19 +158,19 @@ function editSession() {
 function editSessionAttendees() {
     global $wpdb;
     $querySession = "SELECT *
-        FROM bitnami_wordpress.wp_scw_sessions
+        FROM awp.wp_scw_sessions
         WHERE session_ID = " . $_POST['attendees'];
     $resultsSession = $wpdb->get_results($querySession  , OBJECT );
     $session = $resultsSession[0];
 
     $queryClass = "SELECT class_default_slots
-        FROM bitnami_wordpress.wp_scw_classes
+        FROM awp.wp_scw_classes
         WHERE class_ID = " . $session->session_class_ID;
     $resultsClass = $wpdb->get_results($queryClass  , OBJECT );
     $defaultAttendeeSlots = $resultsClass[0]->class_default_slots;
 
     $queryAttendees = "SELECT *
-        FROM bitnami_wordpress.wp_scw_attendees
+        FROM awp.wp_scw_attendees
         WHERE attendee_session_ID = " . $session->session_ID . " AND
               attendee_email != ''";
     $sessionList = $wpdb->get_results($queryAttendees  , OBJECT );
@@ -201,7 +211,7 @@ function deleteSessionAttendees() {
         global $wpdb;
     $query = "SELECT class_ID,
             class_Name
-            FROM bitnami_wordpress.wp_scw_classes;";
+            FROM awp.wp_scw_classes;";
         
     $results = null;
     $results = $wpdb->get_results($query  , OBJECT );
@@ -212,13 +222,33 @@ function deleteSessionAttendees() {
     $className = $_POST[$_POST['selectSession']];
     global $wpdb;
     $query = "SELECT session_ID,
-            session_start_formatted
-            FROM bitnami_wordpress.wp_scw_sessions
+            session_start_formatted,
+            session_start_time,
+            session_slots
+            FROM awp.wp_scw_sessions
             WHERE session_class_ID = " . $_POST['selectSession'];
     
-    $results = null;
-    $results = $wpdb->get_results($query  , OBJECT );
-     createSessionSelectForm($className, $results, $_POST['selectSession']);
+    $instructors = array();
+    $attendees = array();
+    $sessions = $wpdb->get_results($query  , OBJECT );
+    foreach ($sessions as $session){
+        $attendees[$session->session_ID] = array();
+        $instructors[$session->session_ID] = array();
+        $queryAttendees = "SELECT *
+        FROM awp.wp_scw_attendees
+        WHERE attendee_session_ID = " . $session->session_ID . " AND
+              attendee_email != ''";
+        $sessionList = $wpdb->get_results($queryAttendees  , OBJECT );
+        foreach ($sessionList as $attendee) {
+            if ($attendee->attendee_item == "INSTRUCTOR") {
+                $instructors[$session->session_ID][] = $attendee;
+            } else {
+                $attendees[$session->session_ID][] = $attendee;
+            }
+        }
+    }
+
+    createSessionSelectForm($className, $sessions, $attendees, $instructors, $_POST['selectSession']);
  }
 
 /////////// HTML functions below here. /////////////////////////
@@ -321,29 +351,66 @@ function updateMessage($rowsUpdated) {
     <?php
  }
  
- function createSessionSelectForm($className, $results, $classId) {
+ function createSessionSelectForm($className, $sessions, $attendees, $instructors, $classId) {
     ?>
     <form  method="POST">
         <div class="text-center mt-5">
             <h1><?php echo $className ?></h1>
         <div>
         <div id="content" class="container">
-            <table class="mb-100px table table-striped mr-auto ml-auto">
-                <tr><td class="text-left">Add Session</td>
-                    <td></td>
+            <table class="mb-100px table table-bordered mr-auto ml-auto">
+                <tr style="background-color: lightyellow;">
+                    <td class="text-left" style="min-width: 200px;">Add Session</td>
+                    <td style="width: 200px;"></td>
                     <td></td>
                     <td> <input class="submitbutton addItem" type="submit" name="addNewSession" value="<?php echo $classId; ?>"> 
                         </td>
                 </tr>
-                <?php foreach($results as $result) {
+                <?php foreach($sessions as $session) {
                 ?>
-                <tr><td class="text-left"> <?php echo $result->session_start_formatted; ?></td>
-                    <td> <input class="submitbutton editImage" type="submit" name="editSession" value="<?php echo $result->session_ID; ?>"> </td>
-                    <td> <input class="submitbutton attendeesImage" type="submit" name="attendees" value="<?php echo $result->session_ID; ?>"> </td>
-                    <td> <input class="submitbutton deleteImage" type="submit" name="deleteSession" value="<?php echo $result->session_ID; ?>"> 
-                        <input type="hidden" name="className" value="<?php echo $className; ?>"></td>
-                </tr>
-                <?php 
+                    <tr><td class="text-left"> <?php echo formatDate($session->session_start_time); ?></td>
+                        <td> <input class="submitbutton editImage mr-auto ml-auto" type="submit" name="editSession" value="<?php echo $session->session_ID; ?>"> </td>
+                        <td> <input class="submitbutton attendeesImage mr-auto ml-auto" type="submit" name="attendees" value="<?php echo $session->session_ID; ?>"> </td>
+                        <td> <input class="submitbutton deleteImage" type="submit" name="deleteSession" value="<?php echo $session->session_ID; ?>"> 
+                            <input type="hidden" name="className" value="<?php echo $className; ?>"></td>
+                    </tr>
+                    
+                    <?php
+                    if (count($attendees[$session->session_ID]) < $session->session_slots)
+                    {
+                    ?>
+                        <tr><td>Add Attendee</td>
+                            <td></td>
+                            <td></td>
+                            <td> <input class="submitbutton addItem" type="submit" name="addAttendee" value="<?php echo $session->session_ID; ?>"></td>
+                        </tr>
+                    <?php
+                    }
+
+                    foreach($instructors[$session->session_ID] as $instructor) {
+                    ?>
+                        <tr><td> <?php echo $instructor->attendee_firstname . " " . $instructor->attendee_lastname; ?></td>
+                            <td><?php echo $instructor->attendee_item; ?></td>
+                            <td><?php echo $instructor->attendee_email; ?></td>
+                            <td class="centerCheckBox" > <input class="form-check-input" type="checkbox" name="tobedeleted[]" value="<?php echo $instructor->attendee_ID; ?>"> </td>
+                        </tr>
+                    <?php 
+                    } 
+                    ?>
+
+                    <?php
+                    foreach($attendees[$session->session_ID] as $attendee) {
+                    ?>
+                        <tr><td> <?php echo $attendee->attendee_firstname . " " . $attendee->attendee_lastname; ?></td>
+                            <td><?php echo $attendee->attendee_item ?></td>
+                            <td><?php echo $attendee->attendee_email; ?></td>
+                            <td class="centerCheckBox"> <input class="form-check-input" type="checkbox" name="tobedeleted[]" value="<?php echo $attendee->attendee_ID; ?>"> </td>
+                        </tr>
+                    <?php 
+                    }
+                    ?>
+                    <tr style="background: darkgray;"><td></td><td></td><td></td><td></td></tr>
+                    <?php
                 } 
                 ?>
             </table>
@@ -351,6 +418,7 @@ function updateMessage($rowsUpdated) {
     </form>
     </div>
         <input class="btn btn-danger" style="cursor:pointer;" type="button" onclick="   window.history.go(-0);" value="Back">
+        <input class="btn btn-danger" type="submit" value="Delete Selected" name="deleteAttendees">
     </div>
     <?php
 }
