@@ -20,6 +20,13 @@ class ClassItem {
 	public $class_id;
 
 	/**
+	 * The name or title of the class.
+	 *
+	 * @var class_name.
+	 */
+	public $class_name;
+
+	/**
 	 * Contact email.
 	 *
 	 * @var class_contact_email.

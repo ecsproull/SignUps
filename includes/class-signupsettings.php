@@ -27,10 +27,25 @@ class SignupSettings {
 	public function add_image_script() {
 		?>
 		<script>
+			var openPopup = null;
 			function updateImage() {
 				var thumbDisplay = document.getElementById( "displayThumb" );
 				var thumbUrl = document.getElementById( "thumbnail" );
 				thumbDisplay.src = thumbUrl.value;
+			}
+
+			function closePopup() {
+				if (openPopup) {
+					openPopup.classList.toggle("show");
+					openPopup = null;
+				}
+			}
+
+			function myFunction(e, id) {
+				closePopup();
+				openPopup = document.getElementById(id);
+				openPopup.classList.toggle("show");
+				e.stopPropagation ();
 			}
 		</script>
 		<?php
@@ -55,20 +70,23 @@ class SignupSettings {
 				$this->edit_class( $post );
 			} elseif ( isset( $post['edit_session'] ) ) {
 				$this->edit_session( $post );
-			} elseif ( isset( $post['addNewClass'] ) ) {
+			} elseif ( isset( $post['add_new_class'] ) ) {
 				$this->create_class_form( new ClassItem( null ) );
-			} elseif ( isset( $post['addNewSession'] ) ) {
+			} elseif ( isset( $post['add_new_session'] ) ) {
+				var_dump( $post );
 				$this->add_new_session_form( $post );
 			} elseif ( isset( $post['attendees'] ) ) {
 				$this->edit_session_attendees( $post );
-			} elseif ( isset( $post['deleteAttendees'] ) ) {
+			} elseif ( isset( $post['delete_attendees'] ) ) {
 				$this->delete_session_attendees( $post );
-			} elseif ( isset( $post['moveAttendees'] ) ) {
+			} elseif ( isset( $post['move_attendees'] ) ) {
 				$this->move_session_attendees( $post );
-			} elseif ( isset( $post['addAttendee'] ) ) {
+			} elseif ( isset( $post['add_attendee'] ) ) {
 				$this->add_session_attendees( $post );
-			} elseif ( isset( $post['selectSession'] ) ) {
+			} elseif ( isset( $post['select_session'] ) ) {
 				$this->load_session_selection( $post );
+			} elseif ( isset( $post['delete_session'] ) ) {
+				$this->delete_session( $post );
 			}
 		} else {
 			$this->load_class_selection();
@@ -153,12 +171,13 @@ class SignupSettings {
 	 * @param int $post The posted data from the form.
 	 */
 	private function add_new_session_form( $post ) {
-		$session_item = new SessionItem( $post['addNewSession'] );
-		$this->create_session_form( $session_item, $post[ $post['selectSession'] ], true );
+		var_dump( $post );
+		$session_item = new SessionItem( $post['add_new_session'] );
+		$this->create_session_form( $session_item, $post['class_name'], true );
 	}
 
 	/**
-	 * Ed it a session of a class.
+	 * Edit a session of a class.
 	 *
 	 * @param int $post The posted data from the form.
 	 */
@@ -169,11 +188,34 @@ class SignupSettings {
 				'SELECT *
 				FROM awp.wp_scw_sessions
 				WHERE session_id = %s',
-				$post['edit_session']
+				$post['session_id']
 			),
 			OBJECT
 		);
 		$this->create_session_form( $results[0], $post['class_name'], false );
+	}
+
+	/**
+	 * Edit a session of a class.
+	 *
+	 * @param int $post The posted data from the form.
+	 */
+	private function delete_session( $post ) {
+		global $wpdb;
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM awp.wp_scw_sessions
+				WHERE session_id = %s',
+				$post['session_id']
+			),
+			OBJECT
+		);
+
+		echo esc_html( "DELETE <br>");
+		var_dump( $results[0] );
+		
+		//$this->create_session_form( $results[0], $post['class_name'], false );
 	}
 
 	/**
@@ -273,8 +315,7 @@ class SignupSettings {
 
 	/**
 	 * Load the class selection.
-	 *
-	 */
+	*/
 	private function load_class_selection() {
 		global $wpdb;
 		$results = $wpdb->get_results(
@@ -293,10 +334,23 @@ class SignupSettings {
 	 * @param int $post The posted data from the form.
 	 */
 	private function load_session_selection( $post ) {
-		$class_name = $post[ $post['selectSession'] ];
+
+		$class_name = $post[ $post['select_session'] ];
 		global $wpdb;
 		$instructors = array();
 		$attendees   = array();
+		$class   = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT class_rolling
+				FROM awp.wp_scw_classes
+				WHERE class_id = %s',
+				$post['select_session']
+			),
+			OBJECT
+		);
+
+		$rolling =  $class[0]->class_rolling > 0;
+
 		$sessions    = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT session_id,
@@ -305,7 +359,7 @@ class SignupSettings {
 				session_slots
 				FROM awp.wp_scw_sessions
 				WHERE session_class_id = %s',
-				$post['selectSession']
+				$post['select_session']
 			),
 			OBJECT
 		);
@@ -333,7 +387,22 @@ class SignupSettings {
 			}
 		}
 
-		$this->create_session_select_form( $class_name, $sessions, $attendees, $instructors, $post['selectSession'] );
+		if ( $rolling ) {
+			$this->create_rolling_session_select_form( 
+				$class_name,
+				$sessions,
+				$attendees,
+				$post['select_session']
+			);
+		} else {
+			$this->create_session_select_form( 
+				$class_name,
+				$sessions,
+				$attendees,
+				$instructors,
+				$post['select_session']
+			);
+		}
 	}
 
 	/**
@@ -372,7 +441,7 @@ class SignupSettings {
 									<td>Add Attendee</td>
 									<td></td>
 									<td></td>
-									<td> <input class="submitbutton addItem" type="submit" name="addAttendee" value="<?php echo esc_html( $session_id ); ?>"></td>
+									<td> <input class="submitbutton addItem" type="submit" name="add_attendee" value="<?php echo esc_html( $session_id ); ?>"></td>
 								</tr>
 								<?php
 							}
@@ -402,7 +471,7 @@ class SignupSettings {
 							}
 							?>
 						</table>
-						<input class="btn btn-danger" type="submit" value="Delete" name="deleteAttendees">
+						<input class="btn btn-danger" type="submit" value="Delete" name="delete_attendees">
 						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 					</div>
 				</div>
@@ -455,7 +524,7 @@ class SignupSettings {
 						<td>Add SignUp</td>
 						<td></td>
 						<td></td>
-						<td> <input class="submitbutton addItem" type="submit" name="addNewClass" value=""></td>
+						<td> <input class="submitbutton addItem" type="submit" name="add_new_class" value=""></td>
 					</tr>
 					<?php
 					foreach ( $results as $result ) {
@@ -463,7 +532,7 @@ class SignupSettings {
 						<tr>
 							<td> <?php echo esc_html( $result->class_name ); ?></td>
 							<td> <input class="submitbutton editImage" type="submit" name="edit_class" value="<?php echo esc_html( $result->class_id ); ?>"> </td>
-							<td> <input class="submitbutton sessionsImage" type="submit" name="selectSession" value="<?php echo esc_html( $result->class_id ); ?>"> </td>
+							<td> <input class="submitbutton sessionsImage" type="submit" name="select_session" value="<?php echo esc_html( $result->class_id ); ?>"> </td>
 							<td> <input class="submitbutton deleteImage" type="submit" name="deleteClass" value="<?php echo esc_html( $result->class_id ); ?>">
 								<input type="hidden" name="<?php echo esc_html( $result->class_id ); ?>" value="<?php echo esc_html( $result->class_name ); ?>" >
 								<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
@@ -488,85 +557,157 @@ class SignupSettings {
 	 * @param  int    $class_id The ID of the class.
 	 * @return void
 	 */
-	private function create_session_select_form( $class_name, $sessions, $attendees, $instructors, $class_id ) {
+	private function create_session_select_form( $class_name, $sessions, $attendees, $instructors, $class_id) {
 		?>
-		<form method="POST">
-			<div class="text-center mt-5">
-				<h1><?php echo esc_html( $class_name ); ?></h1>
-				<div>
-					<div id="content" class="container">
-						<table class="mb-100px table table-bordered mr-auto ml-auto">
-							<tr style="background-color: lightyellow;">
-								<td class="text-left" style="min-width: 200px;">Add Session</td>
-								<td style="width: 200px;"></td>
+		<div class="text-center mt-5" onclick="closePopup()">
+			<h1><?php echo esc_html( $class_name ); ?></h1>
+			<div>
+				<div id="content" class="container">
+					<table class="mb-100px table table-bordered mr-auto ml-auto">
+						<form method="POST">
+						<tr style="background-color: lightyellow;">
+							<td class="text-left" style="min-width: 200px;">Add Session</td>
+							<td style="width: 200px;"></td>
+							<td></td>
+							<td><input class="submitbutton addItem" type="submit" name="add_new_session" value="<?php echo esc_html( $class_id ); ?>"></td>
+						</tr>
+						<input type="hidden" name="class_name" value="<?php echo esc_html( $class_name ); ?>">
+						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+						</form>
+						<?php
+						foreach ( $sessions as $session ) {
+							?>
+							<form method="POST">
+							<tr>
+								<td class="text-left"> <?php echo esc_html( $this->format_date( $session->session_start_time ) ); ?>
 								<td></td>
-								<td> <input class="submitbutton addItem" type="submit" name="addNewSession" value="<?php echo esc_html( $class_id ); ?>">
+								<td></td>
+								<td>
+									<div class="popup" onclick="myFunction(event, <?php echo esc_html( $session->session_id ); ?>)"><b><i><u>Edit</u></i></b>
+										<span class="popuptext" id=<?php echo esc_html( $session->session_id ); ?>>
+											<input class="btn btn-primary w-90 mb-1" type="submit" name="edit_session" value="Edit Session"> 
+											<input class="btn btn-danger w-90 mb-1" type="submit" name="delete_session" value="Delete Session">
+											<?php
+											if ( count( $attendees[ $session->session_id ] ) < $session->session_slots ) {
+												?>
+												<input class="btn btn-success w-90" type="submit" name="add_attendee" value="Add Attendee">
+												<?php
+											}
+											?>
+											<input class="btn btn-primary w-90 mb-1 mt-2" type="submit" value="Move Selected" name="move_attendees">
+											<input class="btn btn-danger w-90 mb-1" type="submit" value="Delete Selected" name="delete_attendees">
+										</span>
+									</div>
 								</td>
 							</tr>
+							<input type="hidden" name="class_name" value="<?php echo esc_html( $class_name ); ?>">
+							<input type="hidden" name="classId" value="<?php echo esc_html( $class_id ); ?>">
+							<input type="hidden" name="session_id" value="<?php echo esc_html( $session->session_id ); ?>">
+							<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 							<?php
-							foreach ( $sessions as $session ) {
+							foreach ( $instructors[ $session->session_id ] as $instructor ) {
 								?>
 								<tr>
-									<td class="text-left"> <?php echo esc_html( $this->format_date( $session->session_start_time ) ); ?></td>
-									<td> <input class="submitbutton editImage mr-auto ml-auto" type="submit" name="edit_session" value="<?php echo esc_html( $session->session_id ); ?>"> </td>
-									<td> <input class="submitbutton attendeesImage mr-auto ml-auto" type="submit" name="attendees" value="<?php echo esc_html( $session->session_id ); ?>"> </td>
-									<td> <input class="submitbutton deleteImage" type="submit" name="deleteSession" value="<?php echo esc_html( $session->session_id ); ?>"> </td>
-								</tr>
-								<input type="hidden" name="class_name" value="<?php echo esc_html( $class_name ); ?>">
-								<input type="hidden" name="classId" value="<?php echo esc_html( $class_id ); ?>">
-								<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
-								<?php
-								if ( count( $attendees[ $session->session_id ] ) < $session->session_slots ) {
-									?>
-									<tr>
-										<td>Add Attendee</td>
-										<td></td>
-										<td></td>
-										<td> <input class="submitbutton addItem" type="submit" name="addAttendee" value="<?php echo esc_html( $session->session_id ); ?>"></td>
-									</tr>
-									<?php
-								}
-
-								foreach ( $instructors[ $session->session_id ] as $instructor ) {
-									?>
-									<tr>
-										<td><?php echo esc_html( $instructor->attendee_firstname . ' ' . $instructor->attendee_lastname ); ?></td>
-										<td><?php echo esc_html( $instructor->attendee_item ); ?></td>
-										<td><?php echo esc_html( $instructor->attendee_email ); ?></td>
-										<td class="centerCheckBox"> <input class="form-check-input position-relative" type="checkbox" name="selectedAttendee[]" value="<?php $this->session_attendee_string( $instructor->attendee_id, $session->session_id ); ?>"> </td>
-									</tr>
-									<?php
-								}
-								?>
-
-								<?php
-								foreach ( $attendees[ $session->session_id ] as $attendee ) {
-									?>
-									<tr>
-										<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
-										<td><?php echo esc_html( $attendee->attendee_item ); ?></td>
-										<td><?php echo esc_html( $attendee->attendee_email ); ?></td>
-										<td class="centerCheckBox"> <input class="form-check-input position-relative" type="checkbox" name="selectedAttendee[]" value="<?php $this->session_attendee_string( $attendee->attendee_id, $session->session_id ); ?>"> </td>
-									</tr>
-									<?php
-								}
-								?>
-								<tr style="background: darkgray;">
-									<td></td>
-									<td></td>
-									<td></td>
-									<td></td>
+									<td><?php echo esc_html( $instructor->attendee_firstname . ' ' . $instructor->attendee_lastname ); ?></td>
+									<td><?php echo esc_html( $instructor->attendee_item ); ?></td>
+									<td><?php echo esc_html( $instructor->attendee_email ); ?></td>
+									<td class="centerCheckBox"> <input class="form-check-input position-relative" type="checkbox" name="selectedAttendee[]" value="<?php $this->session_attendee_string( $instructor->attendee_id, $session->session_id ); ?>"> </td>
 								</tr>
 								<?php
 							}
 							?>
-						</table>
-					</div>
-		</form>
+
+							<?php
+							foreach ( $attendees[ $session->session_id ] as $attendee ) {
+								?>
+								<tr>
+									<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
+									<td><?php echo esc_html( $attendee->attendee_item ); ?></td>
+									<td><?php echo esc_html( $attendee->attendee_email ); ?></td>
+									<td class="centerCheckBox"> <input class="form-check-input position-relative" type="checkbox" name="selectedAttendee[]" value="<?php $this->session_attendee_string( $attendee->attendee_id, $session->session_id ); ?>"> </td>
+								</tr>
+								<?php
+							}
+						?>
+						</form>
+						<?php
+					}
+					?>
+				</table>
+			</div>
 		</div>
 		<input class="btn btn-danger" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back">
-		<input class="btn btn-danger" type="submit" value="Delete Selected" name="deleteAttendees">
-		<input class="btn btn-primary" type="submit" value="Move Selected" name="moveAttendees">
+		</div>
+		<?php
+	}
+
+	/**
+	 * Creates a form that displays the rolling sessions along with their attenees
+	 *
+	 * @param  string $class_name The class name.
+	 * @param  array  $sessions The list of sessions for the class.
+	 * @param  array  $attendees The list of attendees for the class.
+	 * @param  int    $class_id The ID of the class.
+	 * @return void
+	 */
+	private function create_rolling_session_select_form( $class_name, $sessions, $attendees, $class_id) {
+		?>
+		<div class="text-center mt-5" onclick="closePopup()">
+			<h1><?php echo esc_html( $class_name ); ?></h1>
+			<div>
+				<div id="content" class="container">
+					<table class="mb-100px table table-bordered mr-auto ml-auto">
+						<form method="POST">
+						<tr style="background-color: lightyellow;">
+							<td></td>
+							<td style="width: 200px;"></td>
+							<td></td>
+							<td>
+								<div class="popup" onclick="myFunction(event, 'popup_id')"><b><i><u>Edit</u></i></b>
+									<span class="popuptext" id="popup_id">
+										<input class="btn btn-primary w-90 mb-1" type="submit" name="edit_session" value="Edit Sessions"> 
+										<input class="btn btn-success w-90" type="submit" name="add_attendee" value="Add Attendee">
+										<input class="btn btn-primary w-90 mb-1 mt-2" type="submit" value="Move Selected" name="move_attendees">
+										<input class="btn btn-danger w-90 mb-1" type="submit" value="Delete Selected" name="delete_attendees">
+									</span>
+								</div>
+							</td>
+						</tr>
+						<input type="hidden" name="class_name" value="<?php echo esc_html( $class_name ); ?>">
+						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+						<?php
+						foreach ( $sessions as $session ) {
+							foreach ( $attendees[ $session->session_id ] as $attendee ) {
+								?>
+								<tr>
+									<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
+									<td><?php echo esc_html( $this->format_date( $session->session_start_time ) ); ?></td>
+									<td><?php echo esc_html( $attendee->attendee_email ); ?></td>
+									<td class="centerCheckBox"> <input class="form-check-input position-relative" type="checkbox" name="selectedAttendee[]" value="<?php $this->session_attendee_string( $attendee->attendee_id, $session->session_id ); ?>"> </td>
+								</tr>
+								<?php
+							}
+
+							if ( count( $attendees[ $session->session_id ] ) < $session->session_slots ) {
+								?>
+								<tr>
+									<td class='addAtt'> Add Attendee</td>
+									<td><?php echo esc_html( $this->format_date( $session->session_start_time ) ); ?></td>
+									<td></td>
+									<td class="centerCheckBox"> <input class="form-check-input position-relative addChk" type="checkbox" name="addedAttendee[]" value="<?php $this->session_attendee_string( -1, $session->session_id ); ?>"> </td>
+								</tr>
+								<?php
+							}
+						}
+						?>
+						<input type="hidden" name="class_name" value="<?php echo esc_html( $class_name ); ?>">
+						<input type="hidden" name="classId" value="<?php echo esc_html( $class_id ); ?>">
+						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+					</form>
+				</table>
+			</div>
+		</div>
+		<input class="btn btn-danger" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back">
 		</div>
 		<?php
 	}

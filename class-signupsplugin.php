@@ -55,9 +55,9 @@ class SignupsPlugin {
 	 * Adds the CSS that is used to style the plug-in.
 	 */
 	public function add_scripts_and_css() {
-		wp_register_style( 'signup_bs_style', plugin_dir_url( __FILE__ ) . 'bootstrap/css/bootstrap.min.css', array(), 1 );
+		wp_register_style( 'signup_bs_style', plugins_url( '/signups/bootstrap/css/bootstrap.min.css' ), array(), 1 );
 		wp_enqueue_style( 'signup_bs_style' );
-		wp_register_style( 'signup_style', plugin_dir_url( __FILE__ ) . 'css/style.css', array(), 1 );
+		wp_register_style( 'signup_style', plugins_url( '/signups/css/style.css' ), array(), 1 );
 		wp_enqueue_style( 'signup_style' );
 	}
 }
