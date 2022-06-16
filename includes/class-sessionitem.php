@@ -19,6 +19,7 @@ class SessionItem {
 	 */
 	public function __construct( $class_id ) {
 		$this->session_class_id = $class_id;
+		$this->session_item = "Attendee";
 	}
 
 	/**
@@ -84,5 +85,13 @@ class SessionItem {
 	 * @var session_slots.
 	 */
 	public $session_slots;
+
+		/**
+	 * Number of slots in this session.
+	 * This can vary from the default number of slots for the class.
+	 *
+	 * @var session_item.
+	 */
+	public $session_item;
 }
 

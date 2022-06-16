@@ -10,7 +10,7 @@
  * Mirror of the database Session object.
  * Used for creating new sessions to be added to the DB.
  */
-class SignupSettings {
+class SignupSettings extends SignUpsBase {
 
 	/**
 	 * __construct
@@ -18,38 +18,8 @@ class SignupSettings {
 	 * @return void
 	 */
 	public function __construct() {
-		add_action( 'admin_print_scripts', array( $this, 'add_image_script' ) );
 	}
 
-	/**
-	 *  When you change the link to a class thumbnail this bit of JS updates the image on the page in real time.
-	 */
-	public function add_image_script() {
-		?>
-		<script>
-			var openPopup = null;
-			function updateImage() {
-				var thumbDisplay = document.getElementById( "displayThumb" );
-				var thumbUrl = document.getElementById( "thumbnail" );
-				thumbDisplay.src = thumbUrl.value;
-			}
-
-			function closePopup() {
-				if (openPopup) {
-					openPopup.classList.toggle("show");
-					openPopup = null;
-				}
-			}
-
-			function myFunction(e, id) {
-				closePopup();
-				openPopup = document.getElementById(id);
-				openPopup.classList.toggle("show");
-				e.stopPropagation ();
-			}
-		</script>
-		<?php
-	}
 
 	/**
 	 * The main function of the Plugin.
@@ -137,13 +107,13 @@ class SignupSettings {
 		$where = array( 'session_id' => $post['id'] );
 		unset( $post['id'] );
 		unset( $post['submit_session'] );
-		$rows_pdated = 0;
+		$rows_updated = 0;
 		if ( $where['session_id'] ) {
-			$rows_pdated = $wpdb->update( 'wp_scw_sessions', $post, $where );
+			$rows_updated = $wpdb->update( 'wp_scw_sessions', $post, $where );
 		} else {
-			$rows_pdated = $wpdb->insert( 'wp_scw_sessions', $post );
+			$rows_updated = $wpdb->insert( 'wp_scw_sessions', $post );
 		}
-		$this->update_message( $rows_pdated );
+		$this->update_message( $rows_updated );
 	}
 
 	/**
@@ -192,6 +162,7 @@ class SignupSettings {
 			),
 			OBJECT
 		);
+
 		$this->create_session_form( $results[0], $post['class_name'], false );
 	}
 
@@ -202,20 +173,11 @@ class SignupSettings {
 	 */
 	private function delete_session( $post ) {
 		global $wpdb;
-		$results = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT *
-				FROM awp.wp_scw_sessions
-				WHERE session_id = %s',
-				$post['session_id']
-			),
-			OBJECT
-		);
-
-		echo esc_html( "DELETE <br>");
-		var_dump( $results[0] );
-		
-		//$this->create_session_form( $results[0], $post['class_name'], false );
+		$where_session = array( 'session_id' => $post['session_id'] );
+		$rows_updated = $wpdb->delete( self::SESSIONS_TABLE, $where_session );
+		$where_attendees = array ( 'attendee_session_id' => $post['session_id'] );
+		$wpdb->delete( self::ATTENDEES_TABLE, $where_attendees );
+		$this->update_message( $rows_updated );
 	}
 
 	/**
@@ -289,8 +251,8 @@ class SignupSettings {
 	 * @param int $post The posted data from the form.
 	 */
 	private function add_session_attendees( $post ) {
-		echo 'add_session_attendees';
-		echo var_dump( $post );
+		var_dump( $post );
+		$this->create_attendee_select_form( $post );
 	}
 
 	/**
@@ -414,6 +376,41 @@ class SignupSettings {
 	private function session_attendee_string( $attendee_id, $session_id ) {
 		echo esc_html( $attendee_id . ',' . $session_id );
 	}
+	
+	/**
+	 * create_attendee_select_form
+	 *
+	 * @param  mixed $post
+	 * @return void
+	 */
+	private function create_attendee_select_form( $post ) {
+		?>
+		<div class="text-center mt-5">
+			<h1><?php echo esc_html( $post['class_name'] ); ?></h1> <br>
+			<h2>Add Attendee</h2>
+			<div>
+				<div id="content" class="container">
+					<table class="mb-100px table table-striped mr-auto ml-auto">
+						<tr>
+							<td class="w-25">Enter Badge#</td>
+							<td class="w-25"><input id="badge_input" type="number" #badgeNumber></td>
+							<td class="w-25"><button id="get_member_button" class="btn btn-primary">Get Member</button></td>
+							<td class="w-25"></td>
+							<td class='w-75px'></td>
+						</tr>
+						<tr>
+							<td><input id="firstname" name="firstname" type='text'></td>
+							<td><input id="lastname" name="lastname" type='text'></td>
+							<td><input id="phone" name="phone" type='text'></td>
+							<td><input id="email" name="email" type='text'></td>
+							<td><input id="badge" name="badge" type='text'></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
 
 	/**
 	 * Create attendee information form.
@@ -484,11 +481,11 @@ class SignupSettings {
 	/**
 	 * Formats the message to display after an upate to the DB has been made.
 	 *
-	 * @param  mixed $rows_pdated How many rows were updated in the database.
+	 * @param  mixed $rows_updated How many rows were updated in the database.
 	 * @return void
 	 */
-	private function update_message( $rows_pdated ) {
-		if ( 1 === $rows_pdated ) {
+	private function update_message( $rows_updated ) {
+		if ( 1 === $rows_updated ) {
 			?>
 			<div class="text-center mt-5">
 				<h2> Session Updated </h2>
@@ -498,7 +495,7 @@ class SignupSettings {
 			?>
 			<div class="text-center mt-5">
 				<h2> Something went wrong. </h2>
-				<h3><?php echo esc_html( $rows_pdated ); ?> Rows Updated</h3>
+				<h3><?php echo esc_html( $rows_updated ); ?> Rows Updated</h3>
 			</div>
 			<?php
 		}
@@ -559,7 +556,7 @@ class SignupSettings {
 	 */
 	private function create_session_select_form( $class_name, $sessions, $attendees, $instructors, $class_id) {
 		?>
-		<div class="text-center mt-5" onclick="closePopup()">
+		<div id="session_select" class="text-center mt-5">
 			<h1><?php echo esc_html( $class_name ); ?></h1>
 			<div>
 				<div id="content" class="container">
@@ -579,14 +576,21 @@ class SignupSettings {
 							?>
 							<form method="POST">
 							<tr>
-								<td class="text-left"> <?php echo esc_html( $this->format_date( $session->session_start_time ) ); ?>
+								<td class="text-left"> <?php echo esc_html( $this->format_date( $session->session_start_formatted ) ); ?>
 								<td></td>
 								<td></td>
 								<td>
-									<div class="popup" onclick="myFunction(event, <?php echo esc_html( $session->session_id ); ?>)"><b><i><u>Edit</u></i></b>
-										<span class="popuptext" id=<?php echo esc_html( $session->session_id ); ?>>
-											<input class="btn btn-primary w-90 mb-1" type="submit" name="edit_session" value="Edit Session"> 
-											<input class="btn btn-danger w-90 mb-1" type="submit" name="delete_session" value="Delete Session">
+									<div class="popup" data-textid=<?php echo esc_html( 'sessionid' . $session->session_id ); ?> ><b><i><u>Edit</u></i></b>
+										<span class="popuptext" id=<?php echo esc_html( 'sessionid' . $session->session_id ); ?> >
+											<input class="btn btn-primary w-90 mb-1" 
+												type="submit"
+												name="edit_session"
+												value="Edit Session"> 
+											<input class="btn btn-danger w-90 mb-1" 
+												type="submit"
+												name="delete_session"
+												value="Delete Session" 
+												onclick="return confirm('Confirm Session Delete')">
 											<?php
 											if ( count( $attendees[ $session->session_id ] ) < $session->session_slots ) {
 												?>
@@ -594,8 +598,15 @@ class SignupSettings {
 												<?php
 											}
 											?>
-											<input class="btn btn-primary w-90 mb-1 mt-2" type="submit" value="Move Selected" name="move_attendees">
-											<input class="btn btn-danger w-90 mb-1" type="submit" value="Delete Selected" name="delete_attendees">
+											<input class="btn btn-primary w-90 mb-1 mt-2"
+												type="submit"
+												name="move_attendees"
+												value="Move Selected">
+											<input class="btn btn-danger w-90 mb-1" 
+												type="submit"
+												name="delete_attendees"
+												value="Delete Selected"
+												onclick="return confirm('Confirm Attendee Delete')" >
 										</span>
 									</div>
 								</td>
@@ -628,6 +639,17 @@ class SignupSettings {
 								</tr>
 								<?php
 							}
+
+							for ($i = count( $attendees[ $session->session_id ] ); $i < $session->session_slots; $i++ ) {
+								?>
+								<tr>
+									<td class='addAtt'> Add Attendee</td>
+									<td><?php echo esc_html( $this->format_date( $session->session_start_formatted ) ); ?></td>
+									<td></td>
+									<td class="centerCheckBox"> <input class="form-check-input position-relative addChk" type="checkbox" name="addedAttendee[]" value="<?php $this->session_attendee_string( -1, $session->session_id ); ?>"> </td>
+								</tr>
+								<?php
+							}
 						?>
 						</form>
 						<?php
@@ -652,7 +674,7 @@ class SignupSettings {
 	 */
 	private function create_rolling_session_select_form( $class_name, $sessions, $attendees, $class_id) {
 		?>
-		<div class="text-center mt-5" onclick="closePopup()">
+		<div id="session_select" class="text-center mt-5">
 			<h1><?php echo esc_html( $class_name ); ?></h1>
 			<div>
 				<div id="content" class="container">
@@ -663,7 +685,7 @@ class SignupSettings {
 							<td style="width: 200px;"></td>
 							<td></td>
 							<td>
-								<div class="popup" onclick="myFunction(event, 'popup_id')"><b><i><u>Edit</u></i></b>
+								<div class="popup" data-textid="popup_id" ><b><i><u>Edit</u></i></b>
 									<span class="popuptext" id="popup_id">
 										<input class="btn btn-primary w-90 mb-1" type="submit" name="edit_session" value="Edit Sessions"> 
 										<input class="btn btn-success w-90" type="submit" name="add_attendee" value="Add Attendee">
@@ -681,7 +703,7 @@ class SignupSettings {
 								?>
 								<tr>
 									<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
-									<td><?php echo esc_html( $this->format_date( $session->session_start_time ) ); ?></td>
+									<td><?php echo esc_html( $this->format_date( $session->session_start_formatted ) ); ?></td>
 									<td><?php echo esc_html( $attendee->attendee_email ); ?></td>
 									<td class="centerCheckBox"> <input class="form-check-input position-relative" type="checkbox" name="selectedAttendee[]" value="<?php $this->session_attendee_string( $attendee->attendee_id, $session->session_id ); ?>"> </td>
 								</tr>
@@ -692,7 +714,7 @@ class SignupSettings {
 								?>
 								<tr>
 									<td class='addAtt'> Add Attendee</td>
-									<td><?php echo esc_html( $this->format_date( $session->session_start_time ) ); ?></td>
+									<td><?php echo esc_html( $this->format_date( $session->session_start_formatted ) ); ?></td>
 									<td></td>
 									<td class="centerCheckBox"> <input class="form-check-input position-relative addChk" type="checkbox" name="addedAttendee[]" value="<?php $this->session_attendee_string( -1, $session->session_id ); ?>"> </td>
 								</tr>
@@ -744,7 +766,7 @@ class SignupSettings {
 				</tr>
 				<tr>
 					<td class="text-right mr-2"><label>Thumbnail URL:</label></td>
-					<td><input id="thumbnail" class="w-250px" type="url" name="class_thumbnail_url" value="<?php echo esc_html( $data->class_thumbnail_url ); ?>" onChange="updateImage()" /> </td>
+					<td><input id="thumbnail" class="w-250px" type="url" name="class_thumbnail_url" value="<?php echo esc_html( $data->class_thumbnail_url ); ?>" /> </td>
 				</tr>
 				<tr>
 					<td class="text-right mr-2"><label>Cost:</label></td>
@@ -797,6 +819,10 @@ class SignupSettings {
 					<td><input class="w-250px" type="text" name="session_location" value="<?php echo esc_html( $data->session_location ); ?>" /> </td>
 				</tr>
 				<tr>
+					<td class="text-right mr-2"><label>Session Item:</label></td>
+					<td><input class="w-250px" type="text" name="session_item" value="<?php echo esc_html( $data->session_item ); ?>" /> </td>
+				</tr>
+				<tr>
 					<td class="text-right mr-2"><label>Slots: </label></td>
 					<td><input class="w-250px" type="number" name="session_slots" value="<?php echo esc_html( $data->session_slots ); ?>" /> </td>
 				</tr>
@@ -833,11 +859,8 @@ class SignupSettings {
 	 * @param  mixed $timestamp Unix timestamp to be formated.
 	 * @return string Formatted date.
 	 */
-	private function format_date( $timestamp ) {
-		$timezone = 'America/Phoenix';
-		$dt       = new DateTime();
-		$dt->setTimestamp( $timestamp );
-		$dt->setTimezone( new DateTimeZone( $timezone ) );
+	private function format_date( $formatted_time ) {
+		$dt       = new DateTime( $formatted_time );
 		return $dt->format( 'Y-m-d g:ia' );
 	}
 }

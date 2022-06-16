@@ -1,0 +1,119 @@
+<?php
+/**
+ * Summary
+ * Place class.
+ *
+ * @package     SignUps
+ * @author      Edward Sproull
+ * @copyright   You have the right to copy
+ * @license     GPL-2.0+
+ */
+
+/**
+ * Create the database tables on activation.
+ */
+class SignUpsRestApis extends SignUpsBase {
+
+	/**
+	 * __construct
+	 *
+	 * @return void
+	 */
+	public function __construct() {
+		add_action(
+			'rest_api_init',
+			function () {
+				$this->register_route(
+					'scwmembers/v1',
+					'/members',
+					'get_member',
+					array(
+						'badge' => array(
+							'description'       => esc_html__( 'Member badge number' ),
+							'type'              => 'string',
+							'validate_callback' => array( $this, 'verify_badge_param' ),
+						),
+					)
+				);
+			}
+		);
+	}
+
+	/**
+	 * The actual function that does the work of retrieving the points.
+	 *
+	 * @param string $request Members badge number.
+	 * @return array The results of the query.
+	 */
+	public function get_member( $request ) {
+
+		try {
+			global $wpdb;
+			$results = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT * FROM %1s WHERE badge = %1s',
+					self::ROSTER_TABLE,
+					$request['badge']
+				),
+				OBJECT
+			);
+
+			return $results;
+
+		} catch ( Exception $e ) {
+			return $e->getMessage();
+		}
+	}
+
+	/**
+	 * Helper function for registering routes.
+	 *
+	 * @param  string $namespace The namespace.
+	 * @param  string $route End of the route.
+	 * @param  string $func The endpoint function.
+	 * @param  array  $args Arguments to the api call.
+	 * @return void
+	 */
+	private function register_route( $namespace, $route, $func, $args ) {
+		register_rest_route(
+			$namespace,
+			$route,
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, $func ),
+				'permission_callback' => array( $this, 'permissions_check' ),
+				'args'                => $args,
+			)
+		);
+	}
+
+	/**
+	 * Verifies the user is an admin before passing out data.
+	 *
+	 * @return boolean True if users is an admin, else false.
+	 */
+	public function permissions_check() {
+		if ( ! current_user_can( 'administrator' ) ) {
+			return new WP_Error( 'rest_forbidden', esc_html__( 'OMG you can not view private data.', 'my-text-domain' ), array( 'status' => 401 ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Verify that the badge parameter is valid.
+	 *
+	 * @param  string $value Value of the badge.
+	 * @param  mixed  $request The request object.
+	 * @param  mixed  $param The name of the parameter.
+	 * @return boolean
+	 */
+	public function verify_badge_param( $value, $request, $param ) {
+		$pattern = '/^[0-9]{4}$/ms';
+		if ( ! preg_match( $pattern, $value ) ) {
+			return new WP_Error( 'Bad data format', esc_html__( 'OMG you cannot pass that crap for a badge number.', 'my-text-domain' ), array( 'status' => 402 ) );
+		}
+
+		return true;
+	}
+}
