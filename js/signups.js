@@ -15,7 +15,8 @@ jQuery( document ).ready( function($){
 				$( '#lastname' ).val( response[0].lastname );
 				$( '#phone' ).val( response[0].phone );
 				$( '#email' ).val( response[0].email );
-				$( '#badge' ).val( response[0].badge );
+				$( '#badge' ).val( response[0].badge ); 
+				checkAttendeeValid();
 			} else {
 				alert( 'Badge number not found.' )
 			}
@@ -46,5 +47,22 @@ jQuery( document ).ready( function($){
 
 	$( "#thumbnail" ).change(function( e ){
 		$( "#displayThumb" ).attr( "src", e.currentTarget.value );
-	})
+	});
+
+	$( '#firstname,#lastname,#phone,#email,#badge' ).each( function() {
+		$(this).change( function() {
+			checkAttendeeValid();
+		});
+	});
+
+	function checkAttendeeValid() {
+		if ( $( '#firstname').val() != '' &&
+			$( '#lastname' ).val() != '' &&
+			$( '#badge' ).val() != '' &&
+			( $( '#phone' ).val() != '' || $( '#email' ).val() != '') ) {
+			$( '#submit_attendees' ).prop('disabled', false);
+		} else {
+			$( '#submit_attendees' ).prop('disabled', true);
+		}
+	}
 });

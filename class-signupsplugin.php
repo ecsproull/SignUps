@@ -57,10 +57,11 @@ class SignupsPlugin {
 
 	/**
 	 * Adds the CSS that is used to style the plug-in.
+	 *
+	 * @param string $host Who is calling.
 	 */
 	public function add_scripts_and_css( $host ) {
-		var_dump( $host );
-		if ( $host !== "toplevel_page_SignUps" ) {
+		if ( 'toplevel_page_SignUps' !== $host ) {
 			return;
 		}
 

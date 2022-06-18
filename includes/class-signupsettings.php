@@ -43,7 +43,6 @@ class SignupSettings extends SignUpsBase {
 			} elseif ( isset( $post['add_new_class'] ) ) {
 				$this->create_class_form( new ClassItem( null ) );
 			} elseif ( isset( $post['add_new_session'] ) ) {
-				var_dump( $post );
 				$this->add_new_session_form( $post );
 			} elseif ( isset( $post['attendees'] ) ) {
 				$this->edit_session_attendees( $post );
@@ -53,7 +52,9 @@ class SignupSettings extends SignUpsBase {
 				$this->move_session_attendees( $post );
 			} elseif ( isset( $post['add_attendee'] ) ) {
 				$this->add_session_attendees( $post );
-			} elseif ( isset( $post['select_session'] ) ) {
+			} elseif ( isset( $post['submit_attendees'] ) ) {
+				$this->submit_session_attendees( $post );
+			} elseif ( isset( $post['edit_sessions_class_id'] ) ) {
 				$this->load_session_selection( $post );
 			} elseif ( isset( $post['delete_session'] ) ) {
 				$this->delete_session( $post );
@@ -82,7 +83,7 @@ class SignupSettings extends SignUpsBase {
 				$where
 			);
 		} else {
-			$affected_row_count = $wpdb->insert( 'wp_scw_classes', $post );
+			$affected_row_count = $wpdb->insert( self::CLASSES_TABLE, $post );
 		}
 		if ( $affected_row_count ) {
 			?>
@@ -126,8 +127,9 @@ class SignupSettings extends SignUpsBase {
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
-				FROM awp.wp_scw_classes
+				FROM %1s
 				WHERE class_id = %s',
+				self::CLASSES_TABLE,
 				$post['edit_class']
 			),
 			OBJECT
@@ -156,8 +158,9 @@ class SignupSettings extends SignUpsBase {
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
-				FROM awp.wp_scw_sessions
+				FROM %1s
 				WHERE session_id = %s',
+				self::SESSIONS_TABLE,
 				$post['session_id']
 			),
 			OBJECT
@@ -190,8 +193,9 @@ class SignupSettings extends SignUpsBase {
 		$results_session = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
-				FROM awp.wp_scw_sessions
-				WHERE session_id = %s',
+				FROM %s
+				WHERE session_id = %1s',
+				self::SESSIONS_TABLE,
 				$post['attendees']
 			),
 			OBJECT
@@ -201,8 +205,9 @@ class SignupSettings extends SignUpsBase {
 		$results_class = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT class_default_slots
-				FROM awp.wp_scw_classes
+				FROM %1s
 				WHERE class_id = %s',
+				self::CLASSES_TABLE,
 				$session->session_class_id
 			),
 			OBJECT
@@ -212,9 +217,10 @@ class SignupSettings extends SignUpsBase {
 
 		$session_list = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT * FROM awp.wp_scw_attendees
+				'SELECT * FROM %1s
 				WHERE attendee_session_id = %s  AND
 				attendee_email != "" ',
+				self::ATTENDEES_TABLE,
 				$session->session_id
 			),
 			OBJECT
@@ -251,8 +257,58 @@ class SignupSettings extends SignUpsBase {
 	 * @param int $post The posted data from the form.
 	 */
 	private function add_session_attendees( $post ) {
-		var_dump( $post );
-		$this->create_attendee_select_form( $post );
+		global $wpdb;
+		$query = '';
+		if ( isset( $post['session_id'] ) ) {
+			$query = 'SELECT * FROM ' . self::SESSIONS_TABLE . ' WHERE session_id = ' . $post['session_id'];
+		} else {
+			foreach ( $post['addedAttendee'] as $attendee_session) {
+				$parts = explode( ',', $attendee_session );
+				if ( $query == '' ) {
+					$query = 'SELECT * FROM ' . self::SESSIONS_TABLE . ' WHERE session_id = ' . $parts[1];
+				} else {
+					$query .= ' OR session_id = ' . $parts[1];
+				}
+			}
+		}
+
+		$sessions = null;
+		if ( $query != '') {
+			$sessions = $wpdb->get_results( $query, OBJECT );
+		}
+
+		$this->create_attendee_select_form( $post['class_name'], $post['class_id'], $sessions );
+	}
+
+	/**
+	 * Submit attendees to a class session.
+	 *
+	 * @param int $post The posted data from the form.
+	 */
+	private function submit_session_attendees( $post ) {
+		global $wpdb;
+		$sessions = unserialize( $post['sessions'] );
+		foreach ( $sessions as $session ) {
+			
+			$new_attendee = array(
+				'attendee_session_id'  => (int)$session->session_id,
+				'attendee_email'       => $post['email'],
+				'attendee_firstname'   => $post['firstname'],
+				'attendee_lastname'    => $post['lastname'],
+				'attendee_phone'       => $post['phone'],
+				'attendee_badge'       => $post['badge'],
+				'attendee_paid_amount' => 0,
+				'attendee_item'        => $session->session_item,
+			);
+
+			$wpdb->insert( self::ATTENDEES_TABLE, $new_attendee );
+		}
+
+		$repost = array(
+			'edit_sessions_class_id' => $post['class_id'],
+			$post['class_id'] => $post['class_name']
+		);
+		$this->load_session_selection($repost);
 	}
 
 	/**
@@ -261,8 +317,28 @@ class SignupSettings extends SignUpsBase {
 	 * @param int $post The posted data from the form.
 	 */
 	private function delete_session_attendees( $post ) {
-		echo 'deleteSessionAttendees';
-		echo var_dump( $post );
+		/**
+		 * array (size=4)
+		 *'delete_attendees' => string 'Delete Selected' (length=15)
+		 *'class_name' => string 'C2015 Machine Reserve Jun 2022' (length=30)
+		 *'selectedAttendee' => 
+		 *array (size=3)
+		 * 0 => string '641,1' (length=5)
+		 *1 => string '642,1' (length=5)
+		 *2 => string '643,1' (length=5)
+		 *'class_id' => string '1' (length=1)
+		 */
+		global $wpdb;
+		foreach ( $post['selectedAttendee'] as $attendee ) {
+			$attendee_id = explode( ',', $attendee)[0];
+			$wpdb->delete( self::ATTENDEES_TABLE, array( 'attendee_id' => $attendee_id ) );
+		}
+
+		$repost = array(
+			'edit_sessions_class_id' => $post['class_id'],
+			$post['class_id'] => $post['class_name']
+		);
+		$this->load_session_selection($repost);
 	}
 
 	/**
@@ -281,9 +357,12 @@ class SignupSettings extends SignUpsBase {
 	private function load_class_selection() {
 		global $wpdb;
 		$results = $wpdb->get_results(
-			'SELECT class_id,
-			class_name
-			FROM awp.wp_scw_classes',
+			$wpdb->prepare(
+				'SELECT class_id,
+				class_name
+				FROM %1s',
+				self::CLASSES_TABLE
+			),
 			OBJECT
 		);
 
@@ -296,17 +375,17 @@ class SignupSettings extends SignUpsBase {
 	 * @param int $post The posted data from the form.
 	 */
 	private function load_session_selection( $post ) {
-
-		$class_name = $post[ $post['select_session'] ];
+		$class_name = $post[ $post['edit_sessions_class_id'] ];
 		global $wpdb;
 		$instructors = array();
 		$attendees   = array();
 		$class   = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT class_rolling
-				FROM awp.wp_scw_classes
+				FROM %1s
 				WHERE class_id = %s',
-				$post['select_session']
+				self::CLASSES_TABLE,
+				$post['edit_sessions_class_id']
 			),
 			OBJECT
 		);
@@ -319,9 +398,10 @@ class SignupSettings extends SignUpsBase {
 				session_start_formatted,
 				session_start_time,
 				session_slots
-				FROM awp.wp_scw_sessions
+				FROM %1s
 				WHERE session_class_id = %s',
-				$post['select_session']
+				self::SESSIONS_TABLE,
+				$post['edit_sessions_class_id']
 			),
 			OBJECT
 		);
@@ -332,9 +412,10 @@ class SignupSettings extends SignUpsBase {
 			$session_list                        = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT *
-					FROM awp.wp_scw_attendees
+					FROM %1s
 					WHERE attendee_session_id = %s
 					AND attendee_email != ""',
+					self::ATTENDEES_TABLE,
 					$session->session_id
 				),
 				OBJECT
@@ -354,7 +435,7 @@ class SignupSettings extends SignUpsBase {
 				$class_name,
 				$sessions,
 				$attendees,
-				$post['select_session']
+				$post['edit_sessions_class_id']
 			);
 		} else {
 			$this->create_session_select_form( 
@@ -362,7 +443,7 @@ class SignupSettings extends SignUpsBase {
 				$sessions,
 				$attendees,
 				$instructors,
-				$post['select_session']
+				$post['edit_sessions_class_id']
 			);
 		}
 	}
@@ -383,18 +464,31 @@ class SignupSettings extends SignUpsBase {
 	 * @param  mixed $post
 	 * @return void
 	 */
-	private function create_attendee_select_form( $post ) {
+	private function create_attendee_select_form( $class_name, $class_id, $sessions ) {
 		?>
-		<div class="text-center mt-5">
-			<h1><?php echo esc_html( $post['class_name'] ); ?></h1> <br>
-			<h2>Add Attendee</h2>
-			<div>
+		<form method="POST">
+			<div class="text-center mt-5">
+				<h1><?php echo esc_html( $class_name ); ?></h1> <br>
+				<h2>Add Attendee</h2>
 				<div id="content" class="container">
 					<table class="mb-100px table table-striped mr-auto ml-auto">
+						<?php
+						foreach ( $sessions as $session) {
+							?>
+							<tr>
+								<td class="w-25"><?php echo $session->session_item; ?></td>
+								<td class="w-25"><?php echo $session->session_start_formatted; ?></td>
+								<td class="w-25"><?php echo $session->session_location; ?></td>
+								<td class="w-25"></td>
+								<td class='w-75px'></td>
+							</tr>
+							<?php
+						}
+						?>
 						<tr>
 							<td class="w-25">Enter Badge#</td>
 							<td class="w-25"><input id="badge_input" type="number" #badgeNumber></td>
-							<td class="w-25"><button id="get_member_button" class="btn btn-primary">Get Member</button></td>
+							<td class="w-25"><input type="button" id="get_member_button" class="btn btn-primary" value='Get Member'></td>
 							<td class="w-25"></td>
 							<td class='w-75px'></td>
 						</tr>
@@ -405,10 +499,19 @@ class SignupSettings extends SignUpsBase {
 							<td><input id="email" name="email" type='text'></td>
 							<td><input id="badge" name="badge" type='text'></td>
 						</tr>
+						<td></td>
+						<td><input class="btn bt-md btn-danger" style="cursor:pointer;" type="button" onclick="window.history.go( -1 );" value="Back"></td>
+						<td><td>
+						<td><input id="submit_attendees" class="btn btn-primary" type="submit" value="Complete Add" name="submit_attendees" disabled="true"></td>
+						<td></td>
 					</table>
+					<input type='hidden' name='sessions' value="<?php echo htmlentities(serialize($sessions)); ?>" />
+					<input type='hidden' name='class_id' value="<?php echo $class_id; ?>" />
+					<input type='hidden' name='class_name' value="<?php echo $class_name; ?>" />
+					<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 				</div>
 			</div>
-		</div>
+		</form>
 		<?php
 	}
 
@@ -468,7 +571,7 @@ class SignupSettings extends SignUpsBase {
 							}
 							?>
 						</table>
-						<input class="btn btn-danger" type="submit" value="Delete" name="delete_attendees">
+						<input class="btn btn-danger" type="submit" value="Delete" name="delete_attendees" onclick="return confirm('Confirm Attendee Delete')">
 						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 					</div>
 				</div>
@@ -529,7 +632,7 @@ class SignupSettings extends SignUpsBase {
 						<tr>
 							<td> <?php echo esc_html( $result->class_name ); ?></td>
 							<td> <input class="submitbutton editImage" type="submit" name="edit_class" value="<?php echo esc_html( $result->class_id ); ?>"> </td>
-							<td> <input class="submitbutton sessionsImage" type="submit" name="select_session" value="<?php echo esc_html( $result->class_id ); ?>"> </td>
+							<td> <input class="submitbutton sessionsImage" type="submit" name="edit_sessions_class_id" value="<?php echo esc_html( $result->class_id ); ?>"> </td>
 							<td> <input class="submitbutton deleteImage" type="submit" name="deleteClass" value="<?php echo esc_html( $result->class_id ); ?>">
 								<input type="hidden" name="<?php echo esc_html( $result->class_id ); ?>" value="<?php echo esc_html( $result->class_name ); ?>" >
 								<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
@@ -612,7 +715,7 @@ class SignupSettings extends SignUpsBase {
 								</td>
 							</tr>
 							<input type="hidden" name="class_name" value="<?php echo esc_html( $class_name ); ?>">
-							<input type="hidden" name="classId" value="<?php echo esc_html( $class_id ); ?>">
+							<input type="hidden" name="class_id" value="<?php echo esc_html( $class_id ); ?>">
 							<input type="hidden" name="session_id" value="<?php echo esc_html( $session->session_id ); ?>">
 							<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 							<?php
@@ -690,7 +793,7 @@ class SignupSettings extends SignUpsBase {
 										<input class="btn btn-primary w-90 mb-1" type="submit" name="edit_session" value="Edit Sessions"> 
 										<input class="btn btn-success w-90" type="submit" name="add_attendee" value="Add Attendee">
 										<input class="btn btn-primary w-90 mb-1 mt-2" type="submit" value="Move Selected" name="move_attendees">
-										<input class="btn btn-danger w-90 mb-1" type="submit" value="Delete Selected" name="delete_attendees">
+										<input class="btn btn-danger w-90 mb-1" type="submit" value="Delete Selected" name="delete_attendees" onclick="return confirm('Confirm Attendee Delete')">
 									</span>
 								</div>
 							</td>
@@ -723,7 +826,7 @@ class SignupSettings extends SignUpsBase {
 						}
 						?>
 						<input type="hidden" name="class_name" value="<?php echo esc_html( $class_name ); ?>">
-						<input type="hidden" name="classId" value="<?php echo esc_html( $class_id ); ?>">
+						<input type="hidden" name="class_id" value="<?php echo esc_html( $class_id ); ?>">
 						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 					</form>
 				</table>
