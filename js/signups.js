@@ -65,4 +65,48 @@ jQuery( document ).ready( function($){
 			$( '#submit_attendees' ).prop('disabled', true);
 		}
 	}
+
+	$( '.addChk,.selChk' ).change( function( e ) {
+		var to_slot = null;
+		var from_slot = null;
+		$( '.addChk,.selChk' ).each( function( index, element ) {
+			if ( element.checked ) {
+				var arr = element.value.split(',');
+				if (arr[0] == '-1') {
+					if (to_slot || arr[1] == from_slot) {
+						to_slot = null;
+						disableMoveButton();
+						return false;
+					} else {
+						to_slot = arr[1];
+					}
+				} else {
+					if (from_slot || arr[1] == to_slot) {
+						from_slot = null;
+						disableMoveButton();
+						return false;
+					} else {
+						from_slot = arr[1]; 
+					}
+				}
+			}
+		});
+
+		
+		if ( !to_slot || !from_slot ) {
+			disableMoveButton();
+		} else {
+			var selector = "#move" + from_slot;
+			$( selector ).prop('disabled', false);
+
+			var selector2 = "#move_to" + from_slot;
+			$( selector2 ).val( to_slot );
+		}
+	});
+
+	function disableMoveButton() {
+		$( "input[name=move_attendees]" ).each( function( index, element ) {
+			element.disabled = true;
+		});
+	}
 });

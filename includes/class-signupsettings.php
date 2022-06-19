@@ -317,17 +317,6 @@ class SignupSettings extends SignUpsBase {
 	 * @param int $post The posted data from the form.
 	 */
 	private function delete_session_attendees( $post ) {
-		/**
-		 * array (size=4)
-		 *'delete_attendees' => string 'Delete Selected' (length=15)
-		 *'class_name' => string 'C2015 Machine Reserve Jun 2022' (length=30)
-		 *'selectedAttendee' => 
-		 *array (size=3)
-		 * 0 => string '641,1' (length=5)
-		 *1 => string '642,1' (length=5)
-		 *2 => string '643,1' (length=5)
-		 *'class_id' => string '1' (length=1)
-		 */
 		global $wpdb;
 		foreach ( $post['selectedAttendee'] as $attendee ) {
 			$attendee_id = explode( ',', $attendee)[0];
@@ -342,13 +331,22 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
-	 * Move attendees from one class session to another.
+	 * Move attendees from one class session to another session in the same class.
 	 *
 	 * @param int $post The posted data from the form.
 	 */
 	private function move_session_attendees( $post ) {
-		echo 'moveSessionAttendees';
-		echo var_dump( $post );
+		global $wpdb;
+		$ids   = explode( ',', $post['selectedAttendee'][0] );
+		$data  = array( 'attendee_session_id' => $post['move_to'] );
+		$where = array( 'attendee_id' => $ids[0] );
+		$wpdb->update( self::ATTENDEES_TABLE, $data, $where );
+
+		$repost = array(
+			'edit_sessions_class_id' => $post['class_id'],
+			$post['class_id'] => $post['class_name']
+		);
+		$this->load_session_selection($repost);
 	}
 
 	/**
@@ -701,10 +699,12 @@ class SignupSettings extends SignUpsBase {
 												<?php
 											}
 											?>
-											<input class="btn btn-primary w-90 mb-1 mt-2"
+											<input  id=<?php echo 'move' . $session->session_id ?>
+											    class="btn btn-primary w-90 mb-1 mt-2"
 												type="submit"
 												name="move_attendees"
-												value="Move Selected">
+												value="Move Selected"
+												disabled="true">
 											<input class="btn btn-danger w-90 mb-1" 
 												type="submit"
 												name="delete_attendees"
@@ -717,6 +717,7 @@ class SignupSettings extends SignUpsBase {
 							<input type="hidden" name="class_name" value="<?php echo esc_html( $class_name ); ?>">
 							<input type="hidden" name="class_id" value="<?php echo esc_html( $class_id ); ?>">
 							<input type="hidden" name="session_id" value="<?php echo esc_html( $session->session_id ); ?>">
+							<input  id=<?php echo 'move_to' . $session->session_id ?> type="hidden" name="move_to" value="0">
 							<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 							<?php
 							foreach ( $instructors[ $session->session_id ] as $instructor ) {
@@ -725,7 +726,7 @@ class SignupSettings extends SignUpsBase {
 									<td><?php echo esc_html( $instructor->attendee_firstname . ' ' . $instructor->attendee_lastname ); ?></td>
 									<td><?php echo esc_html( $instructor->attendee_item ); ?></td>
 									<td><?php echo esc_html( $instructor->attendee_email ); ?></td>
-									<td class="centerCheckBox"> <input class="form-check-input position-relative" type="checkbox" name="selectedAttendee[]" value="<?php $this->session_attendee_string( $instructor->attendee_id, $session->session_id ); ?>"> </td>
+									<td class="centerCheckBox"> <input class="form-check-input position-relative selChk" type="checkbox" name="selectedAttendee[]" value="<?php $this->session_attendee_string( $instructor->attendee_id, $session->session_id ); ?>"> </td>
 								</tr>
 								<?php
 							}
@@ -738,7 +739,7 @@ class SignupSettings extends SignUpsBase {
 									<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
 									<td><?php echo esc_html( $attendee->attendee_item ); ?></td>
 									<td><?php echo esc_html( $attendee->attendee_email ); ?></td>
-									<td class="centerCheckBox"> <input class="form-check-input position-relative" type="checkbox" name="selectedAttendee[]" value="<?php $this->session_attendee_string( $attendee->attendee_id, $session->session_id ); ?>"> </td>
+									<td class="centerCheckBox"> <input class="form-check-input position-relative selChk" type="checkbox" name="selectedAttendee[]" value="<?php $this->session_attendee_string( $attendee->attendee_id, $session->session_id ); ?>"> </td>
 								</tr>
 								<?php
 							}
@@ -790,7 +791,7 @@ class SignupSettings extends SignUpsBase {
 							<td>
 								<div class="popup" data-textid="popup_id" ><b><i><u>Edit</u></i></b>
 									<span class="popuptext" id="popup_id">
-										<input class="btn btn-primary w-90 mb-1" type="submit" name="edit_session" value="Edit Sessions"> 
+										<!-- input class="btn btn-primary w-90 mb-1" type="submit" name="edit_session" value="Edit Sessions" --> 
 										<input class="btn btn-success w-90" type="submit" name="add_attendee" value="Add Attendee">
 										<input class="btn btn-primary w-90 mb-1 mt-2" type="submit" value="Move Selected" name="move_attendees">
 										<input class="btn btn-danger w-90 mb-1" type="submit" value="Delete Selected" name="delete_attendees" onclick="return confirm('Confirm Attendee Delete')">
