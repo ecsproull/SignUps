@@ -34,8 +34,11 @@ jQuery( document ).ready( function($){
 	}
 
 	$( ".popup" ).click( function( e ){
+		if (openPopup) {
+			closePopup();
+			return;
+		}
 		var id = $( this ).data("textid");
-		closePopup();
 		openPopup = document.getElementById( id );
 		openPopup.classList.toggle( "show" );
 		e.stopPropagation();
@@ -97,10 +100,18 @@ jQuery( document ).ready( function($){
 			disableMoveButton();
 		} else {
 			var selector = "#move" + from_slot;
-			$( selector ).prop('disabled', false);
+			var move_butt = $( selector );
+			if (!move_butt.length) {
+				move_butt = $( '#move' );
+			}
+			move_butt.prop('disabled', false);
 
 			var selector2 = "#move_to" + from_slot;
-			$( selector2 ).val( to_slot );
+			var move_to = $( selector2 );
+			if ( !move_to.length ) {
+				move_to = $( '#move_to' );
+			}
+			move_to.val( to_slot );
 		}
 	});
 
@@ -109,4 +120,52 @@ jQuery( document ).ready( function($){
 			element.disabled = true;
 		});
 	}
+
+	var lastDragSessionId = -1;
+	$( ".drag-row").on( 'dragstart', function(evt) {
+		var arr =  evt.target.dataset['dragable'].split(',');
+		evt.originalEvent.dataTransfer.setData( "attendee_id", arr[0] );
+		evt.originalEvent.dataTransfer.setData( "session_id", arr[1] );
+		evt.originalEvent.dataTransfer.setData( "check_box_value",  evt.target.dataset['dragable'] );
+		lastDragSessionId = arr[1];
+	})
+
+	$( ".add-attendee-row").on( 'dragover', function(evt) {
+		if (evt.currentTarget.dataset['sessionId'] != lastDragSessionId ) {
+			evt.originalEvent.preventDefault();
+		}
+	})
+
+	$( ".add-attendee-row").on( 'drop', function(evt) {
+		if (confirm( "Confirm Attendee Move") ) {
+			$(":checkbox").prop( "checked", false );
+			evt.currentTarget.querySelector("input").checked = true;
+			var selector = "input[value='" + evt.originalEvent.dataTransfer.getData( "check_box_value" ) + "']";
+			var origin_checkbox = $( selector );
+			origin_checkbox.prop("checked", true);
+
+			var from_slot = evt.originalEvent.dataTransfer.getData( "session_id" );
+			var to_slot = evt.currentTarget.dataset['sessionId'];
+			var selector2 = "#move_to" + from_slot;
+			var move_to = $( selector2 );
+			if ( !move_to.length ) {
+				move_to = $( '#move_to' );
+			}
+			move_to.val( to_slot );
+
+			var selector = "#move" + from_slot;
+			var move_butt = $( selector );
+			if (!move_butt.length) {
+				move_butt = $( '#move' );
+			}
+			move_butt.prop('disabled', false);
+			move_butt.trigger('click');
+		}
+
+	})
+
+	// Add rolling information to the create class form.
+	$( "#rolling-signup" ).change( function( e ) {
+		alert(e.currentTarget.value);
+	});
 });

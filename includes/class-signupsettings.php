@@ -41,7 +41,7 @@ class SignupSettings extends SignUpsBase {
 			} elseif ( isset( $post['edit_session'] ) ) {
 				$this->edit_session( $post );
 			} elseif ( isset( $post['add_new_class'] ) ) {
-				$this->create_class_form( new ClassItem( null ) );
+				$this->create_signup_form( new ClassItem( null ) );
 			} elseif ( isset( $post['add_new_session'] ) ) {
 				$this->add_new_session_form( $post );
 			} elseif ( isset( $post['attendees'] ) ) {
@@ -94,7 +94,7 @@ class SignupSettings extends SignUpsBase {
 		}
 
 		?>
-		<input class="button-primary ml-auto mr-auto" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back">
+		<input class="button-primary ml-auto mr-auto mt-2" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back">
 		<?php
 	}
 
@@ -134,7 +134,7 @@ class SignupSettings extends SignUpsBase {
 			),
 			OBJECT
 		);
-		$this->create_class_form( $results[0] );
+		$this->create_signup_form( $results[0] );
 	}
 
 	/**
@@ -143,7 +143,6 @@ class SignupSettings extends SignUpsBase {
 	 * @param int $post The posted data from the form.
 	 */
 	private function add_new_session_form( $post ) {
-		var_dump( $post );
 		$session_item = new SessionItem( $post['add_new_session'] );
 		$this->create_session_form( $session_item, $post['class_name'], true );
 	}
@@ -493,14 +492,14 @@ class SignupSettings extends SignUpsBase {
 						<tr>
 							<td><input id="firstname" name="firstname" type='text'></td>
 							<td><input id="lastname" name="lastname" type='text'></td>
-							<td><input id="phone" name="phone" type='text'></td>
-							<td><input id="email" name="email" type='text'></td>
-							<td><input id="badge" name="badge" type='text'></td>
+							<td><input id="phone" name="phone" type='phone' pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"></td>
+							<td><input id="email" name="email" type='email'></td>
+							<td><input id="badge" name="badge" type='text' pattern="[0-9]{4}"></td>
 						</tr>
 						<td></td>
-						<td><input class="btn bt-md btn-danger" style="cursor:pointer;" type="button" onclick="window.history.go( -1 );" value="Back"></td>
-						<td><td>
-						<td><input id="submit_attendees" class="btn btn-primary" type="submit" value="Complete Add" name="submit_attendees" disabled="true"></td>
+						<td><input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="window.history.go( -1 );" value="Back"></td>
+						<td><input id="submit_attendees" class="btn btn-primary mt-2" type="submit" value="Complete Add" name="submit_attendees" disabled="true"><td>
+						<td></td>
 						<td></td>
 					</table>
 					<input type='hidden' name='sessions' value="<?php echo htmlentities(serialize($sessions)); ?>" />
@@ -602,7 +601,7 @@ class SignupSettings extends SignUpsBase {
 		}
 		?>
 		<div class="text-center mr-2">
-			<input class="btn bt-md btn-danger" style="cursor:pointer;" type="button" onclick="window.history.go( -1 );" value="Back">
+			<input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="window.history.go( -1 );" value="Back">
 		</div>
 		<?php
 	}
@@ -617,7 +616,7 @@ class SignupSettings extends SignUpsBase {
 		?>
 		<form method="POST">
 			<div id="content" class="container">
-				<table class="mb-100px table table-striped mr-auto ml-auto">
+				<table class="mb-100px table table-striped mr-auto ml-auto mt-5">
 					<tr>
 						<td>Add SignUp</td>
 						<td></td>
@@ -661,13 +660,21 @@ class SignupSettings extends SignUpsBase {
 			<h1><?php echo esc_html( $class_name ); ?></h1>
 			<div>
 				<div id="content" class="container">
-					<table class="mb-100px table table-bordered mr-auto ml-auto">
+					<table class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-125px">
 						<form method="POST">
 						<tr style="background-color: lightyellow;">
-							<td class="text-left" style="min-width: 200px;">Add Session</td>
+							<td class="text-left" >
+								<button class="ml-2 border-0 bg-transparent" type="submit" name="add_new_session" value="<?php echo esc_html( $class_id ); ?>">
+									<b>
+										<i>
+											<u>Add Session</u>
+										</i>
+									</b>
+								</button>
+							</td>
 							<td style="width: 200px;"></td>
 							<td></td>
-							<td><input class="submitbutton addItem" type="submit" name="add_new_session" value="<?php echo esc_html( $class_id ); ?>"></td>
+							<td></td>
 						</tr>
 						<input type="hidden" name="class_name" value="<?php echo esc_html( $class_name ); ?>">
 						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
@@ -735,7 +742,7 @@ class SignupSettings extends SignUpsBase {
 							<?php
 							foreach ( $attendees[ $session->session_id ] as $attendee ) {
 								?>
-								<tr>
+								<tr class="drag-row" draggable="true" data-dragable="<?php $this->session_attendee_string( $attendee->attendee_id, $session->session_id ); ?>" >
 									<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
 									<td><?php echo esc_html( $attendee->attendee_item ); ?></td>
 									<td><?php echo esc_html( $attendee->attendee_email ); ?></td>
@@ -746,7 +753,7 @@ class SignupSettings extends SignUpsBase {
 
 							for ($i = count( $attendees[ $session->session_id ] ); $i < $session->session_slots; $i++ ) {
 								?>
-								<tr>
+								<tr class="add-attendee-row" data-session-id="<?php echo $session->session_id; ?>" >
 									<td class='addAtt'> Add Attendee</td>
 									<td><?php echo esc_html( $this->format_date( $session->session_start_formatted ) ); ?></td>
 									<td></td>
@@ -762,7 +769,7 @@ class SignupSettings extends SignUpsBase {
 				</table>
 			</div>
 		</div>
-		<input class="btn btn-danger" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back">
+		<input class="btn btn-danger mt-2" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back">
 		</div>
 		<?php
 	}
@@ -782,7 +789,7 @@ class SignupSettings extends SignUpsBase {
 			<h1><?php echo esc_html( $class_name ); ?></h1>
 			<div>
 				<div id="content" class="container">
-					<table class="mb-100px table table-bordered mr-auto ml-auto">
+					<table class="mb-100px table table-bordered mr-auto ml-auto mt-150px">
 						<form method="POST">
 						<tr style="background-color: lightyellow;">
 							<td></td>
@@ -793,30 +800,31 @@ class SignupSettings extends SignUpsBase {
 									<span class="popuptext" id="popup_id">
 										<!-- input class="btn btn-primary w-90 mb-1" type="submit" name="edit_session" value="Edit Sessions" --> 
 										<input class="btn btn-success w-90" type="submit" name="add_attendee" value="Add Attendee">
-										<input class="btn btn-primary w-90 mb-1 mt-2" type="submit" value="Move Selected" name="move_attendees">
+										<input id="move" class="btn btn-primary w-90 mb-1 mt-2" type="submit" value="Move Selected" name="move_attendees">
 										<input class="btn btn-danger w-90 mb-1" type="submit" value="Delete Selected" name="delete_attendees" onclick="return confirm('Confirm Attendee Delete')">
 									</span>
 								</div>
 							</td>
 						</tr>
 						<input type="hidden" name="class_name" value="<?php echo esc_html( $class_name ); ?>">
+						<input id='move_to' type="hidden" name="move_to" value="0">
 						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 						<?php
 						foreach ( $sessions as $session ) {
 							foreach ( $attendees[ $session->session_id ] as $attendee ) {
 								?>
-								<tr>
+								<tr  class="drag-row" draggable="true" data-dragable="<?php $this->session_attendee_string( $attendee->attendee_id, $session->session_id ); ?>">
 									<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
 									<td><?php echo esc_html( $this->format_date( $session->session_start_formatted ) ); ?></td>
 									<td><?php echo esc_html( $attendee->attendee_email ); ?></td>
-									<td class="centerCheckBox"> <input class="form-check-input position-relative" type="checkbox" name="selectedAttendee[]" value="<?php $this->session_attendee_string( $attendee->attendee_id, $session->session_id ); ?>"> </td>
+									<td class="centerCheckBox"> <input class="form-check-input position-relative selChk" type="checkbox" name="selectedAttendee[]" value="<?php $this->session_attendee_string( $attendee->attendee_id, $session->session_id ); ?>"> </td>
 								</tr>
 								<?php
 							}
 
 							if ( count( $attendees[ $session->session_id ] ) < $session->session_slots ) {
 								?>
-								<tr>
+								<tr  class="add-attendee-row" data-session-id="<?php echo $session->session_id; ?>">
 									<td class='addAtt'> Add Attendee</td>
 									<td><?php echo esc_html( $this->format_date( $session->session_start_formatted ) ); ?></td>
 									<td></td>
@@ -833,7 +841,7 @@ class SignupSettings extends SignUpsBase {
 				</table>
 			</div>
 		</div>
-		<input class="btn btn-danger" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back">
+		<input class="btn btn-danger mt-2" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back">
 		</div>
 		<?php
 	}
@@ -844,7 +852,7 @@ class SignupSettings extends SignUpsBase {
 	 * @param  class $data Raw data retrieved from the data base or an empty class if a new class is being created.
 	 * @return void
 	 */
-	private function create_class_form( $data ) {
+	private function create_signup_form( $data ) {
 		?>
 		<div class="text-center mb-4">
 			<h1><?php echo esc_html( $data->class_name ); ?> </h1>
@@ -882,11 +890,11 @@ class SignupSettings extends SignUpsBase {
 				</tr>
 				<tr>
 					<td class="text-right mr-2"><label>Rolling Class: </label></td>
-					<td><input class="w-75px" type="text" name="class_rolling" value="<?php echo esc_html( $data->class_rolling ); ?>" /> </td>
+					<td><input id="rolling-signup" class="w-75px" type="number" name="class_rolling" value="<?php echo esc_html( $data->class_rolling ); ?>" /> </td>
 				</tr>
 				<tr>
-					<td class="text-right mr-2"><input class="btn bt-md btn-danger" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back"></td>
-					<td><input class="btn bt-md btn-primary mr-auto ml-auto" type="submit" value="Submit" name="submit_class"></td>
+					<td class="text-right mr-2"><input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back"></td>
+					<td><input class="btn bt-md btn-primary mr-auto ml-auto mt-2" type="submit" value="Submit" name="submit_class"></td>
 				</tr>
 			</table>
 			<input type="hidden" name="id" value="<?php echo esc_html( $data->class_id ); ?>">
@@ -940,8 +948,8 @@ class SignupSettings extends SignUpsBase {
 				</tr>
 
 				<tr>
-					<td class="text-right mr-2"><input class="btn bt-md btn-danger" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back"></td>
-					<td><input class="btn bt-md btn-primary mr-auto ml-auto" type="submit" value="Submit Session" name="submit_session"></td>
+					<td class="text-right mr-2"><input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back"></td>
+					<td><input class="btn bt-md btn-primary mr-auto ml-auto mt-2" type="submit" value="Submit Session" name="submit_session"></td>
 				</tr>
 			</table>
 			<?php
