@@ -15,10 +15,10 @@ class SessionItem {
 	/**
 	 * Constructor.
 	 *
-	 * @param number $class_id DB primary key.
+	 * @param number $signup_id DB primary key.
 	 */
-	public function __construct( $class_id ) {
-		$this->session_class_id = $class_id;
+	public function __construct( $signup_id ) {
+		$this->session_signup_id = $signup_id;
 		$this->session_item = 'Attendee';
 	}
 
@@ -32,9 +32,9 @@ class SessionItem {
 	/**
 	 * Id of the class that this session belongs to.
 	 *
-	 * @var session_class_id.
+	 * @var session_signup_id.
 	 */
-	public $session_class_id;
+	public $session_signup_id;
 
 	/**
 	 * Contact email for the session.

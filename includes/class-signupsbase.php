@@ -26,7 +26,7 @@ class SignUpsBase {
 	 *
 	 * @var mixed
 	 */
-	protected const CLASSES_TABLE = 'wp_scw_classes';
+	protected const SIGNUPS_TABLE = 'wp_scw_signups';
 
 	/**
 	 * Database roster table.

@@ -22,17 +22,17 @@ class DbSignUpTables {
 		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_classes"' ) !== 'wp_scw_classes' ) {
 			$wpdb->query(
 				'CREATE TABLE `wp_scw_classes` (
-					`class_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-					`class_name` varchar(150) NOT NULL,
-					`class_contact_email` varchar(45) NOT NULL,
-					`class_location` varchar(45) NOT NULL,
-					`class_description_url` varchar(255) NOT NULL,
-					`class_cost` int(11) NOT NULL,
-					`class_sig_id` int(11) DEFAULT NULL,
-					`class_thumbnail_url` varchar(255) DEFAULT NULL,
-					`class_default_slots` int(11) DEFAULT NULL,
-					`class_rolling` int(11) DEFAULT 0,
-					PRIMARY KEY (`class_id`)
+					`signup_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+					`signup_name` varchar(150) NOT NULL,
+					`signup_contact_email` varchar(45) NOT NULL,
+					`signup_location` varchar(45) NOT NULL,
+					`signup_description_url` varchar(255) NOT NULL,
+					`signup_cost` int(11) NOT NULL,
+					`signup_sig_id` int(11) DEFAULT NULL,
+					`signup_thumbnail_url` varchar(255) DEFAULT NULL,
+					`signup_default_slots` int(11) DEFAULT NULL,
+					`signup_rolling` int(11) DEFAULT 0,
+					PRIMARY KEY (`signup_id`)
 				  ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;'
 			);
 		}
@@ -41,7 +41,7 @@ class DbSignUpTables {
 			$wpdb->query(
 				'CREATE TABLE `wp_scw_sessions` (
 					`session_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-					`session_class_id` varchar(45) NOT NULL,
+					`session_signup_id` varchar(45) NOT NULL,
 					`session_contact_name` varchar(45) DEFAULT NULL,
 					`session_contact_email` varchar(45) NOT NULL,
 					`session_start_time` int(12) unsigned NOT NULL DEFAULT 0,

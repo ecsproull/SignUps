@@ -40,10 +40,10 @@ class ShortCodes extends SignUpsBase {
 		global $wpdb;
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT class_id,
-				class_name
+				'SELECT signup_id,
+				signup_name
 				FROM %1s',
-				self::CLASSES_TABLE
+				self::SIGNUPS_TABLE
 			),
 			OBJECT
 		);
@@ -75,9 +75,9 @@ class ShortCodes extends SignUpsBase {
 						?>
 						<tr>
 							<td>
-								<button class="button-signup" type="submit" name="signup_id" value="<?php echo esc_html( $result->class_id ); ?>" >
+								<button class="button-signup" type="submit" name="signup_id" value="<?php echo esc_html( $result->signup_id ); ?>" >
 									<i>
-										<u><?php echo esc_html( $result->class_name ); ?></u>
+										<u><?php echo esc_html( $result->signup_name ); ?></u>
 									</i>
 								</button>
 							</td>
