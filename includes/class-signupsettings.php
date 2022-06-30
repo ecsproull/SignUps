@@ -39,8 +39,6 @@ class SignupSettings extends SignUpsBase {
 				$this->create_signup_form( new ClassItem( null ) );
 			} elseif ( isset( $post['add_new_session'] ) ) {
 				$this->add_new_session_form( $post );
-			} elseif ( isset( $post['attendees'] ) ) {
-				$this->edit_session_attendees( $post );
 			} elseif ( isset( $post['delete_attendees'] ) ) {
 				$this->delete_session_attendees( $post );
 			} elseif ( isset( $post['move_attendees'] ) ) {
@@ -175,74 +173,6 @@ class SignupSettings extends SignUpsBase {
 		$where_attendees = array ( 'attendee_session_id' => $post['session_id'] );
 		$wpdb->delete( self::ATTENDEES_TABLE, $where_attendees );
 		$this->update_message( $rows_updated );
-	}
-
-	/**
-	 * Edit the attendees of a session.
-	 *
-	 * @param int $post The posted data from the form.
-	 */
-	private function edit_session_attendees( $post ) {
-		global $wpdb;
-		$results_session = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT *
-				FROM %s
-				WHERE session_id = %1s',
-				self::SESSIONS_TABLE,
-				$post['attendees']
-			),
-			OBJECT
-		);
-		$session         = $results_session[0];
-
-		$results_class = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT signup_default_slots
-				FROM %1s
-				WHERE signup_id = %s',
-				self::SIGNUPS_TABLE,
-				$session->session_signup_id
-			),
-			OBJECT
-		);
-
-		$default_attendee_slots = $results_class[0]->signup_default_slots;
-
-		$session_list = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT * FROM %1s
-				WHERE attendee_session_id = %s  AND
-				attendee_email != "" ',
-				self::ATTENDEES_TABLE,
-				$session->session_id
-			),
-			OBJECT
-		);
-
-		$attendees = array_filter(
-			$session_list,
-			function ( $obj ) {
-				if ( 'INSTRUCTOR' === $obj->attendee_item ) {
-					return false;
-				} else {
-					return true;
-				}
-			}
-		);
-
-		$instructors = array_filter(
-			$session_list,
-			function ( $obj ) {
-				if ( 'INSTRUCTOR' === $obj->attendee_item ) {
-					return true;
-				} else {
-					return false;
-				}
-			}
-		);
-
-		$this->create_attendee_form( $default_attendee_slots, $attendees, $instructors, $post['signup_name'], $session->session_id );
 	}
 
 	/**
@@ -506,72 +436,6 @@ class SignupSettings extends SignUpsBase {
 		</form>
 		<?php
 	}
-
-	/**
-	 * Create attendee information form.
-	 *
-	 * @param  int    $default_attendee_slots Number of slots available.
-	 * @param  array  $attendees List of attendees.
-	 * @param  array  $instructors List of instructors.
-	 * @param  string $signup_name Name of the class.
-	 * @param  int    $session_id Session ID.
-	 * @return void
-	 */
-	private function create_attendee_form( $default_attendee_slots, $attendees, $instructors, $signup_name, $session_id ) {
-		?>
-		<form method="POST">
-			<div class="text-center mt-5">
-				<h1><?php echo esc_html( $signup_name ); ?></h1> <br>
-				<h2>Add Remove Attendees</h2>
-				<div>
-					<div id="content" class="container">
-						<table class="mb-100px table table-striped mr-auto ml-auto">
-							<?php
-							if ( count( $attendees ) < $default_attendee_slots ) {
-								?>
-								<tr>
-									<td>Add Attendee</td>
-									<td></td>
-									<td></td>
-									<td> <input class="submitbutton addItem" type="submit" name="add_attendee" value="<?php echo esc_html( $session_id ); ?>"></td>
-								</tr>
-								<?php
-							}
-
-							foreach ( $instructors as $instructor ) {
-								?>
-								<tr>
-									<td> <?php echo esc_html( $instructor->attendee_firstname . ' ' . $instructor->attendee_lastname ); ?></td>
-									<td><?php echo esc_html( $instructor->attendee_item ); ?></td>
-									<td><?php echo esc_html( $instructor->attendee_email ); ?></td>
-									<td> <input class="form-check-input position-relative" type="checkbox" name="selectedAttendee[]" value="<?php $this->sessionAttendeeString( $instructor->attendee_id, $session_id ); ?>"> </td>
-								</tr>
-								<?php
-							}
-							?>
-
-							<?php
-							foreach ( $attendees as $attendee ) {
-								?>
-								<tr>
-									<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
-									<td><?php echo esc_html( $attendee->attendee_item ); ?></td>
-									<td><?php echo esc_html( $attendee->attendee_email ); ?></td>
-									<td> <input class="form-check-input position-relative" type="checkbox" name="selectedAttendee[]" value="<?php $this->session_attendee_string( $attendee->attendee_id, $session_id ); ?>"> </td>
-								</tr>
-								<?php
-							}
-							?>
-						</table>
-						<input class="btn btn-danger" type="submit" value="Delete" name="delete_attendees" onclick="return confirm('Confirm Attendee Delete')">
-						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
-					</div>
-				</div>
-			</div>
-		</form>
-		<?php
-	}
-
 
 	/**
 	 * Formats the message to display after an upate to the DB has been made.
