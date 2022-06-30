@@ -30,12 +30,12 @@ require 'includes/class-dbsignuptables.php';
 require 'includes/class-signupsettings.php';
 require 'includes/class-classitem.php';
 require 'includes/class-sessionitem.php';
+require 'includes/class-shortcodes.php';
 
 /**
  * Main signups class.
  */
 class SignupsPlugin {
-
 	/**
 	 * __construct
 	 *
@@ -45,7 +45,9 @@ class SignupsPlugin {
 		register_activation_hook( __FILE__, array( new DbSignUpTables(), 'create_db_tables' ) );
 		add_action( 'admin_menu', array( $this, 'signup_plugin_top_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_scripts_and_css' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'add_users_scripts_and_css' ) );
 		new SignUpsRestApis();
+		add_shortcode( 'selectclass', array( new ShortCodes(), 'user_signup' ) );
 	}
 
 	/**
@@ -56,7 +58,7 @@ class SignupsPlugin {
 	}
 
 	/**
-	 * Adds the CSS that is used to style the plug-in.
+	 * Adds the CSS that is used to style the admin side plug-in.
 	 *
 	 * @param string $host Who is calling.
 	 */
@@ -78,6 +80,22 @@ class SignupsPlugin {
 				'nonce' => wp_create_nonce( 'wp_rest' ),
 			)
 		);
+	}
+
+	/**
+	 * Adds the CSS that is used to style the users side of the plug-in.
+	 *
+	 * @param string $host Who is calling.
+	 */
+	public function add_users_scripts_and_css( $host ) {
+		if ( ! is_page( 'signups' ) ) {
+			return;
+		}
+
+		wp_register_style( 'signup_bs_style', plugins_url( '/signups/bootstrap/css/bootstrap.min.css' ), array(), 1 );
+		wp_enqueue_style( 'signup_bs_style' );
+		wp_register_style( 'signup_style', plugins_url( '/signups/css/users-styles.css' ), array(), 1 );
+		wp_enqueue_style( 'signup_style' );
 	}
 }
 

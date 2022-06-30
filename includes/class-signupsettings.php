@@ -1,14 +1,9 @@
 <?php
 /**
  * Summary
- * Database class.
+ * Admin page for the signups plubin. Containes the functions for editing the signups.
  *
  * @package SignUps
- */
-
-/**
- * Mirror of the database Session object.
- * Used for creating new sessions to be added to the DB.
  */
 class SignupSettings extends SignUpsBase {
 

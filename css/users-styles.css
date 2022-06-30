@@ -1,0 +1,13 @@
+#usercontent {
+	background-color: transparent;
+}
+
+.button-signup {
+	background-color: transparent!important;
+	color: black!important;
+	font-weight: bold;
+}
+
+.button-signup:hover {
+	border-radius: 15px;
+}
