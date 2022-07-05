@@ -303,7 +303,7 @@ class SignupSettings extends SignUpsBase {
 		$attendees   = array();
 		$class   = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT signup_rolling
+				'SELECT signup_rolling_template
 				FROM %1s
 				WHERE signup_id = %s',
 				self::SIGNUPS_TABLE,
@@ -312,7 +312,7 @@ class SignupSettings extends SignUpsBase {
 			OBJECT
 		);
 
-		$rolling =  $class[0]->signup_rolling > 0;
+		$rolling =  $class[0]->signup_rolling_template > 0;
 
 		$sessions    = $wpdb->get_results(
 			$wpdb->prepare(
@@ -370,16 +370,6 @@ class SignupSettings extends SignUpsBase {
 		}
 	}
 
-	/**
-	 * Formats a string to be passed back in form data.
-	 *
-	 * @param int $attendee_id Attendee ID.
-	 * @param int $session_id Session ID.
-	 */
-	private function session_attendee_string( $attendee_id, $session_id ) {
-		echo esc_html( $attendee_id . ',' . $session_id );
-	}
-	
 	/**
 	 * create_attendee_select_form
 	 *
@@ -565,7 +555,7 @@ class SignupSettings extends SignUpsBase {
 												<?php
 											}
 											?>
-											<input  id=<?php echo 'move' . $session->session_id ?>
+											<input  id=<?php echo esc_html( 'move' . $session->session_id ); ?>
 											    class="btn btn-primary w-90 mb-1 mt-2"
 												type="submit"
 												name="move_attendees"
@@ -583,7 +573,7 @@ class SignupSettings extends SignUpsBase {
 							<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
 							<input type="hidden" name="signup_id" value="<?php echo esc_html( $signup_id ); ?>">
 							<input type="hidden" name="session_id" value="<?php echo esc_html( $session->session_id ); ?>">
-							<input  id=<?php echo 'move_to' . $session->session_id ?> type="hidden" name="move_to" value="0">
+							<input  id=<?php echo esc_html( 'move_to' . $session->session_id); ?> type="hidden" name="move_to" value="0">
 							<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 							<?php
 							foreach ( $instructors[ $session->session_id ] as $instructor ) {
@@ -610,9 +600,9 @@ class SignupSettings extends SignUpsBase {
 								<?php
 							}
 
-							for ($i = count( $attendees[ $session->session_id ] ); $i < $session->session_slots; $i++ ) {
+							for ( $i = count( $attendees[ $session->session_id ] ); $i < $session->session_slots; $i++ ) {
 								?>
-								<tr class="add-attendee-row" data-session-id="<?php echo $session->session_id; ?>" >
+								<tr class="add-attendee-row" data-session-id="<?php echo esc_html( $session->session_id ); ?>" >
 									<td class='addAtt'> Add Attendee</td>
 									<td><?php echo esc_html( $this->format_date( $session->session_start_formatted ) ); ?></td>
 									<td></td>
@@ -620,9 +610,9 @@ class SignupSettings extends SignUpsBase {
 								</tr>
 								<?php
 							}
-						?>
+							?>
 						</form>
-						<?php
+							<?php
 					}
 					?>
 				</table>
@@ -642,7 +632,7 @@ class SignupSettings extends SignUpsBase {
 	 * @param  int    $signup_id The ID of the class.
 	 * @return void
 	 */
-	private function create_rolling_session_select_form( $signup_name, $sessions, $attendees, $signup_id) {
+	private function create_rolling_session_select_form( $signup_name, $sessions, $attendees, $signup_id  ) {
 		?>
 		<div id="session_select" class="text-center mt-5">
 			<h1><?php echo esc_html( $signup_name ); ?></h1>
@@ -748,8 +738,8 @@ class SignupSettings extends SignUpsBase {
 					<td><input class="w-75px" type="number" name="signup_default_slots" value="<?php echo esc_html( $data->signup_default_slots ); ?>" /> </td>
 				</tr>
 				<tr>
-					<td class="text-right mr-2"><label>Rolling Class: </label></td>
-					<td><input id="rolling-signup" class="w-75px" type="number" name="signup_rolling" value="<?php echo esc_html( $data->signup_rolling ); ?>" /> </td>
+					<td class="text-right mr-2"><label>Rolling Template: </label></td>
+					<td><input id="rolling-signup" class="w-75px" type="number" name="signup_rolling_template" value="<?php echo esc_html( $data->signup_rolling_template ); ?>" /> </td>
 				</tr>
 				<tr>
 					<td class="text-right mr-2"><input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back"></td>
@@ -822,16 +812,5 @@ class SignupSettings extends SignUpsBase {
 			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 		</form>
 		<?php
-	}
-
-	/**
-	 * Format a date
-	 *
-	 * @param  mixed $timestamp Unix timestamp to be formated.
-	 * @return string Formatted date.
-	 */
-	private function format_date( $formatted_time ) {
-		$dt       = new DateTime( $formatted_time );
-		return $dt->format( 'Y-m-d g:ia' );
 	}
 }

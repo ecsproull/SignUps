@@ -71,7 +71,7 @@ class ClassItem {
 	/**
 	 * Class is a continuing signup.
 	 *
-	 * @var signup_rolling.
+	 * @var signup_rolling_template.
 	 */
-	public $signup_rolling;
+	public $signup_rolling_template;
 }

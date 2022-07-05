@@ -31,6 +31,7 @@ require 'includes/class-signupsettings.php';
 require 'includes/class-classitem.php';
 require 'includes/class-sessionitem.php';
 require 'includes/class-shortcodes.php';
+require 'includes/class-timeexception.php';
 
 /**
  * Main signups class.

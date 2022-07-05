@@ -19,7 +19,7 @@ class DbSignUpTables {
 	 */
 	public function create_db_tables() {
 		global $wpdb;
-		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_classes"' ) !== 'wp_scw_classes' ) {
+		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_signups"' ) !== 'wp_scw_signups' ) {
 			$wpdb->query(
 				'CREATE TABLE `wp_scw_classes` (
 					`signup_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -31,7 +31,7 @@ class DbSignUpTables {
 					`signup_sig_id` int(11) DEFAULT NULL,
 					`signup_thumbnail_url` varchar(255) DEFAULT NULL,
 					`signup_default_slots` int(11) DEFAULT NULL,
-					`signup_rolling` int(11) DEFAULT 0,
+					`signup_rolling_template` int(11) DEFAULT 0,
 					PRIMARY KEY (`signup_id`)
 				  ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;'
 			);
