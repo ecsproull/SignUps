@@ -23,7 +23,6 @@
  * Domain Path: /languages
  */
 
-require 'includes/class-scripts.php';
 require 'includes/class-signupsbase.php';
 require 'includes/class-signupsrestapis.php';
 require 'includes/class-dbsignuptables.php';
@@ -97,6 +96,16 @@ class SignupsPlugin {
 		wp_enqueue_style( 'signup_bs_style' );
 		wp_register_style( 'signup_style', plugins_url( '/signups/css/users-styles.css' ), array(), 1 );
 		wp_enqueue_style( 'signup_style' );
+		wp_enqueue_style( 'wp-jquery-ui-dialog' );
+		wp_enqueue_script( 'sigup_member_script', plugins_url( 'js/users-signup.js', __FILE__ ), array( 'jquery', 'jquery-ui-dialog' ), '1.0.0.0' );
+		wp_localize_script(
+			'sigup_member_script',
+			'wpApiSettings',
+			array(
+				'root'  => esc_url_raw( rest_url() ),
+				'nonce' => wp_create_nonce( 'wp_rest' ),
+			)
+		);
 	}
 }
 

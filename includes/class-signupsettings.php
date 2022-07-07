@@ -373,7 +373,9 @@ class SignupSettings extends SignUpsBase {
 	/**
 	 * create_attendee_select_form
 	 *
-	 * @param  mixed $post
+	 * @param mixed $signup_name The name of the signup.
+	 * @param number $signup_id Signup Id
+	 * @param array $sessions An array fo sessions.
 	 * @return void
 	 */
 	private function create_attendee_select_form( $signup_name, $signup_id, $sessions ) {

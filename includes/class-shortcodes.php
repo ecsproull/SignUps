@@ -17,7 +17,6 @@ class ShortCodes extends SignUpsBase {
 	 */
 	public function user_signup() {
 		$post = wp_unslash( $_POST );
-		var_dump( $post );
 		if ( isset( $post['mynonce'] ) && wp_verify_nonce( $post['mynonce'], 'signups' ) ) {
 			if ( isset( $post['signup_id'] ) ) {
 				if ( '-1' === $post['signup_id'] ) {
@@ -25,9 +24,9 @@ class ShortCodes extends SignUpsBase {
 				} else {
 					$this->create_signup( $post['signup_id'] );
 				}
-			} elseif ( isset( $post['add_attendee'] ) ) {
-				$this->add_attendee( $post );
 			}
+		} elseif ( isset( $post['add_attendee_session'] ) ) {
+			$this->add_attendee( $post );
 		} else {
 			$this->create_select_signup();
 		}
@@ -104,15 +103,19 @@ class ShortCodes extends SignUpsBase {
 			);
 		}
 
+		$today = new DateTime( 'now', $this->date_time_zone );
+		$today->SetTime( 8, 0 );
+
 		if ( $rolling ) {
 			$attendees = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT *
 					FROM %1s
-					WHERE attendee_signup_id = %s
+					WHERE attendee_signup_id = %s AND attendee_start_time >= %d
 					ORDER BY attendee_start_time',
 					self::ATTENDEES_ROLLING_TABLE,
-					$signups[0]->signup_id
+					$signups[0]->signup_id,
+					$today->format( 'U' )
 				),
 				OBJECT
 			);
@@ -130,7 +133,6 @@ class ShortCodes extends SignUpsBase {
 
 			$this->create_rolling_session_select_form(
 				$signup_name,
-				$sessions,
 				$attendees,
 				$signup_id,
 				$template[0]
@@ -164,7 +166,48 @@ class ShortCodes extends SignUpsBase {
 	 * @return void
 	 */
 	private function add_attendee( $post ) {
+		global $wpdb;
 		var_dump( $post );
+		$new_attendee = array();
+		$new_attendee['attendee_signup_id'] = $post['add_attendee_session'];
+		$new_attendee['attendee_email']     = $post['email'];
+		$new_attendee['attendee_phone']     = $post['phone'];
+		$new_attendee['attendee_lastname']  = $post['lastname'];
+		$new_attendee['attendee_firstname'] = $post['firstname'];
+		$new_attendee['attendee_badge']     = $post['badge_number'];
+
+		?>
+		<div class="container">
+			<form method="POST">
+				<table class="mb-100px table table-bordered mr-auto ml-auto">
+				<?php
+
+				foreach ( $post['time_slots'] as $slot ) {
+					$slot_parts = explode( ',', $slot );
+					$slot_start = new DateTime( $slot_parts[0], $this->date_time_zone );
+					$new_attendee['attendee_start_time']      = $slot_start->format( 'U' );
+					$new_attendee['attendee_start_formatted'] = $slot_start->format( self::DATETIME_FORMAT );
+					$slot_end = new DateTime( $slot_parts[1], $this->date_time_zone );
+					$new_attendee['attendee_end_time']        = $slot_end->format( 'U' );
+					$new_attendee['attendee_end_formatted']   = $slot_end->format( self::DATETIME_FORMAT );
+					$new_attendee['attendee_item']            = $slot_parts[2];
+					$wpdb->insert( self::ATTENDEES_ROLLING_TABLE, $new_attendee );
+
+					?>
+					<tr  class="border-left3 border-right3 border-bottom2">
+						<td><?php echo esc_html( $slot_start->format( self::TIME_FORMAT ) . ' - ' . $slot_end->format( self::TIME_FORMAT ) ); ?></td>
+						<td><?php echo esc_html( $post['firstname'] ); ?></td>
+						<td><?php echo esc_html( $post['lastname'] ); ?></td>
+					</tr>
+					<?php
+				}
+				?>
+				</table>
+			</form>
+		</div>
+		<?php
+
+		clean_post_cache( $post );
 	}
 
 	/**
@@ -288,13 +331,12 @@ class ShortCodes extends SignUpsBase {
 	 * @param  object $template The template for the rolling class.
 	 * @return void
 	 */
-	private function create_rolling_session_select_form( $signup_name, $sessions, $attendees, $signup_id, $template ) {
-		$date_time_zone = new DateTimeZone( 'America/Phoenix' );
+	private function create_rolling_session_select_form( $signup_name, $attendees, $signup_id, $template ) {
 		$start_time_parts = explode( ':', $template->rolling_start_time );
 		$start_hour   = $start_time_parts[0];
 		$start_minute = $start_time_parts[1];
-		$start_date   = new DateTime( '07/01/2022', $date_time_zone );
-		$end_date     = new DateTime( 'now', $date_time_zone );
+		$start_date   = new DateTime( 'now', $this->date_time_zone );
+		$end_date     = new DateTime( 'now', $this->date_time_zone );
 		$end_date->add( new DateInterval( 'P' . $template->rolling_days . 'D' ) );
 		$days_sessions_raw = explode( ',', $template->rolling_days_week );
 		$days_sessions = array();
@@ -308,7 +350,7 @@ class ShortCodes extends SignUpsBase {
 		$slot_titles = explode( ',', $template->rolling_slot_items );
 
 		$time_exceptions = array();
-		$today = new DateTime( 'now', $date_time_zone );
+		$today = new DateTime( 'now', $this->date_time_zone );
 		for ( $j = 0; $j < 12; $j++ ) {
 			$day = new DateTime(
 				sprintf(
@@ -316,11 +358,11 @@ class ShortCodes extends SignUpsBase {
 					$today->format( 'F' ),
 					$today->format( 'Y' )
 				),
-				$date_time_zone
+				$this->date_time_zone
 			);
 			$day->SetTime( 12, 0 );
 			$time_exception = new timeException();
-			$time_exception->begin = new DateTime( $day->format( self::DATETIME_FORMAT ), $date_time_zone );
+			$time_exception->begin = new DateTime( $day->format( self::DATETIME_FORMAT ), $this->date_time_zone );
 			$time_exception->end = $day;
 			$time_exception->end->add( new DateInterval( 'PT4H' ) );
 
@@ -338,79 +380,113 @@ class ShortCodes extends SignUpsBase {
 			<h3 class="mb-2"><b><?php echo esc_html( $signup_name ); ?><b></h3>
 			<div>
 				<div class="container">
-					<table class="mb-100px table table-bordered mr-auto ml-auto">
-						<form method="POST">
-						<?php
-						$attendee_index = 0;
-						$current_day    = '2000-07-01';
-						while ( $start_date <= $end_date ) {
-							$day_of_week = $start_date->format( 'w' );
-							if ( array_key_exists( $day_of_week, $days_sessions ) ) {
-								for ( $i = 0; $i < $days_sessions[ $day_of_week ]; $i++ ) {
-									if ( 0 === $i ) {
-										$start_date->setTime( $start_hour, $start_minute );
-									} else {
-										$start_date->add( $duration );
-									}
-
-									$add_session = true;
-									foreach ( $time_exceptions as $except ) {
-										if ( $start_date >= $except->begin && $start_date <= $except->end ) {
-											$add_session = false;
+					<form id="rolling_form" method="POST">
+						<table class="mb-100px table table-bordered mr-auto ml-auto">
+							<tr>
+								<td>Enter Badge#</td>
+								<td><input id="badge_input" type="number" name="badge_number" value="4038" required></td>
+								<td><input type="button" id="get_member_button" class="btn btn-primary" value='Lookup Member'></td>
+							</tr>
+							<tr>
+								<td><input id="first_name" type="text" name="firstname" value="First" required readonly></td>
+								<td><input id="last_name" type="text" name="lastname" value="Last" required readonly></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><input id="phone" type="tel" name="phone" placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required readonly></td>
+								<td><input id="email" type="email" name="email" placeholder="foo@bar.com" required readonly></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+						</table>
+						<table id="selection-table" class="mb-100px table table-bordered mr-auto ml-auto" hidden>
+							<?php
+							$attendee_index = 0;
+							$current_day    = '2000-07-01';
+							$comment_index  = 0;
+							$comment_name   = 'comment-';
+							$comment_row_id = 'comment-row-';
+							while ( $start_date <= $end_date ) {
+								$day_of_week = $start_date->format( 'w' );
+								if ( array_key_exists( $day_of_week, $days_sessions ) ) {
+									for ( $i = 0; $i < $days_sessions[ $day_of_week ]; $i++ ) {
+										if ( 0 === $i ) {
+											$start_date->setTime( $start_hour, $start_minute );
+										} else {
+											$start_date->add( $duration );
 										}
-									}
 
-									if ( $add_session ) {
-										if ( $start_date->format( self::DATE_FORMAT ) !== $current_day ) {
-											$current_day = $start_date->format( self::DATE_FORMAT );
-											?>
-											<tr class=" border-bottom2 border-top3 border-left3 border-right3 bg-lightsteelblue">
-												<td><?php echo esc_html( $current_day ); ?></td>
-												<td></td>
-												<td><button type="submit" class="btn bt-md btn-primary mr-auto ml-auto mt-2"value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee">Submit</button></td>
-											</tr>
-											<?php
+										$add_session = true;
+										foreach ( $time_exceptions as $except ) {
+											if ( $start_date >= $except->begin && $start_date <= $except->end ) {
+												$add_session = false;
+											}
 										}
-										$temp_date = new DateTime( $start_date->format( self::DATETIME_FORMAT ), $date_time_zone );
-										$temp_date->Add( $duration );
-										?>
-										<tr  class="border-left3 border-right3 border-bottom2">
-											<td><?php echo esc_html( $start_date->format( self::TIME_FORMAT ) . ' - ' . $temp_date->format( self::TIME_FORMAT ) ); ?></td>
-											<?php
+
+										if ( $add_session ) {
+											if ( $start_date->format( self::DATE_FORMAT ) !== $current_day ) {
+												$current_day = $start_date->format( self::DATE_FORMAT );
+												?>
+												<tr class=" border-bottom2 border-top3 border-left3 border-right3 bg-lightsteelblue">
+													<td><?php echo esc_html( $current_day ); ?></td>
+													<td><?php echo esc_html( $slot_titles[0] ); ?></td>
+													<td><button type="submit" class="btn bt-md btn-primary mr-auto ml-auto mt-2 signup-submit" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee">Submit</button></td>
+												</tr>
+												<?php
+											}
+											$temp_end_date = new DateTime( $start_date->format( self::DATETIME_FORMAT ), $this->date_time_zone );
+											$temp_end_date->Add( $duration );
+
 											if ( count( $attendees ) > $attendee_index && $attendees[ $attendee_index ]->attendee_start_time === $start_date->format( 'U' ) ) {
 												?>
-												<td><?php echo esc_html( $attendees[ $attendee_index ]->attendee_firstname ); ?></td>
-												<td><?php echo esc_html( $attendees[ $attendee_index ]->attendee_lastname ); ?></td>
+												<tr  class="border-left3 border-right3 border-bottom2">
+													<td><?php echo esc_html( $start_date->format( self::TIME_FORMAT ) . ' - ' . $temp_end_date->format( self::TIME_FORMAT ) ); ?></td>
+													<td><?php echo esc_html( $attendees[ $attendee_index ]->attendee_firstname ); ?></td>
+													<td><?php echo esc_html( $attendees[ $attendee_index ]->attendee_lastname ); ?></td>
+												</tr>
 												<?php
 												$attendee_index++;
 											} else {
+												$com_name = $comment_name . $comment_index;
 												?>
-												<td></td>
-												<td class="text-center"> <input class="form-check-input position-relative addChk ml-auto" type="checkbox" name="time_slots[]" value="<?php echo esc_html( $start_date->format( self::TIME_FORMAT ) ); ?>"> </td>
+												<tr class="border-left3 border-right3 border-bottom2">
+													<td><?php echo esc_html( $start_date->format( self::TIME_FORMAT ) . ' - ' . $temp_end_date->format( self::TIME_FORMAT ) ); ?></td>
+													<td><input class="comment-text" type="hidden" name="<?php echo esc_html( $com_name ); ?>" placeholder="Comment"></td>
+													<td class="text-center"> 
+														<input class="form-check-input position-relative addChk ml-auto" 
+															type="checkbox" name="time_slots[]" 
+															value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $slot_titles[0] . ',' . $comment_index ); ?>">
+													</td>
+												</tr>
 												<?php
+												$comment_index++;
 											}
-											?>
-										</tr>
-										<?php
+										}
 									}
 								}
-							}
 
-							$start_date->add( $one_day_interval );
-						}
-						?>
-						<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
-						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
-						<tr>
-							<td><button type="submit" class="btn bt-md btn-danger mr-auto ml-auto mt-2"value="-1" name="signup_id">Back</button></td>
-							<td></td>
-							<td><button type="submit" class="btn bt-md btn-primary mr-auto ml-auto mt-2"value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee">Submit</button>
-						</tr>
+								$start_date->add( $one_day_interval );
+							}
+							?>
+							<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
+							<input type="hidden" name="add_attendee_session" value="<?php echo esc_html( $signup_id ); ?>"
+							<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+							<tr>
+								<td><button type="submit" class="btn bt-md btn-danger mr-auto ml-auto mt-2"value="-1" name="signup_id">Back</button></td>
+								<td></td>
+								<td><button type="submit" class="btn bt-md btn-primary mr-auto ml-auto mt-2 signup-submit" 
+											value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee">Submit</button>
+							</tr>
+						</table>
 					</form>
-				</table>
+				</div>
 			</div>
-		</div>
 		</div>
 		<?php
 	}
 }
+

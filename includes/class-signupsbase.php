@@ -78,12 +78,19 @@ class SignUpsBase {
 	protected const TIME_FORMAT = 'g:iA';
 
 	/**
+	 * Date timezone.
+	 *
+	 * @var undefined
+	 */
+	protected $date_time_zone;
+
+	/**
 	 * __construct
 	 *
 	 * @return void
 	 */
 	public function __construct() {
-
+		$this->date_time_zone = new DateTimeZone( 'America/Phoenix' );
 	}
 
 	/**
