@@ -2,14 +2,14 @@
 	background-color: transparent;
 }
 
-#badge_input {
+#badge-input {
 	width: 100px;
 }
 
 .comment-text,
-#badge_input,
-#last_name,
-#first_name,
+#badge-input,
+#last-name,
+#first-name,
 #phone,
 #email {
 	background-color: transparent;
@@ -53,4 +53,56 @@
 
 .bg-lightsteelblue {
 	background-color: lightsteelblue;
+}
+
+.bg-lightgray {
+	background-color: lightgreen;
+}
+
+.opacity-33 {
+	opacity: .33;
+}
+
+.date-row {
+	border-top: 3px solid black;
+	border-left: 3px solid black;
+	border-right: 3px solid black;
+	border-bottom: 2px solid gray!important;
+	background-color: lightsteelblue;
+	border-radius: 10px;
+}
+
+.footer-row {
+	border: 3px solid black;
+	background-color: lightsteelblue;
+}
+
+.attendee-row {
+	border-left: 3px solid black;
+	border-right: 3px solid black;
+	border-bottom: 2px solid gray!important;
+}
+
+button.button-signup {
+	width: 100%;
+}
+
+button.button-signup > i > u {
+	color: blue;
+}
+
+table#signup-select {
+    border-collapse:separate;
+    border:solid black 4px;
+    border-radius:12px;
+}
+
+table#signup-select > tbody > tr:nth-child(even) {
+	background-color: lightgray;
+}
+
+table#lookup-member,
+table#lookup-member > tbody > tr > td,
+table#signup-select > tbody > tr > td {
+	border:none;
 }

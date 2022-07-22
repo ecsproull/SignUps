@@ -7,14 +7,15 @@ jQuery( document ).ready( function($){
 				xhr.setRequestHeader( 'X-WP-Nonce', wpApiSettings.nonce );
 			},
 			data:{
-				'badge' : jQuery("#badge_input").val()
+				'badge' : jQuery("#badge-input").val()
 			}
 		} ).done( function ( response ) {
 			if ( response.length > 0) {
-				$( '#first_name' ).val( response[0].firstname );
-				$( '#last_name' ).val( response[0].lastname );
-				$( '#email' ).val( response[0].email );
-				$( '#phone' ).val( response[0].phone ); 
+				$( '.member-first-name' ).each( function () { $(this).val( response[0].firstname ); });
+				$( '.member-last-name' ).each( function () { $(this).val( response[0].lastname ); });
+				$( '.member-email' ).each( function () { $(this).val( response[0].email ); });
+				$( '.member-phone' ).each( function () { $(this).val( response[0].phone );  });
+				$( '.member-badge' ).each( function () { $(this).val( response[0].badge );  });
 				$("#selection-table").prop("hidden", false);
 			} else {
 				alert( 'Badge number not found.' )
@@ -24,10 +25,10 @@ jQuery( document ).ready( function($){
 		});
 	});
 
-	$("#rolling_form").submit(function(e){
+	$(".signup_form").submit(function(e){
 		e.preventDefault();
 		var form = this;
-		var selectedValues = $("input[name='time_slots[]']:checked:enabled",'#rolling_form').map(function() {
+		var selectedValues = $("input[name='time_slots[]']:checked:enabled").map(function() {
 			return this.value;
 		}).get();
 
@@ -35,8 +36,12 @@ jQuery( document ).ready( function($){
 		selectedValues.forEach((item) => {
 			var arr = item.split(',');
 			var inputName = "comment-" + arr[3];
-			$('input[name=' + inputName + ']').value
-			selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>" + $('input[name=' + inputName + ']').val() + "</td></tr>";
+
+			if ($('input[name=' + inputName + ']').val()) {
+				selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>" + $('input[name=' + inputName + ']').val() + "</td></tr>";
+			} else {
+				selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>NA</td></tr>";
+			}
 
 		});
 		selectedSessionsTable += "</table>"
@@ -60,7 +65,7 @@ jQuery( document ).ready( function($){
 		  });
 	});
 
-	$(".form-check-input").click(function(x) {
+	$(".rolling-add-chk").click(function(x) {
 		var val = x.currentTarget.value;
 		var arr = val.split(',');
 		var inputName = "comment-" + arr[3];
@@ -70,5 +75,27 @@ jQuery( document ).ready( function($){
 			$('input[name=' + inputName + ']').get(0).type = 'hidden';
 		}
 		
+	});
+
+	$("#back-button").click(function() {
+		window.location.href="http://localhost/wp/signups";
+	});
+
+	$("#selection-table input:radio").click (function(e) {
+		var arr = e.currentTarget.value.split(',');
+		var active_submit_id = "submit_" + arr[3];
+		$("#selection-table :submit").each(function(i, s) {
+			if (s.id != active_submit_id && s.id != "back-button") {
+				s.style.display = 'none';
+			} else {
+				s.style.display = 'block';
+			}
+		})
+
+		$("#selection-table :radio").each(function(i, s) {
+			if (s.value != e.currentTarget.value) {
+				s.checked = false;
+			}
+		})
 	});
 });
