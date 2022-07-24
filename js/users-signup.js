@@ -40,11 +40,16 @@ jQuery( document ).ready( function($){
 			if ($('input[name=' + inputName + ']').val()) {
 				selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>" + $('input[name=' + inputName + ']').val() + "</td></tr>";
 			} else {
-				selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>NA</td></tr>";
+				if (arr[4]) {
+					selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>Cost: $" + arr[4] + "</td></tr>";
+				} else {
+					selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>NA</td></tr>";
+				}
 			}
 
 		});
 		selectedSessionsTable += "</table>"
+
 
 		$('<div style="padding: 10px; max-width: 800px; word-wrap: break-word;">' + selectedSessionsTable + '</div>').dialog({
 			draggable: true,
@@ -97,5 +102,132 @@ jQuery( document ).ready( function($){
 				s.checked = false;
 			}
 		})
+	});
+
+	var appId = "821976"	
+/*
+	document.addEventListener('DOMContentLoaded', function () {
+		// initialize materialize collapsible
+		var collapsibleElement = document.querySelector('.collapsible');
+		var collapsibleInstance = M.Collapsible.init(collapsibleElement);
+
+		// initialize materialize material box
+		var materialBox = document.querySelectorAll('.materialboxed');
+		var instances = M.Materialbox.init(materialBox);
+
+		// load with address open
+		collapsibleInstance.open(1);
+	});
+	*/
+	// show shipping address if different
+	function showMe() {
+		var box = document.getElementById('same');
+		var vis = (box.checked) ? "block" : "none";
+		document.getElementById('shipping-address').style.display = vis;
+	}
+	
+	// close address section on "next" click
+	function closeAddress() {
+		var elems = document.querySelector('.collapsible');
+		var instances = M.Collapsible.init(elems);
+		instances.close(1);
+	}
+	// open submit section on "next" click
+	function openSubmit() {
+		var elems = document.querySelector('.collapsible');
+		var instances = M.Collapsible.init(elems);
+		instances.open(2);
+	}
+	// credit card iframe styling
+	var custom_style = {
+		'styles': {
+			'base': {
+				'color': 'grey',
+				'border': '1px solid grey',
+				'border-top': 'none',
+				'border-right': 'none',
+				'border-left': 'none',
+				'font-weight': '200',
+				'font-family': 'Arial',
+				'padding': '0px',
+				'margin-bottom': '5px',
+				':focus': {
+					'border': '2px solid #4db6ac',
+					'border-top': 'none',
+					'border-right': 'none',
+					'border-left': 'none'
+				},
+				'::placeholder': {
+					'text-transform': 'lowercase',
+					'color': '#D3D3D3',
+					'font-size': '17px'
+				}
+			},
+			'invalid': {
+				'color': '#CD5C5C',
+				'border-color': '#CD5C5C'
+			},
+			'valid': {
+				'color': '#4db6ac',
+				'border-color': '#4db6ac'
+			},
+			'labels': {
+				'base': {
+					'color': 'gray',
+					'font-family': 'Arial',
+					'font-size': '13px',
+					'font-weight': '1',
+					'text-transform': 'lowercase',
+					'padding': '0px',
+					'padding-left': '0px'
+				}
+			},
+			'errors': {
+				'invalid': {
+					'color': '#CD5C5C'
+				}
+			}
+		}
+	};
+	var options = {
+		custom_style: custom_style,
+		show_labels: true,
+		show_placeholders: true,
+		show_error_messages: true,
+		show_error_messages_when_unfocused: true
+	};
+
+	//credit card iframe configs
+	var myAppId = appId;
+	var apiVersion = "3.0";
+	var error = WePay.configure("stage", myAppId, apiVersion);
+	if (error) {
+		console.log(error);
+	}
+
+	var iframe_container_id = "credit_card_iframe";
+	var creditCard = WePay.createCreditCardIframe(iframe_container_id, options);
+
+	$('#submit-credit-card-button').click(function (event) {
+		creditCard.tokenize()
+			.then(function (response) {
+				//get the promise response from the console
+				console.log('response', JSON.stringify(response));
+				var node = document.createElement('div');
+				node.innerHTML = JSON.stringify(response);
+				document.getElementById('token').appendChild(node);
+			})
+			.catch(function (error) {
+				console.log('error', error);
+				// Move the focus to the first error        
+				if (Array.isArray(error)) {
+					let key = error[0].target[0];
+					creditCard.setFocus(key);
+				}
+				// display the response on the page for testing purposes; do not launch with this section
+				var node = document.createElement('div');
+				node.innerHTML = JSON.stringify(error);
+				document.getElementById('token').appendChild(node);
+			});
 	});
 });

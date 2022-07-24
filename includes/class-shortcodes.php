@@ -27,11 +27,137 @@ class ShortCodes extends SignUpsBase {
 			} elseif ( isset( $post['add_attendee_session'] ) ) {
 				$this->add_attendee( $post );
 			} elseif ( isset( $post['add_attendee_class'] ) ) {
-				$this->add_attendee_class( $post );
+				$slots_parts = explode( ',', $post['time_slots'][0] );
+				if ( $slots_parts[4] > 0 && $post['paid'] === "false" ) {
+					$this->collect_money( $post, $slots_parts[4] );
+				} else {
+					$this->add_attendee_class( $post );
+				}
 			}
 		} else {
 			$this->create_select_signup();
 		}
+	}
+
+	/**
+	 * Payment form.
+	 *
+	 * @param array $post The values from the previous for where member slected a signup.
+	 * @return void
+	 */
+	private function collect_money( $post, $cost ) {
+		?>
+		<div class="container">
+			<ul class="collapsible popout">
+				<li>
+					<div class="collapsible-body" id="order-body">
+						<div class="container">
+							<div class="row">
+								<div class="card-panel blue-grey">
+									<div class="card-content white-text center">
+										<span class="card-title">Total: $<?php echo esc_html( $cost ); ?></span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</li>
+				<li class="active">
+					<div class="collapsible-header"><i class="material-icons">place</i>Address</div>
+					<div class="collapsible-body row" id="address-body">
+						<div class="row">
+							<div class="col s12">
+								<div class="card blue-grey">
+									<div class="card-content white-text">
+										<span class="card-title">Billing Address</span>
+										<p>Enter the address associated with your card.</p>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="container">
+							<form class="col s12">
+								<div class="row">
+									<div class="input-field col s6">
+										<input placeholder="first name" id="first_name" type="text" class="validate">
+										<label for="first_name">first name</label>
+									</div>
+									<div class="input-field col s6">
+										<input placeholder="last name" id="last_name" type="text" class="validate">
+										<label for="last_name">last name</label>
+									</div>
+								</div>
+								<div class="row">
+									<div class="input-field col s12">
+										<input placeholder="email" id="email" type="text" class="validate">
+										<label for="email">email</label>
+									</div>
+								</div>
+								<div class="row">
+									<div class="input-field col s6">
+										<input placeholder="street address" id="street_address" type="text" class="validate">
+										<label for="street_address">street address</label>
+									</div>
+									<div class="input-field col s6">
+										<input placeholder="suite / apt." id="suite" type="text" class="validate">
+										<label for="suite">suite / apt.</label>
+									</div>
+								</div>
+								<div class="row">
+									<div class="input-field col s4">
+										<input placeholder="city" id="city" type="text" class="validate">
+										<label for="city">city</label>
+									</div>
+									<div class="input-field col s4">
+										<input placeholder="state" id="state" type="text" class="validate">
+										<label for="state">state</label>
+									</div>
+									<div class="input-field col s4">
+										<input placeholder="zip" id="zip" type="text" class="validate">
+										<label for="zip">zip</label>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+					<button id="collapse-button" class="btn waves-effect waves-light" type="submit" name="action"
+						onclick="closeAddress(); openSubmit();">Next
+						<i class="material-icons right">send</i>
+					</button>
+				</div>
+				</li>
+				<li id="checkout">
+					<div class="collapsible-header"><i class="material-icons">credit_card</i>Submit</div>
+					<div class="collapsible-body" id="submit">
+						<span>
+							<div class="container">
+								<div class="row">
+									<img class="responsive-img" id="accepted-cards"
+										src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/t-1671/card-brands.png" border="0"
+										alt="Accepted Cards" />
+								</div>
+								<div class="row">
+									<div id="credit_card_iframe"></div>
+								</div>
+								<div class="row">
+									<div class="card blue-grey lighten-2">
+										<div class="card-content white-text">
+											<p>By clicking submit, you agree to bring donunts to the Woodshop next Friday.</p>
+										</div>
+									</div>
+								</div>
+								<button class="btn waves-effect waves-light" type="submit" name="action"
+									id="submit-credit-card-button">Submit
+									<i class="material-icons right">send</i>
+								</button>
+								<div id="token"></div>
+							</div>
+						</span>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<?php
 	}
 
 	/**
@@ -64,7 +190,7 @@ class ShortCodes extends SignUpsBase {
 		global $wpdb;
 		$signups   = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT signup_id, signup_name, signup_rolling_template
+				'SELECT signup_id, signup_name, signup_cost, signup_rolling_template
 				FROM %1s
 				WHERE signup_id = %s',
 				self::SIGNUPS_TABLE,
@@ -75,6 +201,7 @@ class ShortCodes extends SignUpsBase {
 
 		$rolling = $signups[0]->signup_rolling_template > 0;
 		$signup_name = $signups[0]->signup_name;
+		$signup_cost = $signups[0]->signup_cost;
 		$sessions    = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT session_id,
@@ -154,7 +281,7 @@ class ShortCodes extends SignUpsBase {
 				$sessions,
 				$attendees,
 				$instructors,
-				$signup_id
+				$signup_cost
 			);
 		}
 	}
@@ -408,10 +535,10 @@ class ShortCodes extends SignUpsBase {
 	 * @param  array  $sessions The list of sessions for the class.
 	 * @param  array  $attendees The list of attendees for the class.
 	 * @param  array  $instructors The list of instructors for the class.
-	 * @param  int    $signup_id The ID of the class.
+	 * @param  int    $cost The cost of the signup in dollars.
 	 * @return void
 	 */
-	private function create_session_select_form( $signup_name, $sessions, $attendees, $instructors, $signup_id ) {
+	private function create_session_select_form( $signup_name, $sessions, $attendees, $instructors, $cost ) {
 		?>
 		<div id="session_select" class="text-center mw-800px">
 			<h1 class="mb-2 entry-title"><?php echo esc_html( $signup_name ); ?></h1>
@@ -429,13 +556,14 @@ class ShortCodes extends SignUpsBase {
 									<td class="text-left"> <?php echo esc_html( $start_date->format( self::DATE_FORMAT ) ); ?>
 									<td><?php echo esc_html( $start_date->format( self::TIME_FORMAT ) . ' - ' . $end_date->format( self::TIME_FORMAT ) ); ?></td>
 									<td><button id=<?php echo esc_html( 'submit_' . $session->session_id ); ?>
-												class="btn bth-md btn-primary mr-auto ml-auto mt-2 signup-submit xxx"
+												class="btn bth-md btn-primary mr-auto ml-auto mt-2 signup-submit"
 												style="display: none;"
 												type="submit">Submit</button></td>
 								</tr>
 								<?php $this->create_hidden_user(); ?>
 								<input type="hidden" name="add_attendee_class">
 								<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
+								<input type="hidden" name="paid" value=false>
 								<?php
 								wp_nonce_field( 'signups', 'mynonce' );
 								if ( isset( $attendees[ $session->session_id ] ) ) {
@@ -453,12 +581,12 @@ class ShortCodes extends SignUpsBase {
 								for ( $i = count( $attendees[ $session->session_id ] ); $i < $session->session_slots; $i++ ) {
 									?>
 									<tr class="attendee-row bg-lightgray" data-session-id="<?php echo esc_html( $session->session_id ); ?>" >
-										<td>Open</td>
+										<td>Cost: $<?php echo esc_html( $cost ); ?></td>
 										<td><?php echo esc_html( $signup_name ); ?></td>
 										<td class="text-center">
 											<input class="form-check-input position-relative addChk" type="radio" 
 												name="time_slots[]" 
-												value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $end_date->format( self::DATETIME_FORMAT ) . ',' . $signup_name . ',' . $session->session_id ); ?>">
+												value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $end_date->format( self::DATETIME_FORMAT ) . ',' . $signup_name . ',' . $session->session_id . ',' . $cost ); ?>">
 										</td>
 									</tr>
 									<?php
@@ -653,7 +781,7 @@ class ShortCodes extends SignUpsBase {
 														<td class="text-center"> 
 															<input class="form-check-input position-relative rolling-add-chk ml-auto" 
 																type="checkbox" name="time_slots[]" 
-																value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $slot_titles[0] . ',' . $comment_index ); ?>">
+																value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $slot_titles[0] . ',' . $comment_index . ',0' ); ?>">
 														</td>
 													</tr>
 													<?php

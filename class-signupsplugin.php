@@ -106,6 +106,8 @@ class SignupsPlugin {
 				'nonce' => wp_create_nonce( 'wp_rest' ),
 			)
 		);
+		wp_enqueue_script( 'wepay_script', plugins_url( 'js/wepay.full.js', __FILE__ ), array(), '3.0' );
+
 	}
 }
 
