@@ -27,13 +27,15 @@ class SignUpsRestApis extends SignUpsBase {
 					'scwmembers/v1',
 					'/members',
 					'get_member',
+					$this,
 					array(
 						'badge' => array(
-							'description'       => esc_html__( 'Member badge number' ),
+							'description'       => esc_html( 'Member badge number' ),
 							'type'              => 'string',
 							'validate_callback' => array( $this, 'verify_badge_param' ),
 						),
-					)
+					),
+					WP_REST_Server::READABLE
 				);
 			}
 		);
@@ -63,28 +65,6 @@ class SignUpsRestApis extends SignUpsBase {
 		} catch ( Exception $e ) {
 			return $e->getMessage();
 		}
-	}
-
-	/**
-	 * Helper function for registering routes.
-	 *
-	 * @param  string $namespace The namespace.
-	 * @param  string $route End of the route.
-	 * @param  string $func The endpoint function.
-	 * @param  array  $args Arguments to the api call.
-	 * @return void
-	 */
-	private function register_route( $namespace, $route, $func, $args ) {
-		register_rest_route(
-			$namespace,
-			$route,
-			array(
-				'methods'             => 'GET',
-				'callback'            => array( $this, $func ),
-				'permission_callback' => array( $this, 'permissions_check' ),
-				'args'                => $args,
-			)
-		);
 	}
 
 	/**

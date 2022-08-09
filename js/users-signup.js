@@ -82,7 +82,7 @@ jQuery( document ).ready( function($){
 		
 	});
 
-	$("#back-button").click(function() {
+	$(".back-button").click(function() {
 		window.location.href="http://localhost/wp/signups";
 	});
 
@@ -90,7 +90,7 @@ jQuery( document ).ready( function($){
 		var arr = e.currentTarget.value.split(',');
 		var active_submit_id = "submit_" + arr[3];
 		$("#selection-table :submit").each(function(i, s) {
-			if (s.id != active_submit_id && s.id != "back-button") {
+			if (s.id != active_submit_id && !s.classList.contains('back-button')) {
 				s.style.display = 'none';
 			} else {
 				s.style.display = 'block';
@@ -196,38 +196,4 @@ jQuery( document ).ready( function($){
 		show_error_messages: true,
 		show_error_messages_when_unfocused: true
 	};
-
-	//credit card iframe configs
-	var myAppId = appId;
-	var apiVersion = "3.0";
-	var error = WePay.configure("stage", myAppId, apiVersion);
-	if (error) {
-		console.log(error);
-	}
-
-	var iframe_container_id = "credit_card_iframe";
-	var creditCard = WePay.createCreditCardIframe(iframe_container_id, options);
-
-	$('#submit-credit-card-button').click(function (event) {
-		creditCard.tokenize()
-			.then(function (response) {
-				//get the promise response from the console
-				console.log('response', JSON.stringify(response));
-				var node = document.createElement('div');
-				node.innerHTML = JSON.stringify(response);
-				document.getElementById('token').appendChild(node);
-			})
-			.catch(function (error) {
-				console.log('error', error);
-				// Move the focus to the first error        
-				if (Array.isArray(error)) {
-					let key = error[0].target[0];
-					creditCard.setFocus(key);
-				}
-				// display the response on the page for testing purposes; do not launch with this section
-				var node = document.createElement('div');
-				node.innerHTML = JSON.stringify(error);
-				document.getElementById('token').appendChild(node);
-			});
-	});
 });

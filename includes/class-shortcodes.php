@@ -3,12 +3,16 @@
  * Summary
  * Shortcode class.
  *
- * @package SignUps
+ * @package signups
  */
+
+ob_start();
 
 /**
  * Mirror of the database Session object.
  * Used for creating new sessions to be added to the DB.
+ *
+ * @package SignUps
  */
 class ShortCodes extends SignUpsBase {
 
@@ -27,12 +31,7 @@ class ShortCodes extends SignUpsBase {
 			} elseif ( isset( $post['add_attendee_session'] ) ) {
 				$this->add_attendee( $post );
 			} elseif ( isset( $post['add_attendee_class'] ) ) {
-				$slots_parts = explode( ',', $post['time_slots'][0] );
-				if ( $slots_parts[4] > 0 && $post['paid'] === "false" ) {
-					$this->collect_money( $post, $slots_parts[4] );
-				} else {
-					$this->add_attendee_class( $post );
-				}
+				$this->add_attendee_class( $post );
 			}
 		} else {
 			$this->create_select_signup();
@@ -40,124 +39,222 @@ class ShortCodes extends SignUpsBase {
 	}
 
 	/**
+	 * Verification i sdone in the Payment Event handler.
+	 */
+	public function permissions_check() {
+		return true;
+	}
+
+	/**
+	 * Called by Stripe.com when a payment has been processed.
+	 */
+	public function payment_event() {
+		global $wpdb;
+		$stripe_row = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s',
+				self::STRIPE_TABLE,
+			),
+			OBJECT
+		);
+
+		\Stripe\Stripe::setApiKey( $stripe_row[0]->stripe_api_key );
+
+		// Secret is at https://dashboard.stripe.com/webhooks.
+		$endpoint_secret = $stripe_row[0]->stripe_api_secret;
+
+		$payload = @file_get_contents( 'php://input' );
+		$event = null;
+
+		try {
+			$event = \Stripe\Event::constructFrom(
+				json_decode( $payload, true )
+			);
+		} catch ( \UnexpectedValueException $e ) {
+			echo '⚠️  Webhook error while parsing basic request.';
+			http_response_code( 400 );
+			exit();
+		}
+
+		if ( $endpoint_secret ) {
+			/**
+			 * Only verify the event if there is an endpoint secret defined
+			 * Otherwise use the basic decoded event
+			 */
+			$sig_header = sanitize_text_field( wp_unslash( $_SERVER['HTTP_STRIPE_SIGNATURE'] ) );
+			try {
+				$event = \Stripe\Webhook::constructEvent(
+					$payload,
+					$sig_header,
+					$endpoint_secret
+				);
+			} catch ( \Stripe\Exception\SignatureVerificationException $e ) {
+				echo '⚠️  Webhook error while validating signature.';
+				http_response_code( 400 );
+				exit();
+			}
+		}
+
+		http_response_code( 200 );
+		switch ( $event->type ) {
+			case 'charge.succeeded':
+				$payment_intent = $event->data->object;
+				break;
+			case 'checkout.session.completed':
+				$payment_intent = $event->data->object;
+				$wpdb->query(
+					$wpdb->prepare(
+						'LOCK TABLES %1s WRITE, %1s WRITE',
+						self::ATTENDEES_TABLE,
+						self::PAYMENTS_TABLE
+					)
+				);
+
+				$payment_row = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT payments_status
+						FROM %1s
+						WHERE payments_intent_id = %s',
+						self::PAYMENTS_TABLE,
+						$payment_intent->payment_intent
+					),
+					OBJECT
+				);
+
+				$dt_now      = new DateTime( 'now', $this->date_time_zone );
+				$new_payment = array(
+					'payments_attendee_id'        => $payment_intent->metadata['attendee_id'],
+					'payments_amount_charged'     => $payment_intent->metadata['cost'],
+					'payments_signup_description' => $payment_intent->metadata['description'],
+					'payments_last_access_time'   => $dt_now->format( 'Y-m-d H:i:s.u' ),
+					'payments_attendee_badge'     => $payment_intent->metadata['badge'],
+					'payments_price_id'           => $payment_intent->metadata['price_id'],
+				);
+
+				if ( ! $payment_row ) {
+					$new_payment['payments_intent_id'] = $payment_intent->payment_intent;
+					$new_payment['payments_start_time'] = $dt_now->format( 'Y-m-d H:i:s.u' );
+					$wpdb->insert( self::PAYMENTS_TABLE, $new_payment );
+				} else {
+					$where = array( 'payments_intent_id' => $payment_intent->payment_intent );
+					$wpdb->update( self::PAYMENTS_TABLE, $new_payment, $where );
+
+					if ( 'succeeded' === $payment_row[0]->payments_status ) {
+						$update = array( 'attendee_balance_owed' => 0 );
+						$where  = array( 'attendee_id' => $payment_intent->metadata['attendee_id'] );
+						$wpdb->update( self::ATTENDEES_TABLE, $update, $where );
+					}
+				}
+
+				$wpdb->query( 'UNLOCK TABLES' );
+				break;
+
+			case 'payment_intent.succeeded':
+				$payment_intent = $event->data->object;
+				$wpdb->query(
+					$wpdb->prepare(
+						'LOCK TABLES %1s WRITE, %1s WRITE',
+						self::ATTENDEES_TABLE,
+						self::PAYMENTS_TABLE
+					)
+				);
+
+				$payment_row = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT payments_attendee_id
+						FROM %1s
+						WHERE payments_intent_id = %s',
+						self::PAYMENTS_TABLE,
+						$payment_intent->id
+					),
+					OBJECT
+				);
+
+				$dt_now         = new DateTime( 'now', $this->date_time_zone );
+				$update = array(
+					'payments_customer_id' => $payment_intent->customer,
+					'payments_status'      => $payment_intent->status,
+					'payments_last_access_time'   => $dt_now->format( 'Y-m-d H:i:s.u' ),
+					'payments_intent_status_time' => $dt_now->format( 'Y-m-d H:i:s.u' ),
+				);
+
+				if ( $payment_row ) {
+					$where = array(
+						'payments_intent_id' => $payment_indent->id,
+					);
+
+					$wpdb->update( self::PAYMENTS_TABLE, $update, $where );
+
+					if ( 'succeeded' === $payment_intent->status ) {
+						$update = array(
+							'attendee_balance_owed' => 0,
+						);
+
+						$where = array(
+							'attendee_id' => $payment_row[0]->payments_attendee_id,
+						);
+
+						$wpdb->update( self::ATTENDEES_TABLE, $update, $where );
+					}
+				} else {
+					$update['payments_intent_id'] = $payment_intent->id;
+					$update['payments_start_time'] = $dt_now->format( 'Y-m-d H:i:s.u' );
+					$wpdb->insert( self::PAYMENTS_TABLE, $update );
+				}
+
+				$wpdb->query( 'UNLOCK TABLES' );
+				break;
+			case 'payment_method.attached':
+				$payment_method = $event->data->object; // Contains a \Stripe\PaymentMethod.
+
+				// Then define and call a method to handle the successful attachment of a PaymentMethod.
+				// handlePaymentMethodAttached($paymentMethod);.
+				break;
+			default:
+				// Unexpected event type.
+				error_log( 'Received unknown event type' );
+		}
+	}
+
+	/**
 	 * Payment form.
 	 *
-	 * @param array $post The values from the previous for where member slected a signup.
+	 * @param string $description Description of what is bing paid for..
+	 * @param int    $price_id    The price ID to be charged to.
+	 * @param int    $badge       Attendee's badge number.
+	 * @param int    $attendee_id The id fo the entry in the attendees table.
+	 * @param int    $cost        The dollar cost of the signup.
 	 * @return void
 	 */
-	private function collect_money( $post, $cost ) {
-		?>
-		<div class="container">
-			<ul class="collapsible popout">
-				<li>
-					<div class="collapsible-body" id="order-body">
-						<div class="container">
-							<div class="row">
-								<div class="card-panel blue-grey">
-									<div class="card-content white-text center">
-										<span class="card-title">Total: $<?php echo esc_html( $cost ); ?></span>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</li>
-				<li class="active">
-					<div class="collapsible-header"><i class="material-icons">place</i>Address</div>
-					<div class="collapsible-body row" id="address-body">
-						<div class="row">
-							<div class="col s12">
-								<div class="card blue-grey">
-									<div class="card-content white-text">
-										<span class="card-title">Billing Address</span>
-										<p>Enter the address associated with your card.</p>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="container">
-							<form class="col s12">
-								<div class="row">
-									<div class="input-field col s6">
-										<input placeholder="first name" id="first_name" type="text" class="validate">
-										<label for="first_name">first name</label>
-									</div>
-									<div class="input-field col s6">
-										<input placeholder="last name" id="last_name" type="text" class="validate">
-										<label for="last_name">last name</label>
-									</div>
-								</div>
-								<div class="row">
-									<div class="input-field col s12">
-										<input placeholder="email" id="email" type="text" class="validate">
-										<label for="email">email</label>
-									</div>
-								</div>
-								<div class="row">
-									<div class="input-field col s6">
-										<input placeholder="street address" id="street_address" type="text" class="validate">
-										<label for="street_address">street address</label>
-									</div>
-									<div class="input-field col s6">
-										<input placeholder="suite / apt." id="suite" type="text" class="validate">
-										<label for="suite">suite / apt.</label>
-									</div>
-								</div>
-								<div class="row">
-									<div class="input-field col s4">
-										<input placeholder="city" id="city" type="text" class="validate">
-										<label for="city">city</label>
-									</div>
-									<div class="input-field col s4">
-										<input placeholder="state" id="state" type="text" class="validate">
-										<label for="state">state</label>
-									</div>
-									<div class="input-field col s4">
-										<input placeholder="zip" id="zip" type="text" class="validate">
-										<label for="zip">zip</label>
-									</div>
-								</div>
-							</form>
-						</div>
-					</div>
-					<button id="collapse-button" class="btn waves-effect waves-light" type="submit" name="action"
-						onclick="closeAddress(); openSubmit();">Next
-						<i class="material-icons right">send</i>
-					</button>
-				</div>
-				</li>
-				<li id="checkout">
-					<div class="collapsible-header"><i class="material-icons">credit_card</i>Submit</div>
-					<div class="collapsible-body" id="submit">
-						<span>
-							<div class="container">
-								<div class="row">
-									<img class="responsive-img" id="accepted-cards"
-										src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/t-1671/card-brands.png" border="0"
-										alt="Accepted Cards" />
-								</div>
-								<div class="row">
-									<div id="credit_card_iframe"></div>
-								</div>
-								<div class="row">
-									<div class="card blue-grey lighten-2">
-										<div class="card-content white-text">
-											<p>By clicking submit, you agree to bring donunts to the Woodshop next Friday.</p>
-										</div>
-									</div>
-								</div>
-								<button class="btn waves-effect waves-light" type="submit" name="action"
-									id="submit-credit-card-button">Submit
-									<i class="material-icons right">send</i>
-								</button>
-								<div id="token"></div>
-							</div>
-						</span>
-					</div>
-				</li>
-			</ul>
-		</div>
-		<?php
+	private function collect_money( $description, $price_id, $badge, $attendee_id, $cost ) {
+		\Stripe\Stripe::setApiKey( 'sk_test_51LPCe7EVPTwIS1QJQp7Vd1X9RsslNrfWNaqetmC3v6DsF3ocQrYUgAfRrhcQkYZW77szXpwZ3RoWFn5y7SWU5ZN200ZDxPlBpk' );
+		header( 'Content-Type: application/json' );
+		$signup_domain    = 'http://localhost/wp';
+		$checkout_session = \Stripe\Checkout\Session::create(
+			array(
+				'metadata' => array(
+					'attendee_id' => $attendee_id,
+					'badge'       => $badge,
+					'cost'        => $cost,
+					'price_id'    => $price_id,
+					'description' => $description,
+				),
+				'line_items'  => array(
+					array(
+						'price'       => $price_id,
+						'quantity'    => 1,
+						'description' => $description,
+					),
+				),
+				'mode'        => 'payment',
+				'success_url' => $signup_domain . '/payment-success?paymentid=' . $price_id . '&badge=' . $badge,
+				'cancel_url'  => $signup_domain . '/payment-canceled?paymentid=' . $price_id . '&badge=' . $badge,
+			)
+		);
+
+		header( 'HTTP/1.1 303 See Other' );
+		header( 'Location: ' . $checkout_session->url );
 	}
 
 	/**
@@ -188,9 +285,9 @@ class ShortCodes extends SignUpsBase {
 	 */
 	private function create_signup( $signup_id ) {
 		global $wpdb;
-		$signups   = $wpdb->get_results(
+		$signups = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT signup_id, signup_name, signup_cost, signup_rolling_template
+				'SELECT signup_id, signup_name, signup_cost, signup_rolling_template, signup_default_price_id
 				FROM %1s
 				WHERE signup_id = %s',
 				self::SIGNUPS_TABLE,
@@ -199,52 +296,12 @@ class ShortCodes extends SignUpsBase {
 			OBJECT
 		);
 
-		$rolling = $signups[0]->signup_rolling_template > 0;
-		$signup_name = $signups[0]->signup_name;
-		$signup_cost = $signups[0]->signup_cost;
-		$sessions    = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT session_id,
-				session_start_formatted,
-				session_end_formatted,
-				session_start_time,
-				session_slots
-				FROM %1s
-				WHERE session_signup_id = %s',
-				self::SESSIONS_TABLE,
-				$signup_id
-			),
-			OBJECT
-		);
-
-		foreach ( $sessions as $session ) {
-			$attendees[ $session->session_id ]   = array();
-			$instructors[ $session->session_id ] = array();
-			$session_list                        = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT *
-					FROM %1s
-					WHERE attendee_session_id = %s
-					AND attendee_email != ""',
-					self::ATTENDEES_TABLE,
-					$session->session_id
-				),
-				OBJECT
-			);
-
-			foreach ( $session_list as $attendee ) {
-				if ( 'INSTRUCTOR' === $attendee->attendee_item ) {
-					$instructors[ $session->session_id ][] = $attendee;
-				} else {
-					$attendees[ $session->session_id ][] = $attendee;
-				}
-			}
-		}
-
-		$today = new DateTime( 'now', $this->date_time_zone );
-		$today->SetTime( 8, 0 );
+		$rolling         = $signups[0]->signup_rolling_template > 0;
+		$signup_name     = $signups[0]->signup_name;
 
 		if ( $rolling ) {
+			$today = new DateTime( 'now', $this->date_time_zone );
+			$today->SetTime( 8, 0 );
 			$attendees_rolling = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT *
@@ -276,12 +333,76 @@ class ShortCodes extends SignUpsBase {
 				$template[0]
 			);
 		} else {
+			$bad_debt = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT attendee_id, 
+					attendee_payment_start
+					FROM %1s
+					WHERE 0 < attendee_balance_owed',
+					self::ATTENDEES_TABLE
+				),
+				OBJECT
+			);
+
+			$dt_now       = new DateTime( 'now', $this->date_time_zone );
+			$five_minutes = new DateInterval( 'PT5M' );
+			foreach ( $bad_debt as $bd ) {
+				$dt_start = new DateTime( $bd->attendee_payment_start, $this->date_time_zone );
+				$dt_start->add( $five_minutes );
+				if ( $dt_start->format( 'U' ) < $dt_now->format( 'U' ) ) {
+					$where = array( 'attendee_id' => $bd->attendee_id );
+					$wpdb->delete( self::ATTENDEES_TABLE, $where );
+				}
+			}
+
+			$signup_cost     = $signups[0]->signup_cost;
+			$signup_default_price_id = $signups[0]->signup_default_price_id;
+			$sessions    = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT session_id,
+					session_start_formatted,
+					session_end_formatted,
+					session_start_time,
+					session_slots,
+					session_price_id
+					FROM %1s
+					WHERE session_signup_id = %s',
+					self::SESSIONS_TABLE,
+					$signup_id
+				),
+				OBJECT
+			);
+
+			foreach ( $sessions as $session ) {
+				$attendees[ $session->session_id ]   = array();
+				$instructors[ $session->session_id ] = array();
+				$session_list                        = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT *
+						FROM %1s
+						WHERE attendee_session_id = %s
+						AND attendee_email != ""',
+						self::ATTENDEES_TABLE,
+						$session->session_id
+					),
+					OBJECT
+				);
+
+				foreach ( $session_list as $attendee ) {
+					if ( 'INSTRUCTOR' === $attendee->attendee_item ) {
+						$instructors[ $session->session_id ][] = $attendee;
+					} else {
+						$attendees[ $session->session_id ][] = $attendee;
+					}
+				}
+			}
+
 			$this->create_session_select_form(
 				$signup_name,
 				$sessions,
 				$attendees,
 				$instructors,
-				$signup_cost
+				$signup_cost,
 			);
 		}
 	}
@@ -294,18 +415,22 @@ class ShortCodes extends SignUpsBase {
 	 */
 	private function add_attendee_class( $post ) {
 		global $wpdb;
-		$slot_parts = explode( ',', $post['time_slots'][0] );
-		$slot_start = new DateTime( $slot_parts[0], $this->date_time_zone );
-		$slot_end   = new DateTime( $slot_parts[1], $this->date_time_zone );
-		$new_attendee = array();
-		$new_attendee['attendee_session_id'] = $slot_parts[3];
-		$new_attendee['attendee_email'] = $post['email'];
-		$new_attendee['attendee_phone'] = $post['phone'];
-		$new_attendee['attendee_paid_amount'] = 0;
-		$new_attendee['attendee_lastname'] = $post['lastname'];
-		$new_attendee['attendee_firstname'] = $post['firstname'];
-		$new_attendee['attendee_item'] = $post['signup_name'];
-		$new_attendee['attendee_badge'] = $post['badge_number'];
+		$now                                    = new DateTime( 'now', $this->date_time_zone );
+		$slot_parts                             = explode( ',', $post['time_slots'][0] );
+		$slot_start                             = new DateTime( $slot_parts[0], $this->date_time_zone );
+		$slot_end                               = new DateTime( $slot_parts[1], $this->date_time_zone );
+		$signup_name                            = $post['signup_name'];
+		$cost                                   = $slot_parts[4];
+		$new_attendee                           = array();
+		$new_attendee['attendee_session_id']    = $slot_parts[3];
+		$new_attendee['attendee_email']         = $post['email'];
+		$new_attendee['attendee_phone']         = $post['phone'];
+		$new_attendee['attendee_balance_owed']  = $cost;
+		$new_attendee['attendee_lastname']      = $post['lastname'];
+		$new_attendee['attendee_firstname']     = $post['firstname'];
+		$new_attendee['attendee_item']          = $post['signup_name'];
+		$new_attendee['attendee_badge']         = $post['badge_number'];
+		$new_attendee['attendee_payment_start'] = $now->format( self::DATETIME_FORMAT );
 		?>
 		<div class="container">
 			<form method="POST">
@@ -342,8 +467,9 @@ class ShortCodes extends SignUpsBase {
 						)
 					);
 
-					$signed_up_already = false;
+					$signed_up_already   = false;
 					$insert_return_value = false;
+					$last_id             = 0;
 					if ( count( $current_session_attendees ) < $available_slots[0]->session_slots ) {
 						$signed_up_already = $wpdb->get_results(
 							$wpdb->prepare(
@@ -356,9 +482,26 @@ class ShortCodes extends SignUpsBase {
 
 						if ( ! $signed_up_already ) {
 							$insert_return_value = $wpdb->insert( self::ATTENDEES_TABLE, $new_attendee );
+							$last_id             = $wpdb->insert_id;
 						}
 					}
 					$wpdb->query( 'UNLOCK TABLES' );
+
+					/**
+					 * Four checks before we collect money.
+					 * 1.) There is a balance owed which will be the full amount.
+					 * 2.) The last inserted ID is valid.
+					 * 3.) The insert didn't fail.
+					 * 4.) Exactly one row is inserted. It can be 0 but never more than 1.
+					 */
+					if (
+						0 !== $new_attendee['attendee_balance_owed'] &&
+						0 !== $last_id &&
+						$insert_return_value
+					) {
+						$description = $signup_name . ' - ' . $slot_start->format( self::DATETIME_FORMAT );
+						$this->collect_money( $description, $post['session_price_id'], $new_attendee['attendee_badge'], $last_id, $cost );
+					}
 					?>
 					<tr class="attendee-row">
 						<td><?php echo esc_html( $slot_start->format( self::DATE_FORMAT ) ); ?></td>
@@ -481,7 +624,7 @@ class ShortCodes extends SignUpsBase {
 						<button class="btn btn-primary signup-submit" type="submit" name="signup_id" value="<?php echo esc_html( $post['add_attendee_session'] ); ?>" >Return</button>
 					</td>
 					<td></td>
-					<td class="text-center"><button class="btn btn-primary signup-submit" type="submit" name="signup_id" value="-1" >SignUps</button></td>
+					<td class="text-center"><button class="btn btn-primary signup-submit" type="submit" name="signup_id" value="-1" >Cancel</button></td>
 					<td></td>
 				</tr>
 				</table>
@@ -548,6 +691,10 @@ class ShortCodes extends SignUpsBase {
 					<table id="selection-table" class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-125px" hidden>
 						<?php
 						foreach ( $sessions as $session ) {
+							$now = new DateTime( 'now', $this->date_time_zone );
+							if ( $session->session_start_time < $now->format( 'U' ) ) {
+								continue;
+							}
 							$start_date = new DateTime( $session->session_start_formatted );
 							$end_date   = new DateTime( $session->session_end_formatted );
 							?>
@@ -563,6 +710,7 @@ class ShortCodes extends SignUpsBase {
 								<?php $this->create_hidden_user(); ?>
 								<input type="hidden" name="add_attendee_class">
 								<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
+								<input type="hidden" name="session_price_id" value="<?php echo esc_html( $session->session_price_id ); ?>">
 								<input type="hidden" name="paid" value=false>
 								<?php
 								wp_nonce_field( 'signups', 'mynonce' );
@@ -572,7 +720,21 @@ class ShortCodes extends SignUpsBase {
 										<tr class="attendee-row">
 											<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
 											<td><?php echo esc_html( $attendee->attendee_item ); ?></td>
-											<td><?php echo esc_html( $attendee->attendee_email ); ?></td>
+											<?php
+											if ( 'INSTRUCTOR' === $attendee->attendee_item ) {
+												?>
+												<td><?php echo esc_html( $attendee->attendee_email ); ?></td>
+												<?php
+											} elseif ( '0' === $attendee->attendee_balance_owed ) {
+												?>
+												<td><?php echo esc_html( 'Paid' ); ?></td>
+												<?php
+											} else {
+												?>
+												<td><?php echo esc_html( 'Payment Pending' ); ?></td>
+												<?php
+											}
+											?>
 										</tr>
 										<?php
 									}
@@ -583,8 +745,8 @@ class ShortCodes extends SignUpsBase {
 									<tr class="attendee-row bg-lightgray" data-session-id="<?php echo esc_html( $session->session_id ); ?>" >
 										<td>Cost: $<?php echo esc_html( $cost ); ?></td>
 										<td><?php echo esc_html( $signup_name ); ?></td>
-										<td class="text-center">
-											<input class="form-check-input position-relative addChk" type="radio" 
+										<td>
+											<input class="form-check-input ml-auto mr-auto addChk" type="radio" 
 												name="time_slots[]" 
 												value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $end_date->format( self::DATETIME_FORMAT ) . ',' . $signup_name . ',' . $session->session_id . ',' . $cost ); ?>">
 										</td>
@@ -616,24 +778,24 @@ class ShortCodes extends SignUpsBase {
 	private function create_rolling_session_select_form( $signup_name, $attendees, $signup_id, $template ) {
 
 		$start_time_parts = explode( ':', $template->rolling_start_time );
-		$start_hour   = $start_time_parts[0];
-		$start_minute = $start_time_parts[1];
-		$start_date   = new DateTime( 'now', $this->date_time_zone );
-		$end_date     = new DateTime( 'now', $this->date_time_zone );
+		$start_hour       = $start_time_parts[0];
+		$start_minute     = $start_time_parts[1];
+		$start_date       = new DateTime( 'now', $this->date_time_zone );
+		$end_date         = new DateTime( 'now', $this->date_time_zone );
 		$end_date->add( new DateInterval( 'P' . $template->rolling_days . 'D' ) );
 		$days_sessions_raw = explode( ',', $template->rolling_days_week );
-		$days_sessions = array();
+		$days_sessions     = array();
 		foreach ( $days_sessions_raw as $dsr ) {
-			$x = explode( '-', $dsr );
+			$x                      = explode( '-', $dsr );
 			$days_sessions[ $x[0] ] = $x[1];
 		}
 
 		$duration_parts = explode( ':', $template->rolling_session_length );
-		$duration = new DateInterval( 'PT' . $duration_parts[0] . 'H' . $duration_parts[1] . 'M' );
-		$slot_titles = explode( ',', $template->rolling_slot_items );
+		$duration       = new DateInterval( 'PT' . $duration_parts[0] . 'H' . $duration_parts[1] . 'M' );
+		$slot_titles    = explode( ',', $template->rolling_slot_items );
 
 		$time_exceptions = array();
-		$today = new DateTime( 'now', $this->date_time_zone );
+		$today           = new DateTime( 'now', $this->date_time_zone );
 		for ( $j = 0; $j < 12; $j++ ) {
 			$day = new DateTime(
 				sprintf(
@@ -644,9 +806,9 @@ class ShortCodes extends SignUpsBase {
 				$this->date_time_zone
 			);
 			$day->SetTime( 12, 0 );
-			$time_exception = new timeException();
+			$time_exception        = new timeException();
 			$time_exception->begin = new DateTime( $day->format( self::DATETIME_FORMAT ), $this->date_time_zone );
-			$time_exception->end = $day;
+			$time_exception->end   = $day;
 			$time_exception->end->add( new DateInterval( 'PT4H' ) );
 
 			if ( $time_exception->begin >= $start_date &&
@@ -819,12 +981,12 @@ class ShortCodes extends SignUpsBase {
 			<tr>
 				<td>Enter Badge#</td>
 				<td><input id="badge-input" class="member-badge" type="number" name="badge_number" value="4038" required></td>
-				<td><input type="button" id="get_member_button" class="btn btn-primary" value='Lookup Member'></td>
+				<td><input type="button" id="get_member_button" class="btn btn-primary" value='Lookup'></td>
 			</tr>
 			<tr>
 				<td><input id="first-name" class=" member-first-name" type="text" name="firstname" value="First" required readonly></td>
 				<td><input id="last-name" class="member-last-name" type="text" name="lastname" value="Last" required readonly></td>
-				<td><button id="back-button" type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary"value="-1" name="signup_id">Back to SignUps</button></td>
+				<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button"value="-1" name="signup_id">Cancel</button></td>
 			</tr>
 			<tr>
 				<td><input id="phone" class="member-phone" type="tel" name="phone" placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required readonly></td>
@@ -851,7 +1013,7 @@ class ShortCodes extends SignUpsBase {
 	}
 
 	/**
-	 * Create footer for a table with a back to signups button.
+	 * Create footer for a table with a Cancel button.
 	 *
 	 * @param int $column_count The number of columns to generate in the row.
 	 * @return void
@@ -860,7 +1022,7 @@ class ShortCodes extends SignUpsBase {
 		?>
 		<form method="POST">
 			<tr class="footer-row">
-				<td><button id="back-button" type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary" value="-1" name="signup_id">SignUps</button></td>
+				<td><button type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="signup_id">Cancel</button></td>
 				<?php
 				for ( $i = 1; $i < $column_count; $i++ ) {
 					?>
@@ -874,4 +1036,3 @@ class ShortCodes extends SignUpsBase {
 		<?php
 	}
 }
-

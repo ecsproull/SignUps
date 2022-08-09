@@ -31,11 +31,20 @@ require 'includes/class-classitem.php';
 require 'includes/class-sessionitem.php';
 require 'includes/class-shortcodes.php';
 require 'includes/class-timeexception.php';
+require_once 'vendor/autoload.php';
 
 /**
  * Main signups class.
  */
-class SignupsPlugin {
+class SignupsPlugin extends SignUpsBase {
+
+	/**
+	 * Shortcode object for use in api callback.
+	 *
+	 * @var $short_codes
+	 */
+	private $short_codes;
+
 	/**
 	 * __construct
 	 *
@@ -47,7 +56,29 @@ class SignupsPlugin {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_scripts_and_css' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'add_users_scripts_and_css' ) );
 		new SignUpsRestApis();
-		add_shortcode( 'selectclass', array( new ShortCodes(), 'user_signup' ) );
+		$this->short_codes = new ShortCodes();
+		add_shortcode( 'selectclass', array( $this->short_codes, 'user_signup' ) );
+		add_action(
+			'rest_api_init',
+			array( $this, 'regester_payment_route' )
+		);
+	}
+
+	/**
+	 * Route used for Stripe.com callback.
+	 *
+	 * @return void
+	 */
+	public function regester_payment_route() {
+		register_rest_route(
+			'scwmembers/v1',
+			'/payments',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this->short_codes, 'payment_event' ),
+				'permission_callback' => array( $this->short_codes, 'permissions_check' ),
+			)
+		);
 	}
 
 	/**
@@ -71,7 +102,7 @@ class SignupsPlugin {
 		wp_enqueue_style( 'signup_bs_style' );
 		wp_register_style( 'signup_style', plugins_url( '/signups/css/style.css' ), array(), 1 );
 		wp_enqueue_style( 'signup_style' );
-		wp_enqueue_script( 'sigup_member_script', plugins_url( 'js/signups.js', __FILE__ ), array( 'jquery' ), '1.0.0.0' );
+		wp_enqueue_script( 'sigup_member_script', plugins_url( 'js/signups.js', __FILE__ ), array( 'jquery' ), '1.0.0.0', false, true );
 		wp_localize_script(
 			'sigup_member_script',
 			'wpApiSettings',
@@ -97,7 +128,7 @@ class SignupsPlugin {
 		wp_register_style( 'signup_style', plugins_url( '/signups/css/users-styles.css' ), array(), 1 );
 		wp_enqueue_style( 'signup_style' );
 		wp_enqueue_style( 'wp-jquery-ui-dialog' );
-		wp_enqueue_script( 'sigup_member_script', plugins_url( 'js/users-signup.js', __FILE__ ), array( 'jquery', 'jquery-ui-dialog' ), '1.0.0.0' );
+		wp_enqueue_script( 'sigup_member_script', plugins_url( 'js/users-signup.js', __FILE__ ), array( 'jquery', 'jquery-ui-dialog' ), '1.0.0.0', false, true );
 		wp_localize_script(
 			'sigup_member_script',
 			'wpApiSettings',
@@ -106,8 +137,6 @@ class SignupsPlugin {
 				'nonce' => wp_create_nonce( 'wp_rest' ),
 			)
 		);
-		wp_enqueue_script( 'wepay_script', plugins_url( 'js/wepay.full.js', __FILE__ ), array(), '3.0' );
-
 	}
 }
 

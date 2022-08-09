@@ -22,7 +22,7 @@ class SignUpsBase {
 	protected const ATTENDEES_TABLE = 'wp_scw_attendees';
 
 	/**
-	 * Database classes table..
+	 * Database classes table.
 	 *
 	 * @var mixed
 	 */
@@ -36,25 +36,39 @@ class SignUpsBase {
 	protected const ROSTER_TABLE = 'roster';
 
 	/**
-	 * Database sessions table..
+	 * Database sessions table.
 	 *
 	 * @var mixed
 	 */
 	protected const SESSIONS_TABLE = 'wp_scw_sessions';
 
 	/**
-	 * Database rolling attendees table..
+	 * Database rolling attendees table.
 	 *
 	 * @var mixed
 	 */
 	protected const ATTENDEES_ROLLING_TABLE = 'wp_scw_rolling_attendees';
 
 	/**
-	 * Rolling signup template.
+	 * Rolling signup table.
 	 *
 	 * @var mixed
 	 */
 	protected const ROLLING_TABLE = 'wp_scw_rolling';
+
+	/**
+	 * Rolling signup template.
+	 *
+	 * @var mixed
+	 */
+	protected const PAYMENTS_TABLE = 'wp_scw_payments';
+
+	/**
+	 * Rolling signup template.
+	 *
+	 * @var mixed
+	 */
+	protected const STRIPE_TABLE = 'wp_scw_stripe';
 
 	/**
 	 * Format DateTime as 2020-08-13 6:00 am.
@@ -136,4 +150,27 @@ class SignUpsBase {
 		return $dt->format( 'Y-m-d' );
 	}
 
+	/**
+	 * Helper function for registering routes.
+	 *
+	 * @param  string $namespace The namespace.
+	 * @param  string $route End of the route.
+	 * @param  object $func The endpoint function.
+	 * @param  string $class_inst Instance of the class containing the function.
+	 * @param  array  $args Arguments to the api call.
+	 * @param  string $method POST, GET....etc.
+	 * @return void
+	 */
+	protected function register_route( $namespace, $route, $func, $class_inst, $args, $method ) {
+		register_rest_route(
+			$namespace,
+			$route,
+			array(
+				'methods'             => $method,
+				'callback'            => array( $class_inst, $func ),
+				'permission_callback' => array( $class_inst, 'permissions_check' ),
+				'args'                => $args,
+			)
+		);
+	}
 }
