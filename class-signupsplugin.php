@@ -31,6 +31,7 @@ require 'includes/class-classitem.php';
 require 'includes/class-sessionitem.php';
 require 'includes/class-shortcodes.php';
 require 'includes/class-timeexception.php';
+require 'includes/html/lathe-2-basic-bowl.php';
 require_once 'vendor/autoload.php';
 
 /**
@@ -57,7 +58,9 @@ class SignupsPlugin extends SignUpsBase {
 		add_action( 'wp_enqueue_scripts', array( $this, 'add_users_scripts_and_css' ) );
 		new SignUpsRestApis();
 		$this->short_codes = new ShortCodes();
-		add_shortcode( 'selectclass', array( $this->short_codes, 'user_signup' ) );
+		add_shortcode( 'scw_selectclass', array( $this->short_codes, 'user_signup' ) );
+		add_shortcode( 'scw_payment_success', array( $this->short_codes, 'payment_success' ) );
+		add_shortcode( 'scw_payment_failure', array( $this->short_codes, 'payment_failure' ) );
 		add_action(
 			'rest_api_init',
 			array( $this, 'regester_payment_route' )
