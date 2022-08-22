@@ -104,21 +104,6 @@ jQuery( document ).ready( function($){
 		})
 	});
 
-	var appId = "821976"	
-/*
-	document.addEventListener('DOMContentLoaded', function () {
-		// initialize materialize collapsible
-		var collapsibleElement = document.querySelector('.collapsible');
-		var collapsibleInstance = M.Collapsible.init(collapsibleElement);
-
-		// initialize materialize material box
-		var materialBox = document.querySelectorAll('.materialboxed');
-		var instances = M.Materialbox.init(materialBox);
-
-		// load with address open
-		collapsibleInstance.open(1);
-	});
-	*/
 	// show shipping address if different
 	function showMe() {
 		var box = document.getElementById('same');
@@ -196,4 +181,11 @@ jQuery( document ).ready( function($){
 		show_error_messages: true,
 		show_error_messages_when_unfocused: true
 	};
+
+	if($('#accept_conditions').length){
+		$('#accept_conditions').click(function() {
+			$("#signup-description").prop("hidden", true);
+			$("#lookup-member").prop("hidden", false);
+		});
+	}
 });

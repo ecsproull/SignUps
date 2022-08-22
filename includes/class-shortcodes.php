@@ -98,9 +98,6 @@ class ShortCodes extends SignUpsBase {
 
 		http_response_code( 200 );
 		switch ( $event->type ) {
-			case 'charge.succeeded':
-				$payment_intent = $event->data->object;
-				break;
 			case 'checkout.session.completed':
 				$payment_intent = $event->data->object;
 				$wpdb->query(
@@ -248,8 +245,8 @@ class ShortCodes extends SignUpsBase {
 					),
 				),
 				'mode'        => 'payment',
-				'success_url' => $signup_domain . '/payment-success?paymentid=' . $price_id . '&badge=' . $badge,
-				'cancel_url'  => $signup_domain . '/payment-canceled?paymentid=' . $price_id . '&badge=' . $badge,
+				'success_url' => $signup_domain . '/payment-success?attendee_id=' . $attendee_id . '&badge=' . $badge,
+				'cancel_url'  => $signup_domain . '/payment-canceled?attendee_id=' . $attendee_id . '&badge=' . $badge,
 			)
 		);
 
@@ -287,7 +284,7 @@ class ShortCodes extends SignUpsBase {
 		global $wpdb;
 		$signups = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT signup_id, signup_name, signup_cost, signup_rolling_template, signup_default_price_id
+				'SELECT signup_id, signup_name, signup_cost, signup_rolling_template, signup_default_price_id, signup_description_url
 				FROM %1s
 				WHERE signup_id = %s',
 				self::SIGNUPS_TABLE,
@@ -355,9 +352,10 @@ class ShortCodes extends SignUpsBase {
 				}
 			}
 
-			$signup_cost     = $signups[0]->signup_cost;
+			$signup_descrition       = $signups[0]->signup_description_url;
+			$signup_cost             = $signups[0]->signup_cost;
 			$signup_default_price_id = $signups[0]->signup_default_price_id;
-			$sessions    = $wpdb->get_results(
+			$sessions                = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT session_id,
 					session_start_formatted,
@@ -403,6 +401,7 @@ class ShortCodes extends SignUpsBase {
 				$attendees,
 				$instructors,
 				$signup_cost,
+				$signup_descrition
 			);
 		}
 	}
@@ -681,13 +680,20 @@ class ShortCodes extends SignUpsBase {
 	 * @param  int    $cost The cost of the signup in dollars.
 	 * @return void
 	 */
-	private function create_session_select_form( $signup_name, $sessions, $attendees, $instructors, $cost ) {
+	private function create_session_select_form( $signup_name, $sessions, $attendees, $instructors, $cost, $signup_description ) {
 		?>
 		<div id="session_select" class="text-center mw-800px">
-			<h1 class="mb-2 entry-title"><?php echo esc_html( $signup_name ); ?></h1>
+			<h2 class="mb-2"><?php echo esc_html( $signup_name ); ?></h2>
 			<div>
 				<div id="usercontent" class="container">
-					<?php $this->create_user_table(); ?>
+					<?php
+					if ( $signup_description ) {
+						$this->create_user_table( 'hidden' );
+						$this->create_description_block( $signup_description );
+					} else {
+						$this->create_user_table();
+					}
+					?>
 					<table id="selection-table" class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-125px" hidden>
 						<?php
 						foreach ( $sessions as $session ) {
@@ -973,11 +979,12 @@ class ShortCodes extends SignUpsBase {
 	/**
 	 * Creates a section of HTM for the user to identify themselves.
 	 *
+	 * @param string $hidden To hide this initially pass the string 'hidden'.
 	 * @return void
 	 */
-	private function create_user_table() {
+	private function create_user_table( $hidden = '' ) {
 		?>
-		<table id="lookup-member" class="mb-100px table table-bordered mr-auto ml-auto">
+		<table id="lookup-member" class="mb-100px table table-bordered mr-auto ml-auto" <?php echo esc_html( $hidden ); ?> >
 			<tr>
 				<td>Enter Badge#</td>
 				<td><input id="badge-input" class="member-badge" type="number" name="badge_number" value="4038" required></td>
@@ -994,6 +1001,29 @@ class ShortCodes extends SignUpsBase {
 				<td></td>
 			</tr>
 		</table>
+		<?php
+	}
+
+		
+	/**
+	 * Creates a signup description block
+	 *
+	 * @param  mixed $signup_description
+	 * @return void
+	 */
+	private function create_description_block( $signup_description ) {
+		?>
+		<div id='signup-description'>
+			<?php
+			call_user_func( $signup_description );
+			?>
+			<div class="row">
+				<form class="ml-auto mr-auto" method="POST">
+					<button type="submit" class="btn bth-md bg-primary mr-2"value="-1" name="signup_id">Hell N0!</button>
+					<input id='accept_conditions' class="btn btn-primary" type='button' value="Continue">
+				</form>
+			</div>
+		</div>
 		<?php
 	}
 
@@ -1033,6 +1063,44 @@ class ShortCodes extends SignUpsBase {
 			</tr>
 			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 		</form>
+		<?php
+	}
+
+	/**
+	 * Shortcode for the Payment Success page
+	 *
+	 * @return void
+	 */
+	public function payment_success() {
+		global $wpdb;
+		$attendee_id   = sanitize_text_field( get_query_var( 'attendee_id' ) );
+		$badge_number = sanitize_text_field( get_query_var( 'badge' ) );
+		$payment_row = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT payments_signup_description
+				FROM %1s
+				WHERE payments_attendee_id = %s',
+				self::PAYMENTS_TABLE,
+				$attendee_id
+			),
+			OBJECT
+		)
+		?>
+		<P>Payment succeeded for badge: <?php echo esc_html( $badge_number ); ?></p>
+		<p> SignUp: <?php echo esc_html( $payment_row->payments_signup_description ); ?></P>
+		<?php
+	}
+
+	/**
+	 * Shortcode for the Payment failure page
+	 *
+	 * @return void
+	 */
+	public function payment_failure() {
+		$payment_id   = sanitize_text_field( get_query_var( 'paymentid' ) );
+		$badge_number = sanitize_text_field( get_query_var( 'badge' ) );
+		?>
+		<P>Payment Failed</P>
 		<?php
 	}
 }
