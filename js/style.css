@@ -1,0 +1,16 @@
+/*
+Theme Name: Twenty Twenty One Child 
+Theme URL:
+Description: Twenty Twenty ChildTheme
+Author: Ed Sproull
+Author URL:
+Template: twentytwentyone
+Version: 1.0.0
+Text Domain: twentytwenty-child
+*/
+
+.center_table {
+    margin-left: auto; 
+    margin-right: auto;
+    display: table;
+}

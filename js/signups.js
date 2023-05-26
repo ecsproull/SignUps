@@ -1,6 +1,6 @@
 jQuery( document ).ready( function($){
 	$( "#get_member_button" ).click( function(){
-		var req = $.ajax( {
+		let req = $.ajax( {
 			url: wpApiSettings.root + 'scwmembers/v1/members',
 			method: 'GET',
 			beforeSend: function ( xhr ) {
@@ -38,7 +38,7 @@ jQuery( document ).ready( function($){
 			closePopup();
 			return;
 		}
-		var id = $( this ).data("textid");
+		let id = $( this ).data("textid");
 		openPopup = document.getElementById( id );
 		openPopup.classList.toggle( "show" );
 		e.stopPropagation();
@@ -70,11 +70,11 @@ jQuery( document ).ready( function($){
 	}
 
 	$( '.addChk,.selChk' ).change( function( e ) {
-		var to_slot = null;
-		var from_slot = null;
+		let to_slot = null;
+		let from_slot = null;
 		$( '.addChk,.selChk' ).each( function( index, element ) {
 			if ( element.checked ) {
-				var arr = element.value.split(',');
+				let arr = element.value.split(',');
 				if (arr[0] == '-1') {
 					if (to_slot || arr[1] == from_slot) {
 						to_slot = null;
@@ -99,15 +99,15 @@ jQuery( document ).ready( function($){
 		if ( !to_slot || !from_slot ) {
 			disableMoveButton();
 		} else {
-			var selector = "#move" + from_slot;
-			var move_butt = $( selector );
+			let selector = "#move" + from_slot;
+			let move_butt = $( selector );
 			if (!move_butt.length) {
 				move_butt = $( '#move' );
 			}
 			move_butt.prop('disabled', false);
 
-			var selector2 = "#move_to" + from_slot;
-			var move_to = $( selector2 );
+			let selector2 = "#move_to" + from_slot;
+			let move_to = $( selector2 );
 			if ( !move_to.length ) {
 				move_to = $( '#move_to' );
 			}
@@ -123,7 +123,7 @@ jQuery( document ).ready( function($){
 
 	var lastDragSessionId = -1;
 	$( ".drag-row").on( 'dragstart', function(evt) {
-		var arr =  evt.target.dataset['dragable'].split(',');
+		let arr =  evt.target.dataset['dragable'].split(',');
 		evt.originalEvent.dataTransfer.setData( "attendee_id", arr[0] );
 		evt.originalEvent.dataTransfer.setData( "session_id", arr[1] );
 		evt.originalEvent.dataTransfer.setData( "check_box_value",  evt.target.dataset['dragable'] );
@@ -140,21 +140,21 @@ jQuery( document ).ready( function($){
 		if (confirm( "Confirm Attendee Move") ) {
 			$(":checkbox").prop( "checked", false );
 			evt.currentTarget.querySelector("input").checked = true;
-			var selector = "input[value='" + evt.originalEvent.dataTransfer.getData( "check_box_value" ) + "']";
-			var origin_checkbox = $( selector );
+			let selector = "input[value='" + evt.originalEvent.dataTransfer.getData( "check_box_value" ) + "']";
+			let origin_checkbox = $( selector );
 			origin_checkbox.prop("checked", true);
 
-			var from_slot = evt.originalEvent.dataTransfer.getData( "session_id" );
-			var to_slot = evt.currentTarget.dataset['sessionId'];
-			var selector2 = "#move_to" + from_slot;
-			var move_to = $( selector2 );
+			let from_slot = evt.originalEvent.dataTransfer.getData( "session_id" );
+			let to_slot = evt.currentTarget.dataset['sessionId'];
+			let selector2 = "#move_to" + from_slot;
+			let move_to = $( selector2 );
 			if ( !move_to.length ) {
 				move_to = $( '#move_to' );
 			}
 			move_to.val( to_slot );
 
-			var selector = "#move" + from_slot;
-			var move_butt = $( selector );
+			selector = "#move" + from_slot;
+			let move_butt = $( selector );
 			if (!move_butt.length) {
 				move_butt = $( '#move' );
 			}
@@ -168,4 +168,37 @@ jQuery( document ).ready( function($){
 	$( "#rolling-signup" ).change( function( e ) {
 		alert(e.currentTarget.value);
 	});
+
+	$( "button#add-time-slot" ).click( function( event ) {
+		let val_str = $( "button#add-time-slot" ).val();
+		$('#session-table').append(
+			'<tr>' +
+				'<td class="text-right mr-2"><label>Start Time:</label></td>' +
+					'<td><input id="start-time' + val_str + '" class="w-250px start-time" type="datetime-local" name="session_start_formatted[]" value="<?php echo esc_html( $start ); ?>" /> </td>' +
+				'</tr>' +
+				'<tr>' +
+					'<td class="text-right mr-2"><label>End Time:</label></td>' +
+					'<td><input id="end-time' + val_str + '" class="w-250px" type="datetime-local" name="session_end_formatted[]" value="<?php echo esc_html( $end ); ?>" /> </td>' +
+			'</tr>'
+		);
+
+		let val_int = parseInt(val_str);
+		$( "button#add-time-slot" ).val(++val_int);
+	});
+
+	$('#session-table').on("change", ".start-time", function( event ) {
+		let minutes = $("#default-minutes").val();
+		let start_id = event.target.id;
+		let end_id = '#' + start_id.replace(/start/g, "end")
+		start_id = '#' + start_id;
+
+		let date = new Date($(start_id).val());
+		date.setTime(date.getTime() + parseInt(minutes) * 60 * 1000);
+		date.setTime(date.getTime() + -7 * 60 * 60 * 1000);
+		let end_date = date.toISOString();
+		let pos1 = end_date.indexOf(":");
+		let pos2 = end_date.indexOf(":", pos1 + 1);
+		end_date = end_date.substring(0, pos2);
+		$(end_id).val(end_date);
+	})
 });

@@ -64,14 +64,19 @@ class SignupSettings extends SignUpsBase {
 	 */
 	private function submit_class( $post ) {
 		global $wpdb;
-		$where             = array();
-		$where['signup_id'] = $post['id'];
+		$where              = array();
+		$where['signup_id'] = (int) $post['id'];
 		unset( $post['submit_class'] );
 		unset( $post['id'] );
+
+		$post['signup_cost']             = (int) $post['signup_cost'];
+		$post['signup_default_slots']    = (int) $post['signup_default_slots'];
+		$post['signup_rolling_template'] = (int) $post['signup_rolling_template'];
+
 		$affected_row_count = 0;
 		if ( $where['signup_id'] ) {
 			$affected_row_count = $wpdb->update(
-				'wp_scw_classes',
+				'wp_scw_signups',
 				$post,
 				$where
 			);
@@ -98,16 +103,51 @@ class SignupSettings extends SignUpsBase {
 	 */
 	private function submit_session( $post ) {
 		global $wpdb;
-		$where = array( 'session_id' => $post['id'] );
-		unset( $post['id'] );
-		unset( $post['submit_session'] );
-		$rows_updated = 0;
-		if ( $where['session_id'] ) {
-			$rows_updated = $wpdb->update( 'wp_scw_sessions', $post, $where );
-		} else {
-			$rows_updated = $wpdb->insert( 'wp_scw_sessions', $post );
-		}
-		$this->update_message( $rows_updated );
+		$signup = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT signup_default_price_id
+				FROM %1s
+				WHERE signup_id = %s',
+				self::SIGNUPS_TABLE,
+				$post['session_signup_id']
+			),
+			OBJECT
+		);
+
+		array_map(
+			function( $start, $end ) use ( $post, $signup ) {
+				global $wpdb;
+				if ( $start && $end ) {
+					$session = $post;
+					$where   = array( 'session_id' => $session['id'] );
+					unset( $session['id'] );
+					unset( $session['submit_session'] );
+					$rows_updated                       = 0;
+					$start_date                         = new DateTime( $start, $this->date_time_zone );
+					$end_date                           = new DateTime( $end, $this->date_time_zone );
+					$session['session_start_time']      = $start_date->format( 'U' );
+					$session['session_end_time']        = $end_date->format( 'U' );
+					$session['session_start_formatted'] = $start_date->format( self::DATETIME_FORMAT );
+					$session['session_end_formatted']   = $end_date->format( self::DATETIME_FORMAT );
+
+					if ( $signup[0]->signup_default_price_id ) {
+						$session['session_price_id'] = $signup[0]->signup_default_price_id;
+					} else {
+						unset( $session['session_price_id'] );
+					}
+
+					if ( $where['session_id'] ) {
+						$rows_updated = $wpdb->update( 'wp_scw_sessions', $session, $where );
+					} else {
+						$rows_updated = $wpdb->insert( 'wp_scw_sessions', $session );
+					}
+
+					$this->update_message( $rows_updated );
+				}
+			},
+			$post['session_start_formatted'],
+			$post['session_end_formatted']
+		);
 	}
 
 	/**
@@ -168,9 +208,9 @@ class SignupSettings extends SignUpsBase {
 	 */
 	private function delete_session( $post ) {
 		global $wpdb;
-		$where_session = array( 'session_id' => $post['session_id'] );
-		$rows_updated = $wpdb->delete( self::SESSIONS_TABLE, $where_session );
-		$where_attendees = array ( 'attendee_session_id' => $post['session_id'] );
+		$where_session   = array( 'session_id' => $post['session_id'] );
+		$rows_updated    = $wpdb->delete( self::SESSIONS_TABLE, $where_session );
+		$where_attendees = array( 'attendee_session_id' => $post['session_id'] );
 		$wpdb->delete( self::ATTENDEES_TABLE, $where_attendees );
 		$this->update_message( $rows_updated );
 	}
@@ -186,7 +226,7 @@ class SignupSettings extends SignUpsBase {
 		if ( isset( $post['session_id'] ) ) {
 			$query = 'SELECT * FROM ' . self::SESSIONS_TABLE . ' WHERE session_id = ' . $post['session_id'];
 		} else {
-			foreach ( $post['addedAttendee'] as $attendee_session) {
+			foreach ( $post['addedAttendee'] as $attendee_session ) {
 				$parts = explode( ',', $attendee_session );
 				if ( $query == '' ) {
 					$query = 'SELECT * FROM ' . self::SESSIONS_TABLE . ' WHERE session_id = ' . $parts[1];
@@ -197,7 +237,7 @@ class SignupSettings extends SignUpsBase {
 		}
 
 		$sessions = null;
-		if ( $query != '') {
+		if ( $query != '' ) {
 			$sessions = $wpdb->get_results( $query, OBJECT );
 		}
 
@@ -213,9 +253,9 @@ class SignupSettings extends SignUpsBase {
 		global $wpdb;
 		$sessions = unserialize( $post['sessions'] );
 		foreach ( $sessions as $session ) {
-			
+
 			$new_attendee = array(
-				'attendee_session_id'  => (int)$session->session_id,
+				'attendee_session_id'  => (int) $session->session_id,
 				'attendee_email'       => $post['email'],
 				'attendee_firstname'   => $post['firstname'],
 				'attendee_lastname'    => $post['lastname'],
@@ -230,9 +270,9 @@ class SignupSettings extends SignUpsBase {
 
 		$repost = array(
 			'edit_sessions_signup_id' => $post['signup_id'],
-			$post['signup_id'] => $post['signup_name']
+			$post['signup_id']        => $post['signup_name'],
 		);
-		$this->load_session_selection($repost);
+		$this->load_session_selection( $repost );
 	}
 
 	/**
@@ -243,15 +283,15 @@ class SignupSettings extends SignUpsBase {
 	private function delete_session_attendees( $post ) {
 		global $wpdb;
 		foreach ( $post['selectedAttendee'] as $attendee ) {
-			$attendee_id = explode( ',', $attendee)[0];
+			$attendee_id = explode( ',', $attendee )[0];
 			$wpdb->delete( self::ATTENDEES_TABLE, array( 'attendee_id' => $attendee_id ) );
 		}
 
 		$repost = array(
 			'edit_sessions_signup_id' => $post['signup_id'],
-			$post['signup_id'] => $post['signup_name']
+			$post['signup_id']        => $post['signup_name'],
 		);
-		$this->load_session_selection($repost);
+		$this->load_session_selection( $repost );
 	}
 
 	/**
@@ -268,14 +308,14 @@ class SignupSettings extends SignUpsBase {
 
 		$repost = array(
 			'edit_sessions_signup_id' => $post['signup_id'],
-			$post['signup_id'] => $post['signup_name']
+			$post['signup_id']        => $post['signup_name'],
 		);
-		$this->load_session_selection($repost);
+		$this->load_session_selection( $repost );
 	}
 
 	/**
 	 * Load the class selection.
-	*/
+	 */
 	private function load_signup_selection() {
 		global $wpdb;
 		$results = $wpdb->get_results(
@@ -301,7 +341,7 @@ class SignupSettings extends SignUpsBase {
 		global $wpdb;
 		$instructors = array();
 		$attendees   = array();
-		$class   = $wpdb->get_results(
+		$class       = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT signup_rolling_template
 				FROM %1s
@@ -312,9 +352,9 @@ class SignupSettings extends SignUpsBase {
 			OBJECT
 		);
 
-		$rolling =  $class[0]->signup_rolling_template > 0;
+		$rolling = $class[0]->signup_rolling_template > 0;
 
-		$sessions    = $wpdb->get_results(
+		$sessions = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT session_id,
 				session_start_formatted,
@@ -353,14 +393,14 @@ class SignupSettings extends SignUpsBase {
 		}
 
 		if ( $rolling ) {
-			$this->create_rolling_session_select_form( 
+			$this->create_rolling_session_select_form(
 				$signup_name,
 				$sessions,
 				$attendees,
 				$post['edit_sessions_signup_id']
 			);
 		} else {
-			$this->create_session_select_form( 
+			$this->create_session_select_form(
 				$signup_name,
 				$sessions,
 				$attendees,
@@ -373,9 +413,9 @@ class SignupSettings extends SignUpsBase {
 	/**
 	 * create_attendee_select_form
 	 *
-	 * @param mixed $signup_name The name of the signup.
+	 * @param mixed  $signup_name The name of the signup.
 	 * @param number $signup_id Signup Id
-	 * @param array $sessions An array fo sessions.
+	 * @param array  $sessions An array fo sessions.
 	 * @return void
 	 */
 	private function create_attendee_select_form( $signup_name, $signup_id, $sessions ) {
@@ -387,7 +427,7 @@ class SignupSettings extends SignUpsBase {
 				<div id="content" class="container">
 					<table class="mb-100px table table-striped mr-auto ml-auto">
 						<?php
-						foreach ( $sessions as $session) {
+						foreach ( $sessions as $session ) {
 							?>
 							<tr>
 								<td class="w-25"><?php echo $session->session_item; ?></td>
@@ -419,7 +459,7 @@ class SignupSettings extends SignUpsBase {
 						<td></td>
 						<td></td>
 					</table>
-					<input type='hidden' name='sessions' value="<?php echo htmlentities(serialize($sessions)); ?>" />
+					<input type='hidden' name='sessions' value="<?php echo htmlentities( serialize( $sessions ) ); ?>" />
 					<input type='hidden' name='signup_id' value="<?php echo $signup_id; ?>" />
 					<input type='hidden' name='signup_name' value="<?php echo $signup_name; ?>" />
 					<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
@@ -505,7 +545,7 @@ class SignupSettings extends SignUpsBase {
 	 * @param  int    $signup_id The ID of the class.
 	 * @return void
 	 */
-	private function create_session_select_form( $signup_name, $sessions, $attendees, $instructors, $signup_id) {
+	private function create_session_select_form( $signup_name, $sessions, $attendees, $instructors, $signup_id ) {
 		?>
 		<div id="session_select" class="text-center mt-5">
 			<h1><?php echo esc_html( $signup_name ); ?></h1>
@@ -558,7 +598,7 @@ class SignupSettings extends SignUpsBase {
 											}
 											?>
 											<input  id=<?php echo esc_html( 'move' . $session->session_id ); ?>
-											    class="btn btn-primary w-90 mb-1 mt-2"
+												class="btn btn-primary w-90 mb-1 mt-2"
 												type="submit"
 												name="move_attendees"
 												value="Move Selected"
@@ -575,7 +615,7 @@ class SignupSettings extends SignUpsBase {
 							<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
 							<input type="hidden" name="signup_id" value="<?php echo esc_html( $signup_id ); ?>">
 							<input type="hidden" name="session_id" value="<?php echo esc_html( $session->session_id ); ?>">
-							<input  id=<?php echo esc_html( 'move_to' . $session->session_id); ?> type="hidden" name="move_to" value="0">
+							<input  id=<?php echo esc_html( 'move_to' . $session->session_id ); ?> type="hidden" name="move_to" value="0">
 							<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 							<?php
 							foreach ( $instructors[ $session->session_id ] as $instructor ) {
@@ -615,8 +655,8 @@ class SignupSettings extends SignUpsBase {
 							?>
 						</form>
 							<?php
-					}
-					?>
+						}
+						?>
 				</table>
 			</div>
 		</div>
@@ -634,7 +674,7 @@ class SignupSettings extends SignUpsBase {
 	 * @param  int    $signup_id The ID of the class.
 	 * @return void
 	 */
-	private function create_rolling_session_select_form( $signup_name, $sessions, $attendees, $signup_id  ) {
+	private function create_rolling_session_select_form( $signup_name, $sessions, $attendees, $signup_id ) {
 		?>
 		<div id="session_select" class="text-center mt-5">
 			<h1><?php echo esc_html( $signup_name ); ?></h1>
@@ -763,12 +803,16 @@ class SignupSettings extends SignUpsBase {
 	 * @return void
 	 */
 	private function create_session_form( $data, $signup_name, $add_new ) {
+		$dt_start = new DateTime( $data->session_start_formatted );
+		$start    = $dt_start->format( 'Y-m-d\TH:i' );
+		$dt_end   = new DateTime( $data->session_end_formatted );
+		$end      = $dt_end->format( 'Y-m-d\TH:i' );
 		?>
 		<div class="text-center mb-4 mr-100px">
 			<h1><?php echo esc_html( $signup_name ); ?></h1>
 		</div>
 		<form method="POST">
-			<table class="table table-striped mr-auto ml-auto">
+			<table id="session-table" class="table table-striped mr-auto ml-auto">
 				<tr>
 					<td class="text-right mr-2"><label>Contact Name:</label></td>
 					<td><input class="w-250px" type="text" name="session_contact_name" value="<?php echo esc_html( $data->session_contact_name ); ?>" /> </td>
@@ -790,14 +834,23 @@ class SignupSettings extends SignUpsBase {
 					<td><input class="w-250px" type="number" name="session_slots" value="<?php echo esc_html( $data->session_slots ); ?>" /> </td>
 				</tr>
 				<tr>
+					<td class="text-right mr-2"><label>Default Minutes: </label></td>
+					<td><input id="default-minutes" class="w-250px" type="number" name="session_slots" value="180" /> </td>
+				</tr>
+				<tr>
 					<td class="text-right mr-2"><label>Start Time:</label></td>
-					<td><input class="w-250px" type="datetime-local" name="session_start_formatted" value="<?php echo esc_html( $data->session_start_formatted ); ?>" /> </td>
+					<td><input id="start-time" class="w-250px start-time" type="datetime-local" name="session_start_formatted[]" value="<?php echo esc_html( $start ); ?>" /> </td>
 				</tr>
 				<tr>
 					<td class="text-right mr-2"><label>End Time:</label></td>
-					<td><input class="w-250px" type="datetime-local" name="session_end_formatted" value="<?php echo esc_html( $data->session_end_formatted ); ?>" /> </td>
+					<td><input id="end-time" class="w-250px" type="datetime-local" name="session_end_formatted[]" value="<?php echo esc_html( $end ); ?>" /> </td>
 				</tr>
-
+			</table>
+			<table class="table table-striped mr-auto ml-auto">
+				<tr>
+					<td></td>
+					<td><button id="add-time-slot" type="button" value="1"><b><i>Add Time Slot</i></b></button></td>
+				</tr>
 				<tr>
 					<td class="text-right mr-2"><input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back"></td>
 					<td><input class="btn bt-md btn-primary mr-auto ml-auto mt-2" type="submit" value="Submit Session" name="submit_session"></td>
@@ -811,6 +864,7 @@ class SignupSettings extends SignUpsBase {
 			}
 			?>
 			<input type="hidden" name="id" value="<?php echo esc_html( $data->session_id ); ?>">
+			<input type="hidden" name="" value="<?php echo esc_html( $data->session_id ); ?>">
 			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 		</form>
 		<?php

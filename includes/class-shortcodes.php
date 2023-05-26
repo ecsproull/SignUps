@@ -65,7 +65,7 @@ class ShortCodes extends SignUpsBase {
 		$endpoint_secret = $stripe_row[0]->stripe_api_secret;
 
 		$payload = @file_get_contents( 'php://input' );
-		$event = null;
+		$event   = null;
 
 		try {
 			$event = \Stripe\Event::constructFrom(
@@ -130,7 +130,7 @@ class ShortCodes extends SignUpsBase {
 				);
 
 				if ( ! $payment_row ) {
-					$new_payment['payments_intent_id'] = $payment_intent->payment_intent;
+					$new_payment['payments_intent_id']  = $payment_intent->payment_intent;
 					$new_payment['payments_start_time'] = $dt_now->format( 'Y-m-d H:i:s.u' );
 					$wpdb->insert( self::PAYMENTS_TABLE, $new_payment );
 				} else {
@@ -168,10 +168,10 @@ class ShortCodes extends SignUpsBase {
 					OBJECT
 				);
 
-				$dt_now         = new DateTime( 'now', $this->date_time_zone );
+				$dt_now = new DateTime( 'now', $this->date_time_zone );
 				$update = array(
-					'payments_customer_id' => $payment_intent->customer,
-					'payments_status'      => $payment_intent->status,
+					'payments_customer_id'        => $payment_intent->customer,
+					'payments_status'             => $payment_intent->status,
 					'payments_last_access_time'   => $dt_now->format( 'Y-m-d H:i:s.u' ),
 					'payments_intent_status_time' => $dt_now->format( 'Y-m-d H:i:s.u' ),
 				);
@@ -195,7 +195,7 @@ class ShortCodes extends SignUpsBase {
 						$wpdb->update( self::ATTENDEES_TABLE, $update, $where );
 					}
 				} else {
-					$update['payments_intent_id'] = $payment_intent->id;
+					$update['payments_intent_id']  = $payment_intent->id;
 					$update['payments_start_time'] = $dt_now->format( 'Y-m-d H:i:s.u' );
 					$wpdb->insert( self::PAYMENTS_TABLE, $update );
 				}
@@ -230,7 +230,7 @@ class ShortCodes extends SignUpsBase {
 		$signup_domain    = 'http://localhost/wp';
 		$checkout_session = \Stripe\Checkout\Session::create(
 			array(
-				'metadata' => array(
+				'metadata'    => array(
 					'attendee_id' => $attendee_id,
 					'badge'       => $badge,
 					'cost'        => $cost,
@@ -293,8 +293,8 @@ class ShortCodes extends SignUpsBase {
 			OBJECT
 		);
 
-		$rolling         = $signups[0]->signup_rolling_template > 0;
-		$signup_name     = $signups[0]->signup_name;
+		$rolling     = $signups[0]->signup_rolling_template > 0;
+		$signup_name = $signups[0]->signup_name;
 
 		if ( $rolling ) {
 			$today = new DateTime( 'now', $this->date_time_zone );
@@ -364,7 +364,8 @@ class ShortCodes extends SignUpsBase {
 					session_slots,
 					session_price_id
 					FROM %1s
-					WHERE session_signup_id = %s',
+					WHERE session_signup_id = %s
+					ORDER BY session_start_time',
 					self::SESSIONS_TABLE,
 					$signup_id
 				),
@@ -541,7 +542,7 @@ class ShortCodes extends SignUpsBase {
 		$new_attendee['attendee_lastname']  = $post['lastname'];
 		$new_attendee['attendee_firstname'] = $post['firstname'];
 		$new_attendee['attendee_badge']     = $post['badge_number'];
-		$insert_return_value = false;
+		$insert_return_value                = false;
 
 		?>
 		<div class="container">
@@ -557,16 +558,16 @@ class ShortCodes extends SignUpsBase {
 				<?php
 
 				foreach ( $post['time_slots'] as $slot ) {
-					$slot_parts = explode( ',', $slot );
-					$slot_start = new DateTime( $slot_parts[0], $this->date_time_zone );
+					$slot_parts                               = explode( ',', $slot );
+					$slot_start                               = new DateTime( $slot_parts[0], $this->date_time_zone );
 					$new_attendee['attendee_start_time']      = $slot_start->format( 'U' );
 					$new_attendee['attendee_start_formatted'] = $slot_start->format( self::DATETIME_FORMAT );
-					$slot_end = new DateTime( $slot_parts[1], $this->date_time_zone );
+					$slot_end                                 = new DateTime( $slot_parts[1], $this->date_time_zone );
 					$new_attendee['attendee_end_time']        = $slot_end->format( 'U' );
 					$new_attendee['attendee_end_formatted']   = $slot_end->format( self::DATETIME_FORMAT );
 					$new_attendee['attendee_item']            = trim( $slot_parts[2] );
 
-					$comment_name = 'comment-' . $slot_parts[3];
+					$comment_name                     = 'comment-' . $slot_parts[3];
 					$new_attendee['attendee_comment'] = $post[ $comment_name ];
 
 					$wpdb->query(
@@ -678,6 +679,7 @@ class ShortCodes extends SignUpsBase {
 	 * @param  array  $attendees The list of attendees for the class.
 	 * @param  array  $instructors The list of instructors for the class.
 	 * @param  int    $cost The cost of the signup in dollars.
+	 * @param  string $signup_description The description of the signup.
 	 * @return void
 	 */
 	private function create_session_select_form( $signup_name, $sessions, $attendees, $instructors, $cost, $signup_description ) {
@@ -1004,11 +1006,10 @@ class ShortCodes extends SignUpsBase {
 		<?php
 	}
 
-		
 	/**
 	 * Creates a signup description block
 	 *
-	 * @param  mixed $signup_description
+	 * @param  mixed $signup_description Description of the signup.
 	 * @return void
 	 */
 	private function create_description_block( $signup_description ) {
@@ -1073,9 +1074,9 @@ class ShortCodes extends SignUpsBase {
 	 */
 	public function payment_success() {
 		global $wpdb;
-		$attendee_id   = sanitize_text_field( get_query_var( 'attendee_id' ) );
+		$attendee_id  = sanitize_text_field( get_query_var( 'attendee_id' ) );
 		$badge_number = sanitize_text_field( get_query_var( 'badge' ) );
-		$payment_row = $wpdb->get_row(
+		$payment_row  = $wpdb->get_row(
 			$wpdb->prepare(
 				'SELECT payments_signup_description
 				FROM %1s
@@ -1087,7 +1088,6 @@ class ShortCodes extends SignUpsBase {
 		)
 		?>
 		<P>Payment succeeded for badge: <?php echo esc_html( $badge_number ); ?></p>
-		<p> SignUp: <?php echo esc_html( $payment_row->payments_signup_description ); ?></P>
 		<?php
 	}
 
