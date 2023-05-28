@@ -57,18 +57,25 @@ class SignUpsBase {
 	protected const ROLLING_TABLE = 'wp_scw_rolling';
 
 	/**
-	 * Rolling signup template.
+	 * Payments table.
 	 *
 	 * @var mixed
 	 */
 	protected const PAYMENTS_TABLE = 'wp_scw_payments';
 
 	/**
-	 * Rolling signup template.
+	 * Stripe table.
 	 *
 	 * @var mixed
 	 */
 	protected const STRIPE_TABLE = 'wp_scw_stripe';
+
+	/**
+	 * Signup desscriptions table.
+	 *
+	 * @var mixed
+	 */
+	protected const SIGNUP_DESCRIPTIONS_TABLE = 'wp_scw_signup_descriptions';
 
 	/**
 	 * Format DateTime as 2020-08-13 6:00 am.

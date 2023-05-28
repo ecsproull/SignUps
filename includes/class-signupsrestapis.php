@@ -68,15 +68,11 @@ class SignUpsRestApis extends SignUpsBase {
 	}
 
 	/**
-	 * Verifies the user is an admin before passing out data.
+	 * No permissions needed.
 	 *
-	 * @return boolean True if users is an admin, else false.
+	 * @return boolean Always returns true.
 	 */
 	public function permissions_check() {
-		if ( ! current_user_can( 'administrator' ) ) {
-			return new WP_Error( 'rest_forbidden', esc_html__( 'OMG you can not view private data.', 'my-text-domain' ), array( 'status' => 401 ) );
-		}
-
 		return true;
 	}
 

@@ -32,6 +32,7 @@ require 'includes/class-sessionitem.php';
 require 'includes/class-shortcodes.php';
 require 'includes/class-timeexception.php';
 require 'includes/html/lathe-2-basic-bowl.php';
+require 'includes/class-htmleditor.php';
 require_once 'vendor/autoload.php';
 
 /**
@@ -88,7 +89,8 @@ class SignupsPlugin extends SignUpsBase {
 	 * Adds the one and only menu item for the plugin.
 	 */
 	public function signup_plugin_top_menu() {
-		add_menu_page( 'SignUps', 'SignUps', 'manage_options', 'SignUps', array( new SignupSettings(), 'signup_settings_page' ), plugins_url( '/signups/img/frenchie.bmp' ) );
+		add_menu_page( '', 'SignUps', 'manage_options', 'SignUps', array( new SignupSettings(), 'signup_settings_page' ), plugins_url( '/signups/img/frenchie.bmp' ) );
+		add_submenu_page( 'SignUps', 'Html Editor', 'Desctiption Editor', 'manage_options', 'Html Edit', array( new HtmlEditor(), 'load_html_editor' ) );
 	}
 
 	/**

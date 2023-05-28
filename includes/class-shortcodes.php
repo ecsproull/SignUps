@@ -402,7 +402,7 @@ class ShortCodes extends SignUpsBase {
 				$attendees,
 				$instructors,
 				$signup_cost,
-				$signup_descrition
+				$signup_id
 			);
 		}
 	}
@@ -682,16 +682,16 @@ class ShortCodes extends SignUpsBase {
 	 * @param  string $signup_description The description of the signup.
 	 * @return void
 	 */
-	private function create_session_select_form( $signup_name, $sessions, $attendees, $instructors, $cost, $signup_description ) {
+	private function create_session_select_form( $signup_name, $sessions, $attendees, $instructors, $cost, $signup_id ) {
 		?>
 		<div id="session_select" class="text-center mw-800px">
 			<h2 class="mb-2"><?php echo esc_html( $signup_name ); ?></h2>
 			<div>
 				<div id="usercontent" class="container">
 					<?php
-					if ( $signup_description ) {
+					if ( $signup_id ) {
 						$this->create_user_table( 'hidden' );
-						$this->create_description_block( $signup_description );
+						$this->create_description_block( $signup_id );
 					} else {
 						$this->create_user_table();
 					}
@@ -1009,15 +1009,28 @@ class ShortCodes extends SignUpsBase {
 	/**
 	 * Creates a signup description block
 	 *
-	 * @param  mixed $signup_description Description of the signup.
+	 * @param  mixed $signup_id Id of the signup.
 	 * @return void
 	 */
-	private function create_description_block( $signup_description ) {
+	private function create_description_block( $signup_id ) {
+		global $wpdb;
+		$html = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT description_html
+				FROM %1s
+				WHERE description_signup_id = %d',
+				self::SIGNUP_DESCRIPTIONS_TABLE,
+				$signup_id
+			),
+			OBJECT
+		);
 		?>
-		<div id='signup-description'>
+		<div class="mr-auto ml-auto text-left">
 			<?php
-			call_user_func( $signup_description );
+			echo $html[0]->description_html;
 			?>
+		</div>
+		<div id='signup-description'>
 			<div class="row">
 				<form class="ml-auto mr-auto" method="POST">
 					<button type="submit" class="btn bth-md bg-primary mr-2"value="-1" name="signup_id">Hell N0!</button>
