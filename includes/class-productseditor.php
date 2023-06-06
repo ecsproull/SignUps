@@ -12,7 +12,7 @@
 /**
  * Manages the map settings including adding places to the map.
  */
-class HtmlEditor {
+class ProductsEditor {
 
 	/**
 	 * __construct
@@ -23,11 +23,11 @@ class HtmlEditor {
 	}
 
 	/**
-	 * load_html_editor
+	 * load_products_editor
 	 *
 	 * @return void
 	 */
-	public function load_html_editor() {
-		echo 'Html Editor is Loaded';
+	public function load_products_editor() {
+		echo 'Products Editor is Loaded';
 	}
 }

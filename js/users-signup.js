@@ -50,7 +50,6 @@ jQuery( document ).ready( function($){
 		});
 		selectedSessionsTable += "</table>"
 
-
 		$('<div style="padding: 10px; max-width: 800px; word-wrap: break-word;">' + selectedSessionsTable + '</div>').dialog({
 			draggable: true,
 			modal: true,
@@ -174,6 +173,7 @@ jQuery( document ).ready( function($){
 			}
 		}
 	};
+
 	var options = {
 		custom_style: custom_style,
 		show_labels: true,
@@ -181,11 +181,4 @@ jQuery( document ).ready( function($){
 		show_error_messages: true,
 		show_error_messages_when_unfocused: true
 	};
-
-	if($('#accept_conditions').length){
-		$('#accept_conditions').click(function() {
-			$("#signup-description").prop("hidden", true);
-			$("#lookup-member").prop("hidden", false);
-		});
-	}
 });
