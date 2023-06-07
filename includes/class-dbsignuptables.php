@@ -143,5 +143,16 @@ class DbSignUpTables {
 				  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'
 			);
 		}
+
+		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_signup_descriptions"' ) !== 'wp_scw_signup_descriptions' ) {
+			$wpdb->query(
+				"CREATE TABLE `wp_scw_signup_descriptions` (
+					`description_id` int(11) NOT NULL AUTO_INCREMENT,
+					`description_signup_id` int(10) unsigned NOT NULL,
+					`description_html` mediumtext NOT NULL,
+					PRIMARY KEY (`description_id`)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
+			);
+		}
 	}
 }

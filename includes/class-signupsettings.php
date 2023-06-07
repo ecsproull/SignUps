@@ -503,7 +503,7 @@ class SignupSettings extends SignUpsBase {
 	 * @param  array $results The class results from teh DB to list on the form.
 	 * @return void
 	 */
-	private function create_signup_select_form( $results, ) {
+	private function create_signup_select_form( $results ) {
 		?>
 		<form method="POST">
 			<div id="content" class="container">
@@ -512,7 +512,9 @@ class SignupSettings extends SignUpsBase {
 						<td>Add SignUp</td>
 						<td></td>
 						<td></td>
-						<td> <input class="submitbutton addItem" type="submit" name="add_new_class" value=""></td>
+						<td> <input class="submitbutton addItem" type="submit" name="add_new_class" value="">
+							<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+						</td>
 					</tr>
 					<?php
 					foreach ( $results as $result ) {
