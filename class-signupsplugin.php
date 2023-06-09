@@ -110,7 +110,7 @@ class SignupsPlugin extends SignUpsBase {
 	 */
 	public function add_scripts_and_css( $host ) {
 		if ( 'toplevel_page_SignUps' !== $host ) {
-			return;
+			//return;  TODO fix this up for just our pages
 		}
 
 		wp_register_style( 'signup_bs_style', plugins_url( '/signups/bootstrap/css/bootstrap.min.css' ), array(), 1 );

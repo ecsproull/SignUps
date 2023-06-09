@@ -200,5 +200,9 @@ jQuery( document ).ready( function($){
 		let pos2 = end_date.indexOf(":", pos1 + 1);
 		end_date = end_date.substring(0, pos2);
 		$(end_id).val(end_date);
-	})
+	});
+
+	$( "#display-html" ).click( function( event ) {
+		$("#html-description-display").html($("#html-signup-description").val());
+	});
 });

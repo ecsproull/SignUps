@@ -82,7 +82,7 @@ jQuery( document ).ready( function($){
 	});
 
 	$(".back-button").click(function() {
-		window.location.href="http://localhost/wp/signups";
+		window.location.href="https://edstestsite.site/signups/";
 	});
 
 	$("#selection-table input:radio").click (function(e) {
