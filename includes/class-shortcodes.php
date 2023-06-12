@@ -537,7 +537,7 @@ class ShortCodes extends SignUpsBase {
 										<td>Cost: $<?php echo esc_html( $cost ); ?></td>
 										<td><?php echo esc_html( $signup_name ); ?></td>
 										<td>
-											<input class="form-check-input ml-auto mr-auto addChk" type="radio" 
+											<input class="ml-auto mr-auto addChk" type="radio" 
 												name="time_slots[]" 
 												value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $end_date->format( self::DATETIME_FORMAT ) . ',' . $signup_name . ',' . $session->session_id . ',' . $cost ); ?>">
 										</td>
@@ -772,7 +772,7 @@ class ShortCodes extends SignUpsBase {
 		<table id="lookup-member" class="mb-100px table table-bordered mr-auto ml-auto" <?php echo esc_html( $hidden ); ?> >
 			<tr>
 				<td>Enter Badge#</td>
-				<td><input id="badge-input" class="member-badge" type="number" name="badge_number" value="4038" required></td>
+				<td><input id="badge-input" class="member-badge" type="number" name="badge_number" value="" required></td>
 				<td><input type="button" id="get_member_button" class="btn btn-primary" value='Lookup'></td>
 			</tr>
 			<tr>
@@ -797,32 +797,27 @@ class ShortCodes extends SignUpsBase {
 	 */
 	private function create_description_form( $signup_id ) {
 		global $wpdb;
-		$html = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT description_html
-				FROM %1s
-				WHERE description_signup_id = %d',
-				self::SIGNUP_DESCRIPTIONS_TABLE,
-				$signup_id
-			),
-			OBJECT
-		);
-		?>
-		<div class="mr-auto ml-auto text-left">
-			<?php
-			echo $html[0]->description_html;
+		$html = $this->get_signup_html( $signup_id );
+		if ( ! $html ) {
+			$this->create_signup_form( $signup_id );
+		} else {
 			?>
-		</div>
-		<div id='signup-description'>
-			<div class="row">
-				<form class="ml-auto mr-auto" method="POST">
-					<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
-					<button type="submit" class="btn bth-md bg-primary mr-2"value="-1" name="signup_id">Cancel</button>
-					<button id='accept_conditions' class="btn btn-primary" type='submit' value="<?php echo esc_html( $signup_id ); ?>" name="continue_signup">Continue</button>
-				</form>
+			<div class="mr-auto ml-auto text-left">
+				<?php
+				echo $html;
+				?>
 			</div>
-		</div>
-		<?php
+			<div id='signup-description'>
+				<div class="row">
+					<form class="ml-auto mr-auto" method="POST">
+						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+						<button type="submit" class="btn bth-md bg-primary mr-2"value="-1" name="signup_id">Cancel</button>
+						<button id='accept_conditions' class="btn btn-primary" type='submit' value="<?php echo esc_html( $signup_id ); ?>" name="continue_signup">Continue</button>
+					</form>
+				</div>
+			</div>
+			<?php
+		}
 	}
 
 	/**

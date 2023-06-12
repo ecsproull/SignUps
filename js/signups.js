@@ -186,7 +186,7 @@ jQuery( document ).ready( function($){
 		$( "button#add-time-slot" ).val(++val_int);
 	});
 
-	$('#session-table').on("change", ".start-time", function( event ) {
+	$("#session-table").on("change", ".start-time", function( event ) {
 		let minutes = $("#default-minutes").val();
 		let start_id = event.target.id;
 		let end_id = '#' + start_id.replace(/start/g, "end")
@@ -204,5 +204,9 @@ jQuery( document ).ready( function($){
 
 	$( "#display-html" ).click( function( event ) {
 		$("#html-description-display").html($("#html-signup-description").val());
+	});
+
+	$("#signup-select").on("change", function (e) {
+		document.html_form.submit();
 	});
 });

@@ -180,4 +180,30 @@ class SignUpsBase {
 			)
 		);
 	}
+
+	/**
+	 * Return html description for a signup.
+	 *
+	 * @param int $signup_id The signup id.
+	 * @return string Formatted html.
+	 */
+	protected function get_signup_html( $signup_id ) {
+		global $wpdb;
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE description_signup_id = %1s',
+				self::SIGNUP_DESCRIPTIONS_TABLE,
+				(int)$signup_id
+			),
+			OBJECT
+		);
+
+		if ( $results ) {
+			return html_entity_decode( $results[0]->description_html );
+		} else {
+			return null;
+		}
+	}
 }

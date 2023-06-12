@@ -35,6 +35,7 @@ require 'includes/html/lathe-2-basic-bowl.php';
 require 'includes/class-htmleditor.php';
 require 'includes/class-productseditor.php';
 require 'includes/class-stripepayments.php';
+require_once 'vendor/autoload.php';
 
 /**
  * Main signups class.

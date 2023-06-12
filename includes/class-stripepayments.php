@@ -38,7 +38,7 @@ class SripePayments extends SignUpsBase {
 		\Stripe\Stripe::setApiKey( $stripe_row[0]->stripe_api_key );
 
 		// Secret is at https://dashboard.stripe.com/webhooks.
-		$endpoint_secret = $stripe_row[0]->stripe_api_secret;
+		$endpoint_secret = $stripe_row[0]->stripe_endpoint_secret;
 
 		$payload = @file_get_contents( 'php://input' );
 		$event   = null;
@@ -203,7 +203,7 @@ class SripePayments extends SignUpsBase {
 	public function collect_money( $description, $price_id, $badge, $attendee_id, $cost ) {
 		\Stripe\Stripe::setApiKey( 'sk_test_51LPCe7EVPTwIS1QJQp7Vd1X9RsslNrfWNaqetmC3v6DsF3ocQrYUgAfRrhcQkYZW77szXpwZ3RoWFn5y7SWU5ZN200ZDxPlBpk' );
 		header( 'Content-Type: application/json' );
-		$signup_domain    = 'http://localhost/wp';
+		$signup_domain    = 'https://edstestsite.site';
 		$checkout_session = \Stripe\Checkout\Session::create(
 			array(
 				'metadata'    => array(

@@ -766,10 +766,6 @@ class SignupSettings extends SignUpsBase {
 					<td><input class="w-250px" type="text" name="signup_location" value="<?php echo esc_html( $data->signup_location ); ?>" /> </td>
 				</tr>
 				<tr>
-					<td class="text-right mr-2"><label>Description URL: </label></td>
-					<td><input class="w-250px" type="url" name="signup_description_url" value="<?php echo esc_html( $data->signup_description_url ); ?>" /> </td>
-				</tr>
-				<tr>
 					<td class="text-right mr-2"><label>Thumbnail URL:</label></td>
 					<td><input id="thumbnail" class="w-250px" type="url" name="signup_thumbnail_url" value="<?php echo esc_html( $data->signup_thumbnail_url ); ?>" /> </td>
 				</tr>
@@ -837,7 +833,7 @@ class SignupSettings extends SignUpsBase {
 				</tr>
 				<tr>
 					<td class="text-right mr-2"><label>Default Minutes: </label></td>
-					<td><input id="default-minutes" class="w-250px" type="number" name="session_slots" value="180" /> </td>
+					<td><input id="default-minutes" class="w-250px" type="number" value="180" /> </td>
 				</tr>
 				<tr>
 					<td class="text-right mr-2"><label>Start Time:</label></td>
@@ -866,6 +862,7 @@ class SignupSettings extends SignUpsBase {
 			}
 			?>
 			<input type="hidden" name="id" value="<?php echo esc_html( $data->session_id ); ?>">
+			<input type="hidden" name="" value="<?php echo esc_html( $data->session_id ); ?>">
 			<input type="hidden" name="" value="<?php echo esc_html( $data->session_id ); ?>">
 			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 		</form>

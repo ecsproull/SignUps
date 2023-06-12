@@ -33,16 +33,45 @@ class HtmlEditor extends SignUpsBase {
 			unset( $post['mynonce'] );
 			if ( isset( $post['submit_html'] ) ) {
 				$this->submit_html( $post );
+			} elseif ( isset( $post['signup'] ) ) {
+				$this->load_description_form( $post['signup'] );
+			} else {
+				$this->load_description_form( -1 );
 			}
 		} else {
-			?>
-			<form method="POST" >
+			$this->load_description_form( -1 );
+		}
+	}
+
+	private function load_description_form( $signup_id ) {
+		global $wpdb;
+		if ( $signup_id === -1) {	
+			$results = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT *
+					FROM %1s',
+					self::SIGNUPS_TABLE,
+				),
+				OBJECT
+			);
+
+			if ( $results ) {
+				$signup_id = $results[0]->signup_id;
+			}
+		}
+
+		$html = $this->get_signup_html( $signup_id );
+		if ( ! $html ) {
+			$html = '';
+		}
+		?>
+			<form method="POST" name="html_form" >
 				<?php
-				$this->load_signup_selection();
+				$this->load_signup_selection( $signup_id );
 				?>
 				<div>
 					<label for="html" class="block-label mt-25px mb-10px">Past HTML Here</label>
-					<textarea id="html-signup-description" name="html" style="width: 600px; height: 400px;"></textarea>
+					<textarea id="html-signup-description" name="html" style="width: 600px; height: 400px;"><?php echo esc_html( $html ); ?></textarea>
 				</div>
 				<div class="mt-2">
 					<button type="button" id="display-html" class="btn bt-md btn-primary mr-auto ml-auto mt-2">Preview</button>
@@ -52,20 +81,36 @@ class HtmlEditor extends SignUpsBase {
 				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 			</form>
 			<?php
-		}
 	}
 
 	private function submit_html( $post ) {
-		$foo = htmlentities($post['html']);
-		echo $foo;
-		echo "<br><br>";
-		echo html_entity_decode($foo);
+		global $wpdb;
+		$desc = htmlentities($post['html']);
+		$descriptoin = array();
+		if ( $desc ) {
+			$description['description_html'] = $desc;
+		} else {
+			return;
+		}
+
+		$results = $this->get_signup_html( $post['signup'] );
+
+		if ( $results ) {
+			$where = array();
+			$where['description_signup_id'] = $post['signup'];
+			$rows_updated = $wpdb->update( self::SIGNUP_DESCRIPTIONS_TABLE, $description, $where );
+		} else {
+			$description['description_signup_id'] = $post['signup'];
+			$rows_updated = $wpdb->insert( self::SIGNUP_DESCRIPTIONS_TABLE, $description );
+		}
+
+		$this->load_description_form( $post['signup'] );
 	}
 
 		/**
 	 * Load the class selection.
 	 */
-	private function load_signup_selection() {
+	private function load_signup_selection( $signup_id ) {
 		global $wpdb;
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
@@ -77,18 +122,24 @@ class HtmlEditor extends SignUpsBase {
 			OBJECT
 		);
 
-		$this->create_signup_dropdown_list( $results );
+		$this->create_signup_dropdown_list( $results, $signup_id );
 	}
 
-	private function create_signup_dropdown_list( $results ) {
+	private function create_signup_dropdown_list( $results, $signup_id ) {
 		?>
 	    <label for="signup" class="block-label mt-50px mb-10px">Select a Signup</label>
-		<select name="signup" id="signup">
+		<select id="signup-select" name="signup" id="signup">
 		<?php
 		foreach ( $results as $result ) {
-			?>
-			<option value="<?php echo esc_html( $result->signup_id ); ?>"><?php echo esc_html( $result->signup_name ); ?></option>
-			<?php
+			if ( $signup_id  == $result->signup_id ) {
+				?>
+				<option value="<?php echo esc_html( $result->signup_id ); ?>" selected><?php echo esc_html( $result->signup_name ); ?></option>
+				<?php
+			} else {
+				?>
+				<option value="<?php echo esc_html( $result->signup_id ); ?>"><?php echo esc_html( $result->signup_name ); ?></option>
+				<?php
+			}
 		}
 		?>
 		</select>
