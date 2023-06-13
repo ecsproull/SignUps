@@ -103,6 +103,8 @@ class SripePayments extends SignUpsBase {
 					'payments_last_access_time'   => $dt_now->format( 'Y-m-d H:i:s.u' ),
 					'payments_attendee_badge'     => $payment_intent->metadata['badge'],
 					'payments_price_id'           => $payment_intent->metadata['price_id'],
+					'payments_status'             => $payment_intent->status,
+					'payments_intent_status_time' => $dt_now->format( 'Y-m-d H:i:s.u' ),
 				);
 
 				if ( ! $payment_row ) {
@@ -154,7 +156,7 @@ class SripePayments extends SignUpsBase {
 
 				if ( $payment_row ) {
 					$where = array(
-						'payments_intent_id' => $payment_indent->id,
+						'payments_intent_id' => $payment_intent->id,
 					);
 
 					$wpdb->update( self::PAYMENTS_TABLE, $update, $where );
@@ -169,6 +171,8 @@ class SripePayments extends SignUpsBase {
 						);
 
 						$wpdb->update( self::ATTENDEES_TABLE, $update, $where );
+					} else {
+						echo 'WTF';
 					}
 				} else {
 					$update['payments_intent_id']  = $payment_intent->id;
@@ -241,7 +245,7 @@ class SripePayments extends SignUpsBase {
 		$badge_number = sanitize_text_field( get_query_var( 'badge' ) );
 		$payment_row  = $wpdb->get_row(
 			$wpdb->prepare(
-				'SELECT payments_signup_description
+				'SELECT payments_signup_description, payments_status
 				FROM %1s
 				WHERE payments_attendee_id = %s',
 				self::PAYMENTS_TABLE,
@@ -250,8 +254,22 @@ class SripePayments extends SignUpsBase {
 			OBJECT
 		)
 		?>
-		<P>Payment succeeded for badge: <?php echo esc_html( $badge_number ); ?></p>
-		<?php
+		<h2>Payment for badge: <?php echo esc_html( $badge_number ); ?></h2>
+		<?php 
+		if ($payment_row) {
+			if ( $payment_row->payments_status != 'succeeded') {
+				?>
+				<meta http-equiv="Refresh" content="2">
+				<?php
+			}
+			?>
+			<h2>Status: <?php echo esc_html( $payment_row->payments_status ); ?></h2>
+			<?php
+		} else {
+			?>
+			<h2>Status: <?php echo esc_html( ' Unknown' ); ?></h2>
+			<?php
+		}
 	}
 
 	/**
