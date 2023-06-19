@@ -72,23 +72,23 @@
 }
 
 .editImage {
-    background-image:url(edit.png);
+    background-image:url(../img/edit2.png);
 }
 
 .deleteImage {
-    background-image:url(delete.png); 
+    background-image:url(../img/delete.png); 
 }
 
 .sessionsImage {
-    background-image:url(sessions.png)
+    background-image:url(../img/sessions.png)
 }
 
 .attendeesImage {
-    background-image:url(attendees.png)
+    background-image:url(../img/attendees.png)
 }
 
 .addItem {
-    background-image:url(plusSmall.png)
+    background-image:url(../img/PlusSmall.png)
 }
 
 .addAtt {

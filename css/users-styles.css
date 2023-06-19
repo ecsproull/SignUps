@@ -107,3 +107,9 @@ table#lookup-member > tbody > tr > td,
 table#signup-select > tbody > tr > td {
 	border:none;
 }
+
+.rolling-add-chk:enabled {
+	outline: 2px solid #1e5180;
+	box-shadow: 2px 2px 2px, -2px -2px 2px, -2px 2px 2px, 2px -2px 2px;
+}
+  

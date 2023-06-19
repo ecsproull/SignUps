@@ -29,7 +29,7 @@ jQuery(document).ready(function($){
 	});
 
 	$("#badge-input").on('keyup', (e) => { 
-		if (e.code === 'Enter') { 
+		if (e.code === 'Enter' || e.code === 'NumpadEnter') { 
 			$("#get_member_button").trigger("click");
 		}
 	});

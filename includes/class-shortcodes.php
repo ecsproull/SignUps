@@ -677,9 +677,16 @@ class ShortCodes extends SignUpsBase {
 											foreach ( $slot_titles as $title ) {
 												if ( count( $attendees ) > $attendee_index && $attendees[ $attendee_index ]->attendee_start_time === $start_date->format( 'U' ) &&
 													$title === $attendees[ $attendee_index ]->attendee_item ) {
-													?>
-													<tr  class="attendee-row">
-														<?php
+														if ( 0 === $count ) {
+														?>
+													<tr  class="attendee-row" style="background:lightgray;">
+													<?php
+														} else {
+															?>
+															<tr  class="attendee-row">
+															<?php
+														}
+														
 														if ( 0 === $count ) {
 															?>
 															<td><?php echo esc_html( $start_date->format( self::TIME_FORMAT ) . ' - ' . $temp_end_date->format( self::TIME_FORMAT ) ); ?></td>
@@ -713,9 +720,15 @@ class ShortCodes extends SignUpsBase {
 													$attendee_index++;
 												} else {
 													$com_name = $comment_name . $comment_index;
+													if ( 0 === $count ) {
 													?>
-													<tr class="attendee-row">
-														<?php
+													<tr  class="attendee-row" style="background:lightgray;">
+													<?php
+														} else {
+															?>
+															<tr  class="attendee-row">
+															<?php
+														}
 														if ( 0 === $count ) {
 															?>
 															<td><?php echo esc_html( $start_date->format( self::TIME_FORMAT ) . ' - ' . $temp_end_date->format( self::TIME_FORMAT ) ); ?></td>
