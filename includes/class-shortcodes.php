@@ -36,7 +36,11 @@ class ShortCodes extends SignUpsBase {
 				$this->add_attendee_class( $post );
 			}
 		} else {
-			$this->create_select_signup();
+			if ( get_query_var('signup_id') ) {
+				$this->create_signup_form( get_query_var('signup_id') );
+			} else {
+				$this->create_select_signup();
+			}
 		}
 	}
 
@@ -53,7 +57,8 @@ class ShortCodes extends SignUpsBase {
 			$wpdb->prepare(
 				'SELECT signup_id,
 				signup_name
-				FROM %1s',
+				FROM %1s
+				WHERE signup_id != 9 AND signup_id != 10',
 				self::SIGNUPS_TABLE
 			),
 			OBJECT
@@ -473,7 +478,7 @@ class ShortCodes extends SignUpsBase {
 	private function create_session_select_form( $signup_name, $sessions, $attendees, $instructors, $cost, $signup_id ) {
 		?>
 		<div id="session_select" class="text-center mw-800px">
-			<h2 class="mb-2"><?php echo esc_html( $signup_name ); ?></h2>
+			<h1 class="mb-2"><?php echo esc_html( $signup_name ); ?></h1>
 			<div>
 				<div id="usercontent" class="container">
 					<?php
@@ -613,7 +618,7 @@ class ShortCodes extends SignUpsBase {
 		$one_day_interval = new DateInterval( 'P1D' );
 		?>
 		<div id="session_select" class="text-center mw-800px">
-			<h3 class="mb-2"><b><?php echo esc_html( $signup_name ); ?><b></h3>
+			<h1 class="mb-2"><b><?php echo esc_html( $signup_name ); ?><b></h1>
 			<div>
 				<div class="container">
 					<form class="signup_form" method="POST">
@@ -662,7 +667,7 @@ class ShortCodes extends SignUpsBase {
 														<?php
 													}
 													?>
-													<td><button type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee">Submit</button></td>
+													<td><button type="submit" disabled class="btn bth-md mr-auto ml-auto mt-2 bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee">Submit</button></td>
 												</tr>
 												<?php
 											}
@@ -732,9 +737,9 @@ class ShortCodes extends SignUpsBase {
 														}
 														?>
 														<td class="text-center"> 
-															<input class="form-check-input position-relative rolling-add-chk ml-auto" 
+															<input class="form-check-input position-relative rolling-add-chk ml-auto <?php echo str_replace(' ', '', $title) ?>" 
 																type="checkbox" name="time_slots[]" 
-																value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $slot_titles[0] . ',' . $comment_index . ',0' ); ?>">
+																value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $title . ',' . $comment_index . ',0' ); ?>">
 														</td>
 													</tr>
 													<?php

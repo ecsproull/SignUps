@@ -31,10 +31,10 @@ require 'includes/class-classitem.php';
 require 'includes/class-sessionitem.php';
 require 'includes/class-shortcodes.php';
 require 'includes/class-timeexception.php';
-require 'includes/html/lathe-2-basic-bowl.php';
 require 'includes/class-htmleditor.php';
 require 'includes/class-productseditor.php';
 require 'includes/class-stripepayments.php';
+require 'includes/class-rollingtemplateseditor.php';
 require_once 'vendor/autoload.php';
 
 /**
@@ -99,9 +99,10 @@ class SignupsPlugin extends SignUpsBase {
 	 * Adds the one and only menu item for the plugin.
 	 */
 	public function signup_plugin_top_menu() {
-		add_menu_page( '', 'SignUps', 'manage_options', 'SignUps', array( new SignupSettings(), 'signup_settings_page' ), plugins_url( '/signups/img/frenchie.bmp' ) );
-		add_submenu_page( 'SignUps', 'Html Editor', 'Desctiptions', 'manage_options', 'Html Edit', array( new HtmlEditor(), 'load_html_editor' ) );
-		add_submenu_page( 'SignUps', 'Products', 'Products', 'manage_options', 'Products Edit', array( new ProductsEditor(), 'load_products_editor' ) );
+		add_menu_page( '', 'SignUps', 'manage_options', 'sign_ups', array( new SignupSettings(), 'signup_settings_page' ), plugins_url( '/signups/img/frenchie.bmp' ) );
+		add_submenu_page( 'sign_ups', 'Html Editor', 'Desctiptions', 'manage_options', 'html_editor', array( new HtmlEditor(), 'load_html_editor' ) );
+		add_submenu_page( 'sign_ups', 'Products Editor', 'Products', 'manage_options', 'products_editor', array( new ProductsEditor(), 'load_products_editor' ) );
+		add_submenu_page( 'sign_ups', 'Rolling Templates Editor', 'Rolling Templates', 'manage_options', 'template_editor', array( new RollingTemplatesEditor(), 'load_templates_editor' ) );
 	}
 
 	/**

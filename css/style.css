@@ -13,6 +13,10 @@
     width: 250px;
 }
 
+.w-300px {
+  width: 300px;
+}
+
 .w-75px {
     width: 75px;
 }
@@ -154,4 +158,8 @@
 
  .block-label {
     display: block;
+  }
+
+  .without_ampm::-webkit-datetime-edit-ampm-field {
+    display: none;
   }

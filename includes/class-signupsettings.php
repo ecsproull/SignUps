@@ -497,6 +497,46 @@ class SignupSettings extends SignUpsBase {
 		<?php
 	}
 
+	private function load_template_selection( $template_id ) {
+		global $wpdb;
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT rolling_id,
+				rolling_template_name
+				FROM %1s',
+				self::ROLLING_TABLE
+			),
+			OBJECT
+		);
+
+		?>
+		<select name="signup_rolling_template" id="templates">
+		<?php
+		if ( $template_id == -1 ) {
+			?>
+			<option value="-1" selected>None</option>
+			<?php
+		} else {
+			?>
+			<option value="-1">None</option>
+			<?php
+		}
+		foreach ( $results as $result ) {
+			if ( $template_id == $result->rolling_id ) {
+				?>
+				<option value="<?php echo esc_html( $result->rolling_id ); ?>" selected><?php echo esc_html( $result->rolling_template_name ); ?></option>
+				<?php
+			} else {
+				?>
+				<option value="<?php echo esc_html( $result->rolling_id ); ?>"><?php echo esc_html( $result->rolling_template_name ); ?></option>
+				<?php
+			}
+		}
+		?>
+		</select>
+		<?php
+	}
+
 	/**
 	 * Create the form to select a class to update.
 	 *
@@ -778,8 +818,13 @@ class SignupSettings extends SignUpsBase {
 					<td><input class="w-75px" type="number" name="signup_default_slots" value="<?php echo esc_html( $data->signup_default_slots ); ?>" /> </td>
 				</tr>
 				<tr>
-					<td class="text-right mr-2"><label>Rolling Template: </label></td>
-					<td><input id="rolling-signup" class="w-75px" type="number" name="signup_rolling_template" value="<?php echo esc_html( $data->signup_rolling_template ); ?>" /> </td>
+				    <td class="text-right mr-2"><label>Rolling Template:</label></td>
+					<td>
+					<?php
+
+						$this->load_template_selection( $data->signup_rolling_template, true );
+					?>
+					</td>
 				</tr>
 				<tr>
 					<td class="text-right mr-2"><input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back"></td>

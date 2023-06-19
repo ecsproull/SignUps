@@ -209,4 +209,11 @@ jQuery( document ).ready( function($){
 	$("#signup-select").on("change", function (e) {
 		document.html_form.submit();
 	});
+
+	$("#template-select").on("change", function (e) {
+		if (document.template_form) {
+			document.template_form.submit();
+		}
+	});
+	
 });

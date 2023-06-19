@@ -1,28 +1,37 @@
-jQuery( document ).ready( function($){
-	$( "#get_member_button" ).click( function(){
-		var req = $.ajax( {
+jQuery(document).ready(function($){
+	$("#get_member_button").click(function(){
+		var req = $.ajax({
 			url: wpApiSettings.root + 'scwmembers/v1/members',
 			method: 'GET',
-			beforeSend: function ( xhr ) {
-				xhr.setRequestHeader( 'X-WP-Nonce', wpApiSettings.nonce );
+			beforeSend: function (xhr) {
+				xhr.setRequestHeader('X-WP-Nonce', wpApiSettings.nonce);
 			},
 			data:{
-				'badge' : jQuery("#badge-input").val()
+				'badge' : $("#badge-input").val()
 			}
-		} ).done( function ( response ) {
-			if ( response.length > 0) {
-				$( '.member-first-name' ).each( function () { $(this).val( response[0].firstname ); });
-				$( '.member-last-name' ).each( function () { $(this).val( response[0].lastname ); });
-				$( '.member-email' ).each( function () { $(this).val( response[0].email ); });
-				$( '.member-phone' ).each( function () { $(this).val( response[0].phone );  });
-				$( '.member-badge' ).each( function () { $(this).val( response[0].badge );  });
+		}).done(function (response) {
+			if (response.length > 0) {
+				$('.member-first-name').each(function () { $(this).val(response[0].firstname); });
+				$('.member-last-name').each(function () { $(this).val(response[0].lastname); });
+				$('.member-email').each(function () { $(this).val(response[0].email); });
+				$('.member-phone').each(function () { $(this).val(response[0].phone);  });
+				$('.member-badge').each(function () { $(this).val(response[0].badge);  });
 				$("#selection-table").prop("hidden", false);
+				$('button[type="submit"]').each(function() {
+					$(this).removeAttr('disabled');
+				});
 			} else {
-				alert( 'Badge number not found.' )
+				alert('Badge number not found.')
 			}
-		} ).error( function ( response ) {
-			alert( 'Error: ' + req.status + ' Verify badge number is correct.' );
+		}).error(function (response) {
+			alert('Error: ' + req.status + ' Verify badge number is correct.');
 		});
+	});
+
+	$("#badge-input").on('keyup', (e) => { 
+		if (e.code === 'Enter') { 
+			$("#get_member_button").trigger("click");
+		}
 	});
 
 	$(".signup_form").submit(function(e){
@@ -72,13 +81,16 @@ jQuery( document ).ready( function($){
 	$(".rolling-add-chk").click(function(x) {
 		var val = x.currentTarget.value;
 		var arr = val.split(',');
-		var inputName = "comment-" + arr[3];
-		if (x.currentTarget.checked) {
-			$('input[name=' + inputName + ']').get(0).type = 'text';
-		} else {
-			$('input[name=' + inputName + ']').get(0).type = 'hidden';
+		var classname = '.' + arr[2].replace(' ', '');
+		if (classname.indexOf("Machine") > 0) {
+			var checked = $(".rolling-add-chk:checkbox:checked").length;
+			if (checked == 0) {
+				$(".rolling-add-chk").attr("disabled", false);
+			} else if (checked == 1) {
+				$(".rolling-add-chk").attr("disabled", true);
+				$(classname).attr("disabled", false);
+			}
 		}
-		
 	});
 
 	$(".back-button").click(function() {
