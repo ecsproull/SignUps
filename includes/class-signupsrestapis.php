@@ -42,6 +42,16 @@ class SignUpsRestApis extends SignUpsBase {
 	}
 
 	/**
+	 * Opens a connection to sql express.
+	 *
+	 * @return mixed The connection.
+	 */
+	function OpenConnection()
+    {
+		$db = new PDO("sqlsrv:Server=WC_SERVER\SQLEXPRESS;Database=WoodClub", "memberapp", "member");
+    }
+
+	/**
 	 * The actual function that does the work of retrieving the points.
 	 *
 	 * @param string $request Members badge number.

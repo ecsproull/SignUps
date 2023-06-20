@@ -20,6 +20,8 @@ jQuery(document).ready(function($){
 				$('button[type="submit"]').each(function() {
 					$(this).removeAttr('disabled');
 				});
+				var badgeclass = '.' + response[0].badge;
+				$(badgeclass).prop("hidden", false);
 			} else {
 				alert('Badge number not found.')
 			}
@@ -41,7 +43,11 @@ jQuery(document).ready(function($){
 			return this.value;
 		}).get();
 
-		var selectedSessionsTable = "<table><tr class='text-center font-weight-bold'><td>Start</td><td>End</td><td>Item</td><td>Comment</td></tr>";
+		var deletedValues = $("input[name='remove_slots[]']:checked:enabled").map(function() {
+			return this.value;
+		}).get();
+
+		var selectedSessionsTable = "<table><tr class='text-center font-weight-bold'><td>Start</td><td>End</td><td>Item</td><td>Cost</td></tr>";
 		selectedValues.forEach((item) => {
 			var arr = item.split(',');
 			var inputName = "comment-" + arr[3];
@@ -49,13 +55,18 @@ jQuery(document).ready(function($){
 			if ($('input[name=' + inputName + ']').val()) {
 				selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>" + $('input[name=' + inputName + ']').val() + "</td></tr>";
 			} else {
-				if (arr[4]) {
+				if (arr[4] && arr[4] != "0") {
 					selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>Cost: $" + arr[4] + "</td></tr>";
 				} else {
 					selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>NA</td></tr>";
 				}
 			}
 
+		});
+
+		deletedValues.forEach((item) => {
+			var arr = item.split(',');
+				selectedSessionsTable += "<tr style='background-color:#FFCCCB;'><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>DELETE</td></tr>";
 		});
 		selectedSessionsTable += "</table>"
 

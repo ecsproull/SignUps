@@ -31,7 +31,7 @@ class ShortCodes extends SignUpsBase {
 					$this->create_description_form( $post['signup_id'] );
 				}
 			} elseif ( isset( $post['add_attendee_session'] ) ) {
-				$this->add_attendee( $post );
+				$this->add_attendee_rolling( $post );
 			} elseif ( isset( $post['add_attendee_class'] ) ) {
 				$this->add_attendee_class( $post );
 			}
@@ -325,7 +325,7 @@ class ShortCodes extends SignUpsBase {
 	 * @param  mixed $post Data from the form.
 	 * @return void
 	 */
-	private function add_attendee( $post ) {
+	private function add_attendee_rolling( $post ) {
 		global $wpdb;
 
 		$new_attendee                       = array();
@@ -349,66 +349,107 @@ class ShortCodes extends SignUpsBase {
 						<th>Status</th>
 					</tr>
 				<?php
+				if ( isset( $post['time_slots']) ) { 
+					foreach ( $post['time_slots'] as $slot ) {
+						$slot_parts                               = explode( ',', $slot );
+						$slot_start                               = new DateTime( $slot_parts[0], $this->date_time_zone );
+						$new_attendee['attendee_start_time']      = $slot_start->format( 'U' );
+						$new_attendee['attendee_start_formatted'] = $slot_start->format( self::DATETIME_FORMAT );
+						$slot_end                                 = new DateTime( $slot_parts[1], $this->date_time_zone );
+						$new_attendee['attendee_end_time']        = $slot_end->format( 'U' );
+						$new_attendee['attendee_end_formatted']   = $slot_end->format( self::DATETIME_FORMAT );
+						$new_attendee['attendee_item']            = trim( $slot_parts[2] );
 
-				foreach ( $post['time_slots'] as $slot ) {
-					$slot_parts                               = explode( ',', $slot );
-					$slot_start                               = new DateTime( $slot_parts[0], $this->date_time_zone );
-					$new_attendee['attendee_start_time']      = $slot_start->format( 'U' );
-					$new_attendee['attendee_start_formatted'] = $slot_start->format( self::DATETIME_FORMAT );
-					$slot_end                                 = new DateTime( $slot_parts[1], $this->date_time_zone );
-					$new_attendee['attendee_end_time']        = $slot_end->format( 'U' );
-					$new_attendee['attendee_end_formatted']   = $slot_end->format( self::DATETIME_FORMAT );
-					$new_attendee['attendee_item']            = trim( $slot_parts[2] );
+						$comment_name                     = 'comment-' . $slot_parts[3];
+						$new_attendee['attendee_comment'] = $post[ $comment_name ];
 
-					$comment_name                     = 'comment-' . $slot_parts[3];
-					$new_attendee['attendee_comment'] = $post[ $comment_name ];
+						$wpdb->query(
+							$wpdb->prepare(
+								'LOCK TABLES %1s WRITE',
+								self::ATTENDEES_ROLLING_TABLE
+							)
+						);
 
-					$wpdb->query(
-						$wpdb->prepare(
-							'LOCK TABLES %1s WRITE',
-							self::ATTENDEES_ROLLING_TABLE
-						)
-					);
+						$dup_rows = $wpdb->get_results(
+							$wpdb->prepare(
+								'SELECT * FROM %1s WHERE attendee_start_time = %d AND attendee_signup_id = %d AND attendee_item = %s',
+								self::ATTENDEES_ROLLING_TABLE,
+								$new_attendee['attendee_start_time'],
+								$new_attendee['attendee_signup_id'],
+								$new_attendee['attendee_item']
+							)
+						);
 
-					$dup_rows = $wpdb->get_results(
-						$wpdb->prepare(
-							'SELECT * FROM %1s WHERE attendee_start_time = %d AND attendee_signup_id = %d AND attendee_item = %s',
-							self::ATTENDEES_ROLLING_TABLE,
-							$new_attendee['attendee_start_time'],
-							$new_attendee['attendee_signup_id'],
-							$new_attendee['attendee_item']
-						)
-					);
-
-					if ( ! $dup_rows ) {
-						$insert_return_value = $wpdb->insert( self::ATTENDEES_ROLLING_TABLE, $new_attendee );
-					} else {
-						?>
-						<h2 class="text-danger">Timeslot is already taken, refresh page and reselect another time.</h2>
-						<?php
-					}
-
-					$wpdb->query( 'UNLOCK TABLES' );
-
-					?>
-					<tr class="attendee-row">
-						<td><?php echo esc_html( $slot_start->format( self::DATE_FORMAT ) ); ?></td>
-						<td><?php echo esc_html( $slot_start->format( self::TIME_FORMAT ) . ' - ' . $slot_end->format( self::TIME_FORMAT ) ); ?></td>
-						<td><?php echo esc_html( $post['firstname'] . ' ' . $post['lastname'] ); ?></td>
-						<td><?php echo esc_html( $slot_parts[2] ); ?></td>
-						<?php
-						if ( ! $insert_return_value || $dup_rows ) {
-							?>
-							<td style="color:red"><b><i>Failed</i></b></td>
-							<?php
+						if ( ! $dup_rows ) {
+							$insert_return_value = $wpdb->insert( self::ATTENDEES_ROLLING_TABLE, $new_attendee );
 						} else {
 							?>
-							<td>Success</td>
+							<h2 class="text-danger">Timeslot is already taken, refresh page and reselect another time.</h2>
 							<?php
 						}
+
+						$wpdb->query( 'UNLOCK TABLES' );
+
 						?>
-					</tr>
-					<?php
+						<tr class="attendee-row">
+							<td><?php echo esc_html( $slot_start->format( self::DATE_FORMAT ) ); ?></td>
+							<td><?php echo esc_html( $slot_start->format( self::TIME_FORMAT ) . ' - ' . $slot_end->format( self::TIME_FORMAT ) ); ?></td>
+							<td><?php echo esc_html( $post['firstname'] . ' ' . $post['lastname'] ); ?></td>
+							<td><?php echo esc_html( $slot_parts[2] ); ?></td>
+							<?php
+							if ( ! $insert_return_value || $dup_rows ) {
+								?>
+								<td style="color:red"><b><i>Failed</i></b></td>
+								<?php
+							} else {
+								?>
+								<td>Success</td>
+								<?php
+							}
+							?>
+						</tr>
+						<?php
+					}
+				}
+
+				if ( isset( $post['remove_slots']) ) { 
+					foreach ( $post['remove_slots'] as $slot ) {
+						$slot_parts = explode( ',', $slot );
+						$slot_start = new DateTime( $slot_parts[0], $this->date_time_zone );
+						$slot_end   = new DateTime( $slot_parts[1], $this->date_time_zone );
+						$slot_id    = $slot_parts[4];
+						$where = Array();
+						$where['attendee_id'] = $slot_id;
+						
+						$wpdb->query(
+							$wpdb->prepare(
+								'LOCK TABLES %1s WRITE',
+								self::ATTENDEES_ROLLING_TABLE
+							)
+						);
+
+						$delete_return_value = $wpdb->delete( self::ATTENDEES_ROLLING_TABLE, $where );
+						$wpdb->query( 'UNLOCK TABLES' );
+						?>
+						<tr class="attendee-row" style="background-color:#FFCCCB;">
+							<td><?php echo esc_html( $slot_start->format( self::DATE_FORMAT ) ); ?></td>
+							<td><?php echo esc_html( $slot_start->format( self::TIME_FORMAT ) . ' - ' . $slot_end->format( self::TIME_FORMAT ) ); ?></td>
+							<td><?php echo esc_html( $post['firstname'] . ' ' . $post['lastname'] ); ?></td>
+							<td><?php echo esc_html( $slot_parts[2] ); ?></td>
+							<?php
+							if ( ! $delete_return_value ) {
+								?>
+								<td style="color:red"><b><i>Failed</i></b></td>
+								<?php
+							} else {
+								?>
+								<td>Success</td>
+								<?php
+							}
+							?>
+						</tr>
+						<?php
+					}
 				}
 				?>
 				<tr class="attendee-row">
@@ -573,6 +614,7 @@ class ShortCodes extends SignUpsBase {
 	 */
 	private function create_rolling_session_select_form( $signup_name, $attendees, $signup_id, $template ) {
 
+		$current_badge = '4038';
 		$start_time_parts = explode( ':', $template->rolling_start_time );
 		$start_hour       = $start_time_parts[0];
 		$start_minute     = $start_time_parts[1];
@@ -714,7 +756,12 @@ class ShortCodes extends SignUpsBase {
 															<?php
 														}
 														?>
-														<td><?php echo esc_html( $attendees[ $attendee_index ]->attendee_firstname . ' ' . $attendees[ $attendee_index ]->attendee_lastname ); ?></td>
+														<td>
+															<?php echo esc_html( $attendees[ $attendee_index ]->attendee_firstname . ' ' . $attendees[ $attendee_index ]->attendee_lastname ); ?>
+															<input class="form-check-input ml-2 rolling-remove-chk <?php echo esc_html( $attendees[ $attendee_index ]->attendee_badge ) ?>" 
+																type="checkbox" name="remove_slots[]" hidden 
+																value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $title . ',' . $comment_index . ',' . $attendees[ $attendee_index ]->attendee_id ); ?>">
+														</td>
 													</tr>
 													<?php
 													$attendee_index++;
@@ -799,7 +846,7 @@ class ShortCodes extends SignUpsBase {
 				<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button"value="-1" name="signup_id">Cancel</button></td>
 			</tr>
 			<tr>
-				<td><input id="phone" class="member-phone" type="tel" name="phone" placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required readonly></td>
+				<td><input id="phone" class="member-phone" type="text" name="phone" placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required readonly></td>
 				<td><input id="email" class="member-email" type="email" name="email" placeholder="foo@bar.com" required readonly></td>
 				<td></td>
 			</tr>

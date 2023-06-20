@@ -4,11 +4,13 @@
 
 #badge-input {
 	width: 100px;
+	background-color: transparent;
+	height: 45px;
+	border-radius: 8px!important;
 }
 
 .validate,
 .comment-text,
-#badge-input,
 #last-name,
 #first-name,
 #phone,
@@ -16,6 +18,8 @@
 	background-color: transparent;
 	height: 45px;
 	border-radius: 8px!important;
+	border-width: 1px;
+    border-color: lightgray;
 }
 
 .signup-submit {
@@ -110,6 +114,11 @@ table#signup-select > tbody > tr > td {
 
 .rolling-add-chk:enabled {
 	outline: 2px solid #1e5180;
+	box-shadow: 2px 2px 2px, -2px -2px 2px, -2px 2px 2px, 2px -2px 2px;
+}
+
+.rolling-remove-chk {
+	outline: 2px solid #FF0000;
 	box-shadow: 2px 2px 2px, -2px -2px 2px, -2px 2px 2px, 2px -2px 2px;
 }
   
