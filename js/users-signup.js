@@ -105,7 +105,7 @@ jQuery(document).ready(function($){
 	});
 
 	$(".back-button").click(function() {
-		window.location.href="https://edstestsite.site/signups/";
+		history.back();
 	});
 
 	$("#selection-table input:radio").click (function(e) {

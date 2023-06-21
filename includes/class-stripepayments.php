@@ -205,9 +205,19 @@ class SripePayments extends SignUpsBase {
 	 * @return void
 	 */
 	public function collect_money( $description, $price_id, $badge, $attendee_id, $cost ) {
-		\Stripe\Stripe::setApiKey( 'sk_test_51LPCe7EVPTwIS1QJQp7Vd1X9RsslNrfWNaqetmC3v6DsF3ocQrYUgAfRrhcQkYZW77szXpwZ3RoWFn5y7SWU5ZN200ZDxPlBpk' );
+		global $wpdb;
+		$stripe_row = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s',
+				self::STRIPE_TABLE,
+			),
+			OBJECT
+		);
+
+		\Stripe\Stripe::setApiKey( $stripe_row[0]->stripe_api_secret );
 		header( 'Content-Type: application/json' );
-		$signup_domain    = 'https://edstestsite.site';
+		$signup_domain    = $stripe_row[0]->stripe_root_url;
 		$checkout_session = \Stripe\Checkout\Session::create(
 			array(
 				'metadata'    => array(

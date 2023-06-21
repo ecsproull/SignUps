@@ -76,7 +76,23 @@ class SignupsPlugin extends SignUpsBase {
 			'rest_api_init',
 			array( $this, 'regester_payment_route' )
 		);
+
+		add_filter( 'query_vars', array( $this, 'wwp_custom_query_vars_filter' ) );
 	}
+
+	/**
+	 * Adds the query vars used by this plugin.
+	 *
+	 * @param mixed $vars Array of vars to add to.
+	 * @return void
+	 */
+	public function wwp_custom_query_vars_filter($vars) {
+		$vars[] .= 'attendee_id';
+		$vars[] .= 'badge';
+		$vars[] .= 'signup_id';
+		return $vars;
+	}
+	
 
 	/**
 	 * Route used for Stripe.com callback.

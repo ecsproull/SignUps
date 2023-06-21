@@ -910,7 +910,7 @@ class ShortCodes extends SignUpsBase {
 		?>
 		<form method="POST">
 			<tr class="footer-row">
-				<td><button type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="signup_id">Cancel</button></td>
+				<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="signup_id">Cancel</button></td>
 				<?php
 				for ( $i = 1; $i < $column_count; $i++ ) {
 					?>
