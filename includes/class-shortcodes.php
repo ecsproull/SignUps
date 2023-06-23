@@ -674,7 +674,7 @@ class ShortCodes extends SignUpsBase {
 							<tr class="date-row">
 								<td></td>
 								<td></td>
-								<td><button type="submit" disabled class="btn bth-md mr-auto ml-auto mt-2 bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee">Submit</button></td>
+								<td><button type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee">Submit</button></td>
 							</tr>
 							<?php
 							$attendee_index = 0;
@@ -754,10 +754,13 @@ class ShortCodes extends SignUpsBase {
 							?>
 							<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
 							<input type="hidden" name="add_attendee_session" value="<?php echo esc_html( $signup_id ); ?>">
+						
+							<tr class="footer-row">
+								<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="signup_id">Cancel</button></td>
+								<td></td>
+								<td><button type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee">Submit</button></td>
+							</tr>
 						</form>
-						<?php
-							$this->create_table_footer();
-						?>
 					</table>
 				</div>
 			</div>
