@@ -267,7 +267,7 @@ class SripePayments extends SignUpsBase {
 		<h2>Payment for badge: <?php echo esc_html( $badge_number ); ?></h2>
 		<?php 
 		if ($payment_row) {
-			if ( $payment_row->payments_status != 'succeeded') {
+			if ( $payment_row->payments_status != 'succeeded' && $payment_row->payments_status != 'completed') {
 				?>
 				<meta http-equiv="Refresh" content="2">
 				<?php

@@ -1,4 +1,5 @@
 jQuery(document).ready(function($){
+	var scw_submitting = 0;
 	$("#get_member_button").click(function(){
 		var req = $.ajax({
 			url: wpApiSettings.root + 'scwmembers/v1/members',
@@ -72,6 +73,7 @@ jQuery(document).ready(function($){
 		});
 		selectedSessionsTable += "</table>"
 
+		scw_submitting = 1;
 		$('<div style="padding: 10px; max-width: 800px; word-wrap: break-word;">' + selectedSessionsTable + '</div>').dialog({
 			draggable: true,
 			modal: true,
@@ -129,6 +131,10 @@ jQuery(document).ready(function($){
 	});
 
 	$(window).on('beforeunload', function(){
+		if (scw_submitting) {
+			scw_submitting = 0;
+			return;
+		}
 		if ($('.rolling-remove-chk:checkbox:checked').length > 0 ||
 		$('.rolling-add-chk:checkbox:checked').length > 0) {
 			return 'You have unsaved items, are you sure you want to leave the page?';
