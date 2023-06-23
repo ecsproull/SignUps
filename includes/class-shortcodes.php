@@ -671,11 +671,6 @@ class ShortCodes extends SignUpsBase {
 
 						<table id="selection-table" class="mb-100px mr-auto ml-auto"
 							<?php echo $userBadge == null ? 'hidden' : ''; ?> >
-							<tr class="date-row">
-								<td></td>
-								<td></td>
-								<td><button type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee">Submit</button></td>
-							</tr>
 							<?php
 							$attendee_index = 0;
 							$current_day    = '2000-07-01';
@@ -703,6 +698,11 @@ class ShortCodes extends SignUpsBase {
 											if ( $start_date->format( self::DATE_FORMAT ) !== $current_day ) {
 												$current_day = $start_date->format( self::DATE_FORMAT );
 												?>
+												<tr class="date-row">
+													<td></td>
+													<td></td>
+													<td><button type="submit" class="btn btn-md mr-auto ml-auto bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee">Submit</button></td>
+												</tr>
 												<tr class="date-row">
 													<td><?php echo esc_html( $current_day ); ?></td>
 													<td><?php echo esc_html( $slot_titles[0] ); ?></td>

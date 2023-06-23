@@ -128,6 +128,14 @@ jQuery(document).ready(function($){
 		})
 	});
 
+	$(window).on('beforeunload', function(){
+		if ($('.rolling-remove-chk:checkbox:checked').length > 0 ||
+		$('.rolling-add-chk:checkbox:checked').length > 0) {
+			return 'You have unsaved items, are you sure you want to leave the page?';
+		}
+	});
+
+	///// Sripe payment stuff below here. /////
 	// show shipping address if different
 	function showMe() {
 		var box = document.getElementById('same');
