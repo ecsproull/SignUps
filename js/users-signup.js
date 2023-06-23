@@ -21,6 +21,8 @@ jQuery(document).ready(function($){
 					$(this).removeAttr('disabled');
 				});
 				var badgeclass = '.' + response[0].badge;
+				Cookies.set('signups_scw_badge', response[0].badge);
+				$('.rolling-remove-chk').prop("hidden", true);
 				$(badgeclass).prop("hidden", false);
 			} else {
 				alert('Badge number not found.')

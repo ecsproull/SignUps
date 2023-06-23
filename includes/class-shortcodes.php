@@ -523,9 +523,10 @@ class ShortCodes extends SignUpsBase {
 			<div>
 				<div id="usercontent" class="container">
 					<?php
-					$this->create_user_table();
+					$userBadge = $this->create_user_table();
 					?>
-					<table id="selection-table" class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-125px" hidden>
+					<table id="selection-table" class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-125px"
+						<?php echo $userBadge == null ? 'hidden' : ''; ?> >
 						<?php
 						foreach ( $sessions as $session ) {
 							$now = new DateTime( 'now', $this->date_time_zone );
@@ -666,9 +667,15 @@ class ShortCodes extends SignUpsBase {
 					<form class="signup_form" method="POST">
 						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 
-						<?php $this->create_user_table(); ?>
+						<?php $userBadge =  $this->create_user_table(); ?>
 
-						<table id="selection-table" class="mb-100px mr-auto ml-auto" hidden>
+						<table id="selection-table" class="mb-100px mr-auto ml-auto"
+							<?php echo $userBadge == null ? 'hidden' : ''; ?> >
+							<tr class="date-row">
+								<td></td>
+								<td></td>
+								<td><button type="submit" disabled class="btn bth-md mr-auto ml-auto mt-2 bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee">Submit</button></td>
+							</tr>
 							<?php
 							$attendee_index = 0;
 							$current_day    = '2000-07-01';
@@ -698,114 +705,46 @@ class ShortCodes extends SignUpsBase {
 												?>
 												<tr class="date-row">
 													<td><?php echo esc_html( $current_day ); ?></td>
-													<?php
-													if ( '1' === $template->rolling_slots ) {
-														?>
-														<td><?php echo esc_html( $slot_titles[0] ); ?></td>
-														<?php
-													} else {
-														?>
-														<td></td>
-														<?php
-													}
-													?>
-													<td><button type="submit" disabled class="btn bth-md mr-auto ml-auto mt-2 bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee">Submit</button></td>
+													<td><?php echo esc_html( $slot_titles[0] ); ?></td>
+													<td><?php echo esc_html( $slot_titles[1] ); ?></td>
 												</tr>
 												<?php
 											}
 											$temp_end_date = new DateTime( $start_date->format( self::DATETIME_FORMAT ), $this->date_time_zone );
 											$temp_end_date->Add( $duration );
 											$count = 0;
+											?>
+											<tr  class="attendee-row" style="background:lightgray;">
+												<td><?php echo esc_html( $start_date->format( self::TIME_FORMAT ) . ' - ' . $temp_end_date->format( self::TIME_FORMAT ) ); ?></td>
+												<?php
 											foreach ( $slot_titles as $title ) {
 												if ( count( $attendees ) > $attendee_index && $attendees[ $attendee_index ]->attendee_start_time === $start_date->format( 'U' ) &&
 													$title === $attendees[ $attendee_index ]->attendee_item ) {
-														if ( 0 === $count ) {
-														?>
-													<tr  class="attendee-row" style="background:lightgray;">
-													<?php
-														} else {
-															?>
-															<tr  class="attendee-row">
-															<?php
-														}
-														
-														if ( 0 === $count ) {
-															?>
-															<td><?php echo esc_html( $start_date->format( self::TIME_FORMAT ) . ' - ' . $temp_end_date->format( self::TIME_FORMAT ) ); ?></td>
-															<?php
-															$count++;
-														} else {
-															?>
-															<td></td>
-															<?php
-														}
-
-														if ( null === $attendees[ $attendee_index ]->attendee_comment ) {
-															if ( '1' === $template->rolling_slots ) {
-																?>
-																<td class="opacity-33"><?php echo esc_html( 'No Comment' ); ?></td>
-																<?php
-															} else {
-																?>
-																<td><?php echo esc_html( $title ); ?></td>
-																<?php
-															}
-														} else {
-															?>
-															<td><?php echo esc_html( $attendees[ $attendee_index ]->attendee_comment ); ?></td>
-															<?php
-														}
-														?>
-														<td>
-															<?php echo esc_html( $attendees[ $attendee_index ]->attendee_firstname . ' ' . $attendees[ $attendee_index ]->attendee_lastname ); ?>
-															<input class="form-check-input ml-2 rolling-remove-chk <?php echo esc_html( $attendees[ $attendee_index ]->attendee_badge ) ?>" 
-																type="checkbox" name="remove_slots[]" hidden 
-																value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $title . ',' . $comment_index . ',' . $attendees[ $attendee_index ]->attendee_id ); ?>">
-														</td>
-													</tr>
+													?>
+													<td>
+														<?php echo esc_html( $attendees[ $attendee_index ]->attendee_firstname . ' ' . $attendees[ $attendee_index ]->attendee_lastname ); ?>
+														<input class="form-check-input ml-2 rolling-remove-chk <?php echo esc_html( $attendees[ $attendee_index ]->attendee_badge ) ?>" 
+															type="checkbox" name="remove_slots[]" <?php echo $userBadge == $attendees[ $attendee_index ]->attendee_badge ? '' : 'hidden'; ?> 
+															value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $title . ',' . $comment_index . ',' . $attendees[ $attendee_index ]->attendee_id ); ?>">
+													</td>
 													<?php
 													$attendee_index++;
 												} else {
 													$com_name = $comment_name . $comment_index;
 													if ( 0 === $count ) {
-													?>
-													<tr  class="attendee-row" style="background:lightgray;">
-													<?php
-														} else {
-															?>
-															<tr  class="attendee-row">
-															<?php
-														}
-														if ( 0 === $count ) {
-															?>
-															<td><?php echo esc_html( $start_date->format( self::TIME_FORMAT ) . ' - ' . $temp_end_date->format( self::TIME_FORMAT ) ); ?></td>
-															<?php
-															$count++;
-														} else {
-															?>
-															<td></td>
-															<?php
-														}
-														if ( $template->rolling_slots > 1 ) {
-															?>
-															<td><?php echo esc_html( $title ); ?></td>
-															<?php
-														} else {
-															?>
-															<td><input class="comment-text" type="hidden" name="<?php echo esc_html( $com_name ); ?>" placeholder="Comment"></td>
-															<?php
-														}
 														?>
 														<td class="text-center"> 
 															<input class="form-check-input position-relative rolling-add-chk ml-auto <?php echo str_replace(' ', '', $title) ?>" 
 																type="checkbox" name="time_slots[]" 
 																value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $title . ',' . $comment_index . ',0' ); ?>">
 														</td>
-													</tr>
 													<?php
+													}
 												}
-												$comment_index++;
 											}
+											?>
+											</tr>
+											<?php
 										}
 									}
 								}
@@ -833,25 +772,49 @@ class ShortCodes extends SignUpsBase {
 	 * @return void
 	 */
 	private function create_user_table( $hidden = '' ) {
+		global $wpdb;
+		$returnVal = null;
+		if(isset($_COOKIE['signups_scw_badge'])) {
+			$badge = $_COOKIE['signups_scw_badge'];
+			$results = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT *
+					FROM %1s
+					WHERE badge = %s',
+					self::ROSTER_TABLE,
+					$badge
+				),
+				OBJECT
+			);
+
+			if ( $results ) {
+				$returnVal = $results[0]->badge;
+			}
+		}
 		?>
 		<table id="lookup-member" class="mb-100px table table-bordered mr-auto ml-auto" <?php echo esc_html( $hidden ); ?> >
 			<tr>
 				<td>Enter Badge#</td>
-				<td><input id="badge-input" class="member-badge" type="number" name="badge_number" value="" required></td>
+				<td><input id="badge-input" class="member-badge" type="number" name="badge_number" 
+					value=<?php echo $returnVal ? $results[0]->badge : ''; ?> required></td>
 				<td><input type="button" id="get_member_button" class="btn btn-primary" value='Lookup'></td>
 			</tr>
 			<tr>
-				<td><input id="first-name" class=" member-first-name" type="text" name="firstname" value="First" required readonly></td>
-				<td><input id="last-name" class="member-last-name" type="text" name="lastname" value="Last" required readonly></td>
+				<td><input id="first-name" class=" member-first-name" type="text" name="firstname" value=<?php echo $returnVal ? $results[0]->firstname : 'First'; ?> required readonly></td>
+				<td><input id="last-name" class="member-last-name" type="text" name="lastname" value=<?php echo $returnVal ? $results[0]->lastname : 'Last'; ?> required readonly></td>
 				<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button"value="-1" name="signup_id">Cancel</button></td>
 			</tr>
 			<tr>
-				<td><input id="phone" class="member-phone" type="text" name="phone" placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required readonly></td>
-				<td><input id="email" class="member-email" type="email" name="email" placeholder="foo@bar.com" required readonly></td>
+				<td><input id="phone" class="member-phone" type="text" name="phone"
+					value=<?php echo $returnVal ? $results[0]->phone : '888-888-8888'; ?> placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required readonly></td>
+				<td><input id="email" class="member-email" type="email" name="email"
+					value=<?php echo $returnVal ? $results[0]->email : 'foo@bar.com'; ?> placeholder="foo@bar.com" required readonly></td>
 				<td></td>
 			</tr>
 		</table>
 		<?php
+
+		return $returnVal;
 	}
 
 	/**

@@ -135,9 +135,9 @@ class SignupsPlugin extends SignUpsBase {
 		wp_enqueue_style( 'signup_bs_style' );
 		wp_register_style( 'signup_style', plugins_url( '/signups/css/style.css' ), array(), 1 );
 		wp_enqueue_style( 'signup_style' );
-		wp_enqueue_script( 'sigup_member_script', plugins_url( 'js/signups.js', __FILE__ ), array( 'jquery' ), '1.0.0.0', false, true );
+		wp_enqueue_script( 'signup_member_script', plugins_url( 'js/signups.js', __FILE__ ), array( 'jquery' ), '1.0.0.0', false, true );
 		wp_localize_script(
-			'sigup_member_script',
+			'signup_member_script',
 			'wpApiSettings',
 			array(
 				'root'  => esc_url_raw( rest_url() ),
@@ -161,9 +161,10 @@ class SignupsPlugin extends SignUpsBase {
 		wp_register_style( 'signup_style', plugins_url( '/signups/css/users-styles.css' ), array(), 1 );
 		wp_enqueue_style( 'signup_style' );
 		wp_enqueue_style( 'wp-jquery-ui-dialog' );
-		wp_enqueue_script( 'sigup_member_script', plugins_url( 'js/users-signup.js', __FILE__ ), array( 'jquery', 'jquery-ui-dialog' ), '1.0.0.0', false, true );
+		wp_enqueue_script( 'signup_cookie_script', plugins_url( 'cookie/node_modules/js-cookie/dist/js.cookie.min.js', __FILE__ ), array( 'jquery' ), '3.0.5', false, true );
+		wp_enqueue_script( 'signup_member_script', plugins_url( 'js/users-signup.js', __FILE__ ), array( 'jquery', 'jquery-ui-dialog', 'signup_cookie_script' ), '1.0.0.0', false, true );
 		wp_localize_script(
-			'sigup_member_script',
+			'signup_member_script',
 			'wpApiSettings',
 			array(
 				'root'  => esc_url_raw( rest_url() ),
