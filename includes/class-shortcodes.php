@@ -714,7 +714,7 @@ class ShortCodes extends SignUpsBase {
 											$temp_end_date->Add( $duration );
 											$count = 0;
 											?>
-											<tr  class="attendee-row" style="background:lightgray;">
+											<tr  class="attendee-row"  style=<?php echo $i % 2 ? "background:#cfcfcf;" : "background:#efefef;"; ?> >
 												<td><?php echo esc_html( $start_date->format( self::TIME_FORMAT ) . ' - ' . $temp_end_date->format( self::TIME_FORMAT ) ); ?></td>
 												<?php
 											foreach ( $slot_titles as $title ) {
