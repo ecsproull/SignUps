@@ -294,4 +294,85 @@ class SripePayments extends SignUpsBase {
 		<P>Payment Failed</P>
 		<?php
 	}
+
+	public function update_price( $price_id, $product_id , $new_cost ) {
+		$new_cost = $new_cost . '00';
+		$ch = curl_init();
+
+		curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/prices');
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, "unit_amount=" . $new_cost . "&currency=usd&recurring[interval]=month&product=prod_O3LkGgqLwkszx5");
+		curl_setopt($ch, CURLOPT_USERPWD, 'sk_test_51LPCe7EVPTwIS1QJQp7Vd1X9RsslNrfWNaqetmC3v6DsF3ocQrYUgAfRrhcQkYZW77szXpwZ3RoWFn5y7SWU5ZN200ZDxPlBpk' . ':' . '');
+
+		$headers = array();
+		$headers[] = 'Content-Type: application/x-www-form-urlencoded';
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+		$result = curl_exec($ch);
+		if (curl_errno($ch)) {
+			echo 'Error:' . curl_error($ch);
+		}
+		curl_close($ch);
+	}
+
+	public function populate_products_table() {
+		global $wpdb;
+		$ch = curl_init();
+
+		curl_setopt( $ch, CURLOPT_URL, 'https://api.stripe.com/v1/products' );
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, 'GET' );
+
+		curl_setopt( $ch, CURLOPT_USERPWD, 'sk_test_51LPCe7EVPTwIS1QJQp7Vd1X9RsslNrfWNaqetmC3v6DsF3ocQrYUgAfRrhcQkYZW77szXpwZ3RoWFn5y7SWU5ZN200ZDxPlBpk' . ':' . '' );
+
+		$result = curl_exec( $ch );
+		if (curl_errno( $ch )) {
+			echo 'Error:' . curl_error( $ch );
+		} else {
+			$products = json_decode( $result );
+			curl_close( $ch );
+
+			foreach( $products->data as $product ) {
+				$product_row  = $wpdb->get_row(
+					$wpdb->prepare(
+						'SELECT *
+						FROM %1s
+						WHERE products_product_id = %s',
+						self::STRIPE_PRODUCTS_TABLE,
+						$product->id
+					),
+					OBJECT
+				);
+
+				if ( ! $product_row && $product->default_price ) {
+					$ch = curl_init();
+
+					curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/prices/' . $product->default_price);
+					curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+					curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+					
+					curl_setopt($ch, CURLOPT_USERPWD, 'sk_test_51LPCe7EVPTwIS1QJQp7Vd1X9RsslNrfWNaqetmC3v6DsF3ocQrYUgAfRrhcQkYZW77szXpwZ3RoWFn5y7SWU5ZN200ZDxPlBpk' . ':' . '');
+					
+					$price_result = curl_exec($ch);
+					if (curl_errno($ch)) {
+						echo 'Error:' . curl_error($ch);
+					} else {
+						$price = json_decode( $price_result );
+
+						$product_new = Array();
+						$product_new['products_product_id'] = $product->id;
+						$product_new['products_product_description'] = $product->description ? $product->description : $product->name  ;
+						$product_new['products_price_id'] = $product->default_price;
+						$product_new['products_price'] = $price->unit_amount / 100;
+						$product_new['products_product_name'] = $product->name;
+						curl_close($ch);
+
+						$rows = $wpdb->insert( self::STRIPE_PRODUCTS_TABLE, $product_new );
+						
+					}
+				}
+			}
+		}
+	}
 }

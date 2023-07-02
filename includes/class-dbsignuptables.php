@@ -154,5 +154,19 @@ class DbSignUpTables {
 				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
 			);
 		}
+
+		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_stripe_products"' ) !== 'wp_scw_stripe_products' ) {
+			$wpdb->query(
+				'CREATE TABLE `edswpdb`.`wp_scw_stripe_products` (
+					`products_id` int NOT NULL AUTO_INCREMENT,
+					`products_product_id` varchar(45) NOT NULL,
+					`products_product_description` varchar(200) NOT NULL,
+					`products_price_id` varchar(45) NOT NULL,
+					`products_price` int NOT NULL,
+					`products_product_name` varchar(45) NOT NULL,
+					PRIMARY KEY (`products_id`)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'
+			);	
+		}
 	}
 }

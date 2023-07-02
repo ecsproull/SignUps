@@ -78,6 +78,13 @@ class SignUpsBase {
 	protected const SIGNUP_DESCRIPTIONS_TABLE = 'wp_scw_signup_descriptions';
 
 	/**
+	 * Stripe products table.
+	 *
+	 * @var mixed
+	 */
+	protected const STRIPE_PRODUCTS_TABLE = 'wp_scw_stripe_products';
+
+	/**
 	 * Format DateTime as 2020-08-13 6:00 am.
 	 *
 	 * @var mixed

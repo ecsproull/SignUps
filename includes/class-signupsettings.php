@@ -64,10 +64,13 @@ class SignupSettings extends SignUpsBase {
 	 */
 	private function submit_class( $post ) {
 		global $wpdb;
-		$where              = array();
-		$where['signup_id'] = (int) $post['id'];
+		$where                   = array();
+		$where['signup_id']      = (int) $post['id'];
+		$original_cost           = $post['original_cost'];
+		$signup_default_price_id = $post['signup_default_price_id'];
 		unset( $post['submit_class'] );
 		unset( $post['id'] );
+		unset( $post['original_cost'] );
 
 		$post['signup_cost']             = (int) $post['signup_cost'];
 		$post['signup_default_slots']    = (int) $post['signup_default_slots'];
@@ -75,12 +78,17 @@ class SignupSettings extends SignUpsBase {
 
 		$affected_row_count = 0;
 		if ( $where['signup_id'] ) {
+			if ( $original_cost != $post['signup_cost'] ) {
+				$stripe = new SripePayments();
+				$stripe->update_price( $signup_default_price_id,$post['signup_cost'] );
+			}
 			$affected_row_count = $wpdb->update(
 				'wp_scw_signups',
 				$post,
 				$where
 			);
 		} else {
+			//need to set up price information.
 			$affected_row_count = $wpdb->insert( self::SIGNUPS_TABLE, $post );
 		}
 		if ( $affected_row_count ) {
@@ -115,12 +123,17 @@ class SignupSettings extends SignUpsBase {
 		);
 
 		array_map(
-			function( $start, $end ) use ( $post, $signup ) {
+			function( $start, $end, $keys ) use ( $post, $signup ) {
 				global $wpdb;
 				if ( $start && $end ) {
 					$session = $post;
-					$where   = array( 'session_id' => $session['id'] );
-					unset( $session['id'] );
+					$where = Array();
+					
+					if ( isset( $session['id'] )) {
+						$where['session_id'] = $session['id'];
+						unset( $session['id'] );
+					}
+
 					unset( $session['submit_session'] );
 					$rows_updated                       = 0;
 					$start_date                         = new DateTime( $start, $this->date_time_zone );
@@ -136,17 +149,19 @@ class SignupSettings extends SignUpsBase {
 						unset( $session['session_price_id'] );
 					}
 
-					if ( $where['session_id'] ) {
+					if ( $where['session_id'] && $keys === 0) {
 						$rows_updated = $wpdb->update( 'wp_scw_sessions', $session, $where );
 					} else {
 						$rows_updated = $wpdb->insert( 'wp_scw_sessions', $session );
 					}
 
-					$this->update_message( $rows_updated );
+					$this->update_message( $rows_updated, $wpdb->last_error );
+					$first_item = false;
 				}
 			},
 			$post['session_start_formatted'],
-			$post['session_end_formatted']
+			$post['session_end_formatted'],
+			array_keys( $post['session_start_formatted'] )
 		);
 	}
 
@@ -440,18 +455,18 @@ class SignupSettings extends SignUpsBase {
 						}
 						?>
 						<tr>
-							<td class="w-25">Enter Badge#</td>
+							<td class="w-25" style="text-align: right; ">Enter Badge#</td>
 							<td class="w-25"><input id="badge_input" type="number" #badgeNumber></td>
 							<td class="w-25"><input type="button" id="get_member_button" class="btn btn-primary" value='Get Member'></td>
 							<td class="w-25"></td>
 							<td class='w-75px'></td>
 						</tr>
 						<tr>
-							<td><input id="firstname" name="firstname" type='text'></td>
-							<td><input id="lastname" name="lastname" type='text'></td>
-							<td><input id="phone" name="phone" type='phone' pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"></td>
-							<td><input id="email" name="email" type='email'></td>
-							<td><input id="badge" name="badge" type='text' pattern="[0-9]{4}"></td>
+							<td><input id="firstname" name="firstname" type='text' readonly></td>
+							<td><input id="lastname" name="lastname" type='text' readonly></td>
+							<td><input id="phone" name="phone" type='phone' pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" readonly></td>
+							<td><input id="email" name="email" type='email' readonly></td>
+							<td><input id="badge" name="badge" type='text' pattern="[0-9]{4}" readonly></td>
 						</tr>
 						<td></td>
 						<td><input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="window.history.go( -1 );" value="Back"></td>
@@ -475,17 +490,24 @@ class SignupSettings extends SignUpsBase {
 	 * @param  mixed $rows_updated How many rows were updated in the database.
 	 * @return void
 	 */
-	private function update_message( $rows_updated ) {
+	private function update_message( $rows_updated, $last_error ) {
 		if ( 1 === $rows_updated ) {
 			?>
 			<div class="text-center mt-5">
 				<h2> Session Updated </h2>
+				<h3><?php echo esc_html( $rows_updated ); ?> Rows Updated</h3>
+			</div>
+			<?php
+		} elseif ( $last_error === '' ) {
+			?>
+			<div class="text-center mt-5">
+				<h2> Session Updated, No Change </h2>
 			</div>
 			<?php
 		} else {
 			?>
 			<div class="text-center mt-5">
-				<h2> Something went wrong. </h2>
+				<h2> Error: <?php echo esc_html( $last_error ); ?> </h2>
 				<h3><?php echo esc_html( $rows_updated ); ?> Rows Updated</h3>
 			</div>
 			<?php
@@ -832,6 +854,8 @@ class SignupSettings extends SignUpsBase {
 				</tr>
 			</table>
 			<input type="hidden" name="id" value="<?php echo esc_html( $data->signup_id ); ?>">
+			<input type="hidden" name="original_cost" value="<?php echo esc_html( $data->signup_cost ); ?>">
+			<input type="hidden" name="signup_default_price_id" value="<?php echo esc_html( $data->signup_default_price_id ); ?>">
 			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 		</form>
 		<?php
@@ -899,16 +923,8 @@ class SignupSettings extends SignUpsBase {
 					<td><input class="btn bt-md btn-primary mr-auto ml-auto mt-2" type="submit" value="Submit Session" name="submit_session"></td>
 				</tr>
 			</table>
-			<?php
-			if ( $add_new ) {
-				?>
-				<input type="hidden" name="session_signup_id" value="<?php echo esc_html( $data->session_signup_id ); ?>">
-				<?php
-			}
-			?>
+			<input type="hidden" name="session_signup_id" value="<?php echo esc_html( $data->session_signup_id ); ?>">
 			<input type="hidden" name="id" value="<?php echo esc_html( $data->session_id ); ?>">
-			<input type="hidden" name="" value="<?php echo esc_html( $data->session_id ); ?>">
-			<input type="hidden" name="" value="<?php echo esc_html( $data->session_id ); ?>">
 			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 		</form>
 		<?php

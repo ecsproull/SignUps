@@ -28,6 +28,9 @@ class ProductsEditor {
 	 * @return void
 	 */
 	public function load_products_editor() {
+
+		//$stripe = new SripePayments();
+		//$stripe->populate_products_table();
 		echo 'Products Editor is Loaded';
 	}
 }
