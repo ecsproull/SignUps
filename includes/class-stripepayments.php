@@ -14,6 +14,34 @@
  */
 class SripePayments extends SignUpsBase {
 
+	private $stripe_api_secret;
+	private $stripe_api_key;
+	private $stripe_endpoint_secret;
+	private $stripe_root_url;
+
+
+	/**
+	 * __construct
+	 *
+	 * @return void
+	 */
+	public function __construct() {
+		global $wpdb;
+		$stripe_row = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s',
+				self::STRIPE_TABLE,
+			),
+			OBJECT
+		);
+
+		$this->stripe_endpoint_secret = $stripe_row[0]->stripe_endpoint_secret;
+		$this->stripe_api_key         = $stripe_row[0]->stripe_api_key;
+		$this->stripe_api_secret      = $stripe_row[0]->stripe_api_secret;
+		$this->stripe_root_url        = $stripe_row[0]->stripe_root_url;
+	}
+
 		/**
 		 * Verification is done in the Payment Event handler.
 		 */
@@ -26,19 +54,8 @@ class SripePayments extends SignUpsBase {
 	 */
 	public function payment_event() {
 		global $wpdb;
-		$stripe_row = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT *
-				FROM %1s',
-				self::STRIPE_TABLE,
-			),
-			OBJECT
-		);
 
-		\Stripe\Stripe::setApiKey( $stripe_row[0]->stripe_api_key );
-
-		// Secret is at https://dashboard.stripe.com/webhooks.
-		$endpoint_secret = $stripe_row[0]->stripe_endpoint_secret;
+		\Stripe\Stripe::setApiKey( $this->stripe_api_key );
 
 		$payload = @file_get_contents( 'php://input' );
 		$event   = null;
@@ -53,7 +70,7 @@ class SripePayments extends SignUpsBase {
 			exit();
 		}
 
-		if ( $endpoint_secret ) {
+		if ( $stripe_endpoint_secret ) {
 			/**
 			 * Only verify the event if there is an endpoint secret defined
 			 * Otherwise use the basic decoded event
@@ -63,7 +80,7 @@ class SripePayments extends SignUpsBase {
 				$event = \Stripe\Webhook::constructEvent(
 					$payload,
 					$sig_header,
-					$endpoint_secret
+					$stripe_endpoint_secret
 				);
 			} catch ( \Stripe\Exception\SignatureVerificationException $e ) {
 				echo '⚠️  Webhook error while validating signature.';
@@ -205,19 +222,9 @@ class SripePayments extends SignUpsBase {
 	 * @return void
 	 */
 	public function collect_money( $description, $price_id, $badge, $attendee_id, $cost ) {
-		global $wpdb;
-		$stripe_row = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT *
-				FROM %1s',
-				self::STRIPE_TABLE,
-			),
-			OBJECT
-		);
-
-		\Stripe\Stripe::setApiKey( $stripe_row[0]->stripe_api_secret );
+		\Stripe\Stripe::setApiKey( $this->stripe_api_secret );
 		header( 'Content-Type: application/json' );
-		$signup_domain    = $stripe_row[0]->stripe_root_url;
+		$signup_domain    = $this->stripe_root_url;
 		$checkout_session = \Stripe\Checkout\Session::create(
 			array(
 				'metadata'    => array(
@@ -295,84 +302,47 @@ class SripePayments extends SignUpsBase {
 		<?php
 	}
 
+	/**
+	 * Update the price for a signup.
+	 *
+	 * @return The new price id.
+	 */
 	public function update_price( $price_id, $product_id , $new_cost ) {
-		$new_cost = $new_cost . '00';
-		$ch = curl_init();
 
-		curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/prices');
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, "unit_amount=" . $new_cost . "&currency=usd&recurring[interval]=month&product=prod_O3LkGgqLwkszx5");
-		curl_setopt($ch, CURLOPT_USERPWD, 'sk_test_51LPCe7EVPTwIS1QJQp7Vd1X9RsslNrfWNaqetmC3v6DsF3ocQrYUgAfRrhcQkYZW77szXpwZ3RoWFn5y7SWU5ZN200ZDxPlBpk' . ':' . '');
+		$stripe = new \Stripe\StripeClient( $this->stripe_api_secret );
+		$result = $stripe->prices->create([
+			'unit_amount' => ( int )($new_cost . '00'),
+			'currency' => 'usd',
+			'product' => $product_id,
+		]);
 
-		$headers = array();
-		$headers[] = 'Content-Type: application/x-www-form-urlencoded';
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-		$result = curl_exec($ch);
-		if (curl_errno($ch)) {
-			echo 'Error:' . curl_error($ch);
+		if ( $result->code == 200 ) {
+			return $result->id;
 		}
-		curl_close($ch);
+
+		return $result->id;
 	}
 
-	public function populate_products_table() {
-		global $wpdb;
-		$ch = curl_init();
+		/**
+	 * Update the price for a signup.
+	 *
+	 * @return The new product and price id as a comma seperated string.
+	 */
+	public function create_product( $name, $cost ) {
 
-		curl_setopt( $ch, CURLOPT_URL, 'https://api.stripe.com/v1/products' );
-		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, 'GET' );
+		$stripe = new \Stripe\StripeClient( $this->stripe_api_secret );
+		$result = $stripe->products->create([
+			'name' => $name,
+			'default_price_data' => ['currency' => 'usd', 'unit_amount' => ( int )$cost * 100]
+		]);
 
-		curl_setopt( $ch, CURLOPT_USERPWD, 'sk_test_51LPCe7EVPTwIS1QJQp7Vd1X9RsslNrfWNaqetmC3v6DsF3ocQrYUgAfRrhcQkYZW77szXpwZ3RoWFn5y7SWU5ZN200ZDxPlBpk' . ':' . '' );
-
-		$result = curl_exec( $ch );
-		if (curl_errno( $ch )) {
-			echo 'Error:' . curl_error( $ch );
+		if ( $result ) {
+			$ret = Array();
+			$ret['product_id'] = $result->id;
+			$ret['price_id']   = $result->default_price;
+			return $ret;
 		} else {
-			$products = json_decode( $result );
-			curl_close( $ch );
-
-			foreach( $products->data as $product ) {
-				$product_row  = $wpdb->get_row(
-					$wpdb->prepare(
-						'SELECT *
-						FROM %1s
-						WHERE products_product_id = %s',
-						self::STRIPE_PRODUCTS_TABLE,
-						$product->id
-					),
-					OBJECT
-				);
-
-				if ( ! $product_row && $product->default_price ) {
-					$ch = curl_init();
-
-					curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/prices/' . $product->default_price);
-					curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-					curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-					
-					curl_setopt($ch, CURLOPT_USERPWD, 'sk_test_51LPCe7EVPTwIS1QJQp7Vd1X9RsslNrfWNaqetmC3v6DsF3ocQrYUgAfRrhcQkYZW77szXpwZ3RoWFn5y7SWU5ZN200ZDxPlBpk' . ':' . '');
-					
-					$price_result = curl_exec($ch);
-					if (curl_errno($ch)) {
-						echo 'Error:' . curl_error($ch);
-					} else {
-						$price = json_decode( $price_result );
-
-						$product_new = Array();
-						$product_new['products_product_id'] = $product->id;
-						$product_new['products_product_description'] = $product->description ? $product->description : $product->name  ;
-						$product_new['products_price_id'] = $product->default_price;
-						$product_new['products_price'] = $price->unit_amount / 100;
-						$product_new['products_product_name'] = $product->name;
-						curl_close($ch);
-
-						$rows = $wpdb->insert( self::STRIPE_PRODUCTS_TABLE, $product_new );
-						
-					}
-				}
-			}
-		}
+			return null;
+		}		
 	}
 }

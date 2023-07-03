@@ -68,6 +68,7 @@ class SignupSettings extends SignUpsBase {
 		$where['signup_id']      = (int) $post['id'];
 		$original_cost           = $post['original_cost'];
 		$signup_default_price_id = $post['signup_default_price_id'];
+		$signup_product_id       = $post['signup_product_id'];
 		unset( $post['submit_class'] );
 		unset( $post['id'] );
 		unset( $post['original_cost'] );
@@ -80,15 +81,30 @@ class SignupSettings extends SignUpsBase {
 		if ( $where['signup_id'] ) {
 			if ( $original_cost != $post['signup_cost'] ) {
 				$stripe = new SripePayments();
-				$stripe->update_price( $signup_default_price_id,$post['signup_cost'] );
+				$new_price_id = $stripe->update_price( $signup_default_price_id, $signup_product_id, $post['signup_cost'] );
+				if ( $new_price_id ) {
+					$post['signup_default_price_id'] = $new_price_id;
+				}
 			}
+
 			$affected_row_count = $wpdb->update(
 				'wp_scw_signups',
 				$post,
 				$where
 			);
 		} else {
-			//need to set up price information.
+			if ( ( int )$post['signup_cost'] > 0 ) {
+				$stripe = new SripePayments();
+				$ret = $stripe->create_product( $post['signup_name'], $post['signup_cost'] );
+				if ( $ret ) {
+					$post['signup_product_id'] = $ret['product_id'];
+					$post['signup_default_price_id'] = $ret['price_id'];
+				} else {
+					echo "Failed to create stripe pricing and product info";
+					return;
+				}
+			}
+			
 			$affected_row_count = $wpdb->insert( self::SIGNUPS_TABLE, $post );
 		}
 		if ( $affected_row_count ) {
@@ -856,6 +872,7 @@ class SignupSettings extends SignUpsBase {
 			<input type="hidden" name="id" value="<?php echo esc_html( $data->signup_id ); ?>">
 			<input type="hidden" name="original_cost" value="<?php echo esc_html( $data->signup_cost ); ?>">
 			<input type="hidden" name="signup_default_price_id" value="<?php echo esc_html( $data->signup_default_price_id ); ?>">
+			<input type="hidden" name="signup_product_id" value="<?php echo esc_html( $data->signup_product_id ); ?>">
 			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 		</form>
 		<?php
