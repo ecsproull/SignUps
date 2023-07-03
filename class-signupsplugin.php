@@ -116,8 +116,7 @@ class SignupsPlugin extends SignUpsBase {
 	 */
 	public function signup_plugin_top_menu() {
 		add_menu_page( '', 'SignUps', 'manage_options', 'sign_ups', array( new SignupSettings(), 'signup_settings_page' ), plugins_url( '/signups/img/frenchie.bmp' ) );
-		add_submenu_page( 'sign_ups', 'Html Editor', 'Desctiptions', 'manage_options', 'html_editor', array( new HtmlEditor(), 'load_html_editor' ) );
-		add_submenu_page( 'sign_ups', 'Products Editor', 'Products', 'manage_options', 'products_editor', array( new ProductsEditor(), 'load_products_editor' ) );
+		add_submenu_page( 'sign_ups', 'Html Editor', 'Descriptions', 'manage_options', 'html_editor', array( new HtmlEditor(), 'load_html_editor' ) );
 		add_submenu_page( 'sign_ups', 'Rolling Templates Editor', 'Rolling Templates', 'manage_options', 'template_editor', array( new RollingTemplatesEditor(), 'load_templates_editor' ) );
 	}
 
