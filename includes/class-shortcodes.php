@@ -302,11 +302,15 @@ class ShortCodes extends SignUpsBase {
 						<td><?php echo esc_html( $post['firstname'] . ' ' . $post['lastname'] ); ?></td>
 						<td><?php echo esc_html( $slot_parts[2] ); ?></td>
 						<?php
-						if ( ! $insert_return_value || $signed_up_already ) {
+						if ( ! $insert_return_value ) {
 							?>
-							<td style="color:red"><b><i>Failed</i></b></td>
+							<td style="color:red"><b><i>Failed DB Insert</i></b></td>
 							<?php
-						} else {
+						} elseif ( $signed_up_already ) {
+							?>
+							<td style="color:red"><b><i>Failed, Signed up alread</i></b></td>
+							<?php
+						} {
 							?>
 							<td>Success</td>
 							<?php

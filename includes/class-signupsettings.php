@@ -243,7 +243,7 @@ class SignupSettings extends SignUpsBase {
 		$rows_updated    = $wpdb->delete( self::SESSIONS_TABLE, $where_session );
 		$where_attendees = array( 'attendee_session_id' => $post['session_id'] );
 		$wpdb->delete( self::ATTENDEES_TABLE, $where_attendees );
-		$this->update_message( $rows_updated );
+		$this->update_message( $rows_updated, $wpdb->last_error );
 	}
 
 	/**
@@ -286,14 +286,14 @@ class SignupSettings extends SignUpsBase {
 		foreach ( $sessions as $session ) {
 
 			$new_attendee = array(
-				'attendee_session_id'  => (int) $session->session_id,
-				'attendee_email'       => $post['email'],
-				'attendee_firstname'   => $post['firstname'],
-				'attendee_lastname'    => $post['lastname'],
-				'attendee_phone'       => $post['phone'],
-				'attendee_badge'       => $post['badge'],
-				'attendee_paid_amount' => 0,
-				'attendee_item'        => $session->session_item,
+				'attendee_session_id'   => (int) $session->session_id,
+				'attendee_email'        => $post['email'],
+				'attendee_firstname'    => $post['firstname'],
+				'attendee_lastname'     => $post['lastname'],
+				'attendee_phone'        => $post['phone'],
+				'attendee_badge'        => $post['badge'],
+				'attendee_balance_owed' => 0,
+				'attendee_item'         => $session->session_item,
 			);
 
 			$wpdb->insert( self::ATTENDEES_TABLE, $new_attendee );
@@ -631,7 +631,7 @@ class SignupSettings extends SignUpsBase {
 			<h1><?php echo esc_html( $signup_name ); ?></h1>
 			<div>
 				<div id="content" class="container">
-					<table class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-125px">
+					<table class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-200px">
 						<form method="POST">
 						<tr style="background-color: lightyellow;">
 							<td class="text-left" >
