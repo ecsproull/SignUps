@@ -268,7 +268,7 @@ class SignUpsBase {
 	 * @param  object $template The template for the rolling class.
 	 * @return void
 	 */
-	protected function create_rolling_session_select_form( $signup_name, $attendees, $signup_id, $template ) {
+	protected function create_rolling_session_select_form( $signup_name, $attendees, $signup_id, $template, $admin = false ) {
 
 		$current_badge = '4038';
 		$start_time_parts = explode( ':', $template->rolling_start_time );
@@ -379,7 +379,7 @@ class SignUpsBase {
 													<td>
 														<?php echo esc_html( $attendees[ $attendee_index ]->attendee_firstname . ' ' . $attendees[ $attendee_index ]->attendee_lastname ); ?>
 														<input class="form-check-input ml-2 rolling-remove-chk mt-1 <?php echo esc_html( $attendees[ $attendee_index ]->attendee_badge ) ?>" 
-															type="checkbox" name="remove_slots[]" <?php echo $userBadge == $attendees[ $attendee_index ]->attendee_badge ? '' : 'hidden'; ?> 
+															type="checkbox" name="remove_slots[]" <?php echo $userBadge || $admin == $attendees[ $attendee_index ]->attendee_badge ? '' : 'hidden'; ?> 
 															value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $title . ',' . $comment_index . ',' . $attendees[ $attendee_index ]->attendee_id ); ?>">
 													</td>
 													<?php
@@ -576,7 +576,7 @@ class SignUpsBase {
 		clean_post_cache( $post );
 	}
 
-	protected function create_rolling_session( $rolling_signup_id ) {
+	protected function create_rolling_session( $rolling_signup_id, $admin = false ) {
 		global $wpdb;
 		$today = new DateTime( 'now', $this->date_time_zone );
 		$today->SetTime( 8, 0 );
@@ -619,7 +619,8 @@ class SignUpsBase {
 			$signup_name,
 			$attendees_rolling,
 			$rolling_signup_id,
-			$template[0]
+			$template[0],
+			$admin
 		);
 	}
 }

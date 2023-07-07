@@ -382,7 +382,7 @@ class SignupSettings extends SignUpsBase {
 		$rolling = $class[0]->signup_rolling_template > 0;
 
 		if ( $rolling ) {
-			$this->create_rolling_session( $signup_id );
+			$this->create_rolling_session( $signup_id, true );
 		} else {
 
 			$sessions = $wpdb->get_results(
