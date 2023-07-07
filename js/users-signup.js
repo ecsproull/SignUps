@@ -109,7 +109,7 @@ jQuery(document).ready(function($){
 	});
 
 	$(".back-button").click(function() {
-		history.back();
+		window.location.href = "https://" + location.hostname;
 	});
 
 	$("#selection-table input:radio").click (function(e) {

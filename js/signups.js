@@ -1,5 +1,5 @@
 jQuery( document ).ready( function($){
-	$( "#get_member_button" ).click( function(){
+	$( "#get_member_button2" ).click( function(){
 		let req = $.ajax( {
 			url: wpApiSettings.root + 'scwmembers/v1/members',
 			method: 'GET',
@@ -22,6 +22,39 @@ jQuery( document ).ready( function($){
 			}
 		} ).error( function ( response ) {
 			alert( 'Error: ' + req.status + ' Verify badge number is correct.' );
+		});
+	});
+
+	$("#get_member_button").click(function(){
+		var req = $.ajax({
+			url: wpApiSettings.root + 'scwmembers/v1/members',
+			method: 'GET',
+			beforeSend: function (xhr) {
+				xhr.setRequestHeader('X-WP-Nonce', wpApiSettings.nonce);
+			},
+			data:{
+				'badge' : $("#badge-input").val()
+			}
+		}).done(function (response) {
+			if (response.length > 0) {
+				$('.member-first-name').each(function () { $(this).val(response[0].firstname); });
+				$('.member-last-name').each(function () { $(this).val(response[0].lastname); });
+				$('.member-email').each(function () { $(this).val(response[0].email); });
+				$('.member-phone').each(function () { $(this).val(response[0].phone);  });
+				$('.member-badge').each(function () { $(this).val(response[0].badge);  });
+				$("#selection-table").prop("hidden", false);
+				$('button[type="submit"]').each(function() {
+					$(this).removeAttr('disabled');
+				});
+				var badgeclass = '.' + response[0].badge;
+				Cookies.set('signups_scw_badge', response[0].badge);
+				$('.rolling-remove-chk').prop("hidden", true);
+				$(badgeclass).prop("hidden", false);
+			} else {
+				alert('Badge number not found.')
+			}
+		}).error(function (response) {
+			alert('Error: ' + req.status + ' Verify badge number is correct.');
 		});
 	});
 

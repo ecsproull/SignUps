@@ -134,6 +134,8 @@ class SignupsPlugin extends SignUpsBase {
 		wp_enqueue_style( 'signup_bs_style' );
 		wp_register_style( 'signup_style', plugins_url( '/signups/css/style.css' ), array(), 1 );
 		wp_enqueue_style( 'signup_style' );
+		wp_register_style( 'user_signup_style', plugins_url( '/signups/css/users-styles.css' ), array(), 1 );
+		wp_enqueue_style( 'user_signup_style' );
 		wp_enqueue_script( 'signup_member_script', plugins_url( 'js/signups.js', __FILE__ ), array( 'jquery' ), '1.0.0.0', false, true );
 		wp_localize_script(
 			'signup_member_script',

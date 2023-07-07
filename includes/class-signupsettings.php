@@ -8,15 +8,6 @@
 class SignupSettings extends SignUpsBase {
 
 	/**
-	 * __construct
-	 *
-	 * @return void
-	 */
-	public function __construct() {
-	}
-
-
-	/**
 	 * The main function of the Plugin.
 	 * This delegates all the real work to helper functions.
 	 * Loading the class selection is the default.
@@ -51,6 +42,10 @@ class SignupSettings extends SignUpsBase {
 				$this->load_session_selection( $post );
 			} elseif ( isset( $post['delete_session'] ) ) {
 				$this->delete_session( $post );
+			} elseif ( isset( $post['add_attendee_session'] ) ) {
+				$this->add_attendee_rolling( $post );
+			} else {
+				$this->load_signup_selection();
 			}
 		} else {
 			$this->load_signup_selection();
@@ -368,7 +363,8 @@ class SignupSettings extends SignUpsBase {
 	 * @param int $post The posted data from the form.
 	 */
 	private function load_session_selection( $post ) {
-		$signup_name = $post[ $post['edit_sessions_signup_id'] ];
+		$signup_id = $post['edit_sessions_signup_id'];
+		$signup_name = $post[$signup_id];
 		global $wpdb;
 		$instructors = array();
 		$attendees   = array();
@@ -378,59 +374,55 @@ class SignupSettings extends SignUpsBase {
 				FROM %1s
 				WHERE signup_id = %s',
 				self::SIGNUPS_TABLE,
-				$post['edit_sessions_signup_id']
+				$signup_id
 			),
 			OBJECT
 		);
 
 		$rolling = $class[0]->signup_rolling_template > 0;
 
-		$sessions = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT session_id,
-				session_start_formatted,
-				session_start_time,
-				session_slots
-				FROM %1s
-				WHERE session_signup_id = %s',
-				self::SESSIONS_TABLE,
-				$post['edit_sessions_signup_id']
-			),
-			OBJECT
-		);
+		if ( $rolling ) {
+			$this->create_rolling_session( $signup_id );
+		} else {
 
-		foreach ( $sessions as $session ) {
-			$attendees[ $session->session_id ]   = array();
-			$instructors[ $session->session_id ] = array();
-			$session_list                        = $wpdb->get_results(
+			$sessions = $wpdb->get_results(
 				$wpdb->prepare(
-					'SELECT *
+					'SELECT session_id,
+					session_start_formatted,
+					session_start_time,
+					session_slots
 					FROM %1s
-					WHERE attendee_session_id = %s
-					AND attendee_email != ""',
-					self::ATTENDEES_TABLE,
-					$session->session_id
+					WHERE session_signup_id = %s',
+					self::SESSIONS_TABLE,
+					$post['edit_sessions_signup_id']
 				),
 				OBJECT
 			);
-
-			foreach ( $session_list as $attendee ) {
-				if ( 'INSTRUCTOR' === $attendee->attendee_item ) {
-					$instructors[ $session->session_id ][] = $attendee;
-				} else {
-					$attendees[ $session->session_id ][] = $attendee;
+	
+			foreach ( $sessions as $session ) {
+				$attendees[ $session->session_id ]   = array();
+				$instructors[ $session->session_id ] = array();
+				$session_list                        = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT *
+						FROM %1s
+						WHERE attendee_session_id = %s
+						AND attendee_email != ""',
+						self::ATTENDEES_TABLE,
+						$session->session_id
+					),
+					OBJECT
+				);
+	
+				foreach ( $session_list as $attendee ) {
+					if ( 'INSTRUCTOR' === $attendee->attendee_item ) {
+						$instructors[ $session->session_id ][] = $attendee;
+					} else {
+						$attendees[ $session->session_id ][] = $attendee;
+					}
 				}
 			}
-		}
 
-		if ( $rolling ) {
-			$this->create_rolling_session_select_form(
-				$signup_name,
-				$sessions,
-				$attendees,
-				$post['edit_sessions_signup_id']
-			);
-		} else {
 			$this->create_session_select_form(
 				$signup_name,
 				$sessions,
@@ -473,7 +465,7 @@ class SignupSettings extends SignUpsBase {
 						<tr>
 							<td class="w-25" style="text-align: right; ">Enter Badge#</td>
 							<td class="w-25"><input id="badge_input" type="number" #badgeNumber></td>
-							<td class="w-25"><input type="button" id="get_member_button" class="btn btn-primary" value='Get Member'></td>
+							<td class="w-25"><input type="button" id="get_member_button2" class="btn btn-primary" value='Get Member'></td>
 							<td class="w-25"></td>
 							<td class='w-75px'></td>
 						</tr>
@@ -659,7 +651,7 @@ class SignupSettings extends SignUpsBase {
 								<td></td>
 								<td></td>
 								<td>
-									<div class="popup" data-textid=<?php echo esc_html( 'sessionid' . $session->session_id ); ?> ><b><i><u>Edit</u></i></b>
+									<div class="popup" data-textid=<?php echo esc_html( 'sessionid' . $session->session_id ); ?> ><b><i><u>Actions</u></i></b>
 										<span class="popuptext" id=<?php echo esc_html( 'sessionid' . $session->session_id ); ?> >
 											<input class="btn btn-primary w-90 mb-1" 
 												type="submit"
@@ -737,78 +729,6 @@ class SignupSettings extends SignUpsBase {
 							<?php
 						}
 						?>
-				</table>
-			</div>
-		</div>
-		<input class="btn btn-danger mt-2" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back">
-		</div>
-		<?php
-	}
-
-	/**
-	 * Creates a form that displays the rolling sessions along with their attenees
-	 *
-	 * @param  string $signup_name The class name.
-	 * @param  array  $sessions The list of sessions for the class.
-	 * @param  array  $attendees The list of attendees for the class.
-	 * @param  int    $signup_id The ID of the class.
-	 * @return void
-	 */
-	private function create_rolling_session_select_form( $signup_name, $sessions, $attendees, $signup_id ) {
-		?>
-		<div id="session_select" class="text-center mt-5">
-			<h1><?php echo esc_html( $signup_name ); ?></h1>
-			<div>
-				<div id="content" class="container">
-					<table class="mb-100px table table-bordered mr-auto ml-auto mt-150px">
-						<form method="POST">
-						<tr style="background-color: lightyellow;">
-							<td></td>
-							<td style="width: 200px;"></td>
-							<td></td>
-							<td>
-								<div class="popup" data-textid="popup_id" ><b><i><u>Edit</u></i></b>
-									<span class="popuptext" id="popup_id">
-										<!-- input class="btn btn-primary w-90 mb-1" type="submit" name="edit_session" value="Edit Sessions" --> 
-										<input class="btn btn-success w-90" type="submit" name="add_attendee" value="Add Attendee">
-										<input id="move" class="btn btn-primary w-90 mb-1 mt-2" type="submit" value="Move Selected" name="move_attendees">
-										<input class="btn btn-danger w-90 mb-1" type="submit" value="Delete Selected" name="delete_attendees" onclick="return confirm('Confirm Attendee Delete')">
-									</span>
-								</div>
-							</td>
-						</tr>
-						<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
-						<input id='move_to' type="hidden" name="move_to" value="0">
-						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
-						<?php
-						foreach ( $sessions as $session ) {
-							foreach ( $attendees[ $session->session_id ] as $attendee ) {
-								?>
-								<tr  class="drag-row" draggable="true" data-dragable="<?php $this->session_attendee_string( $attendee->attendee_id, $session->session_id ); ?>">
-									<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
-									<td><?php echo esc_html( $this->format_date( $session->session_start_formatted ) ); ?></td>
-									<td><?php echo esc_html( $attendee->attendee_email ); ?></td>
-									<td class="centerCheckBox"> <input class="form-check-input position-relative selChk" type="checkbox" name="selectedAttendee[]" value="<?php $this->session_attendee_string( $attendee->attendee_id, $session->session_id ); ?>"> </td>
-								</tr>
-								<?php
-							}
-
-							if ( count( $attendees[ $session->session_id ] ) < $session->session_slots ) {
-								?>
-								<tr  class="add-attendee-row" data-session-id="<?php echo $session->session_id; ?>">
-									<td class='addAtt'> Add Attendee</td>
-									<td><?php echo esc_html( $this->format_date( $session->session_start_formatted ) ); ?></td>
-									<td></td>
-									<td class="centerCheckBox"> <input class="form-check-input position-relative addChk" type="checkbox" name="addedAttendee[]" value="<?php $this->session_attendee_string( -1, $session->session_id ); ?>"> </td>
-								</tr>
-								<?php
-							}
-						}
-						?>
-						<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
-						<input type="hidden" name="signup_id" value="<?php echo esc_html( $signup_id ); ?>">
-						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
-					</form>
 				</table>
 			</div>
 		</div>
