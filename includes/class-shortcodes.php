@@ -89,38 +89,7 @@ class ShortCodes extends SignUpsBase {
 		$signup_name = $signups[0]->signup_name;
 
 		if ( $rolling ) {
-			$today = new DateTime( 'now', $this->date_time_zone );
-			$today->SetTime( 8, 0 );
-			$attendees_rolling = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT *
-					FROM %1s
-					WHERE attendee_signup_id = %s AND attendee_start_time >= %d
-					ORDER BY attendee_start_time',
-					self::ATTENDEES_ROLLING_TABLE,
-					$signups[0]->signup_id,
-					$today->format( 'U' )
-				),
-				OBJECT
-			);
-
-			$template = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT *
-					FROM %1s
-					WHERE rolling_id = %s',
-					self::ROLLING_TABLE,
-					$signups[0]->signup_rolling_template
-				),
-				OBJECT
-			);
-
-			$this->create_rolling_session_select_form(
-				$signup_name,
-				$attendees_rolling,
-				$signup_id,
-				$template[0]
-			);
+			$this->create_rolling_session( $signup_id );
 		} else {
 			$bad_debt = $wpdb->get_results(
 				$wpdb->prepare(
@@ -373,22 +342,22 @@ class ShortCodes extends SignUpsBase {
 		<div id="session_select" class="text-center mw-800px">
 			<h1 class="mb-2"><?php echo esc_html( $signup_name ); ?></h1>
 			<div>
-				<div id="usercontent" class="container">
-					<?php
-					$userBadge = $this->create_user_table();
-					?>
-					<table id="selection-table" class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-125px"
-						<?php echo $userBadge == null ? 'hidden' : ''; ?> >
+				<form class="signup_form" method="POST">
+					<div id="usercontent" class="container">
 						<?php
-						foreach ( $sessions as $session ) {
-							$now = new DateTime( 'now', $this->date_time_zone );
-							if ( $session->session_start_time < $now->format( 'U' ) ) {
-								continue;
-							}
-							$start_date = new DateTime( $session->session_start_formatted );
-							$end_date   = new DateTime( $session->session_end_formatted );
-							?>
-							<form class="signup_form" method="POST">
+						$userBadge = $this->create_user_table();
+						?>
+						<table id="selection-table" class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-125px"
+							<?php echo $userBadge == null ? 'hidden' : ''; ?> >
+							<?php
+							foreach ( $sessions as $session ) {
+								$now = new DateTime( 'now', $this->date_time_zone );
+								if ( $session->session_start_time < $now->format( 'U' ) ) {
+									continue;
+								}
+								$start_date = new DateTime( $session->session_start_formatted );
+								$end_date   = new DateTime( $session->session_end_formatted );
+								?>
 								<tr id="submit-row" class="date-row">
 									<td class="text-left"> <?php echo esc_html( $start_date->format( self::DATE_FORMAT ) ); ?>
 									<td><?php echo esc_html( $start_date->format( self::TIME_FORMAT ) . ' - ' . $end_date->format( self::TIME_FORMAT ) ); ?></td>
@@ -397,7 +366,6 @@ class ShortCodes extends SignUpsBase {
 												style="display: none;"
 												type="submit">Submit</button></td>
 								</tr>
-								<?php $this->create_hidden_user(); ?>
 								<input type="hidden" name="add_attendee_class">
 								<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
 								<input type="hidden" name="session_price_id" value="<?php echo esc_html( $session->session_price_id ); ?>">
@@ -443,14 +411,13 @@ class ShortCodes extends SignUpsBase {
 									</tr>
 									<?php
 								}
-								?>
-							</form>
-							<?php
-						}
-						$this->create_table_footer();
-						?>
-					</table>
-				</div>
+								
+							}
+							$this->create_table_footer();
+							?>
+						</table>
+					</div>
+				</form>
 			</div>
 		</div>
 		<?php

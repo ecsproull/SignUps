@@ -238,7 +238,7 @@ class SignUpsBase {
 			<tr>
 				<td>Enter Badge#</td>
 				<td><input id="badge-input" class="member-badge" type="number" name="badge_number" 
-					value=<?php echo $returnVal ? $results[0]->badge : ''; ?> required></td>
+					value="<?php echo $returnVal ? $results[0]->badge : ''; ?>" required></td>
 				<td><input type="button" id="get_member_button" class="btn btn-primary" value='Lookup'></td>
 			</tr>
 			<tr>
@@ -269,8 +269,6 @@ class SignUpsBase {
 	 * @return void
 	 */
 	protected function create_rolling_session_select_form( $signup_name, $attendees, $signup_id, $template, $admin = false ) {
-
-		$current_badge = '4038';
 		$start_time_parts = explode( ':', $template->rolling_start_time );
 		$start_hour       = $start_time_parts[0];
 		$start_minute     = $start_time_parts[1];
