@@ -5,16 +5,9 @@
 namespace Stripe\Treasury;
 
 /**
- * Use OutboundTransfers to transfer funds from a <a
- * href="https://stripe.com/docs/api#financial_accounts">FinancialAccount</a> to a
- * PaymentMethod belonging to the same entity. To send funds to a different party,
- * use <a href="https://stripe.com/docs/api#outbound_payments">OutboundPayments</a>
- * instead. You can send funds over ACH rails or through a domestic wire transfer
- * to a user's own external bank account.
+ * Use OutboundTransfers to transfer funds from a <a href="https://stripe.com/docs/api#financial_accounts">FinancialAccount</a> to a PaymentMethod belonging to the same entity. To send funds to a different party, use <a href="https://stripe.com/docs/api#outbound_payments">OutboundPayments</a> instead. You can send funds over ACH rails or through a domestic wire transfer to a user's own external bank account.
  *
- * Simulate OutboundTransfer state changes with the
- * <code>/v1/test_helpers/treasury/outbound_transfers</code> endpoints. These
- * methods can only be called on test mode objects.
+ * Simulate OutboundTransfer state changes with the <code>/v1/test_helpers/treasury/outbound_transfers</code> endpoints. These methods can only be called on test mode objects.
  *
  * @property string $id Unique identifier for the object.
  * @property string $object String representing the object's type. Objects of the same type share the same value.
@@ -23,7 +16,7 @@ namespace Stripe\Treasury;
  * @property int $created Time at which the object was created. Measured in seconds since the Unix epoch.
  * @property string $currency Three-letter <a href="https://www.iso.org/iso-4217-currency-codes.html">ISO currency code</a>, in lowercase. Must be a <a href="https://stripe.com/docs/currencies">supported currency</a>.
  * @property null|string $description An arbitrary string attached to the object. Often useful for displaying to users.
- * @property string $destination_payment_method The PaymentMethod used as the payment instrument for an OutboundTransfer.
+ * @property null|string $destination_payment_method The PaymentMethod used as the payment instrument for an OutboundTransfer.
  * @property \Stripe\StripeObject $destination_payment_method_details
  * @property int $expected_arrival_date The date when funds are expected to arrive in the destination account.
  * @property string $financial_account The FinancialAccount that funds were pulled from.

@@ -7,9 +7,7 @@ namespace Stripe\Terminal;
 /**
  * A Reader represents a physical device for accepting payment details.
  *
- * Related guide: <a
- * href="https://stripe.com/docs/terminal/payments/connect-reader">Connecting to a
- * Reader</a>.
+ * Related guide: <a href="https://stripe.com/docs/terminal/payments/connect-reader">Connecting to a reader</a>
  *
  * @property string $id Unique identifier for the object.
  * @property string $object String representing the object's type. Objects of the same type share the same value.
@@ -79,6 +77,23 @@ class Reader extends \Stripe\ApiResource
     public function processSetupIntent($params = null, $opts = null)
     {
         $url = $this->instanceUrl() . '/process_setup_intent';
+        list($response, $opts) = $this->_request('post', $url, $params, $opts);
+        $this->refreshFrom($response, $opts);
+
+        return $this;
+    }
+
+    /**
+     * @param null|array $params
+     * @param null|array|string $opts
+     *
+     * @throws \Stripe\Exception\ApiErrorException if the request fails
+     *
+     * @return \Stripe\Terminal\Reader the refunded reader
+     */
+    public function refundPayment($params = null, $opts = null)
+    {
+        $url = $this->instanceUrl() . '/refund_payment';
         list($response, $opts) = $this->_request('post', $url, $params, $opts);
         $this->refreshFrom($response, $opts);
 

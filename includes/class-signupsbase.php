@@ -208,7 +208,7 @@ class SignUpsBase {
 	}
 
 	/**
-	 * Creates a section of HTM for the user to identify themselves.
+	 * Creates a section of HTML for the user to identify themselves.
 	 *
 	 * @param string $hidden To hide this initially pass the string 'hidden'.
 	 * @return void

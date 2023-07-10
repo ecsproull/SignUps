@@ -286,7 +286,7 @@ class SignupSettings extends SignUpsBase {
 				'attendee_firstname'    => $post['firstname'],
 				'attendee_lastname'     => $post['lastname'],
 				'attendee_phone'        => $post['phone'],
-				'attendee_badge'        => $post['badge'],
+				'attendee_badge'        => $post['badge_number'],
 				'attendee_balance_owed' => 0,
 				'attendee_item'         => $session->session_item,
 			);
@@ -448,40 +448,27 @@ class SignupSettings extends SignUpsBase {
 				<h1><?php echo esc_html( $signup_name ); ?></h1> <br>
 				<h2>Add Attendee</h2>
 				<div id="content" class="container">
-					<table class="mb-100px table table-striped mr-auto ml-auto">
+					<table class="mb-100px mt-4 table table-striped mr-auto ml-auto">
 						<?php
 						foreach ( $sessions as $session ) {
 							?>
 							<tr>
 								<td class="w-25"><?php echo $session->session_item; ?></td>
 								<td class="w-25"><?php echo $session->session_start_formatted; ?></td>
-								<td class="w-25"><?php echo $session->session_location; ?></td>
+								<td class="w-25"><?php echo $signup_name; ?></td>
 								<td class="w-25"></td>
 								<td class='w-75px'></td>
 							</tr>
+						
 							<?php
 						}
 						?>
-						<tr>
-							<td class="w-25" style="text-align: right; ">Enter Badge#</td>
-							<td class="w-25"><input id="badge_input" type="number" #badgeNumber></td>
-							<td class="w-25"><input type="button" id="get_member_button2" class="btn btn-primary" value='Get Member'></td>
-							<td class="w-25"></td>
-							<td class='w-75px'></td>
-						</tr>
-						<tr>
-							<td><input id="firstname" name="firstname" type='text' readonly></td>
-							<td><input id="lastname" name="lastname" type='text' readonly></td>
-							<td><input id="phone" name="phone" type='phone' pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" readonly></td>
-							<td><input id="email" name="email" type='email' readonly></td>
-							<td><input id="badge" name="badge" type='text' pattern="[0-9]{4}" readonly></td>
-						</tr>
-						<td></td>
-						<td><input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="window.history.go( -1 );" value="Back"></td>
-						<td><input id="submit_attendees" class="btn btn-primary mt-2" type="submit" value="Complete Add" name="submit_attendees" disabled="true"><td>
-						<td></td>
-						<td></td>
 					</table>
+					<?php
+					$this->create_user_table();
+					?>
+					<input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="window.history.go( -1 );" value="Back"></td>
+					<input id="submit_attendees" class="btn btn-primary mt-2" type="submit" value="Complete Add" name="submit_attendees" disabled="true"><td>
 					<input type='hidden' name='sessions' value="<?php echo htmlentities( serialize( $sessions ) ); ?>" />
 					<input type='hidden' name='signup_id' value="<?php echo $signup_id; ?>" />
 					<input type='hidden' name='signup_name' value="<?php echo $signup_name; ?>" />
