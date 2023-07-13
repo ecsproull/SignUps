@@ -213,7 +213,7 @@ class SignUpsBase {
 	 * @param string $hidden To hide this initially pass the string 'hidden'.
 	 * @return void
 	 */
-	protected function create_user_table( $hidden = '' ) {
+	protected function create_user_table( $user_group = '' ) {
 		global $wpdb;
 		$returnVal = null;
 		if(isset($_COOKIE['signups_scw_badge'])) {
@@ -222,9 +222,10 @@ class SignUpsBase {
 				$wpdb->prepare(
 					'SELECT *
 					FROM %1s
-					WHERE badge = %s',
+					WHERE badge = %s && FIND_IN_SET( %s, `groups`)',
 					self::ROSTER_TABLE,
-					$badge
+					$badge,
+					$user_group
 				),
 				OBJECT
 			);
@@ -234,7 +235,7 @@ class SignUpsBase {
 			}
 		}
 		?>
-		<table id="lookup-member" class="mb-100px table table-bordered mr-auto ml-auto" <?php echo esc_html( $hidden ); ?> >
+		<table id="lookup-member" class="mb-100px table table-bordered mr-auto ml-auto">
 			<tr>
 				<td>Enter Badge#</td>
 				<td><input id="badge-input" class="member-badge" type="number" name="badge_number" 
@@ -253,10 +254,64 @@ class SignUpsBase {
 					value=<?php echo $returnVal ? $results[0]->email : 'foo@bar.com'; ?> placeholder="foo@bar.com" required readonly></td>
 				<td></td>
 			</tr>
+			<input id="user_groups" type="hidden" name="user_groups" value="<?php echo esc_html( $user_group ); ?>">
 		</table>
 		<?php
 
 		return $returnVal;
+	}
+
+	protected function create_rolling_session( $rolling_signup_id, $admin = false ) {
+		global $wpdb;
+		$today = new DateTime( 'now', $this->date_time_zone );
+		$today->SetTime( 8, 0 );
+		$signups = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT signup_id,
+					signup_name,
+					signup_rolling_template,
+					signup_default_price_id,
+					signup_users_db_table
+				FROM %1s
+				WHERE signup_id = %s',
+				self::SIGNUPS_TABLE,
+				$rolling_signup_id
+			),
+			OBJECT
+		);
+
+		$attendees_rolling = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE attendee_signup_id = %s AND attendee_start_time >= %d
+				ORDER BY attendee_start_time',
+				self::ATTENDEES_ROLLING_TABLE,
+				$signups[0]->signup_id,
+				$today->format( 'U' )
+			),
+			OBJECT
+		);
+
+		$template = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE rolling_id = %s',
+				self::ROLLING_TABLE,
+				$signups[0]->signup_rolling_template
+			),
+			OBJECT
+		);
+
+		$this->create_rolling_session_select_form(
+			$signup_name,
+			$attendees_rolling,
+			$rolling_signup_id,
+			$template[0],
+			$signups[0]->signup_users_db_table,
+			$admin
+		);
 	}
 
 	/**
@@ -268,7 +323,14 @@ class SignUpsBase {
 	 * @param  object $template The template for the rolling class.
 	 * @return void
 	 */
-	protected function create_rolling_session_select_form( $signup_name, $attendees, $signup_id, $template, $admin = false ) {
+	protected function create_rolling_session_select_form( 
+			$signup_name, 
+			$attendees, 
+			$signup_id, 
+			$template, 
+			$user_group,
+			$admin
+		) {
 		$start_time_parts = explode( ':', $template->rolling_start_time );
 		$start_hour       = $start_time_parts[0];
 		$start_minute     = $start_time_parts[1];
@@ -291,12 +353,14 @@ class SignUpsBase {
 		for ( $j = 0; $j < 12; $j++ ) {
 			$day = new DateTime(
 				sprintf(
-					'First Tuesday of %s %s',
+					'First Monday of %s %s',
 					$today->format( 'F' ),
 					$today->format( 'Y' )
 				),
 				$this->date_time_zone
 			);
+			$interval = DateInterval::createFromDateString('1 day');
+			$day->add( $interval );
 			$day->SetTime( 12, 0 );
 			$time_exception        = new timeException();
 			$time_exception->begin = new DateTime( $day->format( self::DATETIME_FORMAT ), $this->date_time_zone );
@@ -320,7 +384,7 @@ class SignUpsBase {
 					<form class="signup_form" method="POST">
 						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 
-						<?php $userBadge =  $this->create_user_table(); ?>
+						<?php $userBadge =  $this->create_user_table( $user_group ); ?>
 
 						<table id="selection-table" class="mb-100px mr-auto ml-auto container"
 							<?php echo $userBadge == null ? 'hidden' : ''; ?> >
@@ -572,53 +636,5 @@ class SignUpsBase {
 		<?php
 
 		clean_post_cache( $post );
-	}
-
-	protected function create_rolling_session( $rolling_signup_id, $admin = false ) {
-		global $wpdb;
-		$today = new DateTime( 'now', $this->date_time_zone );
-		$today->SetTime( 8, 0 );
-		$signups = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT signup_id, signup_name, signup_cost, signup_rolling_template, signup_default_price_id, signup_users_db_table
-				FROM %1s
-				WHERE signup_id = %s',
-				self::SIGNUPS_TABLE,
-				$rolling_signup_id
-			),
-			OBJECT
-		);
-
-		$attendees_rolling = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT *
-				FROM %1s
-				WHERE attendee_signup_id = %s AND attendee_start_time >= %d
-				ORDER BY attendee_start_time',
-				self::ATTENDEES_ROLLING_TABLE,
-				$signups[0]->signup_id,
-				$today->format( 'U' )
-			),
-			OBJECT
-		);
-
-		$template = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT *
-				FROM %1s
-				WHERE rolling_id = %s',
-				self::ROLLING_TABLE,
-				$signups[0]->signup_rolling_template
-			),
-			OBJECT
-		);
-
-		$this->create_rolling_session_select_form(
-			$signup_name,
-			$attendees_rolling,
-			$rolling_signup_id,
-			$template[0],
-			$admin
-		);
 	}
 }

@@ -8,7 +8,8 @@ jQuery(document).ready(function($){
 				xhr.setRequestHeader('X-WP-Nonce', wpApiSettings.nonce);
 			},
 			data:{
-				'badge' : $("#badge-input").val()
+				'badge' : $("#badge-input").val(),
+				'user-groups' : $("#user_groups").val()
 			}
 		}).done(function (response) {
 			if (response.length > 0) {
@@ -33,9 +34,10 @@ jQuery(document).ready(function($){
 		});
 	});
 
-	$("#badge-input").on('keyup', (e) => { 
+	$("#badge-input").on('keydown', (e) => { 
 		if (e.code === 'Enter' || e.code === 'NumpadEnter') { 
 			$("#get_member_button").trigger("click");
+			e.preventDefault();
 		}
 	});
 

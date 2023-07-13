@@ -63,9 +63,10 @@ class SignUpsRestApis extends SignUpsBase {
 			global $wpdb;
 			$results = $wpdb->get_results(
 				$wpdb->prepare(
-					'SELECT * FROM %1s WHERE badge = %1s',
+					'SELECT * FROM %1s WHERE badge = %1s && FIND_IN_SET( %s, `groups`)',
 					self::ROSTER_TABLE,
-					$request['badge']
+					$request['badge'],
+					$request['user-groups']
 				),
 				OBJECT
 			);

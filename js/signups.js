@@ -7,7 +7,8 @@ jQuery( document ).ready( function($){
 				xhr.setRequestHeader('X-WP-Nonce', wpApiSettings.nonce);
 			},
 			data:{
-				'badge' : $("#badge-input").val()
+				'badge' : $("#badge-input").val(),
+				'user-groups' : $("#user_groups").val()
 			}
 		}).done(function (response) {
 			if (response.length > 0) {
