@@ -332,7 +332,7 @@ class ShortCodes extends SignUpsBase {
 					 * 4.) Exactly one row is inserted. It can be 0 but never more than 1.
 					 */
 					if (
-						0 !== $new_attendee['attendee_balance_owed'] &&
+						0 !== ( int )$new_attendee['attendee_balance_owed'] &&
 						0 !== $last_id &&
 						$insert_return_value
 					) {
@@ -347,15 +347,15 @@ class ShortCodes extends SignUpsBase {
 						<td><?php echo esc_html( $post['firstname'] . ' ' . $post['lastname'] ); ?></td>
 						<td><?php echo esc_html( $slot_parts[2] ); ?></td>
 						<?php
-						if ( ! $insert_return_value ) {
-							?>
-							<td style="color:red"><b><i>Failed DB Insert</i></b></td>
-							<?php
-						} elseif ( $signed_up_already ) {
+						if ( $signed_up_already ) {
 							?>
 							<td style="color:red"><b><i>Failed, Signed up alread</i></b></td>
 							<?php
-						} {
+						} elseif ( ! $insert_return_value ) {
+							?>
+							<td style="color:red"><b><i>Failed DB Insert</i></b></td>
+							<?php
+						} else {
 							?>
 							<td>Success</td>
 							<?php
