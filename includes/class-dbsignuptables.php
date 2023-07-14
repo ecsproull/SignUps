@@ -76,19 +76,19 @@ class DbSignUpTables {
 		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_rolling_attendees"' ) !== 'wp_scw_rolling_attendees' ) {
 			$wpdb->query(
 				'CREATE TABLE `wp_scw_rolling_attendees` (
-					`attendee_id` int(11) NOT NULL AUTO_INCREMENT,
-					`attendee_signup_id` int(11) NOT NULL DEFAULT 1,
-					`attendee_email` varchar(45) DEFAULT NULL,
-					`attendee_phone` varchar(15) DEFAULT NULL,
+					`attendee_id` int unsigned NOT NULL AUTO_INCREMENT,
+					`attendee_session_id` int NOT NULL,
+					`attendee_email` varchar(45) NOT NULL,
+					`attendee_phone` varchar(15) NOT NULL,
+					`attendee_balance_owed` int NOT NULL DEFAULT 0,
 					`attendee_lastname` varchar(45) NOT NULL,
 					`attendee_firstname` varchar(45) NOT NULL,
 					`attendee_item` varchar(45) NOT NULL,
-					`attendee_badge` varchar(8) NOT NULL,
-					`attendee_start_time` int(12) unsigned NOT NULL DEFAULT 0,
-					`attendee_start_formatted` varchar(45) NOT NULL,
-					`attendee_end_time` int(12) unsigned NOT NULL DEFAULT 0,
-					`attendee_end_formatted` varchar(45) NOT NULL,
-					`attendee_comment` text DEFAULT NULL,
+					`attendee_badge` varchar(8) DEFAULT NULL,
+					`attendee_payment_start` varchar(45) DEFAULT NULL,
+					`attendee_rec_number` varchar(45) DEFAULT NULL,
+					`attendee_address1` varchar(100) DEFAULT NULL,
+					`attendee_address2` varchar(45) DEFAULT NULL,
 					PRIMARY KEY (`attendee_id`)
 				  ) ENGINE=InnoDB AUTO_INCREMENT=463 DEFAULT CHARSET=utf8;'
 			);
