@@ -44,6 +44,62 @@ class ShortCodes extends SignUpsBase {
 		}
 	}
 
+	/**
+	 * Creates a section of HTML for a new user to identify themselves.
+	 *
+	 * @return void
+	 */
+	protected function create_new_user_table( ) {
+		?>
+		<table id="new-member" class="mb-100px table table-bordered mr-auto ml-auto">
+			<tr>
+				<td class="text-right font-weight-bold">SCW Rec Number:</td>
+				<td class="text-left"><input type="number" name="reccard" placeholder="123456" required></td>
+			</tr>
+			<tr>
+				<td class="text-right font-weight-bold">First Name:</td>
+				<td class="text-left"><input type="text" name="firstname" placeholder="First Name" required></td>
+			</tr>
+			<tr>
+				<td class="text-right font-weight-bold">Last Name:</td>
+				<td class="text-left"><input type="text" name="lastname" placeholder="Last Name" required></td>
+			</tr>
+			<tr>
+				<td class="text-right font-weight-bold">Phone Number:</td>
+				<td class="text-left"><input  type="text" name="phone"
+					placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required></td>
+			</tr>
+			<tr>
+			    <td class="text-right font-weight-bold">Email:</td>
+				<td class="text-left"><input type="email" name="email" placeholder="foo@bar.com" required></td>
+			</tr>
+			<tr>
+				<td class="text-right font-weight-bold">Street Address 1:</td>
+				<td class="text-left"><input type="text" name="address1"
+					placeholder="Sun City West Street Address" required></td>
+			</tr>
+			<tr>
+				<td class="text-right font-weight-bold">Street Address 2:</td>
+				<td class="text-left"><input type="text" name="address2" placeholder="Unit 1234"></td>
+			</tr>
+			<tr>
+				<td class="text-right font-weight-bold">City:</td>
+				<td class="text-left"><input class=" bg-secondary text-white" type="text" name="city" value="Sun City West" required readonly></td>
+			</tr>
+			<tr>
+				<td class="text-right font-weight-bold">State:</td>
+				<td class="text-left"><input class=" bg-secondary text-white" type="text" name="state"	value="AZ"  required readonly></td>
+			</tr>
+			<tr>
+				<td class="text-right font-weight-bold">Zip Code:</td>
+				<td class="text-left"><input class=" bg-secondary text-white" type="text" name="zip"	value="85375"  required readonly></td>
+			</tr>
+		</table>
+		<input id="user_groups" type="hidden" name="user_groups" value="none">
+		<?php
+
+		return $returnVal;
+	}
 
 	/**
 	 * Retrieves the available signups  and
@@ -163,7 +219,8 @@ class ShortCodes extends SignUpsBase {
 				$attendees,
 				$instructors,
 				$signup_cost,
-				$signup_id
+				$signup_id,
+				$signups[0]->signup_users_db_table
 			);
 		}
 	}
@@ -192,6 +249,9 @@ class ShortCodes extends SignUpsBase {
 		$new_attendee['attendee_item']          = $post['signup_name'];
 		$new_attendee['attendee_badge']         = $post['badge_number'];
 		$new_attendee['attendee_payment_start'] = $now->format( self::DATETIME_FORMAT );
+		$new_attendee['attendee_rec_number']    = $post['reccard'];
+		$new_attendee['attendee_address1']      = $post['address1'];
+		$new_attendee['attendee_address2']      = $post['address2'];
 		?>
 		<div class="container">
 			<form method="POST">
@@ -232,14 +292,30 @@ class ShortCodes extends SignUpsBase {
 					$insert_return_value = false;
 					$last_id             = 0;
 					if ( count( $current_session_attendees ) < $available_slots[0]->session_slots ) {
-						$signed_up_already = $wpdb->get_results(
-							$wpdb->prepare(
-								'SELECT attendee_badge FROM %1s WHERE attendee_session_id = %d AND attendee_badge = %d',
-								self::ATTENDEES_TABLE,
-								$new_attendee['attendee_session_id'],
-								$new_attendee['attendee_badge']
-							)
-						);
+						if ( $new_attendee['attendee_badge'] ) {
+							$signed_up_already = $wpdb->get_results(
+								$wpdb->prepare(
+									'SELECT attendee_badge FROM %1s WHERE attendee_session_id = %d AND attendee_badge = %d',
+									self::ATTENDEES_TABLE,
+									$new_attendee['attendee_session_id'],
+									$new_attendee['attendee_badge']
+								)
+							);
+						} else {
+							$signed_up_already = $wpdb->get_results(
+								$wpdb->prepare(
+									'SELECT * FROM %1s WHERE attendee_session_id = %d AND 
+										attendee_firstname = %s AND
+										attendee_lastname  = %s AND
+										attendee_phone     = %s',
+									self::ATTENDEES_TABLE,
+									$new_attendee['attendee_session_id'],
+									$new_attendee['attendee_firstname'],
+									$new_attendee['attendee_lastname'],
+									$new_attendee['attendee_phone']
+								)
+							);
+						}
 
 						if ( ! $signed_up_already ) {
 							$insert_return_value = $wpdb->insert( self::ATTENDEES_TABLE, $new_attendee );
@@ -337,7 +413,7 @@ class ShortCodes extends SignUpsBase {
 	 * @param  string $signup_description The description of the signup.
 	 * @return void
 	 */
-	private function create_session_select_form( $signup_name, $sessions, $attendees, $instructors, $cost, $signup_id ) {
+	private function create_session_select_form( $signup_name, $sessions, $attendees, $instructors, $cost, $signup_id, $user_group ) {
 		?>
 		<div id="session_select" class="text-center mw-800px">
 			<h1 class="mb-2"><?php echo esc_html( $signup_name ); ?></h1>
@@ -345,7 +421,13 @@ class ShortCodes extends SignUpsBase {
 				<form class="signup_form" method="POST">
 					<div id="usercontent" class="container">
 						<?php
-						$userBadge = $this->create_user_table();
+						if ( $user_group == 'none' ) {
+							$userBadge = true;
+							$this->create_new_user_table();
+
+						} else {
+							$userBadge = $this->create_user_table( $user_group );
+						}
 						?>
 						<table id="selection-table" class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-125px"
 							<?php echo $userBadge == null ? 'hidden' : ''; ?> >

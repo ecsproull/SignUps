@@ -254,8 +254,8 @@ class SignUpsBase {
 					value=<?php echo $returnVal ? $results[0]->email : 'foo@bar.com'; ?> placeholder="foo@bar.com" required readonly></td>
 				<td></td>
 			</tr>
-			<input id="user_groups" type="hidden" name="user_groups" value="<?php echo esc_html( $user_group ); ?>">
 		</table>
+		<input id="user_groups" type="hidden" name="user_groups" value="<?php echo esc_html( $user_group ); ?>">
 		<?php
 
 		return $returnVal;

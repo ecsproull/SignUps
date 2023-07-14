@@ -14,7 +14,8 @@
 #last-name,
 #first-name,
 #phone,
-#email {
+#email,
+table#new-member > tbody > tr > td > input {
 	background-color: transparent;
 	height: 45px;
 	border-radius: 8px!important;
@@ -107,6 +108,8 @@ table#signup-select > tbody > tr:nth-child(even) {
 }
 
 table#lookup-member,
+table#new-member,
+table#new-member > tbody > tr > td,
 table#lookup-member > tbody > tr > td,
 table#signup-select > tbody > tr > td {
 	border:none;
