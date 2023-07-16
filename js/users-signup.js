@@ -143,6 +143,17 @@ jQuery(document).ready(function($){
 		}
 	});
 
+	$('.expand-button').click( function(event) {
+		var data = $.parseJSON($(this).attr('data-button'));
+		if ($(".expand-button").html() == "Show All") {
+			$("." + data.session_id).prop("hidden", false);
+			$(".expand-button").html("Hide");
+		} else {
+			$("." + data.session_id).prop("hidden", true);
+			$(".expand-button").html("Show All");
+		}
+	});
+
 	///// Sripe payment stuff below here. /////
 	// show shipping address if different
 	function showMe() {

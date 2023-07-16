@@ -23,6 +23,10 @@ table#new-member > tbody > tr > td > input {
     border-color: lightgray;
 }
 
+.bg-lg {
+	background-color: lightgray;
+}
+
 .signup-submit {
 	background-color: #007bff!important;
 }

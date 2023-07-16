@@ -403,7 +403,7 @@ class ShortCodes extends SignUpsBase {
 	}
 
 	/**
-	 * Creates a form that displays the sessions along with their attenees
+	 * Creates a form that displays the sessions along with their attendees
 	 *
 	 * @param  string $signup_name The class name.
 	 * @param  array  $sessions The list of sessions for the class.
@@ -444,7 +444,7 @@ class ShortCodes extends SignUpsBase {
 									<td class="text-left"> <?php echo esc_html( $start_date->format( self::DATE_FORMAT ) ); ?>
 									<td><?php echo esc_html( $start_date->format( self::TIME_FORMAT ) . ' - ' . $end_date->format( self::TIME_FORMAT ) ); ?></td>
 									<td><button id=<?php echo esc_html( 'submit_' . $session->session_id ); ?>
-												class="btn bth-md btn-primary mr-auto ml-auto mt-2 signup-submit"
+												class="btn btn-md btn-primary mr-auto ml-auto mt-2 signup-submit"
 												style="display: none;"
 												type="submit">Submit</button></td>
 								</tr>
@@ -454,10 +454,35 @@ class ShortCodes extends SignUpsBase {
 								<input type="hidden" name="paid" value=false>
 								<?php
 								wp_nonce_field( 'signups', 'mynonce' );
+
+								$available_slots = $session->session_slots - count( $attendees[ $session->session_id ] );
+								for ( $i = count( $attendees[ $session->session_id ] ); $i < $session->session_slots; $i++ ) {
+									?>
+									<tr class="attendee-row bg-lightgray" data-session-id="<?php echo esc_html( $session->session_id ); ?>" >
+										<td>Cost: $<?php echo esc_html( $cost ); ?></td>
+										<td><?php echo esc_html( $signup_name ); ?></td>
+										<td>
+											<input class="ml-auto mr-auto addChk" type="radio" 
+												name="time_slots[]" 
+												value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $end_date->format( self::DATETIME_FORMAT ) . ',' . $signup_name . ',' . $session->session_id . ',' . $cost ); ?>">
+										</td>
+									</tr>
+									<?php
+									break;
+								}
+								?>
+								<tr class="attendee-row bg-lg">
+									<td></td>
+									<td><b><?php echo $available_slots . ' slots open - ' . count( $attendees[ $session->session_id ] ) . ' filled' ?></b></td>
+									<td></td>
+								</tr>
+								<?php
+								$count = 0;
 								if ( isset( $attendees[ $session->session_id ] ) ) {
 									foreach ( $attendees[ $session->session_id ] as $attendee ) {
+										$count++;
 										?>
-										<tr class="attendee-row">
+										<tr class="attendee-row <?php echo $count > 3 ? $session->session_id : ''; ?>" <?php echo $count > 3 ? 'hidden' : ''; ?> >
 											<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
 											<td><?php echo esc_html( $attendee->attendee_item ); ?></td>
 											<?php
@@ -479,21 +504,21 @@ class ShortCodes extends SignUpsBase {
 										<?php
 									}
 								}
-
-								for ( $i = count( $attendees[ $session->session_id ] ); $i < $session->session_slots; $i++ ) {
+								?>
+								<tr class="attendee-row bg-dark">
+									<td></td>
+									<td></td>
+									<td>
+									<?php 
+									if ( $count > 3 ) {
+										?>
+										<button class="btn btn-sm bg-primary mr-auto ml-auto expand-button" type='button' data-button='{"session_id": <?php echo $session->session_id; ?>}' >Show All</button>
+										<?php
+									}
 									?>
-									<tr class="attendee-row bg-lightgray" data-session-id="<?php echo esc_html( $session->session_id ); ?>" >
-										<td>Cost: $<?php echo esc_html( $cost ); ?></td>
-										<td><?php echo esc_html( $signup_name ); ?></td>
-										<td>
-											<input class="ml-auto mr-auto addChk" type="radio" 
-												name="time_slots[]" 
-												value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $end_date->format( self::DATETIME_FORMAT ) . ',' . $signup_name . ',' . $session->session_id . ',' . $cost ); ?>">
-										</td>
-									</tr>
-									<?php
-								}
-								
+									</td>
+								</tr>
+								<?php
 							}
 							$this->create_table_footer();
 							?>
@@ -527,7 +552,7 @@ class ShortCodes extends SignUpsBase {
 				<div class="row">
 					<form class="ml-auto mr-auto" method="POST">
 						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
-						<button type="submit" class="btn bth-md bg-primary mr-2"value="-1" name="signup_id">Cancel</button>
+						<button type="submit" class="btn btn-md bg-primary mr-2" value="-1" name="signup_id">Cancel</button>
 						<button id='accept_conditions' class="btn btn-primary" type='submit' value="<?php echo esc_html( $signup_id ); ?>" name="continue_signup">Continue</button>
 					</form>
 				</div>
