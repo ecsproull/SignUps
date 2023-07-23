@@ -141,41 +141,57 @@ class RollingTemplatesEditor extends SignUpsBase {
                     <th>Day</th>
                     <th>Select</th>
                     <th>Sessions</th>
+                    <th>Extra Items</th>
+                    <th>Extra Item Slots</th>
                 </tr>
                 <tr>
                     <td>Monday</td>
                     <td><input class="mr-auto ml-auto" type='checkbox' name='days[1]' <?php if ( array_key_exists( 1, $days_sessions ) ) { echo 'checked'; } ?> /></td>
                     <td><input style="width:75px" type='number' name='days_sessions[1]' value=<?php echo $days_sessions[1]; ?> /></td>
+                    <td><input type="text" class="mt-2 w-250px" value="" name="extra_items[1]"></td>
+                    <td><input type="number" class="mt-2 w-75px" value=1 name="extra_slots[1]"></td>
                 </tr>
                 <tr>
                     <td>Tuesday</td>
                     <td><input class="mr-auto ml-auto" type='checkbox' name='days[2]' <?php if ( array_key_exists( 2, $days_sessions ) ) { echo 'checked'; } ?> /></td>
                     <td><input style="width:75px" type='number' name='days_sessions[2]' value=<?php echo $days_sessions[2]; ?> /></td>
+                    <td><input type="text" class="mt-2 w-250px" value="" name="extra_items[2]"></td>
+                    <td><input type="number" class="mt-2 w-75px" value=1 name="extra_slots[2]"></td>
                 </tr>
                 <tr>
                     <td>Wednesday</td>
                     <td><input class="mr-auto ml-auto" type='checkbox' name='days[3]' <?php if ( array_key_exists( 3, $days_sessions ) ) { echo 'checked'; } ?> /></td>
                     <td><input style="width:75px" type='number' name='days_sessions[3]' value=<?php echo $days_sessions[3]; ?> /></td>
+                    <td><input type="text" class="mt-2 w-250px" value="" name="extra_items[3]"></td>
+                    <td><input type="number" class="mt-2 w-75px" value=1 name="extra_slots[3]"></td>
                 </tr>
                 <tr>
                     <td>Thursday</td>
                     <td><input class="mr-auto ml-auto" type='checkbox' name='days[4]' <?php if ( array_key_exists( 4, $days_sessions ) ) { echo 'checked'; } ?> /></td>
                     <td><input style="width:75px" type='number' name='days_sessions[4]' value=<?php echo $days_sessions[4]; ?> /></td>
+                    <td><input type="text" class="mt-2 w-250px" value="" name="extra_items[4]"></td>
+                    <td><input type="number" class="mt-2 w-75px" value=1 name="extra_slots[4]"></td>
                 </tr>
                 <tr>
                     <td>Friday</td>
                     <td><input class="mr-auto ml-auto" type='checkbox' name='days[5]' <?php if ( array_key_exists( 5, $days_sessions ) ) { echo 'checked'; } ?> /></td>
                     <td><input style="width:75px" type='number' name='days_sessions[5]' value=<?php echo $days_sessions[5]; ?> /></td>
+                    <td><input type="text" class="mt-2 w-250px" value="" name="extra_items[5]"></td>
+                    <td><input type="number" class="mt-2 w-75px" value=1 name="extra_slots[5]"></td>
                 </tr>
                 <tr>
                     <td>Saturday</td>
                     <td><input class="mr-auto ml-auto" type='checkbox' name='days[6]' <?php if ( array_key_exists( 6, $days_sessions ) ) { echo 'checked'; } ?> /></td>
                     <td><input style="width:75px" type='number' name='days_sessions[6]' value=<?php echo $days_sessions[6]; ?> /></td>
+                    <td><input type="text" class="mt-2 w-250px" value="" name="extra_items[6]"></td>
+                    <td><input type="number" class="mt-2 w-75px" value=1 name="extra_slots[6]"></td>
                 </tr>
                 <tr>
                     <td>Sunday</td>
                     <td><input class="mr-auto ml-auto" type='checkbox' name='days[7]' <?php if ( array_key_exists( 7, $days_sessions ) ) { echo 'checked'; } ?> /></td>
                     <td><input style="width:75px" type='number' name='days_sessions[7]' value=<?php echo $days_sessions[7]; ?> /></td>
+                    <td><input type="text" class="mt-2 w-250px" value="" name="extra_items[7]"></td>
+                    <td><input type="number" class="mt-2 w-75px" value=1 name="extra_slots[7]"></td>
                 </tr>
             </table>
             <div class="row w-300px">

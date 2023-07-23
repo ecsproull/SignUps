@@ -1,3 +1,17 @@
+.selection-font {  
+    font-size: 20px;
+	font-weight: 600;
+    color: black;
+}
+/* responsive, form small screens, use 13px font size */
+@media (max-width: 1000px) {
+    .selection-font {
+        font-size: 13px;
+		font-weight: 600;
+		color: black;
+    }
+}
+
 #usercontent {
 	background-color: transparent;
 }
@@ -79,6 +93,15 @@ table#new-member > tbody > tr > td > input {
 	border-right: 3px solid black;
 	border-bottom: 2px solid gray!important;
 	background-color: lightsteelblue;
+	border-radius: 10px;
+}
+
+.submit-row {
+	border-top: 3px solid black;
+	border-left: 3px solid black;
+	border-right: 3px solid black;
+	border-bottom: 2px solid gray!important;
+	background-color: rgb(136, 170, 156);
 	border-radius: 10px;
 }
 

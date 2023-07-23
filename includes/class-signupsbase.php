@@ -71,11 +71,25 @@ class SignUpsBase {
 	protected const STRIPE_TABLE = 'wp_scw_stripe';
 
 	/**
-	 * Signup desscriptions table.
+	 * Signup descriptions table.
 	 *
 	 * @var mixed
 	 */
 	protected const SIGNUP_DESCRIPTIONS_TABLE = 'wp_scw_signup_descriptions';
+
+	/**
+	 * Signup template table.
+	 *
+	 * @var mixed
+	 */
+	protected const SIGNUP_TEMPLATE_TABLE = 'wp_scw_template';
+
+	/**
+	 * Signup template item table.
+	 *
+	 * @var mixed
+	 */
+	protected const SIGNUP_TEMPLATE_ITEM_TABLE = 'wp_scw_template_item';
 
 	/**
 	 * Format DateTime as 2020-08-13 6:00 am.
@@ -235,10 +249,10 @@ class SignUpsBase {
 			}
 		}
 		?>
-		<table id="lookup-member" class="mb-100px table table-bordered mr-auto ml-auto">
+		<table id="lookup-member" class="mb-100px table table-bordered mr-auto ml-auto selection-font">
 			<tr>
-				<td>Enter Badge#</td>
-				<td><input id="badge-input" class="member-badge" type="number" name="badge_number" 
+				<td class="text-right">Enter Badge#</td>
+				<td class="text-left"><input id="badge-input" class="member-badge" type="number" name="badge_number" 
 					value="<?php echo $returnVal ? $results[0]->badge : ''; ?>" required></td>
 				<td><input type="button" id="get_member_button" class="btn btn-primary" value='Lookup'></td>
 			</tr>
@@ -297,57 +311,55 @@ class SignUpsBase {
 			$wpdb->prepare(
 				'SELECT *
 				FROM %1s
-				WHERE rolling_id = %s',
-				self::ROLLING_TABLE,
+				WHERE template_id = %s',
+				self::SIGNUP_TEMPLATE_TABLE,
 				$signups[0]->signup_rolling_template
 			),
 			OBJECT
 		);
 
-		$this->create_rolling_session_select_form(
+		$template_items = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT template_item_day_of_week,
+				template_item_title,
+				template_item_slots,
+				template_item_start_time,
+				template_item_duration,
+				template_item_shifts,
+				template_item_group,
+				template_item_column
+				FROM %1s
+				WHERE template_item_template_id = %s',
+				self::SIGNUP_TEMPLATE_ITEM_TABLE,
+				$template[0]->template_id
+			),
+			OBJECT
+		);
+
+		$this->create_rolling_session_select_form2(
 			$signup_name,
 			$attendees_rolling,
 			$rolling_signup_id,
 			$template[0],
-			$signups[0]->signup_users_db_table,
+			$template_items,
+			$signups[0]->signup_users_db_table, 
 			$admin
 		);
 	}
 
-	/**
-	 * Creates a form that displays the rolling sessions along with their attenees
-	 *
-	 * @param  string $signup_name The class name.
-	 * @param  array  $attendees The list of attendees for the class.
-	 * @param  int    $signup_id The ID of the class.
-	 * @param  object $template The template for the rolling class.
-	 * @return void
-	 */
-	protected function create_rolling_session_select_form( 
-			$signup_name, 
-			$attendees, 
-			$signup_id, 
-			$template, 
-			$user_group,
-			$admin
-		) {
-		$start_time_parts = explode( ':', $template->rolling_start_time );
-		$start_hour       = $start_time_parts[0];
-		$start_minute     = $start_time_parts[1];
-		$start_date       = new DateTime( 'now', $this->date_time_zone );
-		$end_date         = new DateTime( 'now', $this->date_time_zone );
-		$end_date->add( new DateInterval( 'P' . $template->rolling_days . 'D' ) );
-		$days_sessions_raw = explode( ',', $template->rolling_days_week );
-		$days_sessions     = array();
-		foreach ( $days_sessions_raw as $dsr ) {
-			$x                      = explode( '-', $dsr );
-			$days_sessions[ $x[0] ] = $x[1];
+	private function get_slot_attendees( $attendees, $start_date, $template_item_title ) {
+		$slot_attendees = Array();
+		foreach ( $attendees as $attendee ) {
+			if ( $attendee->attendee_start_time === $start_date->format( 'U' ) &&
+				$template_item_title === $attendee->attendee_item ) {
+				$slot_attendees[] = $attendee;
+			}
 		}
 
-		$duration_parts = explode( ':', $template->rolling_session_length );
-		$duration       = new DateInterval( 'PT' . $duration_parts[0] . 'H' . $duration_parts[1] . 'M' );
-		$slot_titles    = explode( ',', $template->rolling_slot_items );
+		return $slot_attendees;
+	}
 
+	private function create_meeting_exceptions( $start_date, $end_date ) {
 		$time_exceptions = array();
 		$today           = new DateTime( 'now', $this->date_time_zone );
 		for ( $j = 0; $j < 12; $j++ ) {
@@ -375,7 +387,35 @@ class SignUpsBase {
 			$today->add( new DateInterval( 'P1M' ) );
 		}
 
+		return $time_exceptions;
+	}
+
+	/**
+	 * Creates a form that displays the rolling sessions along with their attenees
+	 *
+	 * @param  string $signup_name The class name.
+	 * @param  array  $attendees The list of attendees for the class.
+	 * @param  int    $signup_id The ID of the class.
+	 * @param  object $template The template for the rolling class.
+	 * @param  array  $template_items Each one describe a signup for that day.
+	 * @param  string $user_group The group that is allowed to sign up.
+	 * @param  bool   $admin This being accessed by an administrator.
+	 * @return void
+	 */
+	protected function create_rolling_session_select_form2( 
+		$signup_name, 
+		$attendees, 
+		$signup_id, 
+		$template,
+		$template_items, 
+		$user_group,
+		$admin
+	) {
+		$start_date       = new DateTime( 'now', $this->date_time_zone );
+		$end_date         = new DateTime( 'now', $this->date_time_zone );
+		$end_date->add( new DateInterval( 'P' . $template->template_rolling_days . 'D' ) );
 		$one_day_interval = new DateInterval( 'P1D' );
+		$time_exceptions = $this->create_meeting_exceptions( $start_date, $end_date );
 		?>
 		<div id="session_select" class="text-center mw-800px">
 			<h1 class="mb-2"><b><?php echo esc_html( $signup_name ); ?></b></h1>
@@ -386,86 +426,169 @@ class SignUpsBase {
 
 						<?php $userBadge =  $this->create_user_table( $user_group ); ?>
 
-						<table id="selection-table" class="mb-100px mr-auto ml-auto container"
+						<table id="selection-table" class="mb-100px mr-auto ml-auto container selection-font"
 							<?php echo $userBadge == null ? 'hidden' : ''; ?> >
 							<?php
-							$attendee_index = 0;
 							$current_day    = '2000-07-01';
 							$comment_index  = 0;
 							$comment_name   = 'comment-';
 							$comment_row_id = 'comment-row-';
 							while ( $start_date <= $end_date ) {
-								$day_of_week = $start_date->format( 'w' );
-								if ( array_key_exists( $day_of_week, $days_sessions ) ) {
-									for ( $i = 0; $i < $days_sessions[ $day_of_week ]; $i++ ) {
-										if ( 0 === $i ) {
-											$start_date->setTime( $start_hour, $start_minute );
-										} else {
-											$start_date->add( $duration );
-										}
+								$day_of_week = $start_date->format( 'N' );
+								$day_items = array_filter($template_items, function( $value, $key ) use ( $day_of_week ){
+									return $value->template_item_day_of_week == $day_of_week;
+								}, ARRAY_FILTER_USE_BOTH);
 
-										$add_day_header = true;
-										foreach ( $time_exceptions as $except ) {
-											if ( $start_date >= $except->begin && $start_date <= $except->end ) {
-												$add_day_header = false;
-											}
-										}
+								usort( $day_items, function ( $a, $b ) {
+									$st_time1 = strtotime($a->template_item_start_time);
+									$st_time2 = strtotime($b->template_item_start_time);
+									return $st_time1 < $st_time2;
+								});
 
-										if ( $add_day_header ) {
-											if ( $start_date->format( self::DATE_FORMAT ) !== $current_day ) {
-												$current_day = $start_date->format( self::DATE_FORMAT );
-												?>
-												<tr class="date-row">
-													<td></td>
-													<td></td>
-													<td><button type="submit" class="btn btn-md mr-auto ml-auto bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee_session">Submit</button></td>
-												</tr>
-												<tr class="date-row">
-													<td><?php echo esc_html( $current_day ); ?></td>
-													<td><?php echo esc_html( $slot_titles[0] ); ?></td>
-													<td><?php echo esc_html( $slot_titles[1] ); ?></td>
-												</tr>
-												<?php
-											}
-											$temp_end_date = new DateTime( $start_date->format( self::DATETIME_FORMAT ), $this->date_time_zone );
-											$temp_end_date->Add( $duration );
-											$count = 0;
-											?>
-											<tr  class="attendee-row"  style=<?php echo $i % 2 ? "background:#cfcfcf;" : "background:#efefef;"; ?> >
-												<td><?php echo esc_html( $start_date->format( self::TIME_FORMAT ) . ' - ' . $temp_end_date->format( self::TIME_FORMAT ) ); ?></td>
-												<?php
-											foreach ( $slot_titles as $title ) {
-												if ( count( $attendees ) > $attendee_index && $attendees[ $attendee_index ]->attendee_start_time === $start_date->format( 'U' ) &&
-													$title === $attendees[ $attendee_index ]->attendee_item ) {
-													?>
-													<td>
-														<?php echo esc_html( $attendees[ $attendee_index ]->attendee_firstname . ' ' . $attendees[ $attendee_index ]->attendee_lastname ); ?>
-														<input class="form-check-input ml-2 rolling-remove-chk mt-1 <?php echo esc_html( $attendees[ $attendee_index ]->attendee_badge ) ?>" 
-															type="checkbox" name="remove_slots[]" <?php echo $userBadge || $admin == $attendees[ $attendee_index ]->attendee_badge ? '' : 'hidden'; ?> 
-															value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $title . ',' . $comment_index . ',' . $attendees[ $attendee_index ]->attendee_id ); ?>">
-													</td>
-													<?php
-													$attendee_index++;
-												} else {
-													$com_name = $comment_name . $comment_index;
-													if ( 0 === $count ) {
-														?>
-														<td class="text-center"> 
-															<input class="form-check-input position-relative rolling-add-chk ml-auto <?php echo str_replace(' ', '', $title) ?>" 
-																type="checkbox" name="time_slots[]" 
-																value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $title . ',' . $comment_index . ',0' ); ?>">
-														</td>
-													<?php
-													}
-												}
-											}
-											?>
-											</tr>
-											<?php
-										}
+								$slot_titles = Array();
+								$group_items = Array();
+								foreach( $day_items as $day_item ) {
+									$slot_titles[$day_item->template_item_title] = $day_item->template_item_title;
+									if ( !array_key_exists( $day_item->template_item_group, $group_items ) ) {
+										$group_items[$day_item->template_item_group] = Array();	
 									}
+
+									$group_items[$day_item->template_item_group][] = $day_item;
 								}
 
+								usort( $group_items, function ( $a, $b ) {
+									return $a[0]->template_item_start_time > $b[0]->template_item_start_time;
+								});
+
+								$current_day = $start_date->format( self::DATE_FORMAT );
+								$count = 0;
+								?>
+								<tr class="submit-row" colspan='4'>
+								<td colspan='4'><button type="submit" class="btn btn-md mr-auto ml-auto bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee_session">Submit</button></td>
+								</tr>
+								<tr class="date-row">
+									<td><?php echo esc_html( $current_day ); ?></td>
+									<?php
+									foreach( $slot_titles as $title ) {
+										?>
+										<td><?php echo esc_html( $title ); ?></td>
+										<?php
+										$count++;
+									}
+
+									for ( ; $count < $template->template_columns; $count++) {
+										?>
+										<td></td>
+										<?php
+									}
+								?>
+								</tr>
+								<?php
+									
+								foreach ( $group_items as $group_item) {
+									$start_time_parts = explode( ':', $group_item[0]->template_item_start_time );
+									$duration_parts   = explode( ':', $group_item[0]->template_item_duration );
+									$start_hour       = $start_time_parts[0];
+									$start_minutes    = $start_time_parts[1];
+									$start_date       = $start_date->SetTime( $start_hour, $start_minutes );
+									$duration       = new DateInterval( 'PT' . $duration_parts[0] . 'H' . $duration_parts[1] . 'M' );
+									$temp_end_date = new DateTime( $start_date->format( self::DATETIME_FORMAT ), $this->date_time_zone );
+									$temp_end_date->Add( $duration );
+
+									for ( $s = 0; $s < $group_item[0]->template_item_shifts; $s++ ) {
+										?>
+										<tr  class="attendee-row"  style=<?php echo $i % 2 ? "background:#cfcfcf;" : "background:#efefef;"; ?> >
+											<td><?php echo esc_html( $start_date->format( self::TIME_FORMAT ) . ' - ' . $temp_end_date->format( self::TIME_FORMAT ) ); ?></td>
+										<?php
+
+										$current_column = 0;
+										foreach ( $group_item as $item ) {
+											for ( ; $current_column < $item->template_item_column; $current_column++ ) {
+												?>
+												<td></td>
+												<?php
+											}
+											$slot_attendees = $this->get_slot_attendees( $attendees, $start_date, $item->template_item_title );
+											if ( $slot_attendees ) {
+												if ( $item->template_item_slots === '1' ) {
+													$attendee = $slot_attendees[0];
+													?>
+													<td>
+														<?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?>
+														<input class="form-check-input ml-2 rolling-remove-chk mt-2 <?php echo esc_html( $attendee->attendee_badge ) ?>" 
+															type="checkbox" name="remove_slots[]" 
+															<?php echo $userBadge == $attendee->attendee_badge || $admin  ? '' : 'hidden'; ?> 
+															value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . 
+																$temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $item->template_item_title . ',' . 
+																$comment_index . ',' . $attendee->attendee_id ); ?>">
+													</td>
+													<?php
+												} else {
+													?>
+													<td>
+													<?php
+													if ( count( $slot_attendees ) < $item->template_item_slots ) {
+														?>
+														<input class="form-check-input position-relative rolling-add-chk ml-auto <?php echo str_replace(' ', '', $title) ?>" 
+														type="checkbox" name="time_slots[]" 
+														value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) . 
+															',' . $item->template_item_title . ',' . $comment_index  . ',' . $item->template_item_slots ); ?>"><br>
+														<?php
+													}
+
+													if ( $item->template_item_slots == count ( $slot_attendees ) ) {
+														echo "<span class='text-primary'><i>All Slots Filled</i></span><br>";
+													} else {
+														echo "<span class='text-primary'><i>" . count( $slot_attendees ) . ' of ' . $item->template_item_slots . ' Slots Filled </i></span><br>';
+													}
+													$count = 1;
+													$random_number = rand();
+													foreach ( $slot_attendees as $attendee) {
+														?>
+														<div class="<?php echo $count > 3 ? $random_number : ''; ?>" <?php echo $count > 3 ? 'hidden' : ''; ?> >
+															<?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?>
+															<input class="form-check-input ml-2 rolling-remove-chk mt-2 <?php echo esc_html( $attendee->attendee_badge ) ?>" 
+																type="checkbox" name="remove_slots[]" 
+																<?php echo $userBadge == $attendee->attendee_badge || $admin ? '' : 'hidden'; ?> 
+																value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . 
+																	$temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $item->template_item_title . ',' . 
+																	$comment_index . ',' . $attendee->attendee_id ); ?>">
+															<br>
+														</div>
+														<?php
+														$count++;
+													}
+													
+													if ( $count > 3 ) {
+														?>
+														<button class="btn btn-sm bg-primary mr-auto ml-auto expand-button" type='button' data-button='{"session_id": <?php echo $random_number; ?>}' >Show All</button>
+														<?php
+													}
+													?>
+													</td>
+													<?php
+												}
+											} else {
+												$com_name = $comment_name . $comment_index;
+												?>
+												<td class="text-center"> 
+													<input class="form-check-input position-relative rolling-add-chk ml-auto <?php echo str_replace(' ', '', $title) ?>" 
+														type="checkbox" name="time_slots[]" 
+														value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) . 
+															',' . $item->template_item_title . ',' . $comment_index  . ',' . $item->template_item_slots ); ?>">
+												</td>
+												<?php
+											}
+
+											$current_column++;
+										}
+										?>
+										</tr>
+										<?php
+										$start_date->add( $duration );
+										$temp_end_date->Add( $duration );
+									}
+								}
 								$start_date->add( $one_day_interval );
 							}
 							?>
@@ -485,7 +608,7 @@ class SignUpsBase {
 		<?php
 	}
 
-		/**
+	/**
 	 * Add attendee for the selected spots
 	 *
 	 * @param  mixed $post Data from the form.
@@ -525,9 +648,9 @@ class SignUpsBase {
 						$new_attendee['attendee_end_time']        = $slot_end->format( 'U' );
 						$new_attendee['attendee_end_formatted']   = $slot_end->format( self::DATETIME_FORMAT );
 						$new_attendee['attendee_item']            = trim( $slot_parts[2] );
-
-						$comment_name                     = 'comment-' . $slot_parts[3];
-						$new_attendee['attendee_comment'] = $post[ $comment_name ];
+						$comment_name                             = 'comment-' . $slot_parts[3];
+						$slot_count                               = $slot_parts[4];
+						$new_attendee['attendee_comment']         = $post[ $comment_name ];
 
 						$wpdb->query(
 							$wpdb->prepare(
@@ -546,7 +669,7 @@ class SignUpsBase {
 							)
 						);
 
-						if ( ! $dup_rows ) {
+						if ( count( $dup_rows ) <  $slot_count ) {
 							$insert_return_value = $wpdb->insert( self::ATTENDEES_ROLLING_TABLE, $new_attendee );
 						} else {
 							?>
@@ -563,7 +686,7 @@ class SignUpsBase {
 							<td><?php echo esc_html( $post['firstname'] . ' ' . $post['lastname'] ); ?></td>
 							<td><?php echo esc_html( $slot_parts[2] ); ?></td>
 							<?php
-							if ( ! $insert_return_value || $dup_rows ) {
+							if ( ! $insert_return_value || count( $dup_rows ) >  $slot_count ) {
 								?>
 								<td style="color:red"><b><i>Failed</i></b></td>
 								<?php
@@ -637,4 +760,5 @@ class SignUpsBase {
 
 		clean_post_cache( $post );
 	}
+
 }
