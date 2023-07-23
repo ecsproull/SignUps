@@ -57,19 +57,35 @@ class DbSignUpTables {
 			);
 		}
 
-		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_rolling"' ) !== 'wp_scw_rolling' ) {
+		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_template"' ) !== 'wp_scw_template' ) {
 			$wpdb->query(
-				"CREATE TABLE `wp_scw_rolling` (
-					`rolling_id` int(11) NOT NULL AUTO_INCREMENT,
-					`rolling_start_time` time NOT NULL DEFAULT '08:00:00',
-					`rolling_session_length` time NOT NULL DEFAULT '01:00:00',
-					`rolling_days_week` varchar(45) NOT NULL DEFAULT '1,2,3,4,5',
-					`rolling_template_name` varchar(45) NOT NULL DEFAULT 'Daily 8 sessions',
-					`rolling_slot_items` varchar(90) NOT NULL DEFAULT 'Attendee',
-					`rolling_slots` int(11) NOT NULL DEFAULT 1,
-					`rolling_days` int(11) NOT NULL DEFAULT 30,
-					PRIMARY KEY (`rolling_id`)
-				  ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;"
+				"CREATE TABLE `wp_scw_template` (
+					`template_id` int NOT NULL AUTO_INCREMENT,
+					`template_name` varchar(60) NOT NULL,
+					`template_columns` int NOT NULL,
+					`template_rolling_days` int NOT NULL,
+					PRIMARY KEY (`template_id`),
+					UNIQUE KEY `template_id_UNIQUE` (`template_id`)
+				  ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;"
+			);
+		}
+
+		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_template_item"' ) !== 'wp_scw_template_item' ) {
+			$wpdb->query(
+				"CREATE TABLE `wp_scw_template_item` (
+					`template_item_id` int NOT NULL AUTO_INCREMENT,
+					`template_item_template_id` int NOT NULL,
+					`template_item_day_of_week` int NOT NULL,
+					`template_item_title` varchar(45) NOT NULL,
+					`template_item_slots` int NOT NULL,
+					`template_item_start_time` time NOT NULL,
+					`template_item_duration` time NOT NULL,
+					`template_item_shifts` int NOT NULL,
+					`template_item_group` char(1) NOT NULL,
+					`template_item_column` int NOT NULL,
+					PRIMARY KEY (`template_item_id`),
+					UNIQUE KEY `template_item_id_UNIQUE` (`template_item_id`)
+				  ) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4;"
 			);
 		}
 

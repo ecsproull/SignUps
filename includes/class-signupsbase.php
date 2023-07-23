@@ -426,7 +426,7 @@ class SignUpsBase {
 
 						<?php $userBadge =  $this->create_user_table( $user_group ); ?>
 
-						<table id="selection-table" class="mb-100px mr-auto ml-auto container selection-font"
+						<table id="selection-table" class="table-bordered mb-100px mr-auto ml-auto container selection-font"
 							<?php echo $userBadge == null ? 'hidden' : ''; ?> >
 							<?php
 							$current_day    = '2000-07-01';
@@ -467,21 +467,7 @@ class SignUpsBase {
 								<td colspan='4'><button type="submit" class="btn btn-md mr-auto ml-auto bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee_session">Submit</button></td>
 								</tr>
 								<tr class="date-row">
-									<td><?php echo esc_html( $current_day ); ?></td>
-									<?php
-									foreach( $slot_titles as $title ) {
-										?>
-										<td><?php echo esc_html( $title ); ?></td>
-										<?php
-										$count++;
-									}
-
-									for ( ; $count < $template->template_columns; $count++) {
-										?>
-										<td></td>
-										<?php
-									}
-								?>
+									<td colspan='4'><span class='mt-3' style="color:'black'; font-size:28px;"><?php echo esc_html( $current_day ); ?></span></td>
 								</tr>
 								<?php
 									
@@ -514,6 +500,7 @@ class SignUpsBase {
 													$attendee = $slot_attendees[0];
 													?>
 													<td>
+														<span class='text-primary'><i><?php echo esc_html( $item->template_item_title );?> </i></span><br>
 														<?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?>
 														<input class="form-check-input ml-2 rolling-remove-chk mt-2 <?php echo esc_html( $attendee->attendee_badge ) ?>" 
 															type="checkbox" name="remove_slots[]" 
@@ -529,7 +516,7 @@ class SignUpsBase {
 													<?php
 													if ( count( $slot_attendees ) < $item->template_item_slots ) {
 														?>
-														<input class="form-check-input position-relative rolling-add-chk ml-auto <?php echo str_replace(' ', '', $title) ?>" 
+														<input class="form-check-input position-relative rolling-add-chk ml-auto <?php echo str_replace( ' ', '', $item->template_item_title ) ?>" 
 														type="checkbox" name="time_slots[]" 
 														value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) . 
 															',' . $item->template_item_title . ',' . $comment_index  . ',' . $item->template_item_slots ); ?>"><br>
@@ -537,7 +524,7 @@ class SignUpsBase {
 													}
 
 													if ( $item->template_item_slots == count ( $slot_attendees ) ) {
-														echo "<span class='text-primary'><i>All Slots Filled</i></span><br>";
+														echo "<span class='text-primary'><i>All " . $item->template_item_slots . " Cleaning Slots Filled</i></span><br>";
 													} else {
 														echo "<span class='text-primary'><i>" . count( $slot_attendees ) . ' of ' . $item->template_item_slots . ' Slots Filled </i></span><br>';
 													}
@@ -571,8 +558,9 @@ class SignUpsBase {
 											} else {
 												$com_name = $comment_name . $comment_index;
 												?>
-												<td class="text-center"> 
-													<input class="form-check-input position-relative rolling-add-chk ml-auto <?php echo str_replace(' ', '', $title) ?>" 
+												<td class="text-center">
+													<span class="mr-2"><?php echo $item->template_item_title; ?></span> 
+													<input class="form-check-input position-relative rolling-add-chk ml-auto <?php echo str_replace( ' ', '', $item->template_item_title ); ?>" 
 														type="checkbox" name="time_slots[]" 
 														value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) . 
 															',' . $item->template_item_title . ',' . $comment_index  . ',' . $item->template_item_slots ); ?>">
@@ -581,6 +569,12 @@ class SignUpsBase {
 											}
 
 											$current_column++;
+										}
+
+										for ( ; $current_column < $template->template_columns; $current_column++ ) {
+											?>
+											<td></td>
+											<?php
 										}
 										?>
 										</tr>
