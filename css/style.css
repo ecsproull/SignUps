@@ -9,6 +9,10 @@
      border: 2px solid lightgray;
 }
 
+.w-125px {
+  width: 125px;
+}
+
 .w-250px {
     width: 250px;
 }

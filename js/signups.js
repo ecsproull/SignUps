@@ -230,5 +230,22 @@ jQuery( document ).ready( function($){
 			document.template_form.submit();
 		}
 	});
+
+	
+	$('.add-template-row').click( function() {
+		$('.template-table').find('tbody').append(
+			"<tr>" +
+				"<td ><input class='w-125px' type='text' name='template_item_day_of_week[]' value=''></td>" +
+				"<td><input type='text' name='template_item_title[]' value=''></td>" +
+				"<td><input class='w-75px' type='number' name='template_item_slots[]' value='1'></td>" +
+				"<td><input type='text' name='template_item_start_time[]' value=''></td>" +
+				"<td><input type='text' name='template_item_duration[]' value='00:00'></td>" +
+				"<td><input class='w-75px' type='number' name='template_item_shifts[]' value='1'></td>" +
+				"<td><input class='w-75px' type='number' name='template_item_column[]' value='1'></td>" +
+				"<td><input class='w-75px' type='text' name='template_item_group[]' value='A'></td>" +
+				"<input class='w-75px' type='hidden' name='template_item_id[]' value='-1'>" +
+			"</tr>"
+		);
+	});
 	
 });

@@ -436,7 +436,7 @@ class SignUpsBase {
 							while ( $start_date <= $end_date ) {
 								$day_of_week = $start_date->format( 'N' );
 								$day_items = array_filter($template_items, function( $value, $key ) use ( $day_of_week ){
-									return $value->template_item_day_of_week == $day_of_week;
+									return str_contains ( $value->template_item_day_of_week, $day_of_week );
 								}, ARRAY_FILTER_USE_BOTH);
 
 								usort( $day_items, function ( $a, $b ) {
@@ -524,7 +524,7 @@ class SignUpsBase {
 													}
 
 													if ( $item->template_item_slots == count ( $slot_attendees ) ) {
-														echo "<span class='text-primary'><i>All " . $item->template_item_slots . " Cleaning Slots Filled</i></span><br>";
+														echo "<span class='text-primary'><i>All " . $item->template_item_slots . " " . $item->template_item_title . " Slots Filled</i></span><br>";
 													} else {
 														echo "<span class='text-primary'><i>" . count( $slot_attendees ) . ' of ' . $item->template_item_slots . ' Slots Filled </i></span><br>';
 													}
@@ -564,6 +564,12 @@ class SignUpsBase {
 														type="checkbox" name="time_slots[]" 
 														value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) . 
 															',' . $item->template_item_title . ',' . $comment_index  . ',' . $item->template_item_slots ); ?>">
+
+														<?php
+														if ( $item->template_item_slots > '1' && count ( $slot_attendees ) === 0 ) {
+															echo "<br><span class='text-primary'><i>" . count( $slot_attendees ) . ' of ' . $item->template_item_slots . ' Slots Filled </i></span><br>';
+														} 
+														?>
 												</td>
 												<?php
 											}

@@ -31,172 +31,169 @@ class RollingTemplatesEditor extends SignUpsBase {
 		$post = wp_unslash( $_POST );
 		if ( isset( $_POST['mynonce'] ) && wp_verify_nonce( $post['mynonce'], 'signups' ) ) {
 			unset( $post['mynonce'] );
-			if ( isset( $post['submit_template'] ) ) {
+            if ( isset( $post['cancel_template'] ) ) {
+				$this->load_template_form( $post['cancel_template'] );
+			} elseif ( isset( $post['submit_template'] ) ) {
 				$this->submit_template( $post );
 			} elseif ( isset( $post['template_id'] ) ) { 
                 $this->load_template_form( $post['template_id'] );
             }else {
-				$this->load_template_form( -1 );
+				$this->load_template_form( 1 );
 			}
 		} else {
-			$this->load_template_form( -1 );
+			$this->load_template_form( 1 );
 		}
 	}
 
     private function submit_template( $post ) {
         global $wpdb;
         $data = Array();
-        $data['rolling_start_time']     = $post['start_time'];
-        $data['rolling_session_length'] = $post['duration'];
-        $data['rolling_slots']          = $post['slots'];
-        $data['rolling_days']           = $post['rolling_days'];
-        $data['rolling_template_name']  = $post['name'];
-        $data['rolling_slot_items']     = $post['items'];
+        $data['template_name']         = $post['template_name'];
+        $data['template_rolling_days'] = $post['template_rolling_days'];
+        $data['template_columns']      = $post['template_columns'];
+        
+        $where = Array();
+        $where['template_id'] = $post['submit_template'];
+        $rows = $wpdb->update( self::SIGNUP_TEMPLATE_TABLE, $data, $where );
 
-        $day_template;
-        for( $i = 1; $i < 8; $i++ ) {
-            if ( $post['days'][$i] ) {
-                if ( $day_template ) {
-                    $day_template .= ',';
+        if ( $rows != 1 && $wpdb->last_error != '' ) {
+            echo "<p>Error updating template table: " . $wpdb->last_error . "<br><br>";
+        }
+
+        for( $i = 0; $i < count ( $post['template_item_id'] ); $i++ ) {
+            if ( array_key_exists( 'template_item_delete', $post) && in_array( $post['template_item_id'][$i] , $post['template_item_delete'] ) ) {
+                $template_items = $wpdb->get_results(
+                    $wpdb->prepare(
+                        'DELETE
+                        FROM %1s
+                        WHERE template_item_id = %d',
+                        self::SIGNUP_TEMPLATE_ITEM_TABLE,
+                        $post['template_item_id'][$i]
+                    ),
+                    OBJECT
+                );
+                continue;
+            }
+
+            $data = Array();
+            $data['template_item_day_of_week'] = $post['template_item_day_of_week'][$i];
+            $data['template_item_title']        = $post['template_item_title'][$i];
+            $data['template_item_slots']        = $post['template_item_slots'][$i];
+            $data['template_item_start_time']   = $post['template_item_start_time'][$i];
+            $data['template_item_duration']     = $post['template_item_duration'][$i];
+            $data['template_item_shifts']       = $post['template_item_shifts'][$i];
+            $data['template_item_column']       = $post['template_item_column'][$i];
+            $data['template_item_group']        = $post['template_item_group'][$i];
+
+            if ( $post['template_item_id'][$i] > 0 ) {
+                $where                     = Array();
+                $where['template_item_id'] = $post['template_item_id'][$i];
+                $rows                      = $wpdb->update( self::SIGNUP_TEMPLATE_ITEM_TABLE, $data, $where );
+
+                if ( $rows != 1 && $wpdb->last_error != '' ) {
+                    echo "<p>Error updating template item ". $i . " failed : " . $wpdb->last_error . "<br><br>";
                 }
+            } else {
+                $data['template_item_template_id'] = $post['submit_template'];
+                $rows  = $wpdb->insert( self::SIGNUP_TEMPLATE_ITEM_TABLE, $data );
 
-                $day_template .= $i . '-' . $post['days_sessions'][$i];
+                if ( $rows != 1 && $wpdb->last_error != '' ) {
+                    echo "<p>Error insert failed : " . $wpdb->last_error . "<br><br>";
+                }
             }
         }
 
-        $data['rolling_days_week'] = $day_template;
-        if ( $post['submit_template'] == -1 ) {
-            $insert_return_value = $wpdb->insert( self::ROLLING_TABLE, $data );
-            if ( $insert_return_value != 1 ) {
-                echo "<p>Error inserting new table: " . $wpdb->last_error;
-            } else {
-                $this->load_template_form( $wpdb->insert_id );
-                return;
-            }
-        } else {
-            $where = Array();
-            $where['rolling_id'] = $post['submit_template'];
-            $rows = $wpdb->update( self::ROLLING_TABLE, $data, $where );
-            if ( $rows != 1 ) {
-                echo "<p>Error updating rolling table: " . $wpdb->last_error;
-            } else {
-                $this->load_template_form( $post['submit_template'] );
-                return;
-            }
-        }
+        ?>
+        <form method="POST" name="template_form" >
+            <button type="submit" class="btn bth-md bg-primary ml-auto mr-auto mt-5" 
+                value=<?php echo $post['submit_template']; ?> name="cancel_template">Return</button>
+        </form>
+        <?php
     }
 
     private function load_template_form( $template_id ) {
         global $wpdb;
-        $results = $wpdb->get_results(
+        $templates = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
 				FROM %1s
-                WHERE rolling_id = %d',
-				self::ROLLING_TABLE,
+                WHERE template_id = %d',
+				self::SIGNUP_TEMPLATE_TABLE,
                 $template_id
 			),
 			OBJECT
 		);
+
+        $template_items = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+                WHERE template_item_template_id = %d',
+				self::SIGNUP_TEMPLATE_ITEM_TABLE,
+                $template_id
+			),
+			OBJECT
+		);
+        
         
         ?>
         <form method="POST" name="template_form" >
         <?php
         $this->load_template_selection( $template_id );
         if ( -1 !== $template_id ) {
-            $days = Array();
-            $days_sessions_raw = explode( ',', $results[0]->rolling_days_week );
-            $days_sessions     = array();
-		    foreach ( $days_sessions_raw as $dsr ) {
-                $x                      = explode( '-', $dsr );
-                $days_sessions[ $x[0] ] = $x[1];
-            }
             ?>
             <div>
                 <label class="mr-4 mt-3" for="rolling-name">Name:</label>
-                <input type="text" class="mt-2 w-250px" id="rolling-name" value="<?php echo $results[0]->rolling_template_name; ?>" name="name">
+                <input type="text" id="rolling-name" class="mt-2 w-250px" 
+                    value="<?php echo $templates[0]->template_name; ?>" name="template_name">
             </div>
-            <div>
-                <label for="start-time">Start time:</label>
-                <input type="time" class="mt-2" id="start-time" value=<?php echo $results[0]->rolling_start_time; ?> name="start_time">
-            </div>
-            <div>
-                <label class="mr-1" for="duration">Duration:</label>
-                <input type="time" class="mt-2 without_ampm" id="duration" value=<?php echo $results[0]->rolling_session_length; ?> name="duration">
-            </div>
+    
             <div>
                 <label class="mr-4 mt-2" for="rolling-days">Days:</label>
-                <input type="number" class="mt-2 ml-2 w-75px" id="rolling-days" value=<?php echo $results[0]->rolling_days; ?> name="rolling_days">
+                <input type="number" id="rolling-days" class="mt-2 ml-2 w-75px" id="rolling-days" 
+                    value=<?php echo $templates[0]->template_rolling_days; ?> name="template_rolling_days">
             </div>
+ 
             <div>
-                <label class="mr-3 mt-2" for="rolling-slots">Slots:</label>
-                <input type="number" class="mt-2 w-75px" id="rolling-slots" value=<?php echo $results[0]->rolling_slots; ?> name="slots">
+                <label class="mr-4 mt-2" for="rolling-columns">Items:</label>
+                <input type="number" for="rolling-columns" class="mt-2 w-250px" 
+                    value="<?php echo $templates[0]->template_columns; ?>" name="template_columns">
             </div>
-            <div>
-                <label class="mr-4 mt-2" for="rolling-items">Items:</label>
-                <input type="text" class="mt-2 w-250px" id="rolling-items" value="<?php echo $results[0]->rolling_slot_items; ?>" name="items">
-            </div>
-            <table class="mt-3 table table-bordered mr-auto w-300px">
+            <table class="mt-3 table mr-auto d-flex template-table">
                 <tr>
-                    <th>Day</th>
-                    <th>Select</th>
-                    <th>Sessions</th>
-                    <th>Extra Items</th>
-                    <th>Extra Item Slots</th>
+                    <th>Days</th>
+                    <th>Item</th>
+                    <th>Slots</th>
+                    <th>Start Time</th>
+                    <th>Duration</th>
+                    <th>Shifts</th>
+                    <th>Column</th>
+                    <th>Group</th>
+                    <th>Delete</th>
                 </tr>
-                <tr>
-                    <td>Monday</td>
-                    <td><input class="mr-auto ml-auto" type='checkbox' name='days[1]' <?php if ( array_key_exists( 1, $days_sessions ) ) { echo 'checked'; } ?> /></td>
-                    <td><input style="width:75px" type='number' name='days_sessions[1]' value=<?php echo $days_sessions[1]; ?> /></td>
-                    <td><input type="text" class="mt-2 w-250px" value="" name="extra_items[1]"></td>
-                    <td><input type="number" class="mt-2 w-75px" value=1 name="extra_slots[1]"></td>
-                </tr>
-                <tr>
-                    <td>Tuesday</td>
-                    <td><input class="mr-auto ml-auto" type='checkbox' name='days[2]' <?php if ( array_key_exists( 2, $days_sessions ) ) { echo 'checked'; } ?> /></td>
-                    <td><input style="width:75px" type='number' name='days_sessions[2]' value=<?php echo $days_sessions[2]; ?> /></td>
-                    <td><input type="text" class="mt-2 w-250px" value="" name="extra_items[2]"></td>
-                    <td><input type="number" class="mt-2 w-75px" value=1 name="extra_slots[2]"></td>
-                </tr>
-                <tr>
-                    <td>Wednesday</td>
-                    <td><input class="mr-auto ml-auto" type='checkbox' name='days[3]' <?php if ( array_key_exists( 3, $days_sessions ) ) { echo 'checked'; } ?> /></td>
-                    <td><input style="width:75px" type='number' name='days_sessions[3]' value=<?php echo $days_sessions[3]; ?> /></td>
-                    <td><input type="text" class="mt-2 w-250px" value="" name="extra_items[3]"></td>
-                    <td><input type="number" class="mt-2 w-75px" value=1 name="extra_slots[3]"></td>
-                </tr>
-                <tr>
-                    <td>Thursday</td>
-                    <td><input class="mr-auto ml-auto" type='checkbox' name='days[4]' <?php if ( array_key_exists( 4, $days_sessions ) ) { echo 'checked'; } ?> /></td>
-                    <td><input style="width:75px" type='number' name='days_sessions[4]' value=<?php echo $days_sessions[4]; ?> /></td>
-                    <td><input type="text" class="mt-2 w-250px" value="" name="extra_items[4]"></td>
-                    <td><input type="number" class="mt-2 w-75px" value=1 name="extra_slots[4]"></td>
-                </tr>
-                <tr>
-                    <td>Friday</td>
-                    <td><input class="mr-auto ml-auto" type='checkbox' name='days[5]' <?php if ( array_key_exists( 5, $days_sessions ) ) { echo 'checked'; } ?> /></td>
-                    <td><input style="width:75px" type='number' name='days_sessions[5]' value=<?php echo $days_sessions[5]; ?> /></td>
-                    <td><input type="text" class="mt-2 w-250px" value="" name="extra_items[5]"></td>
-                    <td><input type="number" class="mt-2 w-75px" value=1 name="extra_slots[5]"></td>
-                </tr>
-                <tr>
-                    <td>Saturday</td>
-                    <td><input class="mr-auto ml-auto" type='checkbox' name='days[6]' <?php if ( array_key_exists( 6, $days_sessions ) ) { echo 'checked'; } ?> /></td>
-                    <td><input style="width:75px" type='number' name='days_sessions[6]' value=<?php echo $days_sessions[6]; ?> /></td>
-                    <td><input type="text" class="mt-2 w-250px" value="" name="extra_items[6]"></td>
-                    <td><input type="number" class="mt-2 w-75px" value=1 name="extra_slots[6]"></td>
-                </tr>
-                <tr>
-                    <td>Sunday</td>
-                    <td><input class="mr-auto ml-auto" type='checkbox' name='days[7]' <?php if ( array_key_exists( 7, $days_sessions ) ) { echo 'checked'; } ?> /></td>
-                    <td><input style="width:75px" type='number' name='days_sessions[7]' value=<?php echo $days_sessions[7]; ?> /></td>
-                    <td><input type="text" class="mt-2 w-250px" value="" name="extra_items[7]"></td>
-                    <td><input type="number" class="mt-2 w-75px" value=1 name="extra_slots[7]"></td>
-                </tr>
+                <?php
+                foreach ( $template_items as $item ) {
+                    ?>
+                    <tr>
+                        <td ><input class="w-125px" type='text' name="template_item_day_of_week[]" value=<?php echo $item->template_item_day_of_week; ?> required ></td>
+                        <td><input type='text' name="template_item_title[]" value='<?php echo $item->template_item_title; ?>' required ></td>
+                        <td><input class="w-75px" type="number" name="template_item_slots[]" value=<?php echo $item->template_item_slots; ?> required ></td>
+                        <td><input type='text' name="template_item_start_time[]" value=<?php echo $item->template_item_start_time; ?> required ></td>
+                        <td><input type='text' name="template_item_duration[]" value=<?php echo $item->template_item_duration; ?> required ></td>
+                        <td><input class="w-75px" type='number' name="template_item_shifts[]" value=<?php echo $item->template_item_shifts; ?> required ></td>
+                        <td><input class="w-75px" type='number' name="template_item_column[]" value=<?php echo $item->template_item_column; ?> required ></td>
+                        <td><input class="w-75px" type='text' name="template_item_group[]" value=<?php echo $item->template_item_group; ?> required ></td>
+                        <td class="bg-danger"><input class="w-75px ml-3" type='checkbox' name="template_item_delete[]" value=<?php echo $item->template_item_id; ?> ></td>
+                        <input class="w-75px" type='hidden' name="template_item_id[]" value=<?php echo $item->template_item_id; ?>  >
+                    </tr>
+                <?php
+                }
+                ?>
             </table>
-            <div class="row w-300px">
-                <button type="submit" class="btn bth-md bg-primary mr-3 ml-auto"value=<?php echo esc_html( $template_id ); ?> name="submit_template">Submit</button>
-                <button type="submit" class="btn bth-md bg-primary mr-auto ml-3"value="-1" name="submit_template">Cancel</button>
+            <div class="row" style="width: 1000px">
+                <button type="submit" class="btn bth-md bg-primary ml-auto" value=<?php echo esc_html( $template_id ); ?> name="submit_template">Submit</button>
+                <button type="submit" class="btn bth-md bg-primary ml-5" value=<?php echo esc_html( $template_id ); ?> name="cancel_template">Cancel</button>
+                <button type="button" class="btn bth-md bg-success mr-auto ml-5 add-template-row">Add Row</button>
             </div>
             <?php
             wp_nonce_field( 'signups', 'mynonce' );
@@ -208,12 +205,11 @@ class RollingTemplatesEditor extends SignUpsBase {
 
     private function load_template_selection( $template_id ) {
 		global $wpdb;
-		$results = $wpdb->get_results(
+		$templates = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT rolling_id,
-				rolling_template_name
+				'SELECT template_id, template_name
 				FROM %1s',
-				self::ROLLING_TABLE
+				self::SIGNUP_TEMPLATE_TABLE
 			),
 			OBJECT
 		);
@@ -222,14 +218,14 @@ class RollingTemplatesEditor extends SignUpsBase {
 	    <label for="templates" class="block-label mt-50px mb-10px">Select a Template</label>
 		<select id="template-select" name="template_id" id="templates">
 		<?php
-		foreach ( $results as $result ) {
-			if ( $template_id == $result->rolling_id ) {
+		foreach ( $templates as $result ) {
+			if ( $template_id == $result->template_id ) {
 				?>
-				<option value="<?php echo esc_html( $result->rolling_id ); ?>" selected><?php echo esc_html( $result->rolling_template_name ); ?></option>
+				<option value="<?php echo esc_html( $result->template_id ); ?>" selected><?php echo esc_html( $result->template_name ); ?></option>
 				<?php
 			} else {
 				?>
-				<option value="<?php echo esc_html( $result->rolling_id ); ?>"><?php echo esc_html( $result->rolling_template_name ); ?></option>
+				<option value="<?php echo esc_html( $result->template_id ); ?>"><?php echo esc_html( $result->template_name ); ?></option>
 				<?php
 			}
 		}

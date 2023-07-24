@@ -154,6 +154,7 @@ jQuery(document).ready(function($){
 		}
 	});
 
+	$(table).find('tbody').append("<tr><td>aaaa</td></tr>");
 	///// Sripe payment stuff below here. /////
 	// show shipping address if different
 	function showMe() {
