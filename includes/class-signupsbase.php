@@ -427,7 +427,7 @@ class SignUpsBase {
 						<?php $userBadge =  $this->create_user_table( $user_group ); ?>
 
 						<table id="selection-table" class="table-bordered mb-100px mr-auto ml-auto container selection-font"
-							<?php echo $userBadge == null ? 'hidden' : ''; ?> >
+							<?php echo $userBadge == null && ! $admin ? 'hidden' : ''; ?> >
 							<?php
 							$current_day    = '2000-07-01';
 							$comment_index  = 0;
@@ -761,4 +761,41 @@ class SignUpsBase {
 		clean_post_cache( $post );
 	}
 
+	protected function load_template_selection( $template_id, $add_new = false ) {
+		global $wpdb;
+		$templates = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT template_id, template_name
+				FROM %1s',
+				self::SIGNUP_TEMPLATE_TABLE
+			),
+			OBJECT
+		);
+
+		?>
+	    <label for="templates" class="block-label mt-50px mb-10px">Select a Template</label>
+		<select id="template-select" name="template_id" id="templates">
+		<?php
+		foreach ( $templates as $result ) {
+			if ( $template_id == $result->template_id ) {
+				?>
+				<option value="<?php echo esc_html( $result->template_id ); ?>" selected><?php echo esc_html( $result->template_name ); ?></option>
+				<?php
+			} else {
+				?>
+				<option value="<?php echo esc_html( $result->template_id ); ?>"><?php echo esc_html( $result->template_name ); ?></option>
+				<?php
+			}
+		}
+
+		if ( $add_new ) {
+			?>
+			<option value="-1">New Template</option>
+			<?php
+		}
+		?>
+        <?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+		</select>
+		<?php
+	}
 }

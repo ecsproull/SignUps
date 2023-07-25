@@ -151,4 +151,8 @@ table#signup-select > tbody > tr > td {
 	outline: 2px solid #FF0000!important;
 	box-shadow: 2px 2px 2px, -2px -2px 2px, -2px 2px 2px, 2px -2px 2px!important;
 }
+
+input[type='radio'] { 
+	transform: scale(2); 
+}
   

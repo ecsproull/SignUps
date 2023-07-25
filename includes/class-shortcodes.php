@@ -362,7 +362,7 @@ class ShortCodes extends SignUpsBase {
 						}
 						?>
 					</tr>
-				<table>
+				</table>
 			</form>
 		</div>
 		<?php
@@ -379,7 +379,7 @@ class ShortCodes extends SignUpsBase {
 		?>
 		<form method="POST">
 			<div id="usercontent" class="container">
-				<table id="signup-select" class="mb-100px mr-auto ml-auto mt-5">
+				<table id="signup-select selection-font" class="mb-100px mr-auto ml-auto mt-5">
 					<?php
 					foreach ( $results as $result ) {
 						?>
@@ -429,7 +429,7 @@ class ShortCodes extends SignUpsBase {
 							$userBadge = $this->create_user_table( $user_group );
 						}
 						?>
-						<table id="selection-table" class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-125px"
+						<table id="selection-table" class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-125px selection-font"
 							<?php echo $userBadge == null ? 'hidden' : ''; ?> >
 							<?php
 							foreach ( $sessions as $session ) {
