@@ -10,6 +10,17 @@
 		font-weight: 600;
 		color: black;
     }
+
+	.date-row {
+		border-top: 3px solid black;
+		border-left: 3px solid black;
+		border-right: 3px solid black;
+		border-bottom: 2px solid gray!important;
+		background-color: lightsteelblue;
+		border-radius: 10px;
+		color:'black'; 
+		font-size:16px;
+	}
 }
 
 #usercontent {
@@ -94,6 +105,8 @@ table#new-member > tbody > tr > td > input {
 	border-bottom: 2px solid gray!important;
 	background-color: lightsteelblue;
 	border-radius: 10px;
+	color:'black'; 
+	font-size:28px;
 }
 
 .submit-row {

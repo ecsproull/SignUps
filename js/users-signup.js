@@ -52,6 +52,10 @@ jQuery(document).ready(function($){
 			return this.value;
 		}).get();
 
+		if (selectedValues.length == 0 && deletedValues.length == 0 ) {
+			alert("Please select a session!");
+			return;
+		}
 		var selectedSessionsTable = "<table><tr class='text-center font-weight-bold'><td>Start</td><td>End</td><td>Item</td><td>Cost</td></tr>";
 		selectedValues.forEach((item) => {
 			var arr = item.split(',');

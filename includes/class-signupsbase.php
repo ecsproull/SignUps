@@ -467,7 +467,7 @@ class SignUpsBase {
 								<td colspan='4'><button type="submit" class="btn btn-md mr-auto ml-auto bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee_session">Submit</button></td>
 								</tr>
 								<tr class="date-row">
-									<td colspan='4'><span class='mt-3' style="color:'black'; font-size:28px;"><?php echo esc_html( $current_day ); ?></span></td>
+									<td colspan='4'><span class='mt-3'><?php echo esc_html( $current_day ); ?></span></td>
 								</tr>
 								<?php
 									

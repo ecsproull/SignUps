@@ -437,16 +437,20 @@ class ShortCodes extends SignUpsBase {
 								if ( $session->session_start_time < $now->format( 'U' ) ) {
 									continue;
 								}
+								?>
+								<tr class="submit-row">
+									<td colspan='3'><button id=<?php echo esc_html( 'submit_' . $session->session_id ); ?>
+												class="btn btn-md btn-primary mr-auto ml-auto mt-2 signup-submit"
+												type="submit">Submit</button>
+									</td>
+								</tr>
+								<?php
 								$start_date = new DateTime( $session->session_start_formatted );
 								$end_date   = new DateTime( $session->session_end_formatted );
 								?>
 								<tr id="submit-row" class="date-row">
-									<td class="text-left"> <?php echo esc_html( $start_date->format( self::DATE_FORMAT ) ); ?>
-									<td><?php echo esc_html( $start_date->format( self::TIME_FORMAT ) . ' - ' . $end_date->format( self::TIME_FORMAT ) ); ?></td>
-									<td><button id=<?php echo esc_html( 'submit_' . $session->session_id ); ?>
-												class="btn btn-md btn-primary mr-auto ml-auto mt-2 signup-submit"
-												style="display: none;"
-												type="submit">Submit</button></td>
+									<td class="text-center" colspan="3"> <?php echo esc_html( $start_date->format( self::DATE_FORMAT ) .
+								 		' - ' .  $start_date->format( self::TIME_FORMAT ) . ' - ' . $end_date->format( self::TIME_FORMAT ) ); ?>
 								</tr>
 								<input type="hidden" name="add_attendee_class">
 								<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
