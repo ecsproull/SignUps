@@ -149,22 +149,30 @@ class RollingTemplatesEditor extends SignUpsBase {
         <?php
         $this->load_template_selection( $template_id, true );
         ?>
-        <div>
-            <label class="mr-4 mt-3" for="rolling-name">Name:</label>
-            <input type="text" id="rolling-name" class="mt-2 w-250px" 
-                value="<?php echo $templates[0]->template_name; ?>" name="template_name">
-        </div>
+        <div class="box mt-4">
+            <div class="text-right">
+                <label class="mt-2 mr-2" for="rolling-name">Name:</label>
+            </div>
+            <div>
+                <input type="text" id="rolling-name" class="mt-2 w-250px" 
+                    value="<?php echo $templates[0]->template_name; ?>" name="template_name">
+            </div>
 
-        <div>
-            <label class="mr-4 mt-2" for="rolling-days">Rolling Days:</label>
-            <input type="number" id="rolling-days" class="mt-2 ml-2 w-75px" 
-                value="<?php echo $templates[0]->template_rolling_days; ?>" name="template_rolling_days">
-        </div>
+            <div class="text-right">
+                <label class="mt-2 mr-2" for="rolling-days">Rolling Days:</label>
+            </div>
+            <div>
+                <input type="number" id="rolling-days" class="mt-2 w-75px" 
+                    value="<?php echo $templates[0]->template_rolling_days; ?>" name="template_rolling_days">
+            </div>
 
-        <div>
-            <label class="mr-4 mt-2" for="rolling-columns">Column Count:</label>
-            <input type="number" for="rolling-columns" class="mt-2 w-75px" 
-                value="<?php echo $templates[0]->template_columns; ?>" name="template_columns">
+            <div class="text-right">
+                <label class="mt-2 mr-2" for="rolling-columns">Column Count:</label>
+            </div>
+            <div>
+                <input type="number" for="rolling-columns" class="mt-2 w-75px" 
+                    value="<?php echo $templates[0]->template_columns; ?>" name="template_columns">
+            </div>
         </div>
         <table class="mt-3 table mr-auto d-flex template-table">
             <tr>
@@ -185,12 +193,12 @@ class RollingTemplatesEditor extends SignUpsBase {
                     <td ><input class="w-125px" type='text' name="template_item_day_of_week[]" value=<?php echo $item->template_item_day_of_week; ?> required ></td>
                     <td><input type='text' name="template_item_title[]" value='<?php echo $item->template_item_title; ?>' required ></td>
                     <td><input class="w-75px" type="number" name="template_item_slots[]" value=<?php echo $item->template_item_slots; ?> required ></td>
-                    <td><input type='text' name="template_item_start_time[]" value=<?php echo $item->template_item_start_time; ?> required ></td>
-                    <td><input type='text' name="template_item_duration[]" value=<?php echo $item->template_item_duration; ?> required ></td>
+                    <td><input class="w-125px" type='text' name="template_item_start_time[]" value=<?php echo $item->template_item_start_time; ?> required ></td>
+                    <td><input class="w-125px" type='text' name="template_item_duration[]" value=<?php echo $item->template_item_duration; ?> required ></td>
                     <td><input class="w-75px" type='number' name="template_item_shifts[]" value=<?php echo $item->template_item_shifts; ?> required ></td>
                     <td><input class="w-75px" type='number' name="template_item_column[]" value=<?php echo $item->template_item_column; ?> required ></td>
                     <td><input class="w-75px" type='text' name="template_item_group[]" value=<?php echo $item->template_item_group; ?> required ></td>
-                    <td class="bg-danger"><input class="w-75px ml-3" type='checkbox' name="template_item_delete[]" value=<?php echo $item->template_item_id; ?> ></td>
+                    <td><div class="bg-danger"><input class="w-75px ml-3" type='checkbox' name="template_item_delete[]" value=<?php echo $item->template_item_id; ?> ></div></td>
                     <input class="w-75px" type='hidden' name="template_item_id[]" value=<?php echo $item->template_item_id; ?>  >
                 </tr>
             <?php

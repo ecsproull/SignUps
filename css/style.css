@@ -61,6 +61,21 @@
     margin-right: 100px;
 }
 
+.box {
+  display: grid;
+  width: 300px;
+  grid-template-columns: 155px 249px;
+  align-items: start;
+  justify-content: space-between;
+}
+
+tr > td > div.bg-danger {
+  height: 2.1rem;
+  padding-top: 3px;
+  border: 1px solid black;
+  border-radius: 4px;
+}
+
 .submitbutton {
     /* display:block; */
     width:27px; height:27px;
