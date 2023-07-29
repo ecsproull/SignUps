@@ -143,13 +143,15 @@ class RollingTemplatesEditor extends SignUpsBase {
 			OBJECT
 		);
         
-        
         ?>
-        <form method="POST" name="template_form" >
+        <form method="POST" name="template_form" class="mt-4" >
+        <div class="text-center">
+            <label class="mr-2" for="template-select:">Select Template:</label>
         <?php
         $this->load_template_selection( $template_id, true );
         ?>
-        <div class="box mt-4">
+        </div>
+        <div class="box mt-4 ml-auto mr-auto">
             <div class="text-right">
                 <label class="mt-2 mr-2" for="rolling-name">Name:</label>
             </div>

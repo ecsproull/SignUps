@@ -32,7 +32,7 @@ require 'includes/class-sessionitem.php';
 require 'includes/class-shortcodes.php';
 require 'includes/class-timeexception.php';
 require 'includes/class-htmleditor.php';
-require 'includes/class-productseditor.php';
+require 'includes/class-descriptioneditor.php';
 require 'includes/class-stripepayments.php';
 require 'includes/class-rollingtemplateseditor.php';
 require_once 'vendor/autoload.php';
@@ -48,6 +48,13 @@ class SignupsPlugin extends SignUpsBase {
 	 * @var $short_codes
 	 */
 	private $short_codes;
+
+	/**
+	 * Shortcode description editor.
+	 *
+	 * @var $short_codes
+	 */
+	private $description_editor;
 
 	/**
 	 * Shortcode object for use in api callback.
@@ -69,9 +76,11 @@ class SignupsPlugin extends SignUpsBase {
 		new SignUpsRestApis();
 		$this->short_codes = new ShortCodes();
 		$this->stripe_payments = new SripePayments();
+		$this->description_editor = new DescriptionEditor();
 		add_shortcode( 'scw_selectclass', array( $this->short_codes, 'user_signup' ) );
 		add_shortcode( 'scw_payment_success', array( $this->stripe_payments, 'payment_success' ) );
 		add_shortcode( 'scw_payment_failure', array( $this->stripe_payments, 'payment_failure' ) );
+		add_shortcode( 'scw_description_editor', array( $this->description_editor, 'load_description_editor' ) );
 		add_action(
 			'rest_api_init',
 			array( $this, 'regester_payment_route' )
@@ -137,6 +146,7 @@ class SignupsPlugin extends SignUpsBase {
 		wp_register_style( 'user_signup_style', plugins_url( '/signups/css/users-styles.css' ), array(), 1 );
 		wp_enqueue_style( 'user_signup_style' );
 		wp_enqueue_script( 'signup_member_script', plugins_url( 'js/signups.js', __FILE__ ), array( 'jquery' ), '1.0.0.0', false, true );
+		wp_enqueue_script( 'signup_tinymce', "https://cdn.tiny.cloud/1/s9npqxi5h9knhv5a8g5qfc33xh2qknj1nage4xv5qsbtrzyt/tinymce/6/tinymce.min.js", array( 'jquery' ), '4.9.11', false, true );
 		wp_localize_script(
 			'signup_member_script',
 			'wpApiSettings',
@@ -153,7 +163,10 @@ class SignupsPlugin extends SignUpsBase {
 	 * @param string $host Who is calling.
 	 */
 	public function add_users_scripts_and_css( $host ) {
-		if ( ! is_page( 'signups' ) ) {
+		$user_pages   = Array();
+		$user_pages[] = 'signup-description-editor';
+		$user_pages[] = 'signups';
+		if ( ! is_page( $user_pages ) ) {
 			return;
 		}
 
@@ -164,6 +177,7 @@ class SignupsPlugin extends SignUpsBase {
 		wp_enqueue_style( 'wp-jquery-ui-dialog' );
 		wp_enqueue_script( 'signup_cookie_script', plugins_url( 'cookie/node_modules/js-cookie/dist/js.cookie.min.js', __FILE__ ), array( 'jquery' ), '3.0.5', false, true );
 		wp_enqueue_script( 'signup_member_script', plugins_url( 'js/users-signup.js', __FILE__ ), array( 'jquery', 'jquery-ui-dialog', 'signup_cookie_script' ), '1.0.0.0', false, true );
+		wp_enqueue_script( 'signup_tinymce', "https://cdn.tiny.cloud/1/s9npqxi5h9knhv5a8g5qfc33xh2qknj1nage4xv5qsbtrzyt/tinymce/6/tinymce.min.js", array( 'jquery' ), '4.9.11', false, true );
 		wp_localize_script(
 			'signup_member_script',
 			'wpApiSettings',

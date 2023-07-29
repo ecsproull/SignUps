@@ -1,5 +1,18 @@
 jQuery(document).ready(function($){
 	var scw_submitting = 0;
+	tinymce.init({
+		selector: 'textarea.html-textarea',
+		plugins: 'ai tinycomments mentions anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed permanentpen footnotes advtemplate advtable advcode editimage tableofcontents mergetags powerpaste tinymcespellchecker autocorrect a11ychecker typography inlinecss',
+		toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | align lineheight | tinycomments | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+		tinycomments_mode: 'embedded',
+		tinycomments_author: 'Author name',
+		mergetags_list: [
+		  { value: 'First.Name', title: 'First Name' },
+		  { value: 'Email', title: 'Email' },
+		],
+		ai_request: (request, respondWith) => respondWith.string(() => Promise.reject("See docs to implement AI Assistant"))
+	});
+
 	$("#get_member_button").click(function(){
 		var req = $.ajax({
 			url: wpApiSettings.root + 'scwmembers/v1/members',
@@ -25,7 +38,7 @@ jQuery(document).ready(function($){
 				var badgeclass = '.' + response[0].badge;
 				Cookies.set('signups_scw_badge', response[0].badge);
 				$('.rolling-remove-chk').prop("hidden", true);
-				$(badgeclass).prop("hidden", false);
+				$('badgeclass').prop("hidden", false);
 			} else {
 				alert('Badge number not found.')
 			}
@@ -158,7 +171,8 @@ jQuery(document).ready(function($){
 		}
 	});
 
-	$(table).find('tbody').append("<tr><td>aaaa</td></tr>");
+	//$(table).find('tbody').append("<tr><td>aaaa</td></tr>");
+	
 	///// Sripe payment stuff below here. /////
 	// show shipping address if different
 	function showMe() {

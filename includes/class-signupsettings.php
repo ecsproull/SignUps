@@ -44,12 +44,84 @@ class SignupSettings extends SignUpsBase {
 				$this->delete_session( $post );
 			} elseif ( isset( $post['add_attendee_session'] ) ) {
 				$this->add_attendee_rolling( $post );
+			} elseif ( isset( $post['update_calendar'] ) ) {
+				$this->update_calendar( $post );
 			} else {
 				$this->load_signup_selection();
 			}
 		} else {
 			$this->load_signup_selection();
 		}
+	}
+
+	/**
+	 * Updates the clubs calendar.
+	 *
+	 * @param int $post The posted data from the form.
+	 */
+	private function update_calendar( $post ) {
+		global $wpdb;
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE session_id = %s',
+				self::SESSIONS_TABLE,
+				$post['session_id']
+			),
+			OBJECT
+		);
+
+		$session = $results[0];
+		$new_calendar_id = 0;
+		if ( $session->session_calendar_id > 0 ) {
+			$where_session = array( 'id' => $session->session_calendar_id );
+			$wpdb->delete( self::SPIDER_CALENDAR_EVENT_TABLE, $where_session );
+		} else {
+			$datetime = new DateTime( $session->session_start_formatted);
+			$date = $datetime->format('Y-m-d');
+			$start_time = $datetime->format('g:iA');
+			$datetime = new DateTime( $session->session_end_formatted);
+			$end_time = $datetime->format('g:iA');
+			$signup_url = get_site_url() . '/signups?signup_id=' . $post['signup_id'];
+			$text_for_date = 'For more information click <a href=' . $signup_url . " target='_blank' rel='noopener' >here</a>.";
+
+			$data = Array();
+			$data['calendar']      = 1;
+			$data['date']          = $date;
+			$data['date_end']      = $date;
+			$data['title']         = $post['signup_name'];
+			$data['category']      = 7;
+			$data['time']          = $start_time . '-' . $end_time;
+			$data['text_for_date'] = $text_for_date;
+			$data['userID']        = '';
+			$data['repeat_method'] = 'no_repeat';
+			$data['repeat']        = '';
+			$data['week']          = '';
+			$data['month']         = '';
+			$data['month_type']    = '1';
+			$data['monthly_list']  = '';
+			$data['month_week']    = '';
+			$data['year_month']    = '1';
+			$data['published']     = 1;
+			$rows                  = $wpdb->insert( self::SPIDER_CALENDAR_EVENT_TABLE, $data );
+			$new_calendar_id       = $wpdb->insert_id;
+		}
+
+		$where = Array();
+		$update = Array();
+		$where['session_id']           = $post['session_id'];
+		$update['session_calendar_id'] = $new_calendar_id;
+		$affected_row_count = $wpdb->update(
+			'wp_scw_sessions',
+			$update,
+			$where
+		);
+
+		$repost = array(
+			'edit_sessions_signup_id' => $post['signup_id']
+		);
+		$this->load_session_selection( $repost );
 	}
 
 	/**
@@ -295,8 +367,7 @@ class SignupSettings extends SignUpsBase {
 		}
 
 		$repost = array(
-			'edit_sessions_signup_id' => $post['signup_id'],
-			$post['signup_id']        => $post['signup_name'],
+			'edit_sessions_signup_id' => $post['signup_id']
 		);
 		$this->load_session_selection( $repost );
 	}
@@ -314,8 +385,7 @@ class SignupSettings extends SignUpsBase {
 		}
 
 		$repost = array(
-			'edit_sessions_signup_id' => $post['signup_id'],
-			$post['signup_id']        => $post['signup_name'],
+			'edit_sessions_signup_id' => $post['signup_id']
 		);
 		$this->load_session_selection( $repost );
 	}
@@ -333,8 +403,7 @@ class SignupSettings extends SignUpsBase {
 		$wpdb->update( self::ATTENDEES_TABLE, $data, $where );
 
 		$repost = array(
-			'edit_sessions_signup_id' => $post['signup_id'],
-			$post['signup_id']        => $post['signup_name'],
+			'edit_sessions_signup_id' => $post['signup_id']
 		);
 		$this->load_session_selection( $repost );
 	}
@@ -390,7 +459,8 @@ class SignupSettings extends SignUpsBase {
 					'SELECT session_id,
 					session_start_formatted,
 					session_start_time,
-					session_slots
+					session_slots,
+					session_calendar_id
 					FROM %1s
 					WHERE session_signup_id = %s',
 					self::SESSIONS_TABLE,
@@ -594,9 +664,10 @@ class SignupSettings extends SignUpsBase {
 							?>
 							<form method="POST">
 							<tr>
-								<td class="text-left"> <?php echo esc_html( $this->format_date( $session->session_start_formatted ) ); ?>
+								<td class="text-left"> 
+									<?php echo esc_html( $this->format_date( $session->session_start_formatted ) ); ?></td>
 								<td></td>
-								<td></td>
+								<td class="text-right"> <?php echo $session->session_calendar_id > 0 ? '&#128197' : ''; ?></td>
 								<td>
 									<div class="popup" data-textid=<?php echo esc_html( 'sessionid' . $session->session_id ); ?> ><b><i><u>Actions</u></i></b>
 										<span class="popuptext" id=<?php echo esc_html( 'sessionid' . $session->session_id ); ?> >
@@ -627,6 +698,17 @@ class SignupSettings extends SignUpsBase {
 												name="delete_attendees"
 												value="Delete Selected"
 												onclick="return confirm('Confirm Attendee Delete')" >
+											<?php
+											if ( $session->session_calendar_id > 0 ) {
+												?>
+												<input class="btn btn-danger w-90" type="submit" name="update_calendar" value="Remove From Cal">
+												<?php
+											} else {
+												?>
+												<input class="btn btn-success w-90" type="submit" name="update_calendar" value="Add To Cal">
+												<?php
+											}
+											?>
 										</span>
 									</div>
 								</td>
@@ -723,11 +805,10 @@ class SignupSettings extends SignUpsBase {
 					<td><input class="w-75px" type="number" name="signup_default_slots" value="<?php echo esc_html( $data->signup_default_slots ); ?>" /> </td>
 				</tr>
 				<tr>
-				    <td class="text-right mr-2"><label>Rolling Template:</label></td>
+					<td class="text-right mr-2"><label>Rolling Template:</label></td>
 					<td>
 					<?php
-
-						$this->load_template_selection( $data->signup_rolling_template, true );
+						$this->load_template_selection( $data->signup_rolling_template, false );
 					?>
 					</td>
 				</tr>

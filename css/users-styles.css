@@ -168,4 +168,40 @@ table#signup-select > tbody > tr > td {
 input[type='radio'] { 
 	transform: scale(2); 
 }
+
+.description-box {
+	display: grid;
+	width: 1000px;
+	grid-template-columns: 150px 850px;
+	align-items: start;
+	justify-content: space-between;
+}
+
+.label-margin-top {
+	margin-top: .8rem;
+}
+
+#description_description {
+	height: 20rem;
+}
+
+.html-textarea {
+    width: 80%;
+    height:70vh;
+}
+
+input[type=time]::-webkit-datetime-edit-ampm-field { display: none; }
+
+.without_ampm::-webkit-datetime-edit-ampm-field {
+	display: none;
+}
+
+input[type=time]::-webkit-clear-button {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	-o-appearance: none;
+	-ms-appearance:none;
+	appearance: none;
+	margin: -10px; 
+  }
   

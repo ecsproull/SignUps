@@ -71,13 +71,13 @@ class HtmlEditor extends SignUpsBase {
 				?>
 				<div>
 					<label for="html" class="block-label mt-25px mb-10px">Past HTML Here</label>
-					<textarea id="html-signup-description" name="html" style="width: 600px; height: 400px;"><?php echo esc_html( $html ); ?></textarea>
+					<textarea class="html-textarea" id="html-signup-description" name="html"><?php echo esc_html( $html ); ?></textarea>
 				</div>
 				<div class="mt-2">
-					<button type="button" id="display-html" class="btn bt-md btn-primary mr-auto ml-auto mt-2">Preview</button>
+					<!-- button type="button" id="display-html" class="btn bt-md btn-primary mr-auto ml-auto mt-2">Preview</button -->
 					<input class="btn bt-md btn-primary mr-auto ml-auto mt-2" type="submit" value="Submit" name="submit_html">
 				</div> 
-				<div id="html-description-display" class="mt-25px;"></div>
+				<!-- div id="html-description-display" class="mt-25px;"></div -->
 				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 			</form>
 			<?php

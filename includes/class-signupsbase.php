@@ -92,6 +92,13 @@ class SignUpsBase {
 	protected const SIGNUP_TEMPLATE_ITEM_TABLE = 'wp_scw_template_item';
 
 	/**
+	 * Spider Calendar Event table.
+	 *
+	 * @var mixed
+	 */
+	protected const SPIDER_CALENDAR_EVENT_TABLE = 'wp_spidercalendar_event';
+
+	/**
 	 * Format DateTime as 2020-08-13 6:00 am.
 	 *
 	 * @var mixed
@@ -761,6 +768,13 @@ class SignUpsBase {
 		clean_post_cache( $post );
 	}
 
+	/**
+	 * Loads the template selection dropdown list.
+	 *
+	 * @param  int     $template_id The id of the selected template.
+	 * @param  boolean $add_new Adds an option to add a new template.
+	 * @return void
+	 */
 	protected function load_template_selection( $template_id, $add_new = false ) {
 		global $wpdb;
 		$templates = $wpdb->get_results(
@@ -773,8 +787,8 @@ class SignUpsBase {
 		);
 
 		?>
-	    <label for="templates" class="block-label mt-50px mb-10px">Select a Template</label>
 		<select id="template-select" name="template_id" id="templates">
+		<option value="0">None</option>
 		<?php
 		foreach ( $templates as $result ) {
 			if ( $template_id == $result->template_id ) {
@@ -798,4 +812,5 @@ class SignUpsBase {
 		</select>
 		<?php
 	}
+
 }

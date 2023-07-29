@@ -186,3 +186,9 @@ tr > td > div.bg-danger {
   .without_ampm::-webkit-datetime-edit-ampm-field {
     display: none;
   }
+
+  .html-textarea {
+    width: 80%;
+    height:70vh;
+  }
+  

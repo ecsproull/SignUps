@@ -432,11 +432,13 @@ class ShortCodes extends SignUpsBase {
 						<table id="selection-table" class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-125px selection-font"
 							<?php echo $userBadge == null ? 'hidden' : ''; ?> >
 							<?php
+							$sessions_displayed = 0;
 							foreach ( $sessions as $session ) {
 								$now = new DateTime( 'now', $this->date_time_zone );
 								if ( $session->session_start_time < $now->format( 'U' ) ) {
 									continue;
 								}
+								$sessions_displayed++;
 								?>
 								<tr class="submit-row">
 									<td colspan='3'><button id=<?php echo esc_html( 'submit_' . $session->session_id ); ?>
@@ -524,6 +526,13 @@ class ShortCodes extends SignUpsBase {
 								</tr>
 								<?php
 							}
+
+							if ( $sessions_displayed === 0 ) {
+								?>
+								<h1>"There are currently no future sessions scheduled for this class."</h1>
+								<?php
+							}
+
 							$this->create_table_footer();
 							?>
 						</table>
