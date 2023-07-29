@@ -37,7 +37,7 @@ class ShortCodes extends SignUpsBase {
 			}
 		} else {
 			if ( get_query_var('signup_id') ) {
-				$this->create_signup_form( get_query_var('signup_id') );
+				$this->create_description_form( get_query_var('signup_id') );
 			} else {
 				$this->create_select_signup();
 			}
@@ -169,7 +169,6 @@ class ShortCodes extends SignUpsBase {
 				}
 			}
 
-			$signup_descrition       = $signups[0]->signup_description_url;
 			$signup_cost             = $signups[0]->signup_cost;
 			$signup_default_price_id = $signups[0]->signup_default_price_id;
 			$sessions                = $wpdb->get_results(

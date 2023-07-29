@@ -661,13 +661,17 @@ class SignupSettings extends SignUpsBase {
 						</form>
 						<?php
 						foreach ( $sessions as $session ) {
+							$session_date_time = esc_html( $this->format_date( $session->session_start_formatted ) );
+							if ( $session->session_calendar_id > 0 ) {
+								$session_date_time = $session_date_time . '  &#128197';
+							}
 							?>
 							<form method="POST">
 							<tr>
 								<td class="text-left"> 
-									<?php echo esc_html( $this->format_date( $session->session_start_formatted ) ); ?></td>
+									<?php echo $session_date_time; ?></td>
 								<td></td>
-								<td class="text-right"> <?php echo $session->session_calendar_id > 0 ? '&#128197' : ''; ?></td>
+								<td></td>
 								<td>
 									<div class="popup" data-textid=<?php echo esc_html( 'sessionid' . $session->session_id ); ?> ><b><i><u>Actions</u></i></b>
 										<span class="popuptext" id=<?php echo esc_html( 'sessionid' . $session->session_id ); ?> >
