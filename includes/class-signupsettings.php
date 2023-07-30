@@ -139,6 +139,7 @@ class SignupSettings extends SignUpsBase {
 		unset( $post['submit_class'] );
 		unset( $post['id'] );
 		unset( $post['original_cost'] );
+		unset( $post['template_id'] );
 
 		$post['signup_cost']             = (int) $post['signup_cost'];
 		$post['signup_default_slots']    = (int) $post['signup_default_slots'];
