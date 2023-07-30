@@ -53,7 +53,7 @@ class DescriptionEditor extends SignUpsBase {
             </div>
             <div>
                 <input type="text" id="description_title" class="mt-2 w-100" 
-                    value="" placeholder="Description Title" name="description_title">
+                    value="" placeholder="Description Title" name="description_title" required>
             </div>
 
             <div class="text-right">
@@ -61,7 +61,7 @@ class DescriptionEditor extends SignUpsBase {
             </div>
             <div>
                 <input type="text" id="description_contact_name" class="mt-2 w-100" 
-                    value="" placeholder="Contact Names" name="description_contact_name">
+                    value="" placeholder="Contact Names" name="description_contact_name" required>
             </div>
             
             <div class="text-right">
@@ -69,7 +69,7 @@ class DescriptionEditor extends SignUpsBase {
             </div>
             <div>
                 <input type="number" id="description_slots" class="mt-2 w-100" 
-                    value="" placeholder="Maximum Number of students." name="description_slots">
+                    value="" placeholder="Maximum Number of students." name="description_slots" required>
             </div>
 
             <div class="text-right">
@@ -77,7 +77,7 @@ class DescriptionEditor extends SignUpsBase {
             </div>
             <div>
                 <input type="text" id="description_contact_email" class="mt-2 w-100" 
-                    value="" placeholder="Contact Email" name="description_contact_email">
+                    value="" placeholder="Contact Email" name="description_contact_email" required>
             </div>
 
             <div class="text-right">
@@ -85,7 +85,7 @@ class DescriptionEditor extends SignUpsBase {
             </div>
             <div>
                 <input type="text" id="description_cost" class="mt-2 w-100" 
-                    value="" placeholder="30.00" name="description_costs">
+                    value="" placeholder="30.00" name="description_cost" required>
             </div>
 
             <div class="text-right">
@@ -93,7 +93,7 @@ class DescriptionEditor extends SignUpsBase {
             </div>
             <div>
                 <input type="datetime-local" id="description_start" class="mt-2 w-100" 
-                    value="" placeholder="" name="description_start">
+                    value="" placeholder="" name="description_start" required>
             </div>
 
             <div class="text-right">
@@ -101,7 +101,7 @@ class DescriptionEditor extends SignUpsBase {
             </div>
             <div>
                 <input type="time" id="description_duration" class="mt-2 w-100 without_ampm"
-                    value="" placeholder="3:00" name="description_duration">
+                    value="" placeholder="3:00" name="description_duration" required>
             </div>
 
             <div class="text-right">
@@ -109,7 +109,7 @@ class DescriptionEditor extends SignUpsBase {
             </div>
             <div>
                 <input type="text" id="description_location" class="mt-2 w-100 without_ampm"
-                    value="" placeholder="Woodshop, library..." name="description_location">
+                    value="" placeholder="Woodshop, library..." name="description_location" required>
             </div>
         </div>
         
@@ -120,7 +120,7 @@ class DescriptionEditor extends SignUpsBase {
         
             <div>
                 <input type="text" id="description_prerequisite" class="mt-2 w-100" 
-                    value="" placeholder="Prerequisites or none" name="description_prerequisite">
+                    value="" placeholder="Prerequisites or none" name="description_prerequisite" required>
             </div>
             
             <div class="text-right">
@@ -128,7 +128,7 @@ class DescriptionEditor extends SignUpsBase {
             </div>
             <div>
                 <input type="text" id="description_materials" class="mt-2 w-100" 
-                    value="" placeholder="Wood, glue, ..." name="description_materials">
+                    value="" placeholder="Wood, glue, ..." name="description_materials" required>
             </div>
 
             <div class="text-right">
@@ -136,7 +136,7 @@ class DescriptionEditor extends SignUpsBase {
             </div>
             <div>
                 <input type="text" id="description_instructions" class="mt-2 w-100" 
-                    value="" placeholder="Glue wood in layers..." name="description_instructions">
+                    value="" placeholder="Glue wood in layers..." name="description_instructions" required>
             </div>
 
             <div class="text-right mt-5">
@@ -145,16 +145,28 @@ class DescriptionEditor extends SignUpsBase {
             
             <div class="mt-2">
                 <textarea type="text" id="description_description" class=" w-100 html-textarea" 
-                    value="" placeholder name="description_description">
+                    value="" placeholder name="description_description" required>
                     Complete description of the class. It is recommended creating this in a word processor and then pasting it here.
                 </textarea>
             </div>
+
+            <div></div>
+            <div><button type="submit" class="btn btn-md bg-primary mr-auto ml-auto" value="-1" name="submit_description">Submit</button></div>
         </div>
+        <?php wp_nonce_field( 'signups', 'mynonce' ); ?>
         </form>
         <?php
     }
 
-    private function submit_description( $description_id ) {
-        
+    private function submit_description( $post ) {
+        $new_signup = Array();
+        $new_signup['signup_name']          = $post['description_title'];
+        $new_signup['signup_contact_email'] = $post['description_email'];
+        $new_signup['signup_location']      = $post['description_location'];
+        $new_signup['signup_group']         = 'member';
+        $new_signup['signup_cost']          = $post['description_cost'];
+        $new_signup['signup_default_slots'] = $post['description_slots'];
+
+
     }
 }

@@ -114,7 +114,7 @@ class ShortCodes extends SignUpsBase {
 				'SELECT signup_id,
 				signup_name
 				FROM %1s
-				WHERE signup_id != 9 AND signup_id != 10',
+				WHERE signup_id != 9 AND signup_id != 10 AND signup_admin_approved = 1',
 				self::SIGNUPS_TABLE
 			),
 			OBJECT
@@ -132,7 +132,7 @@ class ShortCodes extends SignUpsBase {
 		global $wpdb;
 		$signups = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT signup_id, signup_name, signup_cost, signup_rolling_template, signup_default_price_id, signup_users_db_table
+				'SELECT signup_id, signup_name, signup_cost, signup_rolling_template, signup_default_price_id, signup_group
 				FROM %1s
 				WHERE signup_id = %s',
 				self::SIGNUPS_TABLE,
@@ -219,7 +219,7 @@ class ShortCodes extends SignUpsBase {
 				$instructors,
 				$signup_cost,
 				$signup_id,
-				$signups[0]->signup_users_db_table
+				$signups[0]->signup_group
 			);
 		}
 	}

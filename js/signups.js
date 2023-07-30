@@ -63,9 +63,11 @@ jQuery( document ).ready( function($){
 		closePopup();
 	});
 
+	/*
 	$( "#thumbnail" ).change(function( e ){
 		$( "#displayThumb" ).attr( "src", e.currentTarget.value );
 	});
+	*/
 
 	$( '#firstname,#lastname,#phone,#email,#badge' ).each( function() {
 		$(this).change( function() {

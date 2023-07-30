@@ -237,6 +237,11 @@ class SignUpsBase {
 	protected function create_user_table( $user_group = '' ) {
 		global $wpdb;
 		$returnVal = null;
+
+		if ( ! $user_group ) {
+			$user_group = 'member';
+		}
+		
 		if(isset($_COOKIE['signups_scw_badge'])) {
 			$badge = $_COOKIE['signups_scw_badge'];
 			$results = $wpdb->get_results(
@@ -292,7 +297,7 @@ class SignUpsBase {
 					signup_name,
 					signup_rolling_template,
 					signup_default_price_id,
-					signup_users_db_table
+					signup_group
 				FROM %1s
 				WHERE signup_id = %s',
 				self::SIGNUPS_TABLE,
@@ -349,7 +354,7 @@ class SignUpsBase {
 			$rolling_signup_id,
 			$template[0],
 			$template_items,
-			$signups[0]->signup_users_db_table, 
+			$signups[0]->signup_group, 
 			$admin
 		);
 	}

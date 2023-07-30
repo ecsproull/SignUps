@@ -145,6 +145,12 @@ class SignupSettings extends SignUpsBase {
 		$post['signup_default_slots']    = (int) $post['signup_default_slots'];
 		$post['signup_rolling_template'] = (int) $post['signup_rolling_template'];
 
+		if ( isset( $post['signup_admin_approved'] ) ) {
+			$post['signup_admin_approved'] = 1;
+		} else {
+			$post['signup_admin_approved'] = 0;
+		}
+
 		$affected_row_count = 0;
 		if ( $where['signup_id'] ) {
 			if ( $original_cost != $post['signup_cost'] ) {
@@ -179,6 +185,12 @@ class SignupSettings extends SignUpsBase {
 			?>
 			<div class="text-center mb-4">
 				<h1><?php echo esc_html( $affected_row_count ); ?> Rows Updated</h1>
+			</div>
+			<?php
+		} else {
+			?>
+			<div class="text-center mb-4">
+				<h1>Failed to insert Class: <?php echo esc_html( $wpdb->last_error ); ?></h1>
 			</div>
 			<?php
 		}
@@ -536,7 +548,7 @@ class SignupSettings extends SignUpsBase {
 						?>
 					</table>
 					<?php
-					$this->create_user_table();
+					$this->create_user_table( 'member' );
 					?>
 					<input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="window.history.go( -1 );" value="Back"></td>
 					<input id="submit_attendees" class="btn btn-primary mt-2" type="submit" value="Complete Add" name="submit_attendees" disabled="true"><td>
@@ -781,7 +793,7 @@ class SignupSettings extends SignUpsBase {
 		?>
 		<div class="text-center mb-4">
 			<h1><?php echo esc_html( $data->signup_name ); ?> </h1>
-			<img id="displayThumb" src="<?php echo esc_html( $data->signup_thumbnail_url ); ?>" alt="Class Thumbnail">
+			<!-- img id="displayThumb" src="<?php echo esc_html( $data->signup_thumbnail_url ); ?>" alt="Class Thumbnail" -->
 		</div>
 		<form method="POST" >
 			<table class="table table-striped mr-auto ml-auto">
@@ -798,8 +810,11 @@ class SignupSettings extends SignUpsBase {
 					<td><input class="w-250px" type="text" name="signup_location" value="<?php echo esc_html( $data->signup_location ); ?>" /> </td>
 				</tr>
 				<tr>
-					<td class="text-right mr-2"><label>Thumbnail URL:</label></td>
-					<td><input id="thumbnail" class="w-250px" type="url" name="signup_thumbnail_url" value="<?php echo esc_html( $data->signup_thumbnail_url ); ?>" /> </td>
+					<td class="text-right mr-2"><label>User Group:</label></td>
+					<td><select name="signup_group">
+						<option value="member">Members</option>
+						<option value="cnc">Cnc Users</option>
+					</select> </td>
 				</tr>
 				<tr>
 					<td class="text-right mr-2"><label>Cost:</label></td>
@@ -816,6 +831,12 @@ class SignupSettings extends SignUpsBase {
 						$this->load_template_selection( $data->signup_rolling_template, false );
 					?>
 					</td>
+				</tr>
+				<tr>
+					<td class="text-right mr-2"><label>Admin Approved:</label></td>
+					<td><input class="w-75px" type="checkbox" name="signup_admin_approved" value="" 
+						<?php echo esc_html( $data->signup_admin_approved ) == '1'? 'checked ': ''; ?> /> </td>
+		
 				</tr>
 				<tr>
 					<td class="text-right mr-2"><input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back"></td>
