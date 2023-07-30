@@ -169,6 +169,14 @@ input[type='radio'] {
 	transform: scale(2); 
 }
 
+.class-description-box {
+	display: grid;
+	width: 1000px;
+	grid-template-columns: 150px 350px 150px 350px;
+	align-items: start;
+	justify-content: space-between;
+}
+
 .description-box {
 	display: grid;
 	width: 1000px;

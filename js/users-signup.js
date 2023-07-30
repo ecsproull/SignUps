@@ -22,7 +22,7 @@ jQuery(document).ready(function($){
 			},
 			data:{
 				'badge' : $("#badge-input").val(),
-				'user-groups' : $("#user_groups").val()
+				'user-groups' : $("#user_groups").val() ? $("#user_groups").val() : 'member'
 			}
 		}).done(function (response) {
 			if (response.length > 0) {
