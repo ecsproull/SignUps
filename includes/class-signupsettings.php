@@ -46,6 +46,10 @@ class SignupSettings extends SignUpsBase {
 				$this->add_attendee_rolling( $post );
 			} elseif ( isset( $post['update_calendar'] ) ) {
 				$this->update_calendar( $post );
+			} elseif ( isset( $post['delete_class'] ) ) {
+				$this->confirm_class_delete( $post );
+			} elseif ( isset( $post['confirm_delete_class'] ) ) {
+				$this->delete_class( $post );
 			} else {
 				$this->load_signup_selection();
 			}
@@ -282,12 +286,96 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
+	 * Confirm a class deletion.
+	 *
+	 * @param int $post The posted data from the form.
+	 */
+	private function confirm_class_delete( $post ) {
+		global $wpdb;
+		$class = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE signup_id = %s',
+				self::SIGNUPS_TABLE,
+				$post['delete_class']
+			),
+			OBJECT
+		);
+
+		$sessions = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE session_signup_id = %s',
+				self::SESSIONS_TABLE,
+				$post['delete_class']
+			),
+			OBJECT
+		);
+
+		?>
+		<div class="container ml-3 mt-3">
+			<h1>Delete:  <?php echo esc_html( $class[0]->signup_name ); ?></h1>
+			<h2>These sessions will also be deleted.</h2>
+			<table class="mb-100px mt-4 table table-striped mr-auto ml-auto">
+				<?php
+				foreach ( $sessions as $session ) {
+					?>
+					<tr>
+						<td class="w-25"><?php echo $class[0]->signup_name; ?></td>
+						<td class="w-25"><?php echo $session->session_start_formatted; ?></td>
+					</tr>
+					<?php
+				}
+				?>
+			</table>
+			<form method="POST">
+				<div class="mt-2">
+					<input class="btn btn-danger" style="cursor:pointer;" type="button" onclick="window.history.go( -0 );" value="Cancel">
+					<button class="btn btn-success" type="submit" name="confirm_delete_class" value=<?php echo esc_html( $post['delete_class'] ); ?>>Confirm</button>
+				</div>
+				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+			</form>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Delete class and sessions.
+	 *
+	 * @param int $post The posted data from the form.
+	 */
+	private function delete_class( $post ) {
+		global $wpdb;
+		$where = array( 'signup_id' => $post['confirm_delete_class'] );
+		$wpdb->delete( self::SIGNUPS_TABLE, $where_session );
+		
+		$where = array( 'session_signup_id' => $post['confirm_delete_class'] );
+		$wpdb->delete( self::SESSIONS_TABLE, $where_session );
+		$this->load_signup_selection();
+	}
+
+	/**
 	 * Add a new session to a class.
 	 *
 	 * @param int $post The posted data from the form.
 	 */
 	private function add_new_session_form( $post ) {
+		global $wpdb;
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT signup_default_slots
+				FROM %1s
+				WHERE signup_id = %s',
+				self::SIGNUPS_TABLE,
+				$post['add_new_session']
+			),
+			OBJECT
+		);
+		
 		$session_item = new SessionItem( $post['add_new_session'] );
+		$session_item->session_slots = $results[0]->signup_default_slots;
 		$this->create_session_form( $session_item, $post['signup_name'], true );
 	}
 
@@ -623,7 +711,7 @@ class SignupSettings extends SignUpsBase {
 							<td> <?php echo esc_html( $result->signup_name ); ?></td>
 							<td> <input class="submitbutton editImage" type="submit" name="edit_class" value="<?php echo esc_html( $result->signup_id ); ?>"> </td>
 							<td> <input class="submitbutton sessionsImage" type="submit" name="edit_sessions_signup_id" value="<?php echo esc_html( $result->signup_id ); ?>"> </td>
-							<td> <input class="submitbutton deleteImage" type="submit" name="deleteClass" value="<?php echo esc_html( $result->signup_id ); ?>">
+							<td> <input class="submitbutton deleteImage" type="submit" name="delete_class" value="<?php echo esc_html( $result->signup_id ); ?>">
 								<input type="hidden" name="<?php echo esc_html( $result->signup_id ); ?>" value="<?php echo esc_html( $result->signup_name ); ?>" >
 								<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 							</td>
