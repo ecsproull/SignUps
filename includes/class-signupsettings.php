@@ -349,10 +349,10 @@ class SignupSettings extends SignUpsBase {
 	private function delete_class( $post ) {
 		global $wpdb;
 		$where = array( 'signup_id' => $post['confirm_delete_class'] );
-		$wpdb->delete( self::SIGNUPS_TABLE, $where_session );
+		$wpdb->delete( self::SIGNUPS_TABLE, $where );
 		
 		$where = array( 'session_signup_id' => $post['confirm_delete_class'] );
-		$wpdb->delete( self::SESSIONS_TABLE, $where_session );
+		$wpdb->delete( self::SESSIONS_TABLE, $where );
 		$this->load_signup_selection();
 	}
 
