@@ -102,9 +102,9 @@ class SignupSettings extends SignUpsBase {
 
 			$text_for_date;
 			if ( $description ) {
-				$text_for_date = html_entity_decode( $description[0]->description_html );
+				$text_for_date = html_entity_decode( $description[0]->description_html_short );
 			}
-			$text_for_date .= '<br><a href=' . $signup_url . " target='_blank' rel='noopener' >Signup</a>.";
+			$text_for_date .= '<br><br><a href=' . $signup_url . " target='_blank' rel='noopener' >Signup</a>.";
 
 			$data = Array();
 			$data['calendar']      = 1;

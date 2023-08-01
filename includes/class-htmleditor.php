@@ -64,14 +64,30 @@ class HtmlEditor extends SignUpsBase {
 		if ( ! $html ) {
 			$html = '';
 		}
+
+		$html_short = $this->get_signup_html( $signup_id, false );
+		if ( ! $html_short ) {
+			$html_short = '';
+		}
+
 		?>
 			<form method="POST" name="html_form" >
 				<?php
 				$this->load_signup_selection( $signup_id );
 				?>
-				<div>
-					<label for="html" class="block-label mt-25px mb-10px">Past HTML Here</label>
-					<textarea class="html-textarea" id="html-signup-description" name="html"><?php echo esc_html( $html ); ?></textarea>
+				<ul class="nav mt-2 border">
+					<li class="nav-item">
+						<a class="nav-link active" aria-current="page" href="#">Long</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#">Short</a>
+					</li>
+				</ul>
+				<div id="html-signup-description">
+					<textarea class="html-textarea" name="html"><?php echo esc_html( $html ); ?></textarea>
+				</div>
+				<div id="html-signup-description-short" style="display: none;">
+					<textarea class="html-textarea" name="html_short" hidden><?php echo esc_html( $html_short ); ?></textarea>
 				</div>
 				<div class="mt-2">
 					<!-- button type="button" id="display-html" class="btn bt-md btn-primary mr-auto ml-auto mt-2">Preview</button -->
@@ -85,11 +101,18 @@ class HtmlEditor extends SignUpsBase {
 
 	private function submit_html( $post ) {
 		global $wpdb;
-		$desc = htmlentities($post['html']);
-		$descriptoin = array();
+		$desc        = htmlentities( $post['html'] );
+		$desc_short  = htmlentities( $post['html_short'] );
+		$description = array();
 		if ( $desc ) {
 			$description['description_html'] = $desc;
-		} else {
+		}
+
+		if ( $desc_short ) {
+			$description['description_html_short'] = $desc_short;
+		}
+
+		if ( ! $desc_short && ! $desc ) {
 			return;
 		}
 

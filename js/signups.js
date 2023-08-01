@@ -255,6 +255,16 @@ jQuery( document ).ready( function($){
 		);
 	});
 
+	$('.nav-link').click( function (e) {
+		if (e.currentTarget.innerText == "Long") {
+			$('#html-signup-description').show();
+			$('#html-signup-description-short').hide();
+		} else {
+            $('#html-signup-description').hide();
+			$('#html-signup-description-short').show();
+		}
+	})
+
 	tinymce.init({
 		selector: 'textarea.html-textarea',
 		plugins: 'ai tinycomments mentions anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed permanentpen footnotes advtemplate advtable advcode editimage tableofcontents mergetags powerpaste tinymcespellchecker autocorrect a11ychecker typography inlinecss',

@@ -208,7 +208,7 @@ class SignUpsBase {
 	 * @param int $signup_id The signup id.
 	 * @return string Formatted html.
 	 */
-	protected function get_signup_html( $signup_id ) {
+	protected function get_signup_html( $signup_id, $long = true ) {
 		global $wpdb;
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
@@ -222,7 +222,11 @@ class SignUpsBase {
 		);
 
 		if ( $results ) {
-			return html_entity_decode( $results[0]->description_html );
+			if ( $long ) {
+				return html_entity_decode( $results[0]->description_html );
+			} else {
+				return html_entity_decode( $results[0]->description_html_short );
+			}
 		} else {
 			return null;
 		}
