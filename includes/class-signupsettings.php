@@ -76,19 +76,35 @@ class SignupSettings extends SignUpsBase {
 			OBJECT
 		);
 
+		$description = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE description_signup_id = %s',
+				self::SIGNUP_DESCRIPTIONS_TABLE,
+				$post['signup_id']
+			),
+			OBJECT
+		);
+
 		$session = $results[0];
 		$new_calendar_id = 0;
 		if ( $session->session_calendar_id > 0 ) {
 			$where_session = array( 'id' => $session->session_calendar_id );
 			$wpdb->delete( self::SPIDER_CALENDAR_EVENT_TABLE, $where_session );
 		} else {
-			$datetime = new DateTime( $session->session_start_formatted);
+			$datetime = new DateTime( $session->session_start_formatted );
 			$date = $datetime->format('Y-m-d');
 			$start_time = $datetime->format('g:iA');
 			$datetime = new DateTime( $session->session_end_formatted);
 			$end_time = $datetime->format('g:iA');
 			$signup_url = get_site_url() . '/signups?signup_id=' . $post['signup_id'];
-			$text_for_date = 'For more information click <a href=' . $signup_url . " target='_blank' rel='noopener' >here</a>.";
+
+			$text_for_date;
+			if ( $description ) {
+				$text_for_date = html_entity_decode( $description[0]->description_html );
+			}
+			$text_for_date .= '<br><a href=' . $signup_url . " target='_blank' rel='noopener' >Signup</a>.";
 
 			$data = Array();
 			$data['calendar']      = 1;
@@ -123,7 +139,8 @@ class SignupSettings extends SignUpsBase {
 		);
 
 		$repost = array(
-			'edit_sessions_signup_id' => $post['signup_id']
+			'edit_sessions_signup_id' => $post['signup_id'],
+			$post['signup_id']        => $post['signup_name']
 		);
 		$this->load_session_selection( $repost );
 	}
@@ -156,12 +173,27 @@ class SignupSettings extends SignUpsBase {
 		}
 
 		$affected_row_count = 0;
+		$stripe = new SripePayments();
 		if ( $where['signup_id'] ) {
+			if ( ( int )$post['signup_cost'] > 0 && ! $post['signup_product_id'] ) {
+				$ret = $stripe->create_product( $post['signup_name'], $post['signup_cost'] );
+				if ( $ret ) {
+					$post['signup_product_id']       = $ret['product_id'];
+					$post['signup_default_price_id'] = $ret['price_id'];
+					$original_cost                   = $post['signup_cost'];
+				} else {
+					echo "Failed to create stripe pricing and product info";
+					return;
+				}
+			}
+
 			if ( $original_cost != $post['signup_cost'] ) {
-				$stripe = new SripePayments();
 				$new_price_id = $stripe->update_price( $signup_default_price_id, $signup_product_id, $post['signup_cost'] );
 				if ( $new_price_id ) {
 					$post['signup_default_price_id'] = $new_price_id;
+				}else {
+					echo "Failed to update new price";
+					return;
 				}
 			}
 
@@ -172,10 +204,9 @@ class SignupSettings extends SignUpsBase {
 			);
 		} else {
 			if ( ( int )$post['signup_cost'] > 0 ) {
-				$stripe = new SripePayments();
 				$ret = $stripe->create_product( $post['signup_name'], $post['signup_cost'] );
 				if ( $ret ) {
-					$post['signup_product_id'] = $ret['product_id'];
+					$post['signup_product_id']       = $ret['product_id'];
 					$post['signup_default_price_id'] = $ret['price_id'];
 				} else {
 					echo "Failed to create stripe pricing and product info";
@@ -373,7 +404,7 @@ class SignupSettings extends SignUpsBase {
 			),
 			OBJECT
 		);
-		
+
 		$session_item = new SessionItem( $post['add_new_session'] );
 		$session_item->session_slots = $results[0]->signup_default_slots;
 		$this->create_session_form( $session_item, $post['signup_name'], true );
@@ -468,7 +499,8 @@ class SignupSettings extends SignUpsBase {
 		}
 
 		$repost = array(
-			'edit_sessions_signup_id' => $post['signup_id']
+			'edit_sessions_signup_id' => $post['signup_id'],
+			$post['signup_id']        => $post['signup_name']
 		);
 		$this->load_session_selection( $repost );
 	}
@@ -737,11 +769,11 @@ class SignupSettings extends SignUpsBase {
 	 */
 	private function create_session_select_form( $signup_name, $sessions, $attendees, $instructors, $signup_id ) {
 		?>
-		<div id="session_select" class="text-center mt-5">
+		<div id="session_select" class="text-center mt-2">
 			<h1><?php echo esc_html( $signup_name ); ?></h1>
 			<div>
 				<div id="content" class="container">
-					<table class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-200px">
+					<table id="select_table" class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-25px">
 						<form method="POST">
 						<tr style="background-color: lightyellow;">
 							<td class="text-left" >
@@ -981,7 +1013,7 @@ class SignupSettings extends SignUpsBase {
 				</tr>
 				<tr>
 					<td class="text-right mr-2"><label>Default Minutes: </label></td>
-					<td><input id="default-minutes" class="w-250px" type="number" value="180" /> </td>
+					<td><input id="default-minutes" class="w-250px" type="number" value="0" /> </td>
 				</tr>
 				<tr>
 					<td class="text-right mr-2"><label>Start Time:</label></td>

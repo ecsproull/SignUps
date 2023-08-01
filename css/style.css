@@ -166,6 +166,8 @@ tr > td > div.bg-danger {
     visibility: visible;
     -webkit-animation: fadeIn 1s;
     animation: fadeIn 1s;
+    top: 26px;
+    height: 16.5rem;
   }
 
   /* Add animation (fade in the popup) */

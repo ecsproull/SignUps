@@ -59,6 +59,7 @@ jQuery( document ).ready( function($){
 		e.stopPropagation();
 	});
 
+
 	$( "#session_select").click( function() {
 		closePopup();
 	});
@@ -205,6 +206,11 @@ jQuery( document ).ready( function($){
 
 	$("#session-table").on("change", ".start-time", function( event ) {
 		let minutes = $("#default-minutes").val();
+
+		if (minutes === "0") {
+			alert("Please set the number of minutes for the session to get auto time updates.")
+		}
+
 		let start_id = event.target.id;
 		let end_id = '#' + start_id.replace(/start/g, "end")
 		start_id = '#' + start_id;
@@ -233,7 +239,6 @@ jQuery( document ).ready( function($){
 		}
 	});
 
-	
 	$('.add-template-row').click( function() {
 		$('.template-table').find('tbody').append(
 			"<tr>" +

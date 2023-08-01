@@ -69,7 +69,7 @@ class DescriptionEditor extends SignUpsBase {
             </div>
             <div>
                 <input type="number" id="description_slots" class="mt-2 w-100" 
-                    value="" placeholder="Maximum Number of students." name="description_slots" required>
+                    value="" placeholder="Maximum Number of attendees." name="description_slots" required>
             </div>
 
             <div class="text-right">
@@ -159,14 +159,33 @@ class DescriptionEditor extends SignUpsBase {
     }
 
     private function submit_description( $post ) {
+        global $wpdb;
         $new_signup = Array();
-        $new_signup['signup_name']          = $post['description_title'];
-        $new_signup['signup_contact_email'] = $post['description_email'];
-        $new_signup['signup_location']      = $post['description_location'];
-        $new_signup['signup_group']         = 'member';
-        $new_signup['signup_cost']          = $post['description_cost'];
-        $new_signup['signup_default_slots'] = $post['description_slots'];
+        $new_signup['signup_name']             = $post['description_title'];
+        $new_signup['signup_contact_email']    = $post['description_contact_email'];
+        $new_signup['signup_location']         = $post['description_location'];
+        $new_signup['signup_cost']             = $post['description_cost'];
+        $new_signup['signup_default_slots']    = $post['description_slots'];
+        $new_signup['signup_rolling_template'] = 0;
+        $new_signup['signup_admin_approved']   = 0;
+        $new_signup['signup_group']            = 'member';
 
+        $affected_row_count = $wpdb->insert( self::SIGNUPS_TABLE, $new_signup );
+        if ( $affected_row_count == 1 ) {
+            $new_session = Array();
+            $start_date                         = new DateTime( $post['description_start'], $this->date_time_zone );
+            $duration                           = new Datetime( $post['description_duration'], $this->date_time_zone );
+            $duration_hours                     = date_format( $duration, "h" );
+            $duration_minutes                   = date_format( $duration, "i" );
+            $end_date                           = new DateTime( $end, $this->date_time_zone );
+            $session['session_start_time']      = $start_date->format( 'U' );
+            $session['session_end_time']        = $end_date->format( 'U' );
+            $session['session_start_formatted'] = $start_date->format( self::DATETIME_FORMAT );
+            $session['session_end_formatted']   = $end_date->format( self::DATETIME_FORMAT );
+
+        } else {
+            echo "Failed to Create Signup : " . $wpdb->last_error;
+        }
 
     }
 }
