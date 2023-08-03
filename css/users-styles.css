@@ -198,12 +198,13 @@ input[type='radio'] {
     height:70vh;
 }
 
+/*
 input[type=time]::-webkit-datetime-edit-ampm-field { display: none; }
-
+*/
 .without_ampm::-webkit-datetime-edit-ampm-field {
 	display: none;
 }
-
+/*
 input[type=time]::-webkit-clear-button {
 	-webkit-appearance: none;
 	-moz-appearance: none;
@@ -212,4 +213,5 @@ input[type=time]::-webkit-clear-button {
 	appearance: none;
 	margin: -10px; 
   }
+  */
   

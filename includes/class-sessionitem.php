@@ -87,11 +87,38 @@ class SessionItem {
 	public $session_slots;
 
 	/**
-	 * Number of slots in this session.
-	 * This can vary from the default number of slots for the class.
+	 * Session item name
 	 *
 	 * @var session_item.
 	 */
 	public $session_item;
-}
 
+	/**
+	 * Default start time specified in the signup
+	 *
+	 * @var session_default_start_time.
+	 */
+	public $session_default_start_time;
+	
+	/**
+	 * Default duration specified in the signup
+	 *
+	 * @var session_default_duration.
+	 */
+	public $session_duration;
+	
+	/**
+	 * Default number of days between a session
+	 *
+	 * @var session_default_days_between_sessions.
+	 */
+	public $session_days_between_sessions;
+	
+	/**
+	 * Default days of the month. String to be parsed by PHP DateTime.
+	 *
+	 * @var session_default_day_of_month.
+	 */
+	public $session_day_of_month;
+	
+}

@@ -166,6 +166,12 @@ class SignupSettings extends SignUpsBase {
 		$post['signup_default_slots']    = (int) $post['signup_default_slots'];
 		$post['signup_rolling_template'] = (int) $post['signup_rolling_template'];
 
+		$duration_parts                  = explode( ':', $post['signup_default_duration'] );
+		if ( $duration_parts[0] > 12 ) {
+			$duration_parts[0] = $duration_parts[0] - 12;
+			$post['signup_default_duration'] = $duration_parts[0] . ':' . $duration_parts[1] . ':' . $duration_parts[2]; 
+		}
+
 		if ( isset( $post['signup_admin_approved'] ) ) {
 			$post['signup_admin_approved'] = 1;
 		} else {
@@ -216,23 +222,8 @@ class SignupSettings extends SignUpsBase {
 			
 			$affected_row_count = $wpdb->insert( self::SIGNUPS_TABLE, $post );
 		}
-		if ( $affected_row_count ) {
-			?>
-			<div class="text-center mb-4">
-				<h1><?php echo esc_html( $affected_row_count ); ?> Rows Updated</h1>
-			</div>
-			<?php
-		} else {
-			?>
-			<div class="text-center mb-4">
-				<h1>Failed to insert Class: <?php echo esc_html( $wpdb->last_error ); ?></h1>
-			</div>
-			<?php
-		}
 
-		?>
-		<input class="button-primary ml-auto mr-auto mt-2" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back">
-		<?php
+		$this->update_message( $affected_row_count, $wpdb->last_error );
 	}
 
 	/**
@@ -396,7 +387,7 @@ class SignupSettings extends SignUpsBase {
 		global $wpdb;
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT signup_default_slots
+				'SELECT *
 				FROM %1s
 				WHERE signup_id = %s',
 				self::SIGNUPS_TABLE,
@@ -405,8 +396,40 @@ class SignupSettings extends SignUpsBase {
 			OBJECT
 		);
 
+		$today = new DateTime( "now" );
+
+		if ( $results[0]->signup_default_day_of_month ) {
+			$today = new DateTime(
+				sprintf(
+					'%s of %s %s',
+					$results[0]->signup_default_day_of_month,
+					$today->format( 'F' ),
+					$today->format( 'Y' )
+				),
+				$this->date_time_zone
+			);
+		}
+
+		$start_time_parts            = explode( ':', $results[0]->signup_default_start_time );
+		$today->setTime( $start_time_parts[0], $start_time_parts[1] );
+
 		$session_item = new SessionItem( $post['add_new_session'] );
-		$session_item->session_slots = $results[0]->signup_default_slots;
+		$session_item->session_slots           = $results[0]->signup_default_slots;
+		$session_item->session_start_formatted = $today->format( self::DATETIME_FORMAT );
+		$session_item->session_end_time        = $today->format( 'U' );
+		
+		$duration_parts = explode( ':', $results[0]->signup_default_duration );
+		$interval = new DateInterval('PT' . $duration_parts[0] . 'H' . $duration_parts[1] . 'M' );
+		$today->add( $interval );
+		$session_item->session_end_formatted         = $today->format( self::DATETIME_FORMAT );
+		$session_item->session_end_time              = $today->format( 'U' );
+		$session_item->session_duration              = $results[0]->signup_default_duration;
+		$session_item->session_days_between_sessions = $results[0]->signup_default_days_between_sessions;
+		$session_item->session_day_of_month          = $results[0]->signup_default_day_of_month;
+		$session_item->session_contact_name          = $results[0]->signup_default_contact_name;
+		$session_item->session_contact_email         = $results[0]->signup_contact_email;
+		$session_item->session_location              = $results[0]->signup_location;
+
 		$this->create_session_form( $session_item, $post['signup_name'], true );
 	}
 
@@ -926,6 +949,10 @@ class SignupSettings extends SignUpsBase {
 					<td><input class="w-250px" type="email" name="signup_contact_email" value="<?php echo esc_html( $data->signup_contact_email ); ?>" /> </td>
 				</tr>
 				<tr>
+					<td class="text-right mr-2"><label>Contact Name:</label></td>
+					<td><input class="w-250px" type="text" name="signup_default_contact_name" value="<?php echo esc_html( $data->signup_default_contact_name ); ?>" /> </td>
+				</tr>
+				<tr>
 					<td class="text-right mr-2"><label>Location:</label></td>
 					<td><input class="w-250px" type="text" name="signup_location" value="<?php echo esc_html( $data->signup_location ); ?>" /> </td>
 				</tr>
@@ -944,6 +971,24 @@ class SignupSettings extends SignUpsBase {
 					<td class="text-right mr-2"><label>Default Slots:</label></td>
 					<td><input class="w-75px" type="number" name="signup_default_slots" value="<?php echo esc_html( $data->signup_default_slots ); ?>" /> </td>
 				</tr>
+
+				<tr>
+					<td class="text-right mr-2"><label>Default Start Time of Day:</label></td>
+					<td><input class="w-125px" type="time" name="signup_default_start_time" placeholder="12:00 AM" value="<?php echo esc_html( $data->signup_default_start_time ); ?>" /> </td>
+				</tr>
+				<tr>
+					<td class="text-right mr-2"><label>Default Session Duration:</label></td>
+					<td><input class="w-125px without_ampm" type="time" name="signup_default_duration" value="<?php echo esc_html( $data->signup_default_duration ); ?>" /> </td>
+				</tr>
+				<tr>
+					<td class="text-right mr-2"><label>Default Days Between Sessions:</label></td>
+					<td><input class="w-75px" type="number" name="signup_default_days_between_sessions" value="<?php echo esc_html( $data->signup_default_days_between_sessions ); ?>" /> </td>
+				</tr>
+				<tr>
+					<td class="text-right mr-2"><label>Default Day of Month:</label></td>
+					<td><input class="w-250px" type="text" name="signup_default_day_of_month" value="<?php echo esc_html( $data->signup_default_day_of_month ); ?>" /> </td>
+				</tr>
+
 				<tr>
 					<td class="text-right mr-2"><label>Rolling Template:</label></td>
 					<td>
@@ -1008,12 +1053,20 @@ class SignupSettings extends SignUpsBase {
 					<td><input class="w-250px" type="text" name="session_item" value="<?php echo esc_html( $data->session_item ); ?>" /> </td>
 				</tr>
 				<tr>
-					<td class="text-right mr-2"><label>Slots: </label></td>
+					<td class="text-right mr-2"><label>Slots:</label></td>
 					<td><input class="w-250px" type="number" name="session_slots" value="<?php echo esc_html( $data->session_slots ); ?>" /> </td>
 				</tr>
 				<tr>
-					<td class="text-right mr-2"><label>Default Minutes: </label></td>
-					<td><input id="default-minutes" class="w-250px" type="number" value="0" /> </td>
+					<td class="text-right mr-2"><label>Default Duration: </label></td>
+					<td><input id="default-minutes" class="w-250px" type="time" value="<?php echo esc_html( $data->session_duration ); ?>" /> </td>
+				</tr>
+				<tr>
+					<td class="text-right mr-2"><label>Days Between Sessions:</label></td>
+					<td><input class="w-250px" type="number" name="session_days_between_sessions" value="<?php echo esc_html( $data->session_days_between_sessions ); ?>" /> </td>
+				</tr>
+				<tr>
+					<td class="text-right mr-2"><label>Day of Month:</label></td>
+					<td><input class="w-250px" type="text" name="session_day_of_month" value="<?php echo esc_html( $data->session_day_of_month ); ?>" /> </td>
 				</tr>
 				<tr>
 					<td class="text-right mr-2"><label>Start Time:</label></td>
@@ -1024,14 +1077,13 @@ class SignupSettings extends SignUpsBase {
 					<td><input id="end-time" class="w-250px" type="datetime-local" name="session_end_formatted[]" value="<?php echo esc_html( $end ); ?>" /> </td>
 				</tr>
 			</table>
-			<table class="table table-striped mr-auto ml-auto">
+			<table class="mr-auto ml-auto">
 				<tr>
-					<td></td>
-					<td><button id="add-time-slot" type="button" value="1"><b><i>Add Time Slot</i></b></button></td>
+					<td colspan="2" class="text-center"><button class="mb-3" id="add-time-slot" type="button" value="1"><b><i>Add Time Slot</i></b></button></td>
 				</tr>
 				<tr>
-					<td class="text-right mr-2"><input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back"></td>
-					<td><input class="btn bt-md btn-primary mr-auto ml-auto mt-2" type="submit" value="Submit Session" name="submit_session"></td>
+					<td class="text-right"><input class="btn bt-md btn-danger mt-2 mr-5" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back"></td>
+					<td class="text-left"><input class="btn bt-md btn-primary mr-auto ml-auto mt-2 ml-2" type="submit" value="Submit Session" name="submit_session"></td>
 				</tr>
 			</table>
 			<input type="hidden" name="session_signup_id" value="<?php echo esc_html( $data->session_signup_id ); ?>">
