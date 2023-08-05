@@ -96,9 +96,9 @@ class SessionItem {
 	/**
 	 * Default start time specified in the signup
 	 *
-	 * @var session_default_start_time.
+	 * @var session_time_of_day.
 	 */
-	public $session_default_start_time;
+	public $session_time_of_day;
 	
 	/**
 	 * Default duration specified in the signup
@@ -119,6 +119,5 @@ class SessionItem {
 	 *
 	 * @var session_default_day_of_month.
 	 */
-	public $session_day_of_month;
-	
+	public $session_day_of_month;	
 }

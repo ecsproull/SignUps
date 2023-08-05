@@ -106,6 +106,14 @@ class SignUpsBase {
 	protected const DATETIME_FORMAT = 'Y-m-d g:i A';
 
 	/**
+	 * Format DateTime as 2020-08-13T6:00 am. 
+	 * Acceptable for HTML Date Input
+	 *
+	 * @var mixed
+	 */
+	protected const DATETIME_FORMAT_INPUT = 'Y-m-d\TH:i';
+
+	/**
 	 * Format Date as 2020-08-13.
 	 *
 	 * @var mixed
