@@ -204,7 +204,7 @@ jQuery( document ).ready( function($){
 		$( "button#add-time-slot" ).val(++val_int);
 	});
 
-	$("#session-table").on("change", ".start-time", function( event ) {
+	/* $("#session-table").on("change", ".start-time", function( event ) {
 		let minutes = $("#default-minutes").val();
 
 		if (minutes === "0") {
@@ -223,7 +223,7 @@ jQuery( document ).ready( function($){
 		let pos2 = end_date.indexOf(":", pos1 + 1);
 		end_date = end_date.substring(0, pos2);
 		$(end_id).val(end_date);
-	});
+	}); */
 
 	$( "#display-html" ).click( function( event ) {
 		$("#html-description-display").html($("#html-signup-description").val());

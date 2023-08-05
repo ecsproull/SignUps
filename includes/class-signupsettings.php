@@ -435,6 +435,7 @@ class SignupSettings extends SignUpsBase {
 		$session_item->session_time_of_day    = $results[0]->signup_default_start_time;
 		$session_item->session_start_formatted       = $start_time;
 		$session_item->session_end_formatted         = $end_time;
+		$session_item->session_signup_id             = $results[0]->signup_id;
 
 		$this->create_session_form( $session_item, $post['signup_name'] );
 	}
@@ -673,13 +674,12 @@ class SignupSettings extends SignUpsBase {
 	 */
 	private function load_session_selection( $post ) {
 		$signup_id = $post['edit_sessions_signup_id'];
-		$signup_name = $post[$signup_id];
 		global $wpdb;
 		$instructors = array();
 		$attendees   = array();
 		$class       = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT signup_rolling_template
+				'SELECT signup_rolling_template, signup_name
 				FROM %1s
 				WHERE signup_id = %s',
 				self::SIGNUPS_TABLE,
@@ -689,6 +689,7 @@ class SignupSettings extends SignUpsBase {
 		);
 
 		$rolling = $class[0]->signup_rolling_template > 0;
+		$signup_name = $class[0]->signup_name;
 
 		if ( $rolling ) {
 			$this->create_rolling_session( $signup_id, true );
@@ -1146,25 +1147,25 @@ class SignupSettings extends SignUpsBase {
 					<td><input class="w-250px" type="number" name="session_slots" 
 						value="<?php echo esc_html( $data->session_slots ); ?>" /> </td>
 				</tr>
-				<tr>
+				<tr <?php echo $data->session_id ? "hidden" : "" ?>>
 					<td class="text-right mr-2"><label>Start Time: </label></td>
 					<td><input id="default-minutes" class="w-250px" type="time" name="session_time_of_day" 
 						value="<?php echo esc_html( $data->session_time_of_day ); ?>" 
 						<?php echo $data->session_id ? "disabled" : "" ?> /> </td>
 				</tr>
-				<tr>
+				<tr <?php echo $data->session_id ? "hidden" : "" ?>>
 					<td class="text-right mr-2"><label>Duration: </label></td>
 					<td><input id="default-minutes" class="w-250px without_ampm" type="time" name="session_duration" 
 						value="<?php echo esc_html( $data->session_duration ); ?>" 
 						<?php echo $data->session_id ? "disabled" : "" ?> /> </td>
 				</tr>
-				<tr>
+				<tr <?php echo $data->session_id ? "hidden" : "" ?>>
 					<td class="text-right mr-2"><label>Days Between Sessions:</label></td>
 					<td><input class="w-250px" type="number" name="session_days_between_sessions" 
 						value="<?php echo esc_html( $data->session_days_between_sessions ); ?>"
 						<?php echo $data->session_id ? "disabled" : "" ?> /> </td>
 				</tr>
-				<tr>
+				<tr <?php echo $data->session_id ? "hidden" : "" ?>>
 					<td class="text-right mr-2"><label>Day of Month:</label></td>
 					<td><input class="w-250px" type="text" name="session_day_of_month" 
 						value="<?php echo esc_html( $data->session_day_of_month ); ?>" 
@@ -1189,13 +1190,14 @@ class SignupSettings extends SignUpsBase {
 			</table>
 
 			<table class="mr-auto ml-auto">
-				<tr>
-					<td class="text-center"><button name="session_add_slots" type="submit" value="1"><b><i>Update Time Slots</i></b></button></td>
-					<td class="text-right mr-2"><label class="ml-3">Slot Count:</label>
+				<tr <?php echo $data->session_id ? "hidden" : "" ?>>
+					<td class="text-center"><button class="btn btn-primary" name="session_add_slots" type="submit" value="1"><b><i>Update Sessions</i></b></button></td>
+					<td class="text-right mr-2"><label class="ml-3">Session Count:</label>
 					  <input class="w-75px" type="number" name="session_add_slots_count" value="1" /></td>
 				</tr>
 				<tr>
-					<td class="text-right"><input class="btn bt-md btn-danger mt-4 mr-5" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back"></td>
+					<td class="text-right"><button class="btn bt-md btn-danger mt-4 mr-5" style="cursor:pointer;" type="submit" name="edit_sessions_signup_id"
+					value="<?php echo esc_html( $data->session_signup_id ); ?>">Back</button></td>
 					<td class="text-left"><input class="btn bt-md btn-primary mr-auto ml-auto mt-4 ml-2" type="submit" value="Submit Session" name="submit_session"></td>
 				</tr>
 			</table>
