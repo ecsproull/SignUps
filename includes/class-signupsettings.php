@@ -183,19 +183,8 @@ class SignupSettings extends SignUpsBase {
 		$affected_row_count = 0;
 		$stripe = new SripePayments();
 		if ( $where['signup_id'] ) {
-			if ( ( int )$post['signup_cost'] > 0 && ! $post['signup_product_id'] ) {
-				$ret = $stripe->create_product( $post['signup_name'], $post['signup_cost'] );
-				if ( $ret ) {
-					$post['signup_product_id']       = $ret['product_id'];
-					$post['signup_default_price_id'] = $ret['price_id'];
-					$original_cost                   = $post['signup_cost'];
-				} else {
-					echo "Failed to create stripe pricing and product info";
-					return;
-				}
-			}
-
-			if ( $original_cost != $post['signup_cost'] ) {
+			
+			if ( $original_cost != $post['signup_cost'] &&  $signup_product_id ) {
 				$new_price_id = $stripe->update_price( $signup_default_price_id, $signup_product_id, $post['signup_cost'] );
 				if ( $new_price_id ) {
 					$post['signup_default_price_id'] = $new_price_id;
@@ -211,17 +200,6 @@ class SignupSettings extends SignUpsBase {
 				$where
 			);
 		} else {
-			if ( ( int )$post['signup_cost'] > 0 ) {
-				$ret = $stripe->create_product( $post['signup_name'], $post['signup_cost'] );
-				if ( $ret ) {
-					$post['signup_product_id']       = $ret['product_id'];
-					$post['signup_default_price_id'] = $ret['price_id'];
-				} else {
-					echo "Failed to create stripe pricing and product info";
-					return;
-				}
-			}
-			
 			$affected_row_count = $wpdb->insert( self::SIGNUPS_TABLE, $post );
 		}
 

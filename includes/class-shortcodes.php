@@ -336,7 +336,49 @@ class ShortCodes extends SignUpsBase {
 						$insert_return_value
 					) {
 						$description = $signup_name . ' - ' . $slot_start->format( self::DATETIME_FORMAT );
-						$payments = new SripePayments();
+						$payments    = new SripePayments();
+						if ( ! $post['session_price_id'] ) {
+							$signups = $wpdb->get_results(
+								$wpdb->prepare(
+									'SELECT signup_product_id
+									FROM %1s
+									WHERE signup_id = %s',
+									self::SIGNUPS_TABLE,
+									$signup_id
+								),
+								OBJECT
+							);
+
+							if ( ! $signups[0]->signup_product_id ) {
+								$ret = $payments->create_product( $post['signup_name'], $cost );
+								if ( $ret ) {
+									$data = Array();
+									$data['signup_product_id']       = $ret['product_id'];
+									$data['signup_default_price_id'] = $ret['price_id'];
+
+									$where = Array();
+									$where['signup_id'] = $post['session_signup_id'];
+									$affected_row_count = $wpdb->update(
+										'wp_scw_signups',
+										$data,
+										$where
+									);
+
+									if ( ! $affected_row_count ) {
+										echo "Failed to update signup with pricing and product info";
+										return;
+									}
+
+									$post['session_price_id'] = $ret['price_id'];
+
+								} else {
+									echo "Failed to create stripe pricing and product info";
+									return;
+								}
+							}
+
+						}
+
 						$payments->collect_money( $description, $post['session_price_id'], $new_attendee['attendee_badge'], $last_id, $cost );
 					}
 					?>
@@ -456,6 +498,7 @@ class ShortCodes extends SignUpsBase {
 								<input type="hidden" name="add_attendee_class">
 								<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
 								<input type="hidden" name="session_price_id" value="<?php echo esc_html( $session->session_price_id ); ?>">
+								<input type="hidden" name="session_signup_id" value="<?php echo esc_html( $signup_id ); ?>">
 								<input type="hidden" name="paid" value=false>
 								<?php
 								wp_nonce_field( 'signups', 'mynonce' );
