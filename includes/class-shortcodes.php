@@ -350,7 +350,7 @@ class ShortCodes extends SignUpsBase {
 							if ( ! $signups[0]->signup_product_id ) {
 								$ret = $payments->create_product( $post['signup_name'], $cost );
 								if ( $ret ) {
-									$data = array();
+									$data                            = array();
 									$data['signup_product_id']       = $ret['product_id'];
 									$data['signup_default_price_id'] = $ret['price_id'];
 

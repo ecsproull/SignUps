@@ -173,7 +173,7 @@ class DescriptionEditor extends SignUpsBase {
 	 */
 	private function submit_description( $post ) {
 		global $wpdb;
-		$new_signup = array();
+		$new_signup                            = array();
 		$new_signup['signup_name']             = $post['description_title'];
 		$new_signup['signup_contact_email']    = $post['description_contact_email'];
 		$new_signup['signup_location']         = $post['description_location'];
@@ -185,7 +185,7 @@ class DescriptionEditor extends SignUpsBase {
 
 		$affected_row_count = $wpdb->insert( self::SIGNUPS_TABLE, $new_signup );
 		if ( 1 === $affected_row_count ) {
-			$new_session = array();
+			$new_session                        = array();
 			$start_date                         = new DateTime( $post['description_start'], $this->date_time_zone );
 			$duration                           = new Datetime( $post['description_duration'], $this->date_time_zone );
 			$duration_hours                     = date_format( $duration, 'h' );

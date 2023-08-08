@@ -256,8 +256,8 @@ class SignUpsBase {
 		}
 
 		if ( isset( $_COOKIE['signups_scw_badge'] ) ) {
-			$cookie = wp_unslash( $_COOKIE );
-			$badge = $cookie['signups_scw_badge'];
+			$cookie  = wp_unslash( $_COOKIE );
+			$badge   = $cookie['signups_scw_badge'];
 			$results = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT *
@@ -411,7 +411,7 @@ class SignUpsBase {
 		$time_exceptions = array();
 		$today           = new DateTime( 'now', $this->date_time_zone );
 		for ( $j = 0; $j < 12; $j++ ) {
-			$day = new DateTime(
+			$day      = new DateTime(
 				sprintf(
 					'First Monday of %s %s',
 					$today->format( 'F' ),
@@ -459,11 +459,11 @@ class SignUpsBase {
 		$user_group,
 		$admin
 	) {
-		$start_date       = new DateTime( 'now', $this->date_time_zone );
-		$end_date         = new DateTime( 'now', $this->date_time_zone );
+		$start_date = new DateTime( 'now', $this->date_time_zone );
+		$end_date   = new DateTime( 'now', $this->date_time_zone );
 		$end_date->add( new DateInterval( 'P' . $template->template_rolling_days . 'D' ) );
 		$one_day_interval = new DateInterval( 'P1D' );
-		$time_exceptions = $this->create_meeting_exceptions( $start_date, $end_date );
+		$time_exceptions  = $this->create_meeting_exceptions( $start_date, $end_date );
 		?>
 		<div id="session_select" class="text-center mw-800px">
 			<h1 class="mb-2"><b><?php echo esc_html( $signup_name ); ?></b></h1>
@@ -519,7 +519,7 @@ class SignUpsBase {
 								);
 
 								$current_day = $start_date->format( self::DATE_FORMAT );
-								$count = 0;
+								$count       = 0;
 								?>
 								<tr class="submit-row" colspan='4'>
 								<td colspan='4'><button type="submit" class="btn btn-md mr-auto ml-auto bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee_session">Submit</button></td>
@@ -534,8 +534,8 @@ class SignUpsBase {
 									$start_hour       = $start_time_parts[0];
 									$start_minutes    = $start_time_parts[1];
 									$start_date       = $start_date->SetTime( $start_hour, $start_minutes );
-									$duration       = new DateInterval( 'PT' . $duration_parts[0] . 'H' . $duration_parts[1] . 'M' );
-									$temp_end_date = new DateTime( $start_date->format( self::DATETIME_FORMAT ), $this->date_time_zone );
+									$duration         = new DateInterval( 'PT' . $duration_parts[0] . 'H' . $duration_parts[1] . 'M' );
+									$temp_end_date    = new DateTime( $start_date->format( self::DATETIME_FORMAT ), $this->date_time_zone );
 									$temp_end_date->Add( $duration );
 
 									for ( $s = 0; $s < $group_item[0]->template_item_shifts; $s++ ) {
@@ -592,7 +592,7 @@ class SignUpsBase {
 														<?php
 													}
 
-													if ( count( $slot_attendees ) == $item->template_item_slots ) {
+													if ( count( $slot_attendees ) === (int) $item->template_item_slots ) {
 														echo "<span class='text-primary'><i>All " . esc_html( $item->template_item_slots . ' ' . $item->template_item_title ) . ' Slots Filled</i></span><br>';
 													} else {
 														echo "<span class='text-primary'><i>" . count( $slot_attendees ) . ' of ' . esc_html( $item->template_item_slots ) . ' Slots Filled </i></span><br>';
@@ -606,7 +606,7 @@ class SignUpsBase {
 															<?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?>
 															<input class="form-check-input ml-2 rolling-remove-chk mt-2 <?php echo esc_html( $attendee->attendee_badge ); ?>" 
 																type="checkbox" name="remove_slots[]" 
-																<?php echo $user_badge == $attendee->attendee_badge || $admin ? '' : 'hidden'; ?> 
+																<?php echo $user_badge === $attendee->attendee_badge || $admin ? '' : 'hidden'; ?> 
 																value="
 																<?php
 																echo esc_html(
@@ -866,7 +866,7 @@ class SignUpsBase {
 		<option value="0">None</option>
 		<?php
 		foreach ( $templates as $result ) {
-			if ( $template_id == $result->template_id ) {
+			if ( $template_id === $result->template_id ) {
 				?>
 				<option value="<?php echo esc_html( $result->template_id ); ?>" selected><?php echo esc_html( $result->template_name ); ?></option>
 				<?php

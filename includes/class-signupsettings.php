@@ -99,17 +99,17 @@ class SignupSettings extends SignUpsBase {
 			OBJECT
 		);
 
-		$session = $results[0];
+		$session         = $results[0];
 		$new_calendar_id = 0;
 		if ( $session->session_calendar_id > 0 ) {
 			$where_session = array( 'id' => $session->session_calendar_id );
 			$wpdb->delete( self::SPIDER_CALENDAR_EVENT_TABLE, $where_session );
 		} else {
-			$datetime = new DateTime( $session->session_start_formatted );
-			$date = $datetime->format( 'Y-m-d' );
+			$datetime   = new DateTime( $session->session_start_formatted );
+			$date       = $datetime->format( 'Y-m-d' );
 			$start_time = $datetime->format( 'g:iA' );
-			$datetime = new DateTime( $session->session_end_formatted );
-			$end_time = $datetime->format( 'g:iA' );
+			$datetime   = new DateTime( $session->session_end_formatted );
+			$end_time   = $datetime->format( 'g:iA' );
 			$signup_url = get_site_url() . '/signups?signup_id=' . $post['signup_id'];
 
 			$text_for_date;
@@ -118,7 +118,7 @@ class SignupSettings extends SignUpsBase {
 			}
 			$text_for_date .= '<br><br><a href=' . $signup_url . " target='_blank' rel='noopener' >Signup</a>.";
 
-			$data = array();
+			$data                  = array();
 			$data['calendar']      = 1;
 			$data['date']          = $date;
 			$data['date_end']      = $date;
@@ -140,11 +140,11 @@ class SignupSettings extends SignUpsBase {
 			$new_calendar_id       = $wpdb->insert_id;
 		}
 
-		$where = array();
-		$update = array();
+		$where                         = array();
+		$update                        = array();
 		$where['session_id']           = $post['session_id'];
 		$update['session_calendar_id'] = $new_calendar_id;
-		$affected_row_count = $wpdb->update(
+		$affected_row_count            = $wpdb->update(
 			'wp_scw_sessions',
 			$update,
 			$where
@@ -178,9 +178,9 @@ class SignupSettings extends SignUpsBase {
 		$post['signup_default_slots']    = (int) $post['signup_default_slots'];
 		$post['signup_rolling_template'] = (int) $post['signup_rolling_template'];
 
-		$duration_parts                  = explode( ':', $post['signup_default_duration'] );
+		$duration_parts = explode( ':', $post['signup_default_duration'] );
 		if ( $duration_parts[0] > 12 ) {
-			$duration_parts[0] = $duration_parts[0] - 12;
+			$duration_parts[0]               = $duration_parts[0] - 12;
 			$post['signup_default_duration'] = $duration_parts[0] . ':' . $duration_parts[1] . ':' . $duration_parts[2];
 		}
 
@@ -191,9 +191,9 @@ class SignupSettings extends SignUpsBase {
 		}
 
 		$affected_row_count = 0;
-		$stripe = new StripePayments();
+		$stripe             = new StripePayments();
 		if ( $where['signup_id'] ) {
-			if ( $original_cost != $post['signup_cost'] && $signup_product_id ) {
+			if ( $original_cost !== $post['signup_cost'] && $signup_product_id ) {
 				$new_price_id = $stripe->update_price( $signup_default_price_id, $signup_product_id, $post['signup_cost'] );
 				if ( $new_price_id ) {
 					$post['signup_default_price_id'] = $new_price_id;
@@ -400,18 +400,18 @@ class SignupSettings extends SignUpsBase {
 			);
 		}
 
-		$start_time_parts            = explode( ':', $results[0]->signup_default_start_time );
+		$start_time_parts = explode( ':', $results[0]->signup_default_start_time );
 		$today->setTime( $start_time_parts[0], $start_time_parts[1] );
 		$start_time   = array();
 		$start_time[] = $today->format( self::DATETIME_FORMAT_INPUT );
 
 		$duration_parts = explode( ':', $results[0]->signup_default_duration );
-		$interval = new DateInterval( 'PT' . $duration_parts[0] . 'H' . $duration_parts[1] . 'M' );
+		$interval       = new DateInterval( 'PT' . $duration_parts[0] . 'H' . $duration_parts[1] . 'M' );
 		$today->add( $interval );
 		$end_time   = array();
 		$end_time[] = $today->format( self::DATETIME_FORMAT_INPUT );
 
-		$session_item = new SessionItem( $post['add_new_session'] );
+		$session_item                                = new SessionItem( $post['add_new_session'] );
 		$session_item->session_slots                 = $results[0]->signup_default_slots;
 		$session_item->session_duration              = $results[0]->signup_default_duration;
 		$session_item->session_days_between_sessions = $results[0]->signup_default_days_between_sessions;
@@ -419,7 +419,7 @@ class SignupSettings extends SignUpsBase {
 		$session_item->session_contact_name          = $results[0]->signup_default_contact_name;
 		$session_item->session_contact_email         = $results[0]->signup_contact_email;
 		$session_item->session_location              = $results[0]->signup_location;
-		$session_item->session_time_of_day    = $results[0]->signup_default_start_time;
+		$session_item->session_time_of_day           = $results[0]->signup_default_start_time;
 		$session_item->session_start_formatted       = $start_time;
 		$session_item->session_end_formatted         = $end_time;
 		$session_item->session_signup_id             = $results[0]->signup_id;
@@ -475,7 +475,7 @@ class SignupSettings extends SignUpsBase {
 				$start_dates[] = $dt->format( self::DATETIME_FORMAT_INPUT );
 				$dt->add( $interval );
 				$end_dates[] = $dt->format( self::DATETIME_FORMAT_INPUT );
-				$today = $today->modify( '+1 month' );
+				$today       = $today->modify( '+1 month' );
 			}
 		} else {
 			$start_date = new DateTime( $session_item->session_start_formatted[0] );
@@ -524,14 +524,14 @@ class SignupSettings extends SignUpsBase {
 			OBJECT
 		);
 
-		$start_date = array();
-		$dt_start = new DateTime( $results[0]->session_start_formatted );
-		$start_date[] = $dt_start->format( self::DATETIME_FORMAT_INPUT );
+		$start_date                          = array();
+		$dt_start                            = new DateTime( $results[0]->session_start_formatted );
+		$start_date[]                        = $dt_start->format( self::DATETIME_FORMAT_INPUT );
 		$results[0]->session_start_formatted = $start_date;
 
-		$end_date   = array();
-		$dt_end   = new DateTime( $results[0]->session_end_formatted );
-		$end_date[] = $dt_end->format( self::DATETIME_FORMAT_INPUT );
+		$end_date                          = array();
+		$dt_end                            = new DateTime( $results[0]->session_end_formatted );
+		$end_date[]                        = $dt_end->format( self::DATETIME_FORMAT_INPUT );
 		$results[0]->session_end_formatted = $end_date;
 
 		$this->create_session_form( $results[0], $post['signup_name'] );
@@ -686,7 +686,7 @@ class SignupSettings extends SignUpsBase {
 			OBJECT
 		);
 
-		$rolling = $class[0]->signup_rolling_template > 0;
+		$rolling     = $class[0]->signup_rolling_template > 0;
 		$signup_name = $class[0]->signup_name;
 
 		if ( $rolling ) {

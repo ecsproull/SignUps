@@ -19,7 +19,7 @@ class SessionItem {
 	 */
 	public function __construct( $signup_id ) {
 		$this->session_signup_id = $signup_id;
-		$this->session_item = 'Attendee';
+		$this->session_item      = 'Attendee';
 	}
 
 	/**
