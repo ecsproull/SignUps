@@ -99,25 +99,25 @@ class SessionItem {
 	 * @var session_time_of_day.
 	 */
 	public $session_time_of_day;
-	
+
 	/**
 	 * Default duration specified in the signup
 	 *
 	 * @var session_default_duration.
 	 */
 	public $session_duration;
-	
+
 	/**
 	 * Default number of days between a session
 	 *
 	 * @var session_default_days_between_sessions.
 	 */
 	public $session_days_between_sessions;
-	
+
 	/**
 	 * Default days of the month. String to be parsed by PHP DateTime.
 	 *
 	 * @var session_default_day_of_month.
 	 */
-	public $session_day_of_month;	
+	public $session_day_of_month;
 }

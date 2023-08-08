@@ -1,9 +1,12 @@
 <?php
 /**
  * Summary
- * Stripe payment class.
+ * Place class.
  *
- * @package signups
+ * @package     SignUps
+ * @author      Edward Sproull
+ * @copyright   You have the right to copy
+ * @license     GPL-2.0+
  */
 
 /**
@@ -12,11 +15,34 @@
  *
  * @package SignUps
  */
-class SripePayments extends SignUpsBase {
+class StripePayments extends SignUpsBase {
 
+	/**
+	 * Stripe API secret
+	 *
+	 * @var mixed
+	 */
 	private $stripe_api_secret;
+
+	/**
+	 * Stripe API key.
+	 *
+	 * @var mixed
+	 */
 	private $stripe_api_key;
+
+	/**
+	 * Stripe Endpoint Secret.
+	 *
+	 * @var mixed
+	 */
 	private $stripe_endpoint_secret;
+
+	/**
+	 * Stripe root URL.
+	 *
+	 * @var mixed
+	 */
 	private $stripe_root_url;
 
 
@@ -75,7 +101,10 @@ class SripePayments extends SignUpsBase {
 			 * Only verify the event if there is an endpoint secret defined
 			 * Otherwise use the basic decoded event
 			 */
-			$sig_header = sanitize_text_field( wp_unslash( $_SERVER['HTTP_STRIPE_SIGNATURE'] ) );
+			if ( isset( $_SERVER['HTTP_STRIPE_SIGNATURE'] ) ) {
+				$sig_header = sanitize_text_field( wp_unslash( $_SERVER['HTTP_STRIPE_SIGNATURE'] ) );
+			}
+
 			try {
 				$event = \Stripe\Webhook::constructEvent(
 					$payload,
@@ -272,9 +301,9 @@ class SripePayments extends SignUpsBase {
 		)
 		?>
 		<h2>Payment for badge: <?php echo esc_html( $badge_number ); ?></h2>
-		<?php 
-		if ($payment_row) {
-			if ( $payment_row->payments_status != 'succeeded' && $payment_row->payments_status != 'completed') {
+		<?php
+		if ( $payment_row ) {
+			if ( 'succeeded' !== $payment_row->payments_status && 'completed' !== $payment_row->payments_status ) {
 				?>
 				<meta http-equiv="Refresh" content="2">
 				<?php
@@ -305,44 +334,56 @@ class SripePayments extends SignUpsBase {
 	/**
 	 * Update the price for a signup.
 	 *
+	 * @param  mixed $price_id Original price id.
+	 * @param  mixed $product_id Product Id.
+	 * @param  mixed $new_cost New cost.
 	 * @return The new price id.
 	 */
-	public function update_price( $price_id, $product_id , $new_cost ) {
+	public function update_price( $price_id, $product_id, $new_cost ) {
 
 		$stripe = new \Stripe\StripeClient( $this->stripe_api_secret );
-		$result = $stripe->prices->create([
-			'unit_amount' => ( int )($new_cost . '00'),
-			'currency' => 'usd',
-			'product' => $product_id,
-		]);
+		$result = $stripe->prices->create(
+			array(
+				'unit_amount' => (int) ( $new_cost . '00' ),
+				'currency'    => 'usd',
+				'product'     => $product_id,
+			)
+		);
 
-		if ( $result->code == 200 ) {
+		if ( 200 === (int) $result->code ) {
 			return $result->id;
 		}
 
 		return $result->id;
 	}
 
-		/**
+	/**
 	 * Update the price for a signup.
 	 *
+	 * @param string $name Name of the signup.
+	 * @param int    $cost The cost of the signup.
 	 * @return The new product and price id as a comma seperated string.
 	 */
 	public function create_product( $name, $cost ) {
 
 		$stripe = new \Stripe\StripeClient( $this->stripe_api_secret );
-		$result = $stripe->products->create([
-			'name' => $name,
-			'default_price_data' => ['currency' => 'usd', 'unit_amount' => ( int )$cost * 100]
-		]);
+		$result = $stripe->products->create(
+			array(
+				'name'               => $name,
+				'default_price_data' => array(
+					'currency'    => 'usd',
+					'unit_amount' => (int) $cost * 100,
+				),
+			)
+		);
 
 		if ( $result ) {
-			$ret = Array();
+			$ret               = array();
 			$ret['product_id'] = $result->id;
 			$ret['price_id']   = $result->default_price;
 			return $ret;
 		} else {
 			return null;
-		}		
+		}
 	}
 }

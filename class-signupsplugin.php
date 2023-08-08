@@ -93,15 +93,14 @@ class SignupsPlugin extends SignUpsBase {
 	 * Adds the query vars used by this plugin.
 	 *
 	 * @param mixed $vars Array of vars to add to.
-	 * @return void
+	 * @return $vars
 	 */
-	public function wwp_custom_query_vars_filter($vars) {
+	public function wwp_custom_query_vars_filter( $vars ) {
 		$vars[] .= 'attendee_id';
 		$vars[] .= 'badge';
 		$vars[] .= 'signup_id';
 		return $vars;
 	}
-	
 
 	/**
 	 * Route used for Stripe.com callback.
@@ -136,7 +135,7 @@ class SignupsPlugin extends SignUpsBase {
 	 */
 	public function add_scripts_and_css( $host ) {
 		if ( 'toplevel_page_SignUps' !== $host ) {
-			//return;  TODO fix this up for just our pages
+			return;
 		}
 
 		wp_register_style( 'signup_bs_style', plugins_url( '/signups/bootstrap/css/bootstrap.min.css' ), array(), 1 );
@@ -146,7 +145,7 @@ class SignupsPlugin extends SignUpsBase {
 		wp_register_style( 'user_signup_style', plugins_url( '/signups/css/users-styles.css' ), array(), 1 );
 		wp_enqueue_style( 'user_signup_style' );
 		wp_enqueue_script( 'signup_member_script', plugins_url( 'js/signups.js', __FILE__ ), array( 'jquery' ), '1.0.0.0', false, true );
-		wp_enqueue_script( 'signup_tinymce', "https://cdn.tiny.cloud/1/s9npqxi5h9knhv5a8g5qfc33xh2qknj1nage4xv5qsbtrzyt/tinymce/6/tinymce.min.js", array( 'jquery' ), '4.9.11', false, true );
+		wp_enqueue_script( 'signup_tinymce', 'https://cdn.tiny.cloud/1/s9npqxi5h9knhv5a8g5qfc33xh2qknj1nage4xv5qsbtrzyt/tinymce/6/tinymce.min.js', array( 'jquery' ), '4.9.11', false, true );
 		wp_localize_script(
 			'signup_member_script',
 			'wpApiSettings',
@@ -163,7 +162,7 @@ class SignupsPlugin extends SignUpsBase {
 	 * @param string $host Who is calling.
 	 */
 	public function add_users_scripts_and_css( $host ) {
-		$user_pages   = Array();
+		$user_pages   = array();
 		$user_pages[] = 'signup-description-editor';
 		$user_pages[] = 'signups';
 		if ( ! is_page( $user_pages ) ) {
@@ -177,7 +176,7 @@ class SignupsPlugin extends SignUpsBase {
 		wp_enqueue_style( 'wp-jquery-ui-dialog' );
 		wp_enqueue_script( 'signup_cookie_script', plugins_url( 'cookie/node_modules/js-cookie/dist/js.cookie.min.js', __FILE__ ), array( 'jquery' ), '3.0.5', false, true );
 		wp_enqueue_script( 'signup_member_script', plugins_url( 'js/users-signup.js', __FILE__ ), array( 'jquery', 'jquery-ui-dialog', 'signup_cookie_script' ), '1.0.0.0', false, true );
-		wp_enqueue_script( 'signup_tinymce', "https://cdn.tiny.cloud/1/s9npqxi5h9knhv5a8g5qfc33xh2qknj1nage4xv5qsbtrzyt/tinymce/6/tinymce.min.js", array( 'jquery' ), '4.9.11', false, true );
+		wp_enqueue_script( 'signup_tinymce', 'https://cdn.tiny.cloud/1/s9npqxi5h9knhv5a8g5qfc33xh2qknj1nage4xv5qsbtrzyt/tinymce/6/tinymce.min.js', array( 'jquery' ), '4.9.11', false, true );
 		wp_localize_script(
 			'signup_member_script',
 			'wpApiSettings',

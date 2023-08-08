@@ -36,8 +36,8 @@ class ShortCodes extends SignUpsBase {
 				}
 			}
 		} else {
-			if ( get_query_var('signup_id') ) {
-				$this->create_description_form( get_query_var('signup_id') );
+			if ( get_query_var( 'signup_id' ) ) {
+				$this->create_description_form( get_query_var( 'signup_id' ) );
 			} else {
 				$this->create_select_signup();
 			}
@@ -49,7 +49,7 @@ class ShortCodes extends SignUpsBase {
 	 *
 	 * @return void
 	 */
-	protected function create_new_user_table( ) {
+	protected function create_new_user_table() {
 		?>
 		<table id="new-member" class="mb-100px table table-bordered mr-auto ml-auto">
 			<tr>
@@ -70,7 +70,7 @@ class ShortCodes extends SignUpsBase {
 					placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required></td>
 			</tr>
 			<tr>
-			    <td class="text-right font-weight-bold">Email:</td>
+				<td class="text-right font-weight-bold">Email:</td>
 				<td class="text-left"><input type="email" name="email" placeholder="foo@bar.com" required></td>
 			</tr>
 			<tr>
@@ -97,8 +97,6 @@ class ShortCodes extends SignUpsBase {
 		</table>
 		<input id="user_groups" type="hidden" name="user_groups" value="none">
 		<?php
-
-		return $returnVal;
 	}
 
 	/**
@@ -331,12 +329,12 @@ class ShortCodes extends SignUpsBase {
 					 * 4.) Exactly one row is inserted. It can be 0 but never more than 1.
 					 */
 					if (
-						0 !== ( int )$new_attendee['attendee_balance_owed'] &&
+						0 !== (int) $new_attendee['attendee_balance_owed'] &&
 						0 !== $last_id &&
 						$insert_return_value
 					) {
 						$description = $signup_name . ' - ' . $slot_start->format( self::DATETIME_FORMAT );
-						$payments    = new SripePayments();
+						$payments    = new StripePayments();
 						if ( ! $post['session_price_id'] ) {
 							$signups = $wpdb->get_results(
 								$wpdb->prepare(
@@ -352,11 +350,11 @@ class ShortCodes extends SignUpsBase {
 							if ( ! $signups[0]->signup_product_id ) {
 								$ret = $payments->create_product( $post['signup_name'], $cost );
 								if ( $ret ) {
-									$data = Array();
+									$data = array();
 									$data['signup_product_id']       = $ret['product_id'];
 									$data['signup_default_price_id'] = $ret['price_id'];
 
-									$where = Array();
+									$where              = array();
 									$where['signup_id'] = $post['session_signup_id'];
 									$affected_row_count = $wpdb->update(
 										'wp_scw_signups',
@@ -365,18 +363,17 @@ class ShortCodes extends SignUpsBase {
 									);
 
 									if ( ! $affected_row_count ) {
-										echo "Failed to update signup with pricing and product info";
+										echo 'Failed to update signup with pricing and product info.';
 										return;
 									}
 
 									$post['session_price_id'] = $ret['price_id'];
 
 								} else {
-									echo "Failed to create stripe pricing and product info";
+									echo 'Failed to create stripe pricing and product info.';
 									return;
 								}
 							}
-
 						}
 
 						$payments->collect_money( $description, $post['session_price_id'], $new_attendee['attendee_badge'], $last_id, $cost );
@@ -451,7 +448,8 @@ class ShortCodes extends SignUpsBase {
 	 * @param  array  $attendees The list of attendees for the class.
 	 * @param  array  $instructors The list of instructors for the class.
 	 * @param  int    $cost The cost of the signup in dollars.
-	 * @param  string $signup_description The description of the signup.
+	 * @param  string $signup_id The signup id.
+	 * @param  string $user_group The group that defines who can signup.  CNC, Member...etc.
 	 * @return void
 	 */
 	private function create_session_select_form( $signup_name, $sessions, $attendees, $instructors, $cost, $signup_id, $user_group ) {
@@ -462,16 +460,16 @@ class ShortCodes extends SignUpsBase {
 				<form class="signup_form" method="POST">
 					<div id="usercontent" class="container">
 						<?php
-						if ( $user_group == 'none' ) {
-							$userBadge = true;
+						if ( 'none' == $user_group ) {
+							$user_badge = true;
 							$this->create_new_user_table();
 
 						} else {
-							$userBadge = $this->create_user_table( $user_group );
+							$user_badge = $this->create_user_table( $user_group );
 						}
 						?>
 						<table id="selection-table" class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-125px selection-font"
-							<?php echo $userBadge == null ? 'hidden' : ''; ?> >
+							<?php echo null === $user_badge ? 'hidden' : ''; ?> >
 							<?php
 							$sessions_displayed = 0;
 							foreach ( $sessions as $session ) {
@@ -492,8 +490,13 @@ class ShortCodes extends SignUpsBase {
 								$end_date   = new DateTime( $session->session_end_formatted );
 								?>
 								<tr id="submit-row" class="date-row">
-									<td class="text-center" colspan="3"> <?php echo esc_html( $start_date->format( self::DATE_FORMAT ) .
-								 		' - ' .  $start_date->format( self::TIME_FORMAT ) . ' - ' . $end_date->format( self::TIME_FORMAT ) ); ?>
+									<td class="text-center" colspan="3"> 
+										<?php
+										echo esc_html(
+											$start_date->format( self::DATE_FORMAT ) .
+											' - ' . $start_date->format( self::TIME_FORMAT ) . ' - ' . $end_date->format( self::TIME_FORMAT )
+										);
+										?>
 								</tr>
 								<input type="hidden" name="add_attendee_class">
 								<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
@@ -521,7 +524,7 @@ class ShortCodes extends SignUpsBase {
 								?>
 								<tr class="attendee-row bg-lg">
 									<td></td>
-									<td><b><?php echo $available_slots . ' slots open - ' . count( $attendees[ $session->session_id ] ) . ' filled' ?></b></td>
+									<td><b><?php echo esc_html( $available_slots . ' slots open - ' . count( $attendees[ $session->session_id ] ) . ' filled' ); ?></b></td>
 									<td></td>
 								</tr>
 								<?php
@@ -530,7 +533,7 @@ class ShortCodes extends SignUpsBase {
 									foreach ( $attendees[ $session->session_id ] as $attendee ) {
 										$count++;
 										?>
-										<tr class="attendee-row <?php echo $count > 3 ? $session->session_id : ''; ?>" <?php echo $count > 3 ? 'hidden' : ''; ?> >
+										<tr class="attendee-row <?php echo esc_html( $count > 3 ? $session->session_id : '' ); ?>" <?php echo $count > 3 ? 'hidden' : ''; ?> >
 											<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
 											<td><?php echo esc_html( $attendee->attendee_item ); ?></td>
 											<?php
@@ -557,10 +560,11 @@ class ShortCodes extends SignUpsBase {
 									<td></td>
 									<td></td>
 									<td>
-									<?php 
+									<?php
 									if ( $count > 3 ) {
 										?>
-										<button class="btn btn-sm bg-primary mr-auto ml-auto expand-button" type='button' data-button='{"session_id": <?php echo $session->session_id; ?>}' >Show All</button>
+										<button class="btn btn-sm bg-primary mr-auto ml-auto expand-button" type='button' 
+											data-button='{"session_id": <?php echo esc_html( $session->session_id ); ?>}' >Show All</button>
 										<?php
 									}
 									?>
@@ -569,7 +573,7 @@ class ShortCodes extends SignUpsBase {
 								<?php
 							}
 
-							if ( $sessions_displayed === 0 ) {
+							if ( 0 === $sessions_displayed ) {
 								?>
 								<h1>"There are currently no future sessions scheduled for this class."</h1>
 								<?php
@@ -600,7 +604,7 @@ class ShortCodes extends SignUpsBase {
 			?>
 			<div class="mr-auto ml-auto text-left">
 				<?php
-				echo $html;
+				echo esc_html( $html );
 				?>
 			</div>
 			<div id='signup-description'>

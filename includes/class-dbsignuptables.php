@@ -59,20 +59,20 @@ class DbSignUpTables {
 
 		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_template"' ) !== 'wp_scw_template' ) {
 			$wpdb->query(
-				"CREATE TABLE `wp_scw_template` (
+				'CREATE TABLE `wp_scw_template` (
 					`template_id` int NOT NULL AUTO_INCREMENT,
 					`template_name` varchar(60) NOT NULL,
 					`template_columns` int NOT NULL,
 					`template_rolling_days` int NOT NULL,
 					PRIMARY KEY (`template_id`),
 					UNIQUE KEY `template_id_UNIQUE` (`template_id`)
-				  ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;"
+				  ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;'
 			);
 		}
 
 		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_template_item"' ) !== 'wp_scw_template_item' ) {
 			$wpdb->query(
-				"CREATE TABLE `wp_scw_template_item` (
+				'CREATE TABLE `wp_scw_template_item` (
 					`template_item_id` int NOT NULL AUTO_INCREMENT,
 					`template_item_template_id` int NOT NULL,
 					`template_item_day_of_week` int NOT NULL,
@@ -85,7 +85,7 @@ class DbSignUpTables {
 					`template_item_column` int NOT NULL,
 					PRIMARY KEY (`template_item_id`),
 					UNIQUE KEY `template_item_id_UNIQUE` (`template_item_id`)
-				  ) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4;"
+				  ) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4;'
 			);
 		}
 
@@ -162,12 +162,12 @@ class DbSignUpTables {
 
 		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_signup_descriptions"' ) !== 'wp_scw_signup_descriptions' ) {
 			$wpdb->query(
-				"CREATE TABLE `wp_scw_signup_descriptions` (
+				'CREATE TABLE `wp_scw_signup_descriptions` (
 					`description_id` int(11) NOT NULL AUTO_INCREMENT,
 					`description_signup_id` int(10) unsigned NOT NULL,
 					`description_html` mediumtext NOT NULL,
 					PRIMARY KEY (`description_id`)
-				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'
 			);
 		}
 
@@ -182,7 +182,7 @@ class DbSignUpTables {
 					`products_product_name` varchar(45) NOT NULL,
 					PRIMARY KEY (`products_id`)
 				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'
-			);	
+			);
 		}
 	}
 }

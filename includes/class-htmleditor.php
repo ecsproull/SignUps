@@ -23,7 +23,7 @@ class HtmlEditor extends SignUpsBase {
 	}
 
 	/**
-	 * load_html_editor
+	 * Load the html editor.
 	 *
 	 * @return void
 	 */
@@ -43,9 +43,15 @@ class HtmlEditor extends SignUpsBase {
 		}
 	}
 
+	/**
+	 * Loads the form to edit a description.
+	 *
+	 * @param  mixed $signup_id The id of the signup that the description is for.
+	 * @return void
+	 */
 	private function load_description_form( $signup_id ) {
 		global $wpdb;
-		if ( $signup_id === -1) {	
+		if ( -1 === $signup_id ) {
 			$results = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT *
@@ -99,6 +105,12 @@ class HtmlEditor extends SignUpsBase {
 			<?php
 	}
 
+	/**
+	 * Submit the html to the database.
+	 *
+	 * @param  mixed $post Posted values.
+	 * @return void
+	 */
 	private function submit_html( $post ) {
 		global $wpdb;
 		$desc        = htmlentities( $post['html'] );
@@ -130,12 +142,15 @@ class HtmlEditor extends SignUpsBase {
 		$this->load_description_form( $post['signup'] );
 	}
 
-		/**
-	 * Load the class selection.
+	/**
+	 * Load the selected signup.
+	 *
+	 * @param  mixed $signup_id The id that is selected.
+	 * @return void
 	 */
 	private function load_signup_selection( $signup_id ) {
 		global $wpdb;
-		$results = $wpdb->get_results(
+		$signups = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT signup_id,
 				signup_name
@@ -145,22 +160,29 @@ class HtmlEditor extends SignUpsBase {
 			OBJECT
 		);
 
-		$this->create_signup_dropdown_list( $results, $signup_id );
+		$this->create_signup_dropdown_list( $signups, $signup_id );
 	}
 
-	private function create_signup_dropdown_list( $results, $signup_id ) {
+	/**
+	 * Load the dropdown selection list for signups.
+	 *
+	 * @param  mixed $signups Names and Ids of signups.
+	 * @param  mixed $signup_id Id of the selected signup.
+	 * @return void
+	 */
+	private function create_signup_dropdown_list( $signups, $signup_id ) {
 		?>
-	    <label for="signup" class="block-label mt-50px mb-10px">Select a Signup</label>
+		<label for="signup" class="block-label mt-50px mb-10px">Select a Signup</label>
 		<select id="signup-select" name="signup" id="signup">
 		<?php
-		foreach ( $results as $result ) {
-			if ( $signup_id  == $result->signup_id ) {
+		foreach ( $signups as $signup ) {
+			if ( $signup_id == $signup->signup_id ) {
 				?>
-				<option value="<?php echo esc_html( $result->signup_id ); ?>" selected><?php echo esc_html( $result->signup_name ); ?></option>
+				<option value="<?php echo esc_html( $signup->signup_id ); ?>" selected><?php echo esc_html( $signup->signup_name ); ?></option>
 				<?php
 			} else {
 				?>
-				<option value="<?php echo esc_html( $result->signup_id ); ?>"><?php echo esc_html( $result->signup_name ); ?></option>
+				<option value="<?php echo esc_html( $signup->signup_id ); ?>"><?php echo esc_html( $signup->signup_name ); ?></option>
 				<?php
 			}
 		}
