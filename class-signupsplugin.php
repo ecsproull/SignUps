@@ -164,6 +164,7 @@ class SignupsPlugin extends SignUpsBase {
 	public function add_users_scripts_and_css( $host ) {
 		$user_pages   = array();
 		$user_pages[] = 'signup-description-editor';
+		$user_pages[] = 'submit-new-signup';
 		$user_pages[] = 'signups';
 		if ( ! is_page( $user_pages ) ) {
 			return;

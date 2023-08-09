@@ -55,7 +55,7 @@ jQuery(document).ready(function($){
 	});
 
 	$("#description_duration").on('keydown', (e) => {
-		if(e.which === 8 || e.which === 46) {
+		if(e.which === 8 || e.which === 46 || e.which === 37 || e.which === 39 ) {
 			return;
 		}
 

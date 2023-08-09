@@ -116,7 +116,7 @@ class DescriptionEditor extends SignUpsBase {
 			</div>
 			<div>
 				<input type="text" id="description_location" class="mt-2 w-100 without_ampm"
-					value="" placeholder="Woodshop, library..." name="description_location" required>
+					value="SCW Woodclub" placeholder="Woodshop, library..." name="description_location" required>
 			</div>
 
 			<div class="text-right">
