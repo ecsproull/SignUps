@@ -93,7 +93,7 @@ class SignupSettings extends SignUpsBase {
 				'SELECT *
 				FROM %1s
 				WHERE description_signup_id = %s',
-				self::SIGNUP_DESCRIPTIONS_TABLE,
+				self::DESCRIPTIONS_TABLE,
 				$post['signup_id']
 			),
 			OBJECT
@@ -1020,7 +1020,6 @@ class SignupSettings extends SignUpsBase {
 		?>
 		<div class="text-center mb-4">
 			<h1><?php echo esc_html( $data->signup_name ); ?> </h1>
-			<!-- img id="displayThumb" src="<?php echo esc_html( $data->signup_thumbnail_url ); ?>" alt="Class Thumbnail" -->
 		</div>
 		<form method="POST" >
 			<table class="table table-striped mr-auto ml-auto">

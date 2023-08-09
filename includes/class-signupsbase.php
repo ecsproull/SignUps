@@ -75,7 +75,7 @@ class SignUpsBase {
 	 *
 	 * @var mixed
 	 */
-	protected const SIGNUP_DESCRIPTIONS_TABLE = 'wp_scw_signup_descriptions';
+	protected const DESCRIPTIONS_TABLE = 'wp_scw_signup_descriptions';
 
 	/**
 	 * Signup template table.
@@ -224,7 +224,7 @@ class SignUpsBase {
 				'SELECT *
 				FROM %1s
 				WHERE description_signup_id = %1s',
-				self::SIGNUP_DESCRIPTIONS_TABLE,
+				self::DESCRIPTIONS_TABLE,
 				(int) $signup_id
 			),
 			OBJECT
@@ -475,7 +475,7 @@ class SignUpsBase {
 						<?php $user_badge = $this->create_user_table( $user_group ); ?>
 
 						<table id="selection-table" class="table-bordered mb-100px mr-auto ml-auto container selection-font"
-							<?php echo null == $user_badge && ! $admin ? 'hidden' : ''; ?> >
+							<?php echo null === $user_badge && ! $admin ? 'hidden' : ''; ?> >
 							<?php
 							$current_day    = '2000-07-01';
 							$comment_index  = 0;
@@ -676,7 +676,6 @@ class SignUpsBase {
 							?>
 							<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
 							<input type="hidden" name="add_attendee_session" value="<?php echo esc_html( $signup_id ); ?>">
-						
 							<tr class="footer-row">
 								<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="signup_id">Cancel</button></td>
 								<td></td>

@@ -47,9 +47,30 @@ jQuery(document).ready(function($){
 		});
 	});
 
-	$("#badge-input").on('keydown', (e) => { 
+	$("#badge-input").on('keydown', (e) => {
 		if (e.code === 'Enter' || e.code === 'NumpadEnter') { 
 			$("#get_member_button").trigger("click");
+			e.preventDefault();
+		}
+	});
+
+	$("#description_duration").on('keydown', (e) => {
+		if(e.which === 8 || e.which === 46) {
+			return;
+		}
+
+		var val = $("#description_duration").val(); 
+		var len = val.length;
+		if (len === 2 && !val.includes(':')) {
+			$("#description_duration").val(val + ':');
+		}
+
+		if (val.includes(':') && e.which == 186) {
+			e.preventDefault();
+			return;
+		}
+
+		if(((e.which < 48 || e.which > 57) && e.which != 186) || len > 4){
 			e.preventDefault();
 		}
 	});

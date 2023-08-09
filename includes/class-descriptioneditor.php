@@ -70,12 +70,12 @@ class DescriptionEditor extends SignUpsBase {
 				<input type="text" id="description_contact_name" class="mt-2 w-100" 
 					value="" placeholder="Contact Names" name="description_contact_name" required>
 			</div>
-			
+
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_slots">Slots:</label>
 			</div>
 			<div>
-				<input type="number" id="description_slots" class="mt-2 w-100" 
+				<input type="number" id="description_slots" class="mt-2 w-100 h-2rem" 
 					value="" placeholder="Maximum Number of attendees." name="description_slots" required>
 			</div>
 
@@ -91,15 +91,15 @@ class DescriptionEditor extends SignUpsBase {
 				<label class="label-margin-top mr-2" for="description_cost">Cost:</label>
 			</div>
 			<div>
-				<input type="text" id="description_cost" class="mt-2 w-100" 
-					value="" placeholder="30.00" name="description_cost" required>
+				<input type="text" id="description_cost" class="mt-2 w-100 h-2rem" 
+					value="" placeholder="00.00" name="description_cost" required>
 			</div>
 
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_start">Start Day & Time:</label>
 			</div>
 			<div>
-				<input type="datetime-local" id="description_start" class="mt-2 w-100" 
+				<input type="datetime-local" id="description_start" class="mt-2 w-100 h-2rem" 
 					value="" placeholder="" name="description_start" required>
 			</div>
 
@@ -107,8 +107,8 @@ class DescriptionEditor extends SignUpsBase {
 				<label class="label-margin-top mr-2" for="description_duration">Duration:</label>
 			</div>
 			<div>
-				<input type="time" id="description_duration" class="mt-2 w-100 without_ampm"
-					value="" placeholder="3:00" name="description_duration" required>
+				<input type="text" id="description_duration" class="mt-2 w-100 without_ampm h-2rem"
+					value="" placeholder="--:--" pattern="\[0-9]{1,2}:[0-9]{2}\s" name="description_duration">
 			</div>
 
 			<div class="text-right">
@@ -118,18 +118,41 @@ class DescriptionEditor extends SignUpsBase {
 				<input type="text" id="description_location" class="mt-2 w-100 without_ampm"
 					value="" placeholder="Woodshop, library..." name="description_location" required>
 			</div>
+
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="signup_group">User Group:</label>
+			</div>
+			<div>
+				<select id="signup_group" class="mt-2 w-100 h-2rem" name="description_group">
+					<option value="member">Members</option>
+					<option value="cnc">Cnc Users</option>
+				</select>
+			</div>
+
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="signup_Repeat">Repeat:</label>
+			</div>
+			<div>
+				<select id="signup_Repeat" class="mt-2 w-100 h-2rem" name="description_repeat">
+					<option value="7">Weekly</option>
+					<option value="14">Two Weeks</option>
+					<option value="21">Three Weeks</option>
+					<option value="31">Monthly</option>
+					<option value="0">TBD</option>
+				</select>
+			</div>
 		</div>
-		
+
 		<div class="description-box">
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_prerequisite">Prerequisite:</label>
 			</div>
-		
+
 			<div>
 				<input type="text" id="description_prerequisite" class="mt-2 w-100" 
 					value="" placeholder="Prerequisites or none" name="description_prerequisite" required>
 			</div>
-			
+
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_materials">Student Materials:</label>
 			</div>
@@ -149,7 +172,7 @@ class DescriptionEditor extends SignUpsBase {
 			<div class="text-right mt-5">
 				<label class="label-margin-top mr-2" for="description_description">Description:</label>
 			</div>
-			
+
 			<div class="mt-2">
 				<textarea type="text" id="description_description" class=" w-100 html-textarea" 
 					value="" placeholder name="description_description" required>
@@ -173,31 +196,97 @@ class DescriptionEditor extends SignUpsBase {
 	 */
 	private function submit_description( $post ) {
 		global $wpdb;
-		$new_signup                            = array();
-		$new_signup['signup_name']             = $post['description_title'];
-		$new_signup['signup_contact_email']    = $post['description_contact_email'];
-		$new_signup['signup_location']         = $post['description_location'];
-		$new_signup['signup_cost']             = $post['description_cost'];
-		$new_signup['signup_default_slots']    = $post['description_slots'];
-		$new_signup['signup_rolling_template'] = 0;
-		$new_signup['signup_admin_approved']   = 0;
-		$new_signup['signup_group']            = 'member';
+		$new_signup                                = array();
+		$new_signup['signup_name']                 = $post['description_title'];
+		$new_signup['signup_contact_email']        = $post['description_contact_email'];
+		$new_signup['signup_default_contact_name'] = $post['description_contact_name'];
+		$new_signup['signup_location']             = $post['description_location'];
+		$new_signup['signup_cost']                 = $post['description_cost'];
+		$new_signup['signup_default_slots']        = $post['description_slots'];
+		$new_signup['signup_rolling_template']     = 0;
+		$new_signup['signup_admin_approved']       = 0;
+		$new_signup['signup_group']                = $post['description_group'];
+
+		$start_date                              = new DateTime( $post['description_start'], $this->date_time_zone );
+		$new_signup['signup_default_start_time'] = date_format( $start_date, 'H:i' );
+
+		if ( '31' !== $post['description_repeat'] ) {
+			$new_signup['signup_default_days_between_sessions'] = $post['description_repeat'];
+		} else {
+			$new_signup['signup_default_days_between_sessions'] = 0;
+			$day  = $start_date->format( 'l' );
+			$date = $start_date->format( 'j' );
+			$week = intdiv( $date, 7 );
+			switch ( $week ) {
+				case 0:
+					$new_signup['signup_default_day_of_month'] = 'First ' . $day;
+					break;
+				case 1:
+					$new_signup['signup_default_day_of_month'] = 'Second ' . $day;
+					break;
+				case 2:
+					$new_signup['signup_default_day_of_month'] = 'Third ' . $day;
+					break;
+				case 3:
+					$new_signup['signup_default_day_of_month'] = 'Fourth ' . $day;
+					break;
+				default:
+					$new_signup['signup_default_day_of_month'] = 'last ' . $day;
+					break;
+			}
+		}
+
+		$duration         = new Datetime( $post['description_duration'], $this->date_time_zone );
+		$duration_hours   = date_format( $duration, 'h' );
+		$duration_minutes = date_format( $duration, 'i' );
+
+		if ( (int) $duration_hours > 12 ) {
+			$duration_hours = $duration - 12;
+			$duration->modify( '-12 hours' );
+		}
+
+		$duration_total_minutes                = $duration_hours * 60 + $duration_minutes;
+		$new_signup['signup_default_duration'] = date_format( $duration, 'H:i' );
 
 		$affected_row_count = $wpdb->insert( self::SIGNUPS_TABLE, $new_signup );
 		if ( 1 === $affected_row_count ) {
-			$new_session                        = array();
-			$start_date                         = new DateTime( $post['description_start'], $this->date_time_zone );
-			$duration                           = new Datetime( $post['description_duration'], $this->date_time_zone );
-			$duration_hours                     = date_format( $duration, 'h' );
-			$duration_minutes                   = date_format( $duration, 'i' );
-			$end_date                           = new DateTime( $end, $this->date_time_zone );
-			$session['session_start_time']      = $start_date->format( 'U' );
-			$session['session_end_time']        = $end_date->format( 'U' );
-			$session['session_start_formatted'] = $start_date->format( self::DATETIME_FORMAT );
-			$session['session_end_formatted']   = $end_date->format( self::DATETIME_FORMAT );
+			$signup_id                              = $wpdb->insert_id;
+			$new_session                            = array();
+			$new_session['session_start_time']      = $start_date->format( 'U' );
+			$new_session['session_start_formatted'] = $start_date->format( self::DATETIME_FORMAT );
+			$start_date->modify( '+' . $duration_total_minutes . ' minutes' );
+			$new_session['session_end_time']              = $start_date->format( 'U' );
+			$new_session['session_end_formatted']         = $start_date->format( self::DATETIME_FORMAT );
+			$new_session['session_contact_email']         = $post['description_contact_email'];
+			$new_session['session_contact_name']          = $post['description_contact_name'];
+			$new_session['session_duration']              = date_format( $duration, 'H:i' );
+			$new_session['session_slots']                 = $post['description_slots'];
+			$new_session['session_item']                  = 'attendee';
+			$new_session['session_days_between_sessions'] = $new_signup['signup_default_days_between_sessions'];
+			$new_session['session_day_of_month']          = $new_signup['signup_default_day_of_month'];
+			$new_session['session_time_of_day']           = $new_signup['signup_default_start_time'];
+			$new_session['session_signup_id']             = $signup_id;
 
+			$affected_row_count = $wpdb->insert( self::SESSIONS_TABLE, $new_session );
+			if ( 1 !== $affected_row_count ) {
+				echo '<h1>Failed to Create Initial Session : ' . esc_html( $wpdb->last_error ) . '</h1>';
+				$where              = array( 'signup_id' => $signup_id );
+				$affected_row_count = $wpdb->delete( self::SIGNUPS_TABLE, $where );
+			} else {
+				$new_description = array(
+					'description_signup_id' => $signup_id,
+					'description_html'      => htmlentities( $post['description_description'] ),
+				);
+
+				$affected_row_count = $wpdb->insert( self::DESCRIPTIONS_TABLE, $new_description );
+				if ( 1 !== $affected_row_count ) {
+					echo '<h1>Failed to Create Description : ' . esc_html( $wpdb->last_error ) . '</h1>';
+				} else {
+					echo '<h1>Success, check with the system admin to get this approved</h1>';
+				}
+			}
 		} else {
-			echo 'Failed to Create Signup : ' . esc_html( $wpdb->last_error );
+			echo '<h1>Failed to Create Signup : ' . esc_html( $wpdb->last_error ) . '</h1>';
 		}
 	}
 }

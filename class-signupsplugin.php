@@ -74,8 +74,8 @@ class SignupsPlugin extends SignUpsBase {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_scripts_and_css' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'add_users_scripts_and_css' ) );
 		new SignUpsRestApis();
-		$this->short_codes = new ShortCodes();
-		$this->stripe_payments = new SripePayments();
+		$this->short_codes        = new ShortCodes();
+		$this->stripe_payments    = new StripePayments();
 		$this->description_editor = new DescriptionEditor();
 		add_shortcode( 'scw_selectclass', array( $this->short_codes, 'user_signup' ) );
 		add_shortcode( 'scw_payment_success', array( $this->stripe_payments, 'payment_success' ) );
@@ -134,7 +134,7 @@ class SignupsPlugin extends SignUpsBase {
 	 * @param string $host Who is calling.
 	 */
 	public function add_scripts_and_css( $host ) {
-		if ( 'toplevel_page_SignUps' !== $host ) {
+		if ( 'toplevel_page_sign_ups' !== $host ) {
 			return;
 		}
 
