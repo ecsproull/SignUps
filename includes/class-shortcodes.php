@@ -604,7 +604,7 @@ class ShortCodes extends SignUpsBase {
 			?>
 			<div class="mr-auto ml-auto text-left">
 				<?php
-				echo esc_html( $html );
+				echo $html;
 				?>
 			</div>
 			<div id='signup-description'>

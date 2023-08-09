@@ -108,7 +108,7 @@ class DescriptionEditor extends SignUpsBase {
 			</div>
 			<div>
 				<input type="text" id="description_duration" class="mt-2 w-100 without_ampm h-2rem"
-					value="" placeholder="--:--" pattern="\[0-9]{1,2}:[0-9]{2}\s" name="description_duration">
+					value="" placeholder="--:--" pattern="[0-9]{1,2}:[0-9]{2}" name="description_duration">
 			</div>
 
 			<div class="text-right">

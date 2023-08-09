@@ -283,11 +283,11 @@ class SignUpsBase {
 				<td><input type="button" id="get_member_button" class="btn btn-primary" value='Lookup'></td>
 			</tr>
 			<tr>
-				<td><input id="first-name" class=" member-first-name" type="text" name="firstname" value=<?php echo $return_val ? esc_html( $results[0]->firstname ) : 'First'; ?> required readonly></td>
-				<td><input id="last-name" class="member-last-name" type="text" name="lastname" value=<?php echo $return_val ? esc_html( $results[0]->lastname ) : 'Last'; ?> required readonly></td>
+				<td class="text-right"><input id="first-name" class=" member-first-name" type="text" name="firstname" value=<?php echo $return_val ? esc_html( $results[0]->firstname ) : 'First'; ?> required readonly></td>
+				<td  class="text-left"><input id="last-name" class="member-last-name" type="text" name="lastname" value=<?php echo $return_val ? esc_html( $results[0]->lastname ) : 'Last'; ?> required readonly></td>
 				<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="signup_id">Cancel</button></td>
 			</tr>
-			<tr>
+			<tr hidden>
 				<td><input id="phone" class="member-phone" type="text" name="phone"
 					value=<?php echo $return_val ? esc_html( $results[0]->phone ) : '888-888-8888'; ?> placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required readonly></td>
 				<td><input id="email" class="member-email" type="email" name="email"
