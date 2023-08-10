@@ -215,9 +215,9 @@ class SignUpsBase {
 	 *
 	 * @param int     $signup_id The signup id.
 	 * @param boolean $long Return the long version of the description.
-	 * @return string Formatted html.
+	 * @return array
 	 */
-	protected function get_signup_html( $signup_id, $long = true ) {
+	protected function get_signup_html( $signup_id) {
 		global $wpdb;
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
@@ -231,11 +231,7 @@ class SignUpsBase {
 		);
 
 		if ( $results ) {
-			if ( $long ) {
-				return html_entity_decode( $results[0]->description_html );
-			} else {
-				return html_entity_decode( $results[0]->description_html_short );
-			}
+			return $results[0];
 		} else {
 			return null;
 		}

@@ -134,7 +134,7 @@ class SignupsPlugin extends SignUpsBase {
 	 * @param string $host Who is calling.
 	 */
 	public function add_scripts_and_css( $host ) {
-		if ( 'toplevel_page_sign_ups' !== $host ) {
+		if ( 'toplevel_page_sign_ups' !== $host && 'signups_page_html_editor' !== $host ) {
 			return;
 		}
 

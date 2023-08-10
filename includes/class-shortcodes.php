@@ -597,24 +597,74 @@ class ShortCodes extends SignUpsBase {
 	 */
 	private function create_description_form( $signup_id ) {
 		global $wpdb;
-		$html = $this->get_signup_html( $signup_id );
-		if ( ! $html ) {
+		$signups = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT signup_name,
+				signup_contact_email,
+				signup_default_contact_name,
+				signup_default_duration,
+				signup_default_days_between_sessions,
+				signup_default_day_of_month,
+				signup_cost,
+				signup_default_slots
+				FROM %1s
+				WHERE signup_id = %s',
+				self::SIGNUPS_TABLE,
+				$signup_id
+			),
+			OBJECT
+		);
+
+		$signup   = $signups[0];
+		$schedule = 'Schedule for this class has not been set';
+		if ( $signup->signup_default_duration ) {
+			$dt       = new DateTime( $signup->signup_default_duration );
+			$schedule = 'Duration: ' . $dt->format( 'g:i' );
+
+			if ( $signup->signup_default_day_of_month ) {
+				$schedule .= ', Every ' . $signup->signup_default_day_of_month . ' of the month';
+			} elseif ( $signup->signup_default_days_between_sessions ) {
+				$schedule .= ', Every ' . $signup->signup_default_days_between_sessions . ' days';
+			}
+		}
+
+		if ( $signup->signup_default_slots ) {
+			$schedule .= '. Max ' . $signup->signup_default_slots . ' students.';
+		} else {
+			$schedule .= '.';
+		}
+
+		$description_object = $this->get_signup_html( $signup_id );
+		if ( ! $description_object ) {
 			$this->create_signup_form( $signup_id );
 		} else {
 			?>
-			<div class="mr-auto ml-auto text-left">
-				<?php
-				echo $html;
-				?>
+			<div class="text-center"><h1 ><?php echo esc_html( $signup->signup_name ); ?></h1></div>
+			<div class="description-box description-block">
+				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Cost: </div>
+				<div><?php echo '$' . esc_html( $signup->signup_cost ) . '.00'; ?></div>
+
+				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Schedule: </div>
+				<div><?php echo esc_html( $schedule ); ?></div>
+
+				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Prerequisite: </div>
+				<div><?php echo esc_html( $description_object->description_prerequisite ); ?></div>
+
+				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Materials: </div>
+				<div><?php echo esc_html( $description_object->description_materials ); ?></div>
+
+				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Instructions: </div>
+				<div><?php echo esc_html( $description_object->description_instructions ); ?></div>
+
+				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Description: </div>
+				<div><?php echo html_entity_decode( $description_object->description_html ); ?></div>
 			</div>
-			<div id='signup-description'>
-				<div class="row">
-					<form class="ml-auto mr-auto" method="POST">
-						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
-						<button type="submit" class="btn btn-md bg-primary mr-2" value="-1" name="signup_id">Cancel</button>
-						<button id='accept_conditions' class="btn btn-primary" type='submit' value="<?php echo esc_html( $signup_id ); ?>" name="continue_signup">Continue</button>
-					</form>
-				</div>
+			<div class="row">
+				<form class="ml-auto mr-auto" method="POST">
+					<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+					<button type="submit" class="btn btn-md bg-primary mr-2" value="-1" name="signup_id">Cancel</button>
+					<button id='accept_conditions' class="btn btn-primary" type='submit' value="<?php echo esc_html( $signup_id ); ?>" name="continue_signup">Continue</button>
+				</form>
 			</div>
 			<?php
 		}

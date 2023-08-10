@@ -66,16 +66,7 @@ class HtmlEditor extends SignUpsBase {
 			}
 		}
 
-		$html = $this->get_signup_html( $signup_id );
-		if ( ! $html ) {
-			$html = '';
-		}
-
-		$html_short = $this->get_signup_html( $signup_id, false );
-		if ( ! $html_short ) {
-			$html_short = '';
-		}
-
+		$description_object = $this->get_signup_html( $signup_id );
 		?>
 			<form method="POST" name="html_form" >
 				<?php
@@ -89,18 +80,57 @@ class HtmlEditor extends SignUpsBase {
 						<a class="nav-link" href="#">Short</a>
 					</li>
 				</ul>
+				<div class="description-box">
+					<div class="text-right">
+						<label class="label-margin-top mr-2" for="description_prerequisite">Prerequisite:</label>
+					</div>
+
+					<div>
+						<input type="text" id="description_prerequisite" class="mt-2 w-100" 
+							value="<?php echo esc_html( $description_object ? $description_object->description_prerequisite : '' ); ?>" 
+							placeholder="Prerequisites or none" name="description_prerequisite" required>
+					</div>
+
+					<div class="text-right">
+						<label class="label-margin-top mr-2" for="description_materials">Student Materials:</label>
+					</div>
+					<div>
+						<input type="text" id="description_materials" class="mt-2 w-100" 
+							value="<?php echo esc_html( $description_object ? $description_object->description_materials : '' ); ?>" 
+							placeholder="Wood, glue, ..." name="description_materials" required>
+					</div>
+
+					<div class="text-right">
+						<label class="label-margin-top mr-2" for="description_instructions">Preclass Instructions:</label>
+					</div>
+					<div>
+						<input type="text" id="description_instructions" class="mt-2 w-100" 
+							value="<?php echo esc_html( $description_object ? $description_object->description_instructions : '' ); ?>" 
+							placeholder="Glue wood in layers..." name="description_instructions" required>
+					</div>
+				</div>
+
 				<div id="html-signup-description">
-					<textarea class="html-textarea" name="html"><?php echo esc_html( $html ); ?></textarea>
+					<textarea class="html-textarea" name="description_html"
+					><?php echo esc_html( $description_object ? $description_object->description_html : '' ); ?></textarea>
 				</div>
 				<div id="html-signup-description-short" style="display: none;">
-					<textarea class="html-textarea" name="html_short" hidden><?php echo esc_html( $html_short ); ?></textarea>
+					<textarea class="html-textarea" name="description_html_short" 
+					hidden><?php echo esc_html( $description_object ? $description_object->description_html_short : '' ); ?></textarea>
 				</div>
 				<div class="mt-2">
 					<!-- button type="button" id="display-html" class="btn bt-md btn-primary mr-auto ml-auto mt-2">Preview</button -->
 					<input class="btn bt-md btn-primary mr-auto ml-auto mt-2" type="submit" value="Submit" name="submit_html">
 				</div> 
-				<!-- div id="html-description-display" class="mt-25px;"></div -->
-				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+				<?php
+				wp_nonce_field( 'signups', 'mynonce' );
+				if ( $description_object ) {
+					?>
+					<input type="hidden" name="description_id" value=<?php echo esc_html( $description_object->description_id ); ?> >
+					<?php
+				}
+				?>
+				<input type="hidden" name="description_signup_id" value="<?php echo esc_html( $signup_id ); ?> >
 			</form>
 			<?php
 	}
@@ -113,33 +143,22 @@ class HtmlEditor extends SignUpsBase {
 	 */
 	private function submit_html( $post ) {
 		global $wpdb;
-		$desc        = htmlentities( $post['html'] );
-		$desc_short  = htmlentities( $post['html_short'] );
-		$description = array();
-		if ( $desc ) {
-			$description['description_html'] = $desc;
-		}
+		$post['description_html']       = htmlentities( $post['description_html'] );
+		$post['description_html_short'] = htmlentities( $post['description_html_short'] );
+		unset( $post['_wp_http_referer'] );
+		unset( $post['submit_html'] );
+		unset( $post['signup'] );
 
-		if ( $desc_short ) {
-			$description['description_html_short'] = $desc_short;
-		}
-
-		if ( ! $desc_short && ! $desc ) {
-			return;
-		}
-
-		$results = $this->get_signup_html( $post['signup'] );
-
-		if ( $results ) {
-			$where = array();
-			$where['description_signup_id'] = $post['signup'];
-			$rows_updated = $wpdb->update( self::SIGNUP_DESCRIPTIONS_TABLE, $description, $where );
+		if ( isset( $post['description_id'] ) ) {
+			$where                   = array();
+			$where['description_id'] = $post['description_id'];
+			unset( $post['description_id'] );
+			$rows_updated = $wpdb->update( self::DESCRIPTIONS_TABLE, $post, $where );
 		} else {
-			$description['description_signup_id'] = $post['signup'];
-			$rows_updated = $wpdb->insert( self::SIGNUP_DESCRIPTIONS_TABLE, $description );
+			$rows_updated = $wpdb->insert( self::DESCRIPTIONS_TABLE, $post );
 		}
 
-		$this->load_description_form( $post['signup'] );
+		$this->load_description_form( $post['description_signup_id'] );
 	}
 
 	/**

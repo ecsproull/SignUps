@@ -274,8 +274,11 @@ class DescriptionEditor extends SignUpsBase {
 				$affected_row_count = $wpdb->delete( self::SIGNUPS_TABLE, $where );
 			} else {
 				$new_description = array(
-					'description_signup_id' => $signup_id,
-					'description_html'      => htmlentities( $post['description_description'] ),
+					'description_signup_id'    => $signup_id,
+					'description_html'         => htmlentities( $post['description_description'] ),
+					'description_materials'    => $post['description_materials'],
+					'description_prerequisite' => $post['description_prerequisite'],
+					'description_instructions' => $post['description_instructions'],
 				);
 
 				$affected_row_count = $wpdb->insert( self::DESCRIPTIONS_TABLE, $new_description );
