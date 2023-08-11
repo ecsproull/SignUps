@@ -88,7 +88,7 @@ class HtmlEditor extends SignUpsBase {
 					<div>
 						<input type="text" id="description_prerequisite" class="mt-2 w-100" 
 							value="<?php echo esc_html( $description_object ? $description_object->description_prerequisite : '' ); ?>" 
-							placeholder="Prerequisites or none" name="description_prerequisite" required>
+							placeholder="Prerequisites or Leave blank to omit this section." name="description_prerequisite">
 					</div>
 
 					<div class="text-right">
@@ -97,7 +97,7 @@ class HtmlEditor extends SignUpsBase {
 					<div>
 						<input type="text" id="description_materials" class="mt-2 w-100" 
 							value="<?php echo esc_html( $description_object ? $description_object->description_materials : '' ); ?>" 
-							placeholder="Wood, glue, ..." name="description_materials" required>
+							placeholder="Wood, glue, ..., Leave blank to omit this section." name="description_materials">
 					</div>
 
 					<div class="text-right">
@@ -106,7 +106,7 @@ class HtmlEditor extends SignUpsBase {
 					<div>
 						<input type="text" id="description_instructions" class="mt-2 w-100" 
 							value="<?php echo esc_html( $description_object ? $description_object->description_instructions : '' ); ?>" 
-							placeholder="Glue wood in layers..." name="description_instructions" required>
+							placeholder="Glue wood in layers..., Leave blank to omit this section." name="description_instructions">
 					</div>
 				</div>
 

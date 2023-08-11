@@ -606,7 +606,8 @@ class ShortCodes extends SignUpsBase {
 				signup_default_days_between_sessions,
 				signup_default_day_of_month,
 				signup_cost,
-				signup_default_slots
+				signup_default_slots,
+				signup_multiple_days
 				FROM %1s
 				WHERE signup_id = %s',
 				self::SIGNUPS_TABLE,
@@ -618,11 +619,24 @@ class ShortCodes extends SignUpsBase {
 		$signup   = $signups[0];
 		$schedule = 'Schedule for this class has not been set';
 		if ( $signup->signup_default_duration ) {
-			$dt       = new DateTime( $signup->signup_default_duration );
-			$schedule = 'Duration: ' . $dt->format( 'g:i' );
+			$dt_parts = explode( ':', $signup->signup_default_duration );
+
+			if ( (int) $dt_parts[0] === 1 ) {
+				$schedule = (int) $dt_parts[0] . ' hour';
+			} else {
+				$schedule = (int) $dt_parts[0] . ' hours';
+			}
+
+			if ( '00' !== $dt_parts[1] ) {
+				$schedule .= ' & ' . $dt_parts[1] . ' minutes';
+			}
+
+			if ( $signup->signup_multiple_days > 1 ) {
+				$schedule .= ' for ' . $signup->signup_multiple_days . ' days';
+			}
 
 			if ( $signup->signup_default_day_of_month ) {
-				$schedule .= ', Every ' . $signup->signup_default_day_of_month . ' of the month';
+				$schedule .= ', The ' . $signup->signup_default_day_of_month . ' of the month';
 			} elseif ( $signup->signup_default_days_between_sessions ) {
 				$schedule .= ', Every ' . $signup->signup_default_days_between_sessions . ' days';
 			}
@@ -647,17 +661,35 @@ class ShortCodes extends SignUpsBase {
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Schedule: </div>
 				<div><?php echo esc_html( $schedule ); ?></div>
 
-				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Prerequisite: </div>
-				<div><?php echo esc_html( $description_object->description_prerequisite ); ?></div>
+				<?php
+				if ( $description_object->description_prerequisite ) {
+					?>
+					<div class="text-right pr-2 font-weight-bold text-dark mb-2">Prerequisite: </div>
+					<div><?php echo esc_html( $description_object->description_prerequisite ); ?></div>
+					<?php
+				}
 
-				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Materials: </div>
-				<div><?php echo esc_html( $description_object->description_materials ); ?></div>
+				if ( $description_object->description_materials ) {
+					?>
+					<div class="text-right pr-2 font-weight-bold text-dark mb-2">Materials: </div>
+					<div><?php echo esc_html( $description_object->description_materials ); ?></div>
+					<?php
+				}
 
-				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Instructions: </div>
-				<div><?php echo esc_html( $description_object->description_instructions ); ?></div>
+				if ( $description_object->description_instructions ) {
+					?>
+					<div class="text-right pr-2 font-weight-bold text-dark mb-2">Instructions: </div>
+					<div><?php echo esc_html( $description_object->description_instructions ); ?></div>
+					<?php
+				}
+				?>
 
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Description: </div>
 				<div><?php echo html_entity_decode( $description_object->description_html ); ?></div>
+
+				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Contact: </div>
+				<div><a href="mailto:<?php echo esc_html( $signup->signup_contact_email ); ?>?subject=<?php echo esc_html( $signup->signup_name ); ?>">
+					<?php echo esc_html( $signup->signup_default_contact_name ); ?></a></div>
 			</div>
 			<div class="row">
 				<form class="ml-auto mr-auto" method="POST">

@@ -1017,6 +1017,15 @@ class SignupSettings extends SignUpsBase {
 	 * @return void
 	 */
 	private function create_signup_form( $data ) {
+		global $wpdb;
+		$categories = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s',
+				self::SIGNUP_CATEGORY_TABLE
+			),
+			OBJECT
+		);
 		?>
 		<div class="text-center mb-4">
 			<h1><?php echo esc_html( $data->signup_name ); ?> </h1>
@@ -1026,6 +1035,20 @@ class SignupSettings extends SignUpsBase {
 				<tr>
 					<td class="text-right mr-2"><label>Class Name:</label></td>
 					<td><input class="w-250px" type="text" name="signup_name" value="<?php echo esc_html( $data->signup_name ); ?>" /> </td>
+				</tr>
+				<tr>
+					<td class="text-right mr-2"><label>Category:</label></td>
+					<td><select name="signup_category">
+						<?php
+						foreach ( $categories as $category ) {
+							?>
+							<option value=<?php	echo esc_html( $category->category_id ); ?> 
+								<?php echo $category->category_id === $data->signup_category ? 'selected' : ''; ?>
+								><?php echo esc_html( $category->category_title ); ?></option>
+							<?php
+						}
+						?>
+					</select></td>
 				</tr>
 				<tr>
 					<td class="text-right mr-2"><label>Contact Email:</label></td>
@@ -1058,17 +1081,24 @@ class SignupSettings extends SignUpsBase {
 				</tr>
 
 				<tr>
+					<td class="text-right mr-2"><label>Multiple Days per Class:</label></td>
+					<td><input class="w-75px" type="number" name="signup_multiple_days" 
+						value="<?php echo esc_html( $data->signup_multiple_days ); ?>" min="1" /> </td>
+				</tr>
+
+				<tr>
 					<td class="text-right mr-2"><label>Default Start Time of Day:</label></td>
 					<td><input class="w-125px" type="time" name="signup_default_start_time" placeholder="12:00 AM" 
 						value="<?php echo esc_html( $data->signup_default_start_time ); ?>" /> </td>
 				</tr>
 				<tr>
-					<td class="text-right mr-2"><label>Default Session Duration:</label></td>
-					<td><input class="w-125px without_ampm" type="time" name="signup_default_duration" 
-						value="<?php echo esc_html( $data->signup_default_duration ); ?>" /> </td>
+					<td class="text-right mr-2"><label>Default Class Duration:</label></td>
+					<td><input id="signup_duration" class="w-125px" type="text" name="signup_default_duration" 
+						value="<?php echo esc_html( substr( $data->signup_default_duration, 0, 5 ) ); ?>"
+						placeholder="--:--" pattern="[0-9]{1,2}:[0-9]{2}" /> </td>
 				</tr>
 				<tr>
-					<td class="text-right mr-2"><label>Default Days Between Sessions:</label></td>
+					<td class="text-right mr-2"><label>Default Days Between Classes:</label></td>
 					<td><input class="w-75px" type="number" name="signup_default_days_between_sessions" 
 						value="<?php echo esc_html( $data->signup_default_days_between_sessions ); ?>" /> </td>
 				</tr>

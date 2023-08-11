@@ -92,6 +92,13 @@ class SignUpsBase {
 	protected const SIGNUP_TEMPLATE_ITEM_TABLE = 'wp_scw_template_item';
 
 	/**
+	 * Signup category table.
+	 *
+	 * @var mixed
+	 */
+	protected const SIGNUP_CATEGORY_TABLE = 'wp_scw_signup_categories';
+
+	/**
 	 * Spider Calendar Event table.
 	 *
 	 * @var mixed
@@ -213,11 +220,10 @@ class SignUpsBase {
 	/**
 	 * Return html description for a signup.
 	 *
-	 * @param int     $signup_id The signup id.
-	 * @param boolean $long Return the long version of the description.
+	 * @param int $signup_id The signup id.
 	 * @return array
 	 */
-	protected function get_signup_html( $signup_id) {
+	protected function get_signup_html( $signup_id ) {
 		global $wpdb;
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
