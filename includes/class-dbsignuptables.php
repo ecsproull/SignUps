@@ -130,6 +130,7 @@ class DbSignUpTables {
 					`session_days_between_sessions` tinyint DEFAULT NULL,
 					`session_day_of_month` varchar(60) DEFAULT NULL,
 					`session_time_of_day` time DEFAULT NULL,
+					`session_multiple_days` tinyint DEFAULT NULL,
 					PRIMARY KEY (`session_id`)
 				  ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;"
 			);
@@ -145,16 +146,18 @@ class DbSignUpTables {
 					`signup_group` varchar(45) NOT NULL DEFAULT 'member',
 					`signup_cost` int NOT NULL,
 					`signup_default_slots` int DEFAULT NULL,
+					`signup_default_minimum` tinyint DEFAULT NULL,
 					`signup_rolling_template` tinyint DEFAULT NULL,
-					`signup_product_id` varchar(45) DEFAULT NULL,
 					`signup_default_price_id` varchar(45) DEFAULT '',
-					`signup_admin_approved` tinyint NOT NULL DEFAULT '0',
+					`signup_product_id` varchar(45) DEFAULT NULL,
 					`signup_multiple_days` tinyint NOT NULL DEFAULT '1',
+					`signup_admin_approved` tinyint NOT NULL DEFAULT '0',
 					`signup_default_start_time` time DEFAULT NULL,
 					`signup_default_duration` time DEFAULT NULL,
 					`signup_default_days_between_sessions` tinyint DEFAULT NULL,
 					`signup_default_day_of_month` varchar(45) DEFAULT NULL,
 					`signup_default_contact_name` varchar(45) DEFAULT NULL,
+					`signup_category` tinyint DEFAULT NULL,
 					PRIMARY KEY (`signup_id`)
 				  ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;"
 			);
@@ -184,7 +187,7 @@ class DbSignUpTables {
 
 		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_stripe_products"' ) !== 'wp_scw_stripe_products' ) {
 			$wpdb->query(
-				'CREATE TABLE `edswpdb`.`wp_scw_stripe_products` (
+				'CREATE TABLE `wp_scw_stripe_products` (
 					`products_id` int NOT NULL AUTO_INCREMENT,
 					`products_product_id` varchar(45) NOT NULL,
 					`products_product_description` varchar(200) NOT NULL,
@@ -193,6 +196,29 @@ class DbSignUpTables {
 					`products_product_name` varchar(45) NOT NULL,
 					PRIMARY KEY (`products_id`)
 				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'
+			);
+		}
+
+		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_signup_categories"' ) !== 'wp_scw_signup_categories' ) {
+			$wpdb->query(
+				'CREATE TABLE `wp_scw_signup_categories` (
+					`category_id` int unsigned NOT NULL AUTO_INCREMENT,
+					`category_title` varchar(150) NOT NULL,
+					PRIMARY KEY (`category_id`)
+				  ) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb3;'
+			);
+
+			$wpdb->query(
+				"INSERT INTO `wp_scw_signup_categories`
+				(`category_title`)
+				VALUES
+				('Lathe'),
+				('Ring Bowl'),
+				('CNC'),
+				('General Shop Fundamentals'),
+				('Lathe Projects'),
+				('Club Classes'),
+				('General Shop Project Classes')"
 			);
 		}
 	}

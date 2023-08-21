@@ -621,7 +621,7 @@ class ShortCodes extends SignUpsBase {
 		if ( $signup->signup_default_duration ) {
 			$dt_parts = explode( ':', $signup->signup_default_duration );
 
-			if ( (int) $dt_parts[0] === 1 ) {
+			if ( 1 === (int) $dt_parts[0] ) {
 				$schedule = (int) $dt_parts[0] . ' hour';
 			} else {
 				$schedule = (int) $dt_parts[0] . ' hours';

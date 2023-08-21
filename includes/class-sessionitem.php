@@ -120,4 +120,11 @@ class SessionItem {
 	 * @var session_default_day_of_month.
 	 */
 	public $session_day_of_month;
+
+	/**
+	 * Database id for the calendar item.
+	 *
+	 * @var session_default_day_of_month.
+	 */
+	public $session_calendar_id;
 }
