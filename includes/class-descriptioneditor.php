@@ -150,7 +150,7 @@ class DescriptionEditor extends SignUpsBase {
 
 			<div>
 				<input type="text" id="description_prerequisite" class="mt-2 w-100" 
-					value="" placeholder="Prerequisites or none" name="description_prerequisite" required>
+					value="" placeholder="Prerequisites or none" name="description_prerequisite">
 			</div>
 
 			<div class="text-right">
@@ -158,7 +158,7 @@ class DescriptionEditor extends SignUpsBase {
 			</div>
 			<div>
 				<input type="text" id="description_materials" class="mt-2 w-100" 
-					value="" placeholder="Wood, glue, ..." name="description_materials" required>
+					value="" placeholder="Wood, glue, ..." name="description_materials">
 			</div>
 
 			<div class="text-right">
@@ -166,7 +166,7 @@ class DescriptionEditor extends SignUpsBase {
 			</div>
 			<div>
 				<input type="text" id="description_instructions" class="mt-2 w-100" 
-					value="" placeholder="Glue wood in layers..." name="description_instructions" required>
+					value="" placeholder="Glue wood in layers..." name="description_instructions">
 			</div>
 
 			<div class="text-right mt-5">

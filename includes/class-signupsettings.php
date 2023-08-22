@@ -390,11 +390,24 @@ class SignupSettings extends SignUpsBase {
 	 */
 	private function delete_class( $post ) {
 		global $wpdb;
+		$sessions = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE session_signup_id = %s',
+				self::SESSIONS_TABLE,
+				$post['confirm_delete_class']
+			),
+			ARRAY_A
+		);
+
+		foreach( $sessions as $session ) {
+			$this->delete_session( $session, false );
+		}
+
 		$where = array( 'signup_id' => $post['confirm_delete_class'] );
 		$wpdb->delete( self::SIGNUPS_TABLE, $where );
 
-		$where = array( 'session_signup_id' => $post['confirm_delete_class'] );
-		$wpdb->delete( self::SESSIONS_TABLE, $where );
 		$this->load_signup_selection();
 	}
 
@@ -524,7 +537,7 @@ class SignupSettings extends SignUpsBase {
 				$start->setTime( $start_time_parts[0], $start_time_parts[1] );
 				$end->add( $interval );
 
-				for ( $i; $i < $session_item->session_multiple_days; $i++ ) {
+				for ( $j = 0; $j < $session_item->session_multiple_days; $j++ ) {
 					$start_dates[] = $start->format( self::DATETIME_FORMAT_INPUT );
 					$end_dates[]   = $end->format( self::DATETIME_FORMAT_INPUT );
 					$start->modify( '+1 day' );
@@ -601,11 +614,11 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
-	 * Edit a session of a class.
+	 * Delete a session of a class.
 	 *
 	 * @param int $post The posted data from the form.
 	 */
-	private function delete_session( $post ) {
+	private function delete_session( $post, $repost = true ) {
 		global $wpdb;
 		$rows_updated = 0;
 		$last_errors  = '';
@@ -640,7 +653,7 @@ class SignupSettings extends SignUpsBase {
 
 		if ( $last_errors ) {
 			$this->update_message( $rows_updated, $last_errors );
-		} else {
+		} elseif ( $repost ) {
 			$repost = array(
 				'edit_sessions_signup_id' => $post['signup_id'],
 			);
