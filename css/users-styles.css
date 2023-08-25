@@ -223,4 +223,20 @@ input[type=time]::-webkit-clear-button {
 	margin: -10px; 
   }
   */
+
+.description-box ::placeholder,
+.class-description-box ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: red;
+  opacity: 1; /* Firefox */
+}
+
+.description-box ::placeholder,
+.class-description-box :-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color: red;
+}
+
+.description-box ::placeholder,
+.class-description-box ::-ms-input-placeholder { /* Microsoft Edge */
+  color: red;
+}
   

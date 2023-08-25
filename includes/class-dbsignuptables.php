@@ -66,7 +66,7 @@ class DbSignUpTables {
 					`template_rolling_days` int NOT NULL,
 					PRIMARY KEY (`template_id`),
 					UNIQUE KEY `template_id_UNIQUE` (`template_id`)
-				  ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;'
+				  ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;'
 			);
 		}
 
@@ -85,7 +85,7 @@ class DbSignUpTables {
 					`template_item_column` int NOT NULL,
 					PRIMARY KEY (`template_item_id`),
 					UNIQUE KEY `template_item_id_UNIQUE` (`template_item_id`)
-				  ) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4;'
+				  ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;'
 			);
 		}
 
@@ -106,71 +106,72 @@ class DbSignUpTables {
 					`attendee_address1` varchar(100) DEFAULT NULL,
 					`attendee_address2` varchar(45) DEFAULT NULL,
 					PRIMARY KEY (`attendee_id`)
-				  ) ENGINE=InnoDB AUTO_INCREMENT=463 DEFAULT CHARSET=utf8;'
+				  ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;'
 			);
 		}
 
 		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_sessions"' ) !== 'wp_scw_sessions' ) {
 			$wpdb->query(
 				"CREATE TABLE `wp_scw_sessions` (
-					`session_id` int unsigned NOT NULL AUTO_INCREMENT,
-					`session_signup_id` varchar(45) NOT NULL,
-					`session_contact_name` varchar(45) DEFAULT NULL,
-					`session_contact_email` varchar(45) NOT NULL,
-					`session_start_time` int unsigned NOT NULL DEFAULT '0',
-					`session_start_formatted` varchar(45) NOT NULL,
-					`session_end_time` int unsigned NOT NULL DEFAULT '0',
-					`session_end_formatted` varchar(45) NOT NULL,
-					`session_slots` int unsigned NOT NULL DEFAULT '1',
-					`session_location` varchar(45) NOT NULL,
-					`session_item` varchar(45) NOT NULL DEFAULT '0',
-					`session_price_id` varchar(45) DEFAULT '0',
-					`session_calendar_id` int DEFAULT '0',
-					`session_duration` time DEFAULT NULL,
-					`session_days_between_sessions` tinyint DEFAULT NULL,
-					`session_day_of_month` varchar(60) DEFAULT NULL,
-					`session_time_of_day` time DEFAULT NULL,
-					`session_multiple_days` tinyint DEFAULT NULL,
-					PRIMARY KEY (`session_id`)
-				  ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;"
+				`session_id` int unsigned NOT NULL AUTO_INCREMENT,
+				`session_signup_id` varchar(45) NOT NULL,
+				`session_contact_name` varchar(45) DEFAULT NULL,
+				`session_contact_email` varchar(45) NOT NULL,
+				`session_start_time` int unsigned NOT NULL DEFAULT '0',
+				`session_start_formatted` varchar(45) NOT NULL,
+				`session_end_time` int unsigned NOT NULL DEFAULT '0',
+				`session_end_formatted` varchar(45) NOT NULL,
+				`session_slots` int unsigned NOT NULL DEFAULT '1',
+				`session_location` varchar(45) NOT NULL,
+				`session_item` varchar(45) NOT NULL DEFAULT '0',
+				`session_price_id` varchar(45) DEFAULT '0',
+				`session_calendar_id` int NOT NULL DEFAULT '0',
+				`session_duration` time DEFAULT NULL,
+				`session_days_between_sessions` tinyint DEFAULT NULL,
+				`session_day_of_month` varchar(60) DEFAULT NULL,
+				`session_time_of_day` time DEFAULT NULL,
+				`session_multiple_days` tinyint DEFAULT NULL,
+				PRIMARY KEY (`session_id`)
+				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;"
 			);
 		}
 
 		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_signups"' ) !== 'wp_scw_signups' ) {
 			$wpdb->query(
 				"CREATE TABLE `wp_scw_signups` (
-					`signup_id` int unsigned NOT NULL AUTO_INCREMENT,
-					`signup_name` varchar(150) NOT NULL,
-					`signup_contact_email` varchar(45) NOT NULL,
-					`signup_location` varchar(45) NOT NULL,
-					`signup_group` varchar(45) NOT NULL DEFAULT 'member',
-					`signup_cost` int NOT NULL,
-					`signup_default_slots` int DEFAULT NULL,
-					`signup_default_minimum` tinyint DEFAULT NULL,
-					`signup_rolling_template` tinyint DEFAULT NULL,
-					`signup_default_price_id` varchar(45) DEFAULT '',
-					`signup_product_id` varchar(45) DEFAULT NULL,
-					`signup_multiple_days` tinyint NOT NULL DEFAULT '1',
-					`signup_admin_approved` tinyint NOT NULL DEFAULT '0',
-					`signup_default_start_time` time DEFAULT NULL,
-					`signup_default_duration` time DEFAULT NULL,
-					`signup_default_days_between_sessions` tinyint DEFAULT NULL,
-					`signup_default_day_of_month` varchar(45) DEFAULT NULL,
-					`signup_default_contact_name` varchar(45) DEFAULT NULL,
-					`signup_category` tinyint DEFAULT NULL,
-					PRIMARY KEY (`signup_id`)
-				  ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;"
+				`signup_id` int unsigned NOT NULL AUTO_INCREMENT,
+				`signup_name` varchar(150) NOT NULL,
+				`signup_contact_email` varchar(45) NOT NULL,
+				`signup_location` varchar(45) NOT NULL,
+				`signup_group` varchar(45) NOT NULL DEFAULT 'member',
+				`signup_cost` int NOT NULL,
+				`signup_default_slots` int DEFAULT NULL,
+				`signup_rolling_template` tinyint DEFAULT NULL,
+				`signup_product_id` varchar(45) DEFAULT NULL,
+				`signup_default_price_id` varchar(45) DEFAULT '',
+				`signup_admin_approved` tinyint NOT NULL DEFAULT '0',
+				`signup_multiple_days` tinyint NOT NULL DEFAULT '1',
+				`signup_default_start_time` time DEFAULT NULL,
+				`signup_default_duration` time DEFAULT NULL,
+				`signup_default_days_between_sessions` tinyint DEFAULT NULL,
+				`signup_default_day_of_month` varchar(45) DEFAULT NULL,
+				`signup_default_contact_name` varchar(45) DEFAULT NULL,
+				`signup_category` tinyint DEFAULT NULL,
+				`signup_default_minimum` tinyint DEFAULT '1',
+				`signup_schedule_desc` varchar(150) DEFAULT NULL,
+				PRIMARY KEY (`signup_id`)
+				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;"
 			);
 		}
 
 		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_stripe"' ) !== 'wp_scw_stripe' ) {
 			$wpdb->query(
 				'CREATE TABLE `wp_scw_stripe` (
-					`stripe_id` int(11) NOT NULL DEFAULT 1,
+					`stripe_id` int(11) NOT NULL AUTO_INCREMENT,
 					`stripe_api_key` varchar(100) NOT NULL,
 					`stripe_api_secret` varchar(100) NOT NULL,
 					PRIMARY KEY (`stripe_id`)
-				  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'
+				  ) ENGINE=InnoDB  AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;'
 			);
 		}
 

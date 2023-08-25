@@ -88,11 +88,11 @@ class DescriptionEditor extends SignUpsBase {
 			</div>
 
 			<div class="text-right">
-				<label class="label-margin-top mr-2" for="description_cost">Cost:</label>
+				<label class="label-margin-top mr-2" for="signup_default_minimum">Minimum Attendees:</label>
 			</div>
 			<div>
-				<input type="text" id="description_cost" class="mt-2 w-100 h-2rem" 
-					value="" placeholder="00.00" name="description_cost" required>
+				<input type="number" id="signup_default_minimum" class="mt-2 w-100" 
+					value="1" name="signup_default_minimum" required>
 			</div>
 
 			<div class="text-right">
@@ -104,11 +104,11 @@ class DescriptionEditor extends SignUpsBase {
 			</div>
 
 			<div class="text-right">
-				<label class="label-margin-top mr-2" for="description_duration">Duration:</label>
+				<label class="label-margin-top mr-2" for="description_cost">Cost:</label>
 			</div>
 			<div>
-				<input type="text" id="description_duration" class="mt-2 w-100 without_ampm h-2rem"
-					value="" placeholder="--:--" pattern="[0-9]{1,2}:[0-9]{2}" name="description_duration">
+				<input type="number" id="description_cost" class="mt-2 w-100 h-2rem" 
+					value="0" name="description_cost" required>
 			</div>
 
 			<div class="text-right">
@@ -120,13 +120,11 @@ class DescriptionEditor extends SignUpsBase {
 			</div>
 
 			<div class="text-right">
-				<label class="label-margin-top mr-2" for="signup_group">User Group:</label>
+				<label class="label-margin-top mr-2" for="description_duration">Duration:</label>
 			</div>
 			<div>
-				<select id="signup_group" class="mt-2 w-100 h-2rem" name="description_group">
-					<option value="member">Members</option>
-					<option value="cnc">Cnc Users</option>
-				</select>
+				<input type="text" id="description_duration" class="mt-2 w-100 without_ampm h-2rem"
+					value="" placeholder="--:--" pattern="[0-9]{1,2}:[0-9]{2}" name="description_duration">
 			</div>
 
 			<div class="text-right">
@@ -141,9 +139,36 @@ class DescriptionEditor extends SignUpsBase {
 					<option value="0">TBD</option>
 				</select>
 			</div>
+
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="signup_group">User Group:</label>
+			</div>
+			<div>
+				<select id="signup_group" class="mt-2 w-100 h-2rem" name="description_group">
+					<option value="member">Members</option>
+					<option value="cnc">Cnc Users</option>
+				</select>
+			</div>
+
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="signup_multiple_days">Multi Day:</label>
+			</div>
+			<div>
+				<input id="signup_multiple_days" class="mt-2 w-100" name="signup_multiple_days" 
+					value="1" >
+			</div>
 		</div>
 
 		<div class="description-box">
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="signup_schedule_desc">Schedule:</label>
+			</div>
+
+			<div>
+				<input type="text" id="signup_schedule_desc" class="mt-2 w-100" 
+					value="" placeholder="Leave blank unless the schedule is TBD" name="signup_schedule_desc">
+			</div>
+
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_prerequisite">Prerequisite:</label>
 			</div>
@@ -206,6 +231,8 @@ class DescriptionEditor extends SignUpsBase {
 		$new_signup['signup_rolling_template']     = 0;
 		$new_signup['signup_admin_approved']       = 0;
 		$new_signup['signup_group']                = $post['description_group'];
+		$new_signup['signup_schedule_desc']        = $post['signup_schedule_desc'];
+		$new_signup['signup_default_minimum']      = $post['signup_default_minimum'];
 
 		$start_date                              = new DateTime( $post['description_start'], $this->date_time_zone );
 		$new_signup['signup_default_start_time'] = date_format( $start_date, 'H:i' );
@@ -231,7 +258,7 @@ class DescriptionEditor extends SignUpsBase {
 					$new_signup['signup_default_day_of_month'] = 'Fourth ' . $day;
 					break;
 				default:
-					$new_signup['signup_default_day_of_month'] = 'last ' . $day;
+					$new_signup['signup_default_day_of_month'] = 'Last ' . $day;
 					break;
 			}
 		}

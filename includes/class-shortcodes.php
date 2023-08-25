@@ -607,7 +607,8 @@ class ShortCodes extends SignUpsBase {
 				signup_default_day_of_month,
 				signup_cost,
 				signup_default_slots,
-				signup_multiple_days
+				signup_multiple_days,
+				signup_schedule_desc
 				FROM %1s
 				WHERE signup_id = %s',
 				self::SIGNUPS_TABLE,
@@ -618,7 +619,9 @@ class ShortCodes extends SignUpsBase {
 
 		$signup   = $signups[0];
 		$schedule = 'Schedule for this class has not been set';
-		if ( $signup->signup_default_duration ) {
+		if ( $signup->signup_schedule_desc ) {
+			$schedule = $signup->signup_schedule_desc;
+		} elseif ( $signup->signup_default_duration ) {
 			$dt_parts = explode( ':', $signup->signup_default_duration );
 
 			if ( 1 === (int) $dt_parts[0] ) {

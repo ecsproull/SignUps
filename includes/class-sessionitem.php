@@ -87,6 +87,13 @@ class SessionItem {
 	public $session_slots;
 
 	/**
+	 * Minimum number of required attendees.
+	 *
+	 * @var signup_default_minimum.
+	 */
+	public $signup_default_minimum;
+
+	/**
 	 * Session item name
 	 *
 	 * @var session_item.
@@ -127,4 +134,12 @@ class SessionItem {
 	 * @var session_default_day_of_month.
 	 */
 	public $session_calendar_id;
+
+	/**
+	 * Scheduling descriptions. Overrides the automatically
+	 * generated schedule description.
+	 *
+	 * @var signup_schedule_desc.
+	 */
+	public $signup_schedule_desc;
 }

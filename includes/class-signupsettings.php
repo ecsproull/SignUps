@@ -1197,7 +1197,12 @@ class SignupSettings extends SignUpsBase {
 					<td><input class="w-250px" type="text" name="signup_default_day_of_month" 
 						value="<?php echo esc_html( $data->signup_default_day_of_month ); ?>" /> </td>
 				</tr>
-
+				<tr>
+					<td class="text-right mr-2"><label>Schedule Description:</label></td>
+					<td><input class="w-250px" type="text" name="signup_schedule_desc"
+						value="<?php echo esc_html( $data->signup_schedule_desc ); ?>"
+						placeholder="Leave Blank unless the class doesn't meet regularly" /> </td>
+				</tr>
 				<tr>
 					<td class="text-right mr-2"><label>Rolling Template:</label></td>
 					<td>
