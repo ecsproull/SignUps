@@ -166,12 +166,14 @@ class DbSignUpTables {
 
 		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_stripe"' ) !== 'wp_scw_stripe' ) {
 			$wpdb->query(
-				'CREATE TABLE `wp_scw_stripe` (
-					`stripe_id` int(11) NOT NULL AUTO_INCREMENT,
-					`stripe_api_key` varchar(100) NOT NULL,
-					`stripe_api_secret` varchar(100) NOT NULL,
+				"CREATE TABLE `wp_scw_stripe` (
+					`stripe_id` int NOT NULL DEFAULT '1',
+					`stripe_api_key` varchar(150) NOT NULL,
+					`stripe_api_secret` varchar(150) NOT NULL,
+					`stripe_endpoint_secret` varchar(120) DEFAULT NULL,
+					`stripe_root_url` varchar(48) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
 					PRIMARY KEY (`stripe_id`)
-				  ) ENGINE=InnoDB  AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;'
+				  ) ENGINE=InnoDB  AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;"
 			);
 		}
 
