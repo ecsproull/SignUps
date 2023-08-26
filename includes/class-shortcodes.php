@@ -107,17 +107,28 @@ class ShortCodes extends SignUpsBase {
 	 */
 	private function create_select_signup() {
 		global $wpdb;
-		$results = $wpdb->get_results(
+		$signups = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT signup_id,
-				signup_name
+				signup_name,
+				signup_category
 				FROM %1s
 				WHERE signup_id != 9 AND signup_id != 10 AND signup_admin_approved = 1',
 				self::SIGNUPS_TABLE
 			),
 			OBJECT
 		);
-		$this->create_select_signup_form( $results );
+
+		$categories = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s',
+				self::SIGNUP_CATEGORY_TABLE
+			),
+			OBJECT
+		);
+
+		$this->create_select_signup_form( $signups, $categories );
 	}
 
 	/**
@@ -413,27 +424,33 @@ class ShortCodes extends SignUpsBase {
 	 * @param  mixed $results The results of a DB query for available classes.
 	 * @return void
 	 */
-	private function create_select_signup_form( $results ) {
+	private function create_select_signup_form( $signups, $categories ) {
 		?>
 		<form method="POST">
 			<div id="usercontent" class="container">
-				<table id="signup-select selection-font" class="mb-100px mr-auto ml-auto mt-5">
+				<div id="signup-select selection-font" class="signup-category-list mb-100px mr-auto ml-auto mt-5">
 					<?php
-					foreach ( $results as $result ) {
+					foreach ( $categories as $category ) {
 						?>
-						<tr>
-							<td>
-								<button class="button-signup" type="submit" name="signup_id" value="<?php echo esc_html( $result->signup_id ); ?>" >
-									<i>
-										<u><?php echo esc_html( $result->signup_name ); ?></u>
-									</i>
-								</button>
-							</td>
-						</tr>
+						<div class="text-center mb-4">
+							<div class="border-top3 pt-2 bg-lightgray h-65px">
+								<h2><?php echo esc_html( $category->category_title ); ?></h2>
+							</div>
+							<?php
+							foreach ( $signups as $signup ) {
+								if ( $signup->signup_category === $category->category_id ) {
+									?>
+									<button class="button-signup" type="submit" name="signup_id" value="<?php echo esc_html( $signup->signup_id ); ?>" >
+										<i><u><?php echo esc_html( $signup->signup_name ); ?></u></i>
+									</button>
+									<?php
+								}
+							}
+							?>
+						</div>
 						<?php
 					}
 					?>
-				</table>
 				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 			</div>
 		</form>
@@ -509,7 +526,7 @@ class ShortCodes extends SignUpsBase {
 								$available_slots = $session->session_slots - count( $attendees[ $session->session_id ] );
 								for ( $i = count( $attendees[ $session->session_id ] ); $i < $session->session_slots; $i++ ) {
 									?>
-									<tr class="attendee-row bg-lightgray" data-session-id="<?php echo esc_html( $session->session_id ); ?>" >
+									<tr class="attendee-row bg-lightgreen" data-session-id="<?php echo esc_html( $session->session_id ); ?>" >
 										<td>Cost: $<?php echo esc_html( $cost ); ?></td>
 										<td><?php echo esc_html( $signup_name ); ?></td>
 										<td>
