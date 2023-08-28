@@ -38,31 +38,31 @@ class DescriptionEditor extends SignUpsBase {
 			} elseif ( isset( $post['description_id'] ) ) {
 				$this->load_description_form( $post['description_id'] );
 			} else {
-				$this->load_description_form( 1 );
+				$this->load_description_form();
 			}
 		} else {
-			$this->load_description_form( 1 );
+			$this->load_description_form();
 		}
 	}
 
 	/**
 	 * Load the form to create class descriptions.
 	 *
-	 * @param  mixed $description_id The id of the description to load.
 	 * @return void
 	 */
-	private function load_description_form( $description_id ) {
+	private function load_description_form() {
 		?>
 		<form method="POST" name="template_form" >
-		<div class="class-description-box mt-4">
-			<div class="text-right">
+		<div class="description-box mt-4">
+		<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_title">Title:</label>
 			</div>
 			<div>
 				<input type="text" id="description_title" class="mt-2 w-100" 
 					value="" placeholder="Description Title" name="description_title" required>
 			</div>
-
+		</div>
+		<div class="class-description-box">
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_contact_name">Contact Name:</label>
 			</div>
@@ -72,19 +72,27 @@ class DescriptionEditor extends SignUpsBase {
 			</div>
 
 			<div class="text-right">
-				<label class="label-margin-top mr-2" for="description_slots">Slots:</label>
-			</div>
-			<div>
-				<input type="number" id="description_slots" class="mt-2 w-100 h-2rem" 
-					value="" placeholder="Maximum Number of attendees." name="description_slots" required>
-			</div>
-
-			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_contact_email">Contact Email:</label>
 			</div>
 			<div>
 				<input type="text" id="description_contact_email" class="mt-2 w-100" 
 					value="" placeholder="Contact Email" name="description_contact_email" required>
+			</div>
+
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="description_location">Location:</label>
+			</div>
+			<div>
+				<input type="text" id="description_location" class="mt-2 w-100 without_ampm"
+					value="SCW Woodclub" placeholder="Woodshop, library..." name="description_location" required>
+			</div>
+
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="description_slots">Slots:</label>
+			</div>
+			<div>
+				<input type="number" id="description_slots" class="mt-2 w-100 h-2rem" 
+					value="" placeholder="Maximum Number of attendees." name="description_slots" required>
 			</div>
 
 			<div class="text-right">
@@ -109,14 +117,6 @@ class DescriptionEditor extends SignUpsBase {
 			<div>
 				<input type="number" id="description_cost" class="mt-2 w-100 h-2rem" 
 					value="0" name="description_cost" required>
-			</div>
-
-			<div class="text-right">
-				<label class="label-margin-top mr-2" for="description_location">Location:</label>
-			</div>
-			<div>
-				<input type="text" id="description_location" class="mt-2 w-100 without_ampm"
-					value="SCW Woodclub" placeholder="Woodshop, library..." name="description_location" required>
 			</div>
 
 			<div class="text-right">
@@ -156,6 +156,36 @@ class DescriptionEditor extends SignUpsBase {
 			<div>
 				<input id="signup_multiple_days" class="mt-2 w-100" name="signup_multiple_days" 
 					value="1" >
+			</div>
+
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="description_end_repeat">End Repeat:</label>
+			</div>
+			<div>
+				<input type="date" id="description_end_repeat" class="mt-2 w-100 h-2rem" 
+					value="" placeholder="" name="description_end_repeat">
+			</div>
+
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="signup_admin_approved">Admin Approved:</label>
+			</div>
+			<div class="text-left ml-2 pt-2"><input type="checkbox" id="signup_admin_approved" class="mt-2"  
+				name="signup_admin_approved" checked /> 
+			</div>
+
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="description_add_cal">Add to Calendar:</label>
+			</div>
+			<div class="text-left ml-2 pt-2"><input type="checkbox" id="description_add_cal" class="mt-2"  
+				name="description_add_cal" checked /> 
+			</div>
+
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="description_repeat_count">Repeat Count:</label>
+			</div>
+			<div>
+				<input type="number" id="description_repeat_count" class="mt-2 w-100" 
+					value="1" name="description_repeat_count" required>
 			</div>
 		</div>
 

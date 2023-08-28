@@ -624,6 +624,7 @@ class ShortCodes extends SignUpsBase {
 				signup_default_day_of_month,
 				signup_cost,
 				signup_default_slots,
+				signup_default_minimum,
 				signup_multiple_days,
 				signup_schedule_desc
 				FROM %1s
@@ -663,7 +664,13 @@ class ShortCodes extends SignUpsBase {
 		}
 
 		if ( $signup->signup_default_slots ) {
-			$schedule .= '. Max ' . $signup->signup_default_slots . ' students.';
+			$schedule .= '. Max ' . $signup->signup_default_slots . ' students';
+		} else {
+			$schedule .= '.';
+		}
+
+		if ( $signup->signup_default_minimum ) {
+			$schedule .= '. Min ' . $signup->signup_default_minimum . ' students.';
 		} else {
 			$schedule .= '.';
 		}
