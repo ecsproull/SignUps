@@ -82,31 +82,39 @@ class HtmlEditor extends SignUpsBase {
 				</ul>
 				<div class="description-box">
 					<div class="text-right">
-						<label class="label-margin-top mr-2" for="description_prerequisite">Prerequisite:</label>
+						<label class="label-margin-top mr-2" for="description_instructors">Instructors:</label>
+					</div>
+					<div>
+						<input type="text" id="description_instructors" class="mt-2 w-100" 
+							value="<?php echo esc_html( $description_object ? $description_object->description_instructors : '' ); ?>" 
+							placeholder="Tom, Dick and Harry" name="description_instructors">
 					</div>
 
+					<div class="text-right">
+						<label class="label-margin-top mr-2" for="description_prerequisite">Prerequisite:</label>
+					</div>
 					<div>
-						<input type="text" id="description_prerequisite" class="mt-2 w-100" 
-							value="<?php echo esc_html( $description_object ? $description_object->description_prerequisite : '' ); ?>" 
-							placeholder="Prerequisites or Leave blank to omit this section." name="description_prerequisite">
+						<textarea type="text" id="description_prerequisite" class="mt-2 w-100" 
+							placeholder="Prerequisites or Leave blank to omit this section." name="description_prerequisite"
+							><?php echo esc_html( $description_object ? $description_object->description_prerequisite : '' ); ?></textarea>
 					</div>
 
 					<div class="text-right">
 						<label class="label-margin-top mr-2" for="description_materials">Student Materials:</label>
 					</div>
 					<div>
-						<input type="text" id="description_materials" class="mt-2 w-100" 
-							value="<?php echo esc_html( $description_object ? $description_object->description_materials : '' ); ?>" 
-							placeholder="Wood, glue, ..., Leave blank to omit this section." name="description_materials">
+						<textarea type="text" id="description_materials" class="mt-2 w-100" 
+							placeholder="Wood, glue, ..., Leave blank to omit this section." name="description_materials"
+							><?php echo esc_html( $description_object ? $description_object->description_materials : '' ); ?></textarea>
 					</div>
 
 					<div class="text-right">
-						<label class="label-margin-top mr-2" for="description_instructions">Preclass Instructions:</label>
+						<label class="label-margin-top mr-2" for="description_instructions">Preclass:</label>
 					</div>
 					<div>
-						<input type="text" id="description_instructions" class="mt-2 w-100" 
-							value="<?php echo esc_html( $description_object ? $description_object->description_instructions : '' ); ?>" 
-							placeholder="Glue wood in layers..., Leave blank to omit this section." name="description_instructions">
+						<textarea type="text" id="description_instructions" class="mt-2 w-100" 
+							placeholder="Glue wood in layers..., Leave blank to omit this section." name="description_instructions"
+							><?php echo esc_html( $description_object ? $description_object->description_instructions : '' ); ?></textarea>
 					</div>
 				</div>
 
@@ -130,7 +138,7 @@ class HtmlEditor extends SignUpsBase {
 					<?php
 				}
 				?>
-				<input type="hidden" name="description_signup_id" value="<?php echo esc_html( $signup_id ); ?> >
+				<input type="hidden" name="description_signup_id" value="<?php echo esc_html( $signup_id ); ?>" >
 			</form>
 			<?php
 	}
@@ -143,6 +151,7 @@ class HtmlEditor extends SignUpsBase {
 	 */
 	private function submit_html( $post ) {
 		global $wpdb;
+		$short_description              = $post['description_html'];
 		$post['description_html']       = htmlentities( $post['description_html'] );
 		$post['description_html_short'] = htmlentities( $post['description_html_short'] );
 		unset( $post['_wp_http_referer'] );
@@ -154,6 +163,26 @@ class HtmlEditor extends SignUpsBase {
 			$where['description_id'] = $post['description_id'];
 			unset( $post['description_id'] );
 			$rows_updated = $wpdb->update( self::DESCRIPTIONS_TABLE, $post, $where );
+			if ( 1 === $rows_updated ) {
+				$sessions = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT *
+						FROM %1s
+						WHERE session_signup_id = %s',
+						self::SESSIONS_TABLE,
+						$post['description_signup_id']
+					),
+					OBJECT
+				);
+
+				foreach ( $sessions as $session ) {
+					if ( $session->session_calendar_id ) {
+						$where        = array( 'id' => $session->session_calendar_id );
+						$data         = array( 'text_for_date' => $short_description );
+						$rows_updated = $wpdb->update( self::SPIDER_CALENDAR_EVENT_TABLE, $data, $where );
+					}
+				}
+			}
 		} else {
 			$rows_updated = $wpdb->insert( self::DESCRIPTIONS_TABLE, $post );
 		}

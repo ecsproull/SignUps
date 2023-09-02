@@ -34,6 +34,10 @@ class SignupSettings extends SignUpsBase {
 				$this->submit_session( $post );
 			} elseif ( isset( $post['edit_class'] ) ) {
 				$this->edit_class( $post );
+			} elseif ( isset( $post['edit_class_move_up'] ) ) {
+				$this->edit_class_move( $post, 'up' );
+			} elseif ( isset( $post['edit_class_move_down'] ) ) {
+				$this->edit_class_move( $post, 'down' );
 			} elseif ( isset( $post['edit_session'] ) ) {
 				$this->edit_session( $post );
 			} elseif ( isset( $post['add_new_class'] ) ) {
@@ -74,6 +78,67 @@ class SignupSettings extends SignUpsBase {
 		} else {
 			$this->load_signup_selection();
 		}
+	}
+
+	/**
+	 * Moves the order of an item up or down in the listing view.
+	 *
+	 * @param array  $post The posted data from the form.
+	 * @param string $direction The direction to move the item.
+	 */
+	private function edit_class_move( $post, $direction ) {
+		global $wpdb;
+		$signup_id = 0;
+		$id_cat = array();
+		if ( 'up' === $direction ) {
+			$id_cat = explode( ',', $post['edit_class_move_up'] );
+		} else {
+			$id_cat = explode( ',', $signup_id = $post['edit_class_move_down'] );
+		}
+
+		$signup_id = $id_cat[0];
+		$category  = $id_cat[1];
+
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE signup_category = %d
+				ORDER BY signup_order',
+				self::SIGNUPS_TABLE,
+				$category
+			),
+			OBJECT
+		);
+
+		$results_count = count( $results );
+		for ( $i = 0; $i < $results_count; $i++ ) {
+			if ( $results[ $i ]->signup_id === $signup_id ) {
+				$update_id = 0;
+				$temp = $results[ $i ]->signup_order;
+				if ( 'up' === $direction ) {
+					$results[ $i ]->signup_order     = $results[ $i - 1 ]->signup_order;
+					$results[ $i - 1 ]->signup_order = $temp;
+					$update_index                    = $i - 1;
+				} else {
+					$results[ $i ]->signup_order     = $results[ $i + 1 ]->signup_order;
+					$results[ $i + 1 ]->signup_order = $temp;
+					$update_index                    = $i + 1;
+				}
+
+				$where = array( 'signup_id' => $results[ $i ]->signup_id );
+				$data  = array( 'signup_order' => $results[ $i ]->signup_order );
+				$wpdb->update( self::SIGNUPS_TABLE, $data, $where );
+
+				$where = array( 'signup_id' => $results[ $update_index ]->signup_id );
+				$data  = array( 'signup_order' => $results[ $update_index ]->signup_order );
+				$wpdb->update( self::SIGNUPS_TABLE, $data, $where );
+
+				break;
+			}
+		}
+
+		$this->load_signup_selection();
 	}
 
 	/**
@@ -183,11 +248,11 @@ class SignupSettings extends SignUpsBase {
 		unset( $post['submit_class'] );
 		unset( $post['id'] );
 		unset( $post['original_cost'] );
-		unset( $post['template_id'] );
 
 		$post['signup_cost']             = (int) $post['signup_cost'];
 		$post['signup_default_slots']    = (int) $post['signup_default_slots'];
-		$post['signup_rolling_template'] = (int) $post['signup_rolling_template'];
+		$post['signup_rolling_template'] = (int) $post['template_id'];
+		unset( $post['template_id'] );
 
 		$duration_parts = explode( ':', $post['signup_default_duration'] );
 		if ( $duration_parts[0] > 12 ) {
@@ -221,6 +286,15 @@ class SignupSettings extends SignUpsBase {
 			);
 		} else {
 			$affected_row_count = $wpdb->insert( self::SIGNUPS_TABLE, $post );
+			if ( 1 === $affected_row_count ) {
+				$data               = array( 'signup_order' => $wpdb->insert_id );
+				$where              = array( 'signup_id' => $wpdb->insert_id );
+				$affected_row_count = $wpdb->update(
+					'wp_scw_signups',
+					$data,
+					$where
+				);
+			}
 		}
 
 		$this->update_message( $affected_row_count, $wpdb->last_error );
@@ -406,7 +480,7 @@ class SignupSettings extends SignUpsBase {
 			ARRAY_A
 		);
 
-		foreach( $sessions as $session ) {
+		foreach ( $sessions as $session ) {
 			$this->delete_session( $session, false );
 		}
 
@@ -507,6 +581,7 @@ class SignupSettings extends SignUpsBase {
 		$interval         = new DateInterval( 'PT' . $duration_parts[0] . 'H' . $duration_parts[1] . 'M' );
 		$start_time_parts = explode( ':', $session_item->session_time_of_day );
 		$today            = new DateTime( 'now', $this->date_time_zone );
+		$now              = new DateTime( 'now', $this->date_time_zone );
 		$end_repeat_date  = $session_item->session_end_repeat ? new DateTime( $session_item->session_end_repeat ) : null;
 
 		if ( $start_time_parts[0] > 12 ) {
@@ -529,9 +604,9 @@ class SignupSettings extends SignUpsBase {
 					$this->date_time_zone
 				);
 
-				if ( $start < $today ) {
+				if ( $start < $now ) {
 					$today = $today->modify( '+1 month' );
-					$dt    = new DateTime(
+					$start = new DateTime(
 						sprintf(
 							'%s of %s %s',
 							$session_item->session_day_of_month,
@@ -547,7 +622,7 @@ class SignupSettings extends SignUpsBase {
 				$start->setTime( $start_time_parts[0], $start_time_parts[1] );
 				$end->add( $interval );
 
-				if ( $session_item->session_end_repeat && ( $end_repeat_datet < $start ) ) {
+				if ( $session_item->session_end_repeat && ( $end_repeat_date < $start ) ) {
 					break;
 				}
 				for ( $j = 0; $j < $session_item->session_multiple_days; $j++ ) {
@@ -634,6 +709,7 @@ class SignupSettings extends SignUpsBase {
 	 * Delete a session of a class.
 	 *
 	 * @param int $post The posted data from the form.
+	 * @param int $repost This is being reposted.
 	 */
 	private function delete_session( $post, $repost = true ) {
 		global $wpdb;
@@ -782,8 +858,10 @@ class SignupSettings extends SignUpsBase {
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT signup_id,
-				signup_name
-				FROM %1s',
+				signup_name,
+				signup_category
+				FROM %1s
+				ORDER BY signup_category, signup_order',
 				self::SIGNUPS_TABLE
 			),
 			OBJECT
@@ -826,7 +904,8 @@ class SignupSettings extends SignUpsBase {
 					session_slots,
 					session_calendar_id
 					FROM %1s
-					WHERE session_signup_id = %s',
+					WHERE session_signup_id = %s
+					ORDER BY session_start_time',
 					self::SESSIONS_TABLE,
 					$post['edit_sessions_signup_id']
 				),
@@ -949,13 +1028,16 @@ class SignupSettings extends SignUpsBase {
 	 * @return void
 	 */
 	private function create_signup_select_form( $results ) {
+		global $wpdb;
 		?>
 		<form method="POST">
 			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 			<div id="content" class="container">
-				<table class="mb-100px table table-striped mr-auto ml-auto mt-5">
+				<table class="mb-100px table mr-auto ml-auto mt-5">
 					<tr>
 						<td>Add SignUp</td>
+						<td></td>
+						<td></td>
 						<td></td>
 						<td></td>
 						<td> <input class="submitbutton addItem" type="submit" name="add_new_class" value=""></td>
@@ -964,21 +1046,79 @@ class SignupSettings extends SignUpsBase {
 						<td>Add SignUp, Sessions and Description</td>
 						<td></td>
 						<td></td>
+						<td></td>
+						<td></td>
 						<td> <input class="submitbutton addItem" type="submit" name="load_description_form" value=""></td>
 					</tr>
 					<?php
+					$category_counts = array();
 					foreach ( $results as $result ) {
+						if ( array_key_exists( $result->signup_category, $category_counts ) ) {
+							$category_counts[ $result->signup_category ]++;
+						} else {
+							$category_counts[ $result->signup_category ] = 1;
+						}
+					}
+
+					$count = 0;
+					foreach ( $results as $result ) {
+						if ( $result->signup_category !== $category ) {
+							$category   = $result->signup_category;
+							$categories = $wpdb->get_results(
+								$wpdb->prepare(
+									'SELECT *
+									FROM %1s
+									WHERE category_id = %d',
+									self::SIGNUP_CATEGORY_TABLE,
+									$category
+								),
+								OBJECT
+							);
+							$count = 0;
+							?>
+							<tr class="bg-lg">
+								<td><h4><?php echo esc_html( $categories[0]->category_title ); ?></h4></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<?php
+						}
 						?>
 						<tr>
 							<td> <?php echo esc_html( $result->signup_name ); ?></td>
+							<?php
+							if ( $count > 0 ) {
+								?>
+								<td> <input class="submitbutton upImage" type="submit" name="edit_class_move_up" 
+									value="<?php echo esc_html( $result->signup_id . ',' . $result->signup_category ); ?>"> </td>
+								<?php
+							} else {
+								?>
+								<td></td>
+								<?php
+							}
+
+							if ( ( $category_counts[ $result->signup_category ] - 1 ) === $count ) {
+								echo '<td></td>';
+							} else {
+								?>
+								<td> <input class="submitbutton downImage mr-3" type="submit" name="edit_class_move_down" 
+									value="<?php echo esc_html( $result->signup_id . ',' . $result->signup_category ); ?>"> </td>
+								<?php
+							}
+							?>
 							<td> <input class="submitbutton editImage" type="submit" name="edit_class" value="<?php echo esc_html( $result->signup_id ); ?>"> </td>
-							<td> <input class="submitbutton sessionsImage" type="submit" name="edit_sessions_signup_id" value="<?php echo esc_html( $result->signup_id ); ?>"> </td>
+							<td> <input class="submitbutton sessionsImage mr-3" type="submit" name="edit_sessions_signup_id" value="<?php echo esc_html( $result->signup_id ); ?>"> </td>
 							<td> <input class="submitbutton deleteImage" type="submit" name="delete_class" value="<?php echo esc_html( $result->signup_id ); ?>">
 								<input type="hidden" name="<?php echo esc_html( $result->signup_id ); ?>" value="<?php echo esc_html( $result->signup_name ); ?>" >
 								<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 							</td>
 						</tr>
 						<?php
+						$count++;
 					}
 					?>
 				</table>
@@ -1371,7 +1511,7 @@ class SignupSettings extends SignUpsBase {
 		<?php
 	}
 
-		/**
+	/**
 	 * Load the form to create class descriptions.
 	 *
 	 * @return void
@@ -1542,9 +1682,16 @@ class SignupSettings extends SignUpsBase {
 
 		<div class="description-box">
 			<div class="text-right">
+				<label class="label-margin-top mr-2" for="description_instructors">Instructors:</label>
+			</div>
+			<div>
+				<input type="text" id="description_instructors" class="mt-2 w-100" 
+					value="" placeholder="Tom, Dick and Harry" name="description_instructors">
+			</div>	
+
+			<div class="text-right">
 				<label class="label-margin-top mr-2" for="signup_schedule_desc">Schedule:</label>
 			</div>
-
 			<div>
 				<input type="text" id="signup_schedule_desc" class="mt-2 w-100" 
 					value="" placeholder="Leave blank unless the schedule is TBD" name="signup_schedule_desc">
@@ -1553,32 +1700,30 @@ class SignupSettings extends SignUpsBase {
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_prerequisite">Prerequisite:</label>
 			</div>
-
 			<div>
-				<input type="text" id="description_prerequisite" class="mt-2 w-100" 
-					value="" placeholder="Prerequisites or none" name="description_prerequisite">
+				<textarea type="text" id="description_prerequisite" class="mt-2 w-100" 
+					value="" placeholder="Prerequisites or none" name="description_prerequisite"></textarea>
 			</div>
 
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_materials">Student Materials:</label>
 			</div>
 			<div>
-				<input type="text" id="description_materials" class="mt-2 w-100" 
-					value="" placeholder="Wood, glue, ..." name="description_materials">
+				<textarea type="text" id="description_materials" class="mt-2 w-100" 
+					value="" placeholder="Wood, glue, ..." name="description_materials"></textarea>
 			</div>
 
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_instructions">Preclass:</label>
 			</div>
 			<div>
-				<input type="text" id="description_instructions" class="mt-2 w-100" 
-					value="" placeholder="Glue wood in layers..." name="description_instructions">
+				<textarea type="text" id="description_instructions" class="mt-2 w-100"
+					value="" placeholder="Glue wood in layers..." name="description_instructions"></textarea>
 			</div>
 
 			<div class="text-right mt-5">
 				<label class="label-margin-top mr-2" for="description_description">Description:</label>
 			</div>
-
 			<div class="mt-2">
 				<textarea type="text" id="description_description" class=" w-100 html-textarea" 
 					value="" placeholder name="description_description" required>
@@ -1610,12 +1755,12 @@ class SignupSettings extends SignUpsBase {
 		$new_signup['signup_cost']                 = $post['description_cost'];
 		$new_signup['signup_default_slots']        = $post['description_slots'];
 		$new_signup['signup_rolling_template']     = 0;
-		$new_signup['signup_admin_approved']       = isset( $post['signup_admin_approved']);
+		$new_signup['signup_admin_approved']       = isset( $post['signup_admin_approved'] );
 		$new_signup['signup_group']                = $post['description_group'];
 		$new_signup['signup_schedule_desc']        = $post['signup_schedule_desc'];
 		$new_signup['signup_default_minimum']      = $post['signup_default_minimum'];
 		$new_signup['signup_category']             = $post['signup_category'];
-		$new_session['signup_multiple_days']       = $post['signup_multiple_days'];
+		$new_signup['signup_multiple_days']        = $post['signup_multiple_days'];
 
 		$start_date                              = new DateTime( $post['description_start'], $this->date_time_zone );
 		$new_signup['signup_default_start_time'] = date_format( $start_date, 'H:i' );
@@ -1661,12 +1806,22 @@ class SignupSettings extends SignUpsBase {
 		$affected_row_count = $wpdb->insert( self::SIGNUPS_TABLE, $new_signup );
 		if ( 1 === $affected_row_count ) {
 			$signup_id = $wpdb->insert_id;
+			$data      = array( 'signup_order' => $signup_id );
+			$where     = array( 'signup_id' => $signup_id );
+			$wpdb->update(
+				self::SIGNUPS_TABLE,
+				$data,
+				$where
+			);
+
 			$new_description = array(
 				'description_signup_id'    => $signup_id,
 				'description_html'         => htmlentities( $post['description_description'] ),
+				'description_html_short'   => htmlentities( $post['description_description'] ),
 				'description_materials'    => $post['description_materials'],
 				'description_prerequisite' => $post['description_prerequisite'],
 				'description_instructions' => $post['description_instructions'],
+				'description_instructors'  => $post['description_instructors'],
 			);
 
 			$affected_row_count = $wpdb->insert( self::DESCRIPTIONS_TABLE, $new_description );

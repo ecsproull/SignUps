@@ -113,7 +113,8 @@ class ShortCodes extends SignUpsBase {
 				signup_name,
 				signup_category
 				FROM %1s
-				WHERE signup_id != 9 AND signup_id != 10 AND signup_admin_approved = 1',
+				WHERE signup_admin_approved = 1
+				ORDER BY signup_order',
 				self::SIGNUPS_TABLE
 			),
 			OBJECT
@@ -257,9 +258,6 @@ class ShortCodes extends SignUpsBase {
 		$new_attendee['attendee_item']          = $post['signup_name'];
 		$new_attendee['attendee_badge']         = $post['badge_number'];
 		$new_attendee['attendee_payment_start'] = $now->format( self::DATETIME_FORMAT );
-		$new_attendee['attendee_rec_number']    = $post['reccard'];
-		$new_attendee['attendee_address1']      = $post['address1'];
-		$new_attendee['attendee_address2']      = $post['address2'];
 		?>
 		<div class="container">
 			<form method="POST">
@@ -421,7 +419,8 @@ class ShortCodes extends SignUpsBase {
 	/**
 	 * Creates the form for selecting a signup to add to.
 	 *
-	 * @param  mixed $results The results of a DB query for available classes.
+	 * @param  mixed $signups The results of a DB query for available classes.
+	 * @param  mixed $categories the list of categories.
 	 * @return void
 	 */
 	private function create_select_signup_form( $signups, $categories ) {
@@ -430,6 +429,7 @@ class ShortCodes extends SignUpsBase {
 			<div id="usercontent" class="container">
 				<div id="signup-select selection-font" class="signup-category-list mb-100px mr-auto ml-auto mt-5">
 					<?php
+					$count = 0;
 					foreach ( $categories as $category ) {
 						?>
 						<div class="text-center mb-4">
@@ -447,6 +447,16 @@ class ShortCodes extends SignUpsBase {
 								}
 							}
 							?>
+						</div>
+						<?php
+						$count++;
+					}
+					$remainder = $count % 4;
+					for ( $i = 0; $i < $remainder; $i++ ) {
+						?>
+						<div class="text-center mb-4">
+							<div class="border-top3 pt-2 bg-lightgray h-65px">
+							</div>
 						</div>
 						<?php
 					}
@@ -635,8 +645,9 @@ class ShortCodes extends SignUpsBase {
 			OBJECT
 		);
 
-		$signup   = $signups[0];
-		$schedule = 'Schedule for this class has not been set';
+		$signup             = $signups[0];
+		$description_object = $this->get_signup_html( $signup_id );
+		$schedule           = 'Schedule for this class has not been set';
 		if ( $signup->signup_schedule_desc ) {
 			$schedule = $signup->signup_schedule_desc;
 		} elseif ( $signup->signup_default_duration ) {
@@ -675,7 +686,6 @@ class ShortCodes extends SignUpsBase {
 			$schedule .= '.';
 		}
 
-		$description_object = $this->get_signup_html( $signup_id );
 		if ( ! $description_object ) {
 			$this->create_signup_form( $signup_id );
 		} else {
@@ -685,6 +695,14 @@ class ShortCodes extends SignUpsBase {
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Cost: </div>
 				<div><?php echo '$' . esc_html( $signup->signup_cost ) . '.00'; ?></div>
 
+				<?php
+				if ( $description_object->description_instructors ) {
+					?>
+					<div class="text-right pr-2 font-weight-bold text-dark mb-2">Instructors: </div>
+					<div><?php echo esc_html( $description_object->description_instructors ); ?></div>
+					<?php
+				}
+				?>
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Schedule: </div>
 				<div><?php echo esc_html( $schedule ); ?></div>
 
@@ -692,7 +710,7 @@ class ShortCodes extends SignUpsBase {
 				if ( $description_object->description_prerequisite ) {
 					?>
 					<div class="text-right pr-2 font-weight-bold text-dark mb-2">Prerequisite: </div>
-					<div><?php echo esc_html( $description_object->description_prerequisite ); ?></div>
+					<div><?php echo $description_object->description_prerequisite; ?></div>
 					<?php
 				}
 
@@ -706,7 +724,7 @@ class ShortCodes extends SignUpsBase {
 				if ( $description_object->description_instructions ) {
 					?>
 					<div class="text-right pr-2 font-weight-bold text-dark mb-2">Instructions: </div>
-					<div><?php echo esc_html( $description_object->description_instructions ); ?></div>
+					<div><?php echo $description_object->description_instructions; ?></div>
 					<?php
 				}
 				?>

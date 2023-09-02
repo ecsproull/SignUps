@@ -102,6 +102,13 @@ tr > td > div.bg-danger {
     background-image:url(../img/delete.png); 
 }
 
+.upImage {
+  background-image:url(../img/up_arrow.png);
+}
+
+.downImage {
+  background-image:url(../img/down_arrow.png); 
+}
 .sessionsImage {
     background-image:url(../img/sessions.png)
 }
