@@ -462,6 +462,7 @@ class SignUpsBase {
 		$admin
 	) {
 		$start_date = new DateTime( 'now', $this->date_time_zone );
+		$start_date->modify( "-1 day");
 		$end_date   = new DateTime( 'now', $this->date_time_zone );
 		$end_date->add( new DateInterval( 'P' . $template->template_rolling_days . 'D' ) );
 		$one_day_interval = new DateInterval( 'P1D' );
@@ -635,27 +636,33 @@ class SignUpsBase {
 													<?php
 												}
 											} else {
-												$com_name = $comment_name . $comment_index;
-												?>
-												<td class="text-center">
-													<span class="mr-2"><?php echo esc_html( $item->template_item_title ); ?></span> 
-													<input class="form-check-input position-relative rolling-add-chk ml-auto <?php echo esc_html( str_replace( ' ', '', $item->template_item_title ) ); ?>" 
-														type="checkbox" name="time_slots[]" 
-														value="
-														<?php
-														echo esc_html(
-															$start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) .
-															',' . $item->template_item_title . ',' . $comment_index . ',' . $item->template_item_slots
-														)
-														?>
-														">
-														<?php
-														if ( $item->template_item_slots > '1' && count( $slot_attendees ) === 0 ) {
-															echo "<br><span class='text-primary'><i>" . count( $slot_attendees ) . ' of ' . esc_html( $item->template_item_slots ) . ' Slots Filled </i></span><br>';
-														}
-														?>
-												</td>
-												<?php
+												if ( ! $this->adjust_time( $time_exceptions, $start_date, $temp_end_date ) ) {
+													?>
+													<td>Shop Closed</td>
+													<?php
+												} else {
+													$com_name = $comment_name . $comment_index;
+													?>
+													<td class="text-center">
+														<span class="mr-2"><?php echo esc_html( $item->template_item_title ); ?></span> 
+														<input class="form-check-input position-relative rolling-add-chk ml-auto <?php echo esc_html( str_replace( ' ', '', $item->template_item_title ) ); ?>" 
+															type="checkbox" name="time_slots[]" 
+															value="
+															<?php
+															echo esc_html(
+																$start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) .
+																',' . $item->template_item_title . ',' . $comment_index . ',' . $item->template_item_slots
+															)
+															?>
+															">
+															<?php
+															if ( $item->template_item_slots > '1' && count( $slot_attendees ) === 0 ) {
+																echo "<br><span class='text-primary'><i>" . count( $slot_attendees ) . ' of ' . esc_html( $item->template_item_slots ) . ' Slots Filled </i></span><br>';
+															}
+															?>
+													</td>
+													<?php
+												}
 											}
 
 											$current_column++;
@@ -689,6 +696,19 @@ class SignUpsBase {
 			</div>
 		</div>
 		<?php
+	}
+
+	private function adjust_time( $time_exceptions, &$start_date, &$temp_end_date ) {
+		foreach ( $time_exceptions as $exception ) {
+			if ( $start_date == $exception->begin ) {
+				return false;
+			} elseif ( $exception->begin > $start_date && $exception->begin < $temp_end_date) {
+				$start_date = $exception->begin;
+				return true;
+			}
+		}
+
+		return true;
 	}
 
 	/**

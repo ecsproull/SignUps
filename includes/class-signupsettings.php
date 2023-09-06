@@ -581,12 +581,13 @@ class SignupSettings extends SignUpsBase {
 		$interval         = new DateInterval( 'PT' . $duration_parts[0] . 'H' . $duration_parts[1] . 'M' );
 		$start_time_parts = explode( ':', $session_item->session_time_of_day );
 		$today            = new DateTime( 'now', $this->date_time_zone );
-		$now              = new DateTime( 'now', $this->date_time_zone );
-		$end_repeat_date  = $session_item->session_end_repeat ? new DateTime( $session_item->session_end_repeat ) : null;
 
-		if ( $start_time_parts[0] > 12 ) {
-			$start_time_parts[0] = $start_time_parts[0] - 12;
+		if ( $session_item->session_start_formatted[0] ) {
+			$today = new DateTime( $session_item->session_start_formatted[0], $this->date_time_zone );
 		}
+
+		$now             = new DateTime( 'now', $this->date_time_zone );
+		$end_repeat_date = $session_item->session_end_repeat ? new DateTime( $session_item->session_end_repeat ) : null;
 
 		if ( $session_item->session_end_repeat ) {
 			$session_item->session_add_slots_count = 25;
