@@ -895,7 +895,7 @@ class SignupSettings extends SignUpsBase {
 		$signup_name = $class[0]->signup_name;
 
 		if ( $rolling ) {
-			$this->create_rolling_session( $signup_id, true );
+			$this->create_rolling_session( $signup_id, null, true );
 		} else {
 			$sessions = $wpdb->get_results(
 				$wpdb->prepare(
@@ -972,7 +972,7 @@ class SignupSettings extends SignUpsBase {
 						?>
 					</table>
 					<?php
-					$this->create_user_table( 'member' );
+					$this->create_user_table( 'member', $signup_id );
 					?>
 					<input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="window.history.go( -1 );" value="Back"></td>
 					<input id="submit_attendees" class="btn btn-primary mt-2" type="submit" value="Complete Add" name="submit_attendees" disabled="true"><td>

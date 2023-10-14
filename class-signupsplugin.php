@@ -22,7 +22,8 @@
  * Text Domain: wpccp
  * Domain Path: /languages
  */
-
+declare(strict_types=1);
+require_once 'vendor/autoload.php';
 require 'includes/class-signupsbase.php';
 require 'includes/class-signupsrestapis.php';
 require 'includes/class-dbsignuptables.php';
@@ -35,7 +36,7 @@ require 'includes/class-htmleditor.php';
 require 'includes/class-descriptioneditor.php';
 require 'includes/class-stripepayments.php';
 require 'includes/class-rollingtemplateseditor.php';
-require_once 'vendor/autoload.php';
+require 'includes/class-sendgridmail.php';
 
 /**
  * Main signups class.
@@ -99,6 +100,7 @@ class SignupsPlugin extends SignUpsBase {
 		$vars[] .= 'attendee_id';
 		$vars[] .= 'badge';
 		$vars[] .= 'signup_id';
+		$vars[] .= 'secret';
 		return $vars;
 	}
 

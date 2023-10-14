@@ -247,20 +247,55 @@ class SignUpsBase {
 	 * Creates a section of HTML for the user to identify themselves.
 	 *
 	 * @param string $user_group The required group for this signup. Normally "member".
+	 * @param string $secret Secret supplied by member to edit their signups.
 	 * @return boolean
 	 */
-	protected function create_user_table( $user_group = '' ) {
+	protected function create_user_table( $user_group, $signup_id, $secret = null ) {
 		global $wpdb;
-		$return_val = null;
+		$return_val  = null;
+		$results     = array( 1 );
+		$remember_me = false;
 
-		if ( ! $user_group ) {
-			$user_group = 'member';
+		if ( $secret ) {
+			$attendees_rolling = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT *
+					FROM %1s
+					WHERE attendee_secret = %s',
+					self::ATTENDEES_ROLLING_TABLE,
+					$secret
+				),
+				OBJECT
+			);
+
+			if ( $attendees_rolling ) {
+				$badge   = $attendees_rolling[0]->attendee_badge;
+				$results = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT *
+						FROM %1s
+						WHERE badge = %s',
+						self::ROSTER_TABLE,
+						$badge
+					),
+					OBJECT
+				);
+
+				$user_secret = $results[0]->secret;
+				$return_val  = array(
+					'badge'  => $badge,
+					'secret' => $secret,
+				);
+			}
+			?>
+			<?php
 		}
 
-		if ( isset( $_COOKIE['signups_scw_badge'] ) ) {
-			$cookie  = wp_unslash( $_COOKIE );
-			$badge   = $cookie['signups_scw_badge'];
-			$results = $wpdb->get_results(
+		if ( ! $return_val && isset( $_COOKIE['signups_scw_badge'] ) ) {
+			$remember_me = true;
+			$cookie      = wp_unslash( $_COOKIE );
+			$badge       = $cookie['signups_scw_badge'];
+			$results     = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT *
 					FROM %1s
@@ -273,10 +308,14 @@ class SignUpsBase {
 			);
 
 			if ( $results ) {
-				$return_val = $results[0]->badge;
+				$return_val = array(
+					'badge'  => $results[0]->badge,
+					'secret' => $results[0]->secret,
+				);
 			}
 		}
 		?>
+
 		<table id="lookup-member" class="mb-100px table table-bordered mr-auto ml-auto selection-font">
 			<tr>
 				<td class="text-right">Enter Badge#</td>
@@ -288,6 +327,18 @@ class SignUpsBase {
 				<td class="text-right"><input id="first-name" class=" member-first-name" type="text" name="firstname" value=<?php echo $return_val ? esc_html( $results[0]->firstname ) : 'First'; ?> required readonly></td>
 				<td  class="text-left"><input id="last-name" class="member-last-name" type="text" name="lastname" value=<?php echo $return_val ? esc_html( $results[0]->lastname ) : 'Last'; ?> required readonly></td>
 				<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="signup_id">Cancel</button></td>
+			</tr>
+			<tr>
+				<td class="text-right">
+					<span class="mr-1">Remember Badge</span>
+					<input id="remember_me" class="position-relative rolling-add-chk mr-1" 
+						type="checkbox" name="remember_me" value='' <?php echo $remember_me ? 'checked' : ''; ?>></td>
+				<td class="text-left"><input id="user-edit-id" class="user-edit-id" 
+					type="text" name="secret" value="<?php echo esc_html( $secret ); ?>" placeholder="Enter secret to edit"
+					<?php echo $signup_id < 9 || $signup_id > 10 ? 'hidden' : ''; ?>></td>
+				<td><button id="update_butt" type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary" 
+					value=<?php echo esc_html( $signup_id ); ?> name="continue_signup" disabled
+					<?php echo $signup_id < 9 || $signup_id > 10 ? 'hidden' : ''; ?> >Reload</button></td>
 			</tr>
 			<tr hidden>
 				<td><input id="phone" class="member-phone" type="text" name="phone"
@@ -310,7 +361,7 @@ class SignUpsBase {
 	 * @param  mixed $admin Set to true if an admin is using this function.
 	 * @return void
 	 */
-	protected function create_rolling_session( $rolling_signup_id, $admin = false ) {
+	protected function create_rolling_session( $rolling_signup_id, $secret, $admin = false ) {
 		global $wpdb;
 		$today = new DateTime( 'now', $this->date_time_zone );
 		$today->SetTime( 8, 0 );
@@ -372,13 +423,14 @@ class SignUpsBase {
 		);
 
 		$this->create_rolling_session_select_form2(
-			$signup_name,
+			$signups[0]->signup_name,
 			$attendees_rolling,
 			$rolling_signup_id,
 			$template[0],
 			$template_items,
 			$signups[0]->signup_group,
-			$admin
+			$admin,
+			$secret
 		);
 	}
 
@@ -400,6 +452,26 @@ class SignUpsBase {
 		}
 
 		return $slot_attendees;
+	}
+
+	/**
+	 * Get the attendees based on start time. Used to check if an attendee is double booking.
+	 *
+	 * @param  mixed $attendees Attendees for this signup.
+	 * @param  mixed $start_date When to look look for attendees that match the start date.
+	 * @param  mixed $badge Current users badge.
+	 * @return array
+	 */
+	private function is_attendee_free( $attendees, $start_date, $badge ) {
+		$slot_attendees = array();
+		foreach ( $attendees as $attendee ) {
+			if ( $attendee->attendee_start_time === $start_date->format( 'U' ) &&
+				$badge === $attendee->attendee_badge ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -459,23 +531,30 @@ class SignUpsBase {
 		$template,
 		$template_items,
 		$user_group,
-		$admin
+		$admin,
+		$secret
 	) {
 		$start_date = new DateTime( 'now', $this->date_time_zone );
-		$start_date->modify( "-1 day");
-		$end_date   = new DateTime( 'now', $this->date_time_zone );
+		$end_date = new DateTime( 'now', $this->date_time_zone );
 		$end_date->add( new DateInterval( 'P' . $template->template_rolling_days . 'D' ) );
 		$one_day_interval = new DateInterval( 'P1D' );
 		$time_exceptions  = $this->create_meeting_exceptions( $start_date, $end_date );
+
+		if ( ! $secret && get_query_var( 'secret' ) ) {
+			$secret = get_query_var( 'secret' );
+		}
 		?>
 		<div id="session_select" class="text-center mw-800px">
 			<h1 class="mb-2"><b><?php echo esc_html( $signup_name ); ?></b></h1>
 			<div>
 				<div class="container">
 					<form class="signup_form" method="POST">
-						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
-
-						<?php $user_badge = $this->create_user_table( $user_group ); ?>
+						<?php
+						wp_nonce_field( 'signups', 'mynonce' );
+						$user        = $this->create_user_table( $user_group, $signup_id, $secret );
+						$user_badge  = $user['badge'];
+						$user_secret = $user['secret'];
+						?>
 
 						<table id="selection-table" class="table-bordered mb-100px mr-auto ml-auto container selection-font"
 							<?php echo null === $user_badge && ! $admin ? 'hidden' : ''; ?> >
@@ -564,7 +643,7 @@ class SignUpsBase {
 														<?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?>
 														<input class="form-check-input ml-2 rolling-remove-chk mt-2 <?php echo esc_html( $attendee->attendee_badge ); ?>" 
 															type="checkbox" name="remove_slots[]" 
-															<?php echo $user_badge === $attendee->attendee_badge || $admin ? '' : 'hidden'; ?>
+															<?php echo ( $user_badge === $attendee->attendee_badge && $attendee->attendee_secret === $secret ) || $admin ? '' : 'hidden'; ?>
 															value="
 															<?php
 															echo esc_html(
@@ -573,7 +652,8 @@ class SignUpsBase {
 																$comment_index . ',' . $attendee->attendee_id
 															);
 															?>
-															">
+															"
+															>
 													</td>
 													<?php
 												} else {
@@ -588,10 +668,10 @@ class SignUpsBase {
 														<?php
 														echo esc_html(
 															$start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) .
-															',' . $item->template_item_title . ',' . $comment_index . ',' . $item->template_item_slots
+															',' . $item->template_item_title . ',' . $comment_index . ',0,' . $item->template_item_slots
 														);
 														?>
-														"><br>
+														" <?php echo $this->is_attendee_free( $attendees, $start_date, $user_badge ) ? '' : 'disabled'; ?> ><br>
 														<?php
 													}
 
@@ -609,7 +689,7 @@ class SignUpsBase {
 															<?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?>
 															<input class="form-check-input ml-2 rolling-remove-chk mt-2 <?php echo esc_html( $attendee->attendee_badge ); ?>" 
 																type="checkbox" name="remove_slots[]" 
-																<?php echo $user_badge === $attendee->attendee_badge || $admin ? '' : 'hidden'; ?> 
+																<?php echo ( $user_badge === $attendee->attendee_badge && $attendee->attendee_secret === $secret ) || $admin ? '' : 'hidden'; ?>
 																value="
 																<?php
 																echo esc_html(
@@ -642,19 +722,16 @@ class SignUpsBase {
 													<?php
 												} else {
 													$com_name = $comment_name . $comment_index;
+													$value    = $start_date->format( self::DATETIME_FORMAT ) . ',';
+													$value   .= $temp_end_date->format( self::DATETIME_FORMAT ) . ',';
+													$value   .= $item->template_item_title . ',' . $comment_index . ',0,' . $item->template_item_slots;
 													?>
 													<td class="text-center">
 														<span class="mr-2"><?php echo esc_html( $item->template_item_title ); ?></span> 
 														<input class="form-check-input position-relative rolling-add-chk ml-auto <?php echo esc_html( str_replace( ' ', '', $item->template_item_title ) ); ?>" 
 															type="checkbox" name="time_slots[]" 
-															value="
-															<?php
-															echo esc_html(
-																$start_date->format( self::DATETIME_FORMAT ) . ',' . $temp_end_date->format( self::DATETIME_FORMAT ) .
-																',' . $item->template_item_title . ',' . $comment_index . ',' . $item->template_item_slots
-															)
-															?>
-															">
+															value="<?php echo esc_html( $value ); ?>"
+															<?php echo $this->is_attendee_free( $attendees, $start_date, $user_badge ) ? '' : 'disabled'; ?> >
 															<?php
 															if ( $item->template_item_slots > '1' && count( $slot_attendees ) === 0 ) {
 																echo "<br><span class='text-primary'><i>" . count( $slot_attendees ) . ' of ' . esc_html( $item->template_item_slots ) . ' Slots Filled </i></span><br>';
@@ -685,6 +762,7 @@ class SignUpsBase {
 							?>
 							<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
 							<input type="hidden" name="add_attendee_session" value="<?php echo esc_html( $signup_id ); ?>">
+							<input type="hidden" name="user_secret" value="<?php echo esc_html( $user_secret ); ?>">
 							<tr class="footer-row">
 								<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="signup_id">Cancel</button></td>
 								<td></td>
@@ -727,8 +805,10 @@ class SignUpsBase {
 		$new_attendee['attendee_lastname']  = $post['lastname'];
 		$new_attendee['attendee_firstname'] = $post['firstname'];
 		$new_attendee['attendee_badge']     = $post['badge_number'];
+		$new_attendee['attendee_secret']    = $post['user_secret'];
 		$insert_return_value                = false;
-
+		$send_mail                          = false;
+		$body                               = '<h2>' . $post['signup_name'] . '</h2><br>';
 		?>
 		<div class="container">
 			<form method="POST">
@@ -741,6 +821,7 @@ class SignUpsBase {
 						<th>Status</th>
 					</tr>
 				<?php
+				$body .= '<b><pre>      Date           Time           Name             Item         Status</pre></b>';
 				if ( isset( $post['time_slots'] ) ) {
 					foreach ( $post['time_slots'] as $slot ) {
 						$slot_parts                               = explode( ',', $slot );
@@ -752,7 +833,7 @@ class SignUpsBase {
 						$new_attendee['attendee_end_formatted']   = $slot_end->format( self::DATETIME_FORMAT );
 						$new_attendee['attendee_item']            = trim( $slot_parts[2] );
 						$comment_name                             = 'comment-' . $slot_parts[3];
-						$slot_count                               = $slot_parts[4];
+						$slot_count                               = $slot_parts[5];
 						$new_attendee['attendee_comment']         = $post[ $comment_name ];
 
 						$wpdb->query(
@@ -772,8 +853,12 @@ class SignUpsBase {
 							)
 						);
 
+						$insert_id = -1;
 						if ( count( $dup_rows ) < $slot_count ) {
 							$insert_return_value = $wpdb->insert( self::ATTENDEES_ROLLING_TABLE, $new_attendee );
+							if ( $insert_return_value ) {
+								$insert_id = $wpdb->insert_id;
+							}
 						} else {
 							?>
 							<h2 class="text-danger">Timeslot is already taken, refresh page and reselect another time.</h2>
@@ -781,7 +866,6 @@ class SignUpsBase {
 						}
 
 						$wpdb->query( 'UNLOCK TABLES' );
-
 						?>
 						<tr class="attendee-row">
 							<td><?php echo esc_html( $slot_start->format( self::DATE_FORMAT ) ); ?></td>
@@ -789,14 +873,19 @@ class SignUpsBase {
 							<td><?php echo esc_html( $post['firstname'] . ' ' . $post['lastname'] ); ?></td>
 							<td><?php echo esc_html( $slot_parts[2] ); ?></td>
 							<?php
+							$body .= '<pre>' . $slot_start->format( self::DATE_FORMAT ) . ' ' . $slot_start->format( self::TIME_FORMAT ) . ' - ' . $slot_end->format( self::TIME_FORMAT );
+							$body .= '  ' . $post['firstname'] . ' ' . $post['lastname'] . '    ' . $slot_parts[2];
 							if ( ! $insert_return_value || count( $dup_rows ) > $slot_count ) {
 								?>
 								<td style="color:red"><b><i>Failed</i></b></td>
 								<?php
+								$body .= '   ' . "<b style='color:red'><i>   Failed </pre></i></b></pre>";
 							} else {
+								$send_mail = true;
 								?>
 								<td>Success</td>
 								<?php
+								$body .= '   Success </pre>';
 							}
 							?>
 						</tr>
@@ -857,9 +946,17 @@ class SignUpsBase {
 				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 			</form>
 			<h2>Signup complete</h2>
-
+			<a href="https://edstestsite.site/signups/?signup_id=9&secret=" <?php echo esc_html( $post['user_secret'] ); ?> >Change Signup</a><br>
+			<p>Your key to edit this signup is: &emsp; &emsp; <?php echo esc_html( $post['user_secret'] ); ?> </p>
 		</div>
 		<?php
+		if ( $send_mail ) {
+			$sgm   = new SendGridMail();
+			$link  = "<a href='https://edstestsite.site/signups/?signup_id=9&secret=" . $post['user_secret'] . "'>Edit Signup</a>";
+			$body .= '<br><br>' . $link . '<br>';
+			$body .= '<p>Your key to edit this signup is: &emsp; &emsp;' . $post['user_secret'] . '</p>';
+			$sgm->send_mail( $post['email'], 'Montor Signup', $body );
+		}
 
 		clean_post_cache( $post );
 	}

@@ -23,7 +23,7 @@ class ShortCodes extends SignUpsBase {
 		$post = wp_unslash( $_POST );
 		if ( isset( $post['mynonce'] ) && wp_verify_nonce( $post['mynonce'], 'signups' ) ) {
 			if ( isset( $post['continue_signup'] ) ) {
-				$this->create_signup_form( $post['continue_signup'] );
+				$this->create_signup_form( $post['continue_signup'], $post['secret'] );
 			} elseif ( isset( $post['add_attendee_session'] ) ) {
 				$this->add_attendee_rolling( $post );
 			} elseif ( isset( $post['add_attendee_class'] ) ) {
@@ -37,7 +37,11 @@ class ShortCodes extends SignUpsBase {
 			}
 		} else {
 			if ( get_query_var( 'signup_id' ) ) {
-				$this->create_description_form( get_query_var( 'signup_id' ) );
+				if ( get_query_var( 'secret' ) ) {
+					$this->create_description_form( get_query_var( 'signup_id' ), get_query_var( 'secret' ) );
+				} else {
+					$this->create_description_form( get_query_var( 'signup_id' ) );
+				}
 			} else {
 				$this->create_select_signup();
 			}
@@ -138,7 +142,7 @@ class ShortCodes extends SignUpsBase {
 	 * @param string $signup_id The id of the signup to create a form for.
 	 * @return void
 	 */
-	private function create_signup_form( $signup_id ) {
+	private function create_signup_form( $signup_id, $secret = null ) {
 		global $wpdb;
 		$signups = $wpdb->get_results(
 			$wpdb->prepare(
@@ -155,7 +159,7 @@ class ShortCodes extends SignUpsBase {
 		$signup_name = $signups[0]->signup_name;
 
 		if ( $rolling ) {
-			$this->create_rolling_session( $signup_id );
+			$this->create_rolling_session( $signup_id, $secret );
 		} else {
 			$bad_debt = $wpdb->get_results(
 				$wpdb->prepare(
@@ -490,9 +494,9 @@ class ShortCodes extends SignUpsBase {
 						if ( 'none' == $user_group ) {
 							$user_badge = true;
 							$this->create_new_user_table();
-
 						} else {
-							$user_badge = $this->create_user_table( $user_group );
+							$user       = $this->create_user_table( $user_group, $signup_id );
+							$user_badge = $user['badge'];
 						}
 						?>
 						<table id="selection-table" class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-125px selection-font"
@@ -622,7 +626,7 @@ class ShortCodes extends SignUpsBase {
 	 * @param  mixed $signup_id Id of the signup.
 	 * @return void
 	 */
-	private function create_description_form( $signup_id ) {
+	private function create_description_form( $signup_id, $secret = null ) {
 		global $wpdb;
 		$signups = $wpdb->get_results(
 			$wpdb->prepare(
@@ -687,7 +691,7 @@ class ShortCodes extends SignUpsBase {
 		}
 
 		if ( ! $description_object ) {
-			$this->create_signup_form( $signup_id );
+			$this->create_signup_form( $signup_id, $secret );
 		} else {
 			?>
 			<div class="text-center"><h1 ><?php echo esc_html( $signup->signup_name ); ?></h1></div>
@@ -741,6 +745,7 @@ class ShortCodes extends SignUpsBase {
 					<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 					<button type="submit" class="btn btn-md bg-primary mr-2" value="-1" name="signup_id">Cancel</button>
 					<button id='accept_conditions' class="btn btn-primary" type='submit' value="<?php echo esc_html( $signup_id ); ?>" name="continue_signup">Continue</button>
+					<input type="hidden" name="secret" value="<?php echo esc_html( $secret ); ?>">
 				</form>
 			</div>
 			<?php

@@ -35,10 +35,19 @@ jQuery(document).ready(function($){
 				$('button[type="submit"]').each(function() {
 					$(this).removeAttr('disabled');
 				});
-				var badgeclass = '.' + response[0].badge;
-				Cookies.set('signups_scw_badge', response[0].badge);
+
+				if ($("#remember_me").is(":checked")){
+					Cookies.set('signups_scw_badge', response[0].badge);
+				}
 				$('.rolling-remove-chk').prop("hidden", true);
 				$('badgeclass').prop("hidden", false);
+
+				$("<input />").attr("type", "hidden")
+				.attr("name", "continue_signup")
+				.attr("value", "9")
+				.appendTo(".signup_form");
+				$("#update_butt").attr("clicked", "true");
+				$(".signup_form").submit();
 			} else {
 				alert('Badge number not found.')
 			}
@@ -75,9 +84,34 @@ jQuery(document).ready(function($){
 		}
 	});
 
+	$("#user-edit-id").on("input", function() {
+		var len = $(this).val().length;
+		if(len === 36) {
+			$("#update_butt").removeAttr("disabled");
+		} else {
+			$("#update_butt").attr("disabled", true);
+		}
+
+	});
+
+	$("#update_butt").click(function(e){
+		$(this).attr("clicked", "true");
+		return;
+	})
+
 	$(".signup_form").submit(function(e){
 		e.preventDefault();
 		var form = this;
+		if ($("#update_butt").attr('clicked')) {
+			$("#update_butt").removeAttr('clicked')
+			$("<input />").attr("type", "hidden")
+				.attr("name", "continue_signup")
+				.attr("value", "9")
+				.appendTo(".signup_form");
+		    form.submit();
+			return;
+		}
+		
 		var selectedValues = $("input[name='time_slots[]']:checked:enabled").map(function() {
 			return this.value;
 		}).get();
@@ -133,19 +167,31 @@ jQuery(document).ready(function($){
 		  });
 	});
 
+	$("#remember_me").click(function() {
+		if ($("#remember_me").is(":checked")){
+			if ($("#badge-input").val()) {
+				Cookies.set("signups_scw_badge", $("#badge-input").val());
+			}
+		} else {
+			Cookies.remove("signups_scw_badge");
+		}
+	})
+
 	$(".rolling-add-chk").click(function(x) {
 		var val = x.currentTarget.value;
-		var arr = val.split(',');
-		var classname = '.' + arr[2].replace(' ', '');
-		if (classname.indexOf("Machine") > 0) {
-			var checked = $(".rolling-add-chk:checkbox:checked").length;
-			if (checked == 0) {
-				$(".rolling-add-chk").attr("disabled", false);
-			} else if (checked == 1) {
-				$(".rolling-add-chk").attr("disabled", true);
-				$(classname).attr("disabled", false);
+		if (val) {
+			var arr = val.split(',');
+			var classname = '.' + arr[2].replace(' ', '');
+			if (classname.indexOf("Machine") > 0) {
+				var checked = $(".rolling-add-chk:checkbox:checked").length;
+				if (checked == 0) {
+					$(".rolling-add-chk").attr("disabled", false);
+				} else if (checked == 1) {
+					$(".rolling-add-chk").attr("disabled", true);
+					$(classname).attr("disabled", false);
+				}
 			}
-		}
+	}
 	});
 
 	$(".back-button").click(function() {

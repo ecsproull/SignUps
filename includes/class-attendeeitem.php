@@ -69,9 +69,16 @@ class AttendeeItem {
 	public $attendee_item;
 
 	/**
-	 * Item.
+	 * Badge.
 	 *
 	 * @var attendee_badge.
 	 */
 	public $attendee_badge;
+
+	/**
+	 * Secret.
+	 *
+	 * @var attendee_Secret.
+	 */
+	public $attendee_secret;
 }

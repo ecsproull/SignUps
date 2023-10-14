@@ -40,6 +40,7 @@
 #first-name,
 #phone,
 #email,
+#user-edit-id,
 table#new-member > tbody > tr > td > input {
 	background-color: transparent;
 	height: 45px;
