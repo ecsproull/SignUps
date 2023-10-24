@@ -495,8 +495,7 @@ class ShortCodes extends SignUpsBase {
 							$user_badge = true;
 							$this->create_new_user_table();
 						} else {
-							$user       = $this->create_user_table( $user_group, $signup_id );
-							$user_badge = $user['badge'];
+							$user_badge = $this->create_user_table( $user_group, $signup_id );
 						}
 						?>
 						<table id="selection-table" class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-125px selection-font"

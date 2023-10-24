@@ -255,6 +255,7 @@ class SignUpsBase {
 		$return_val  = null;
 		$results     = array( 1 );
 		$remember_me = false;
+		$user_secret = null;
 
 		if ( $secret ) {
 			$attendees_rolling = $wpdb->get_results(
@@ -282,10 +283,7 @@ class SignUpsBase {
 				);
 
 				$user_secret = $results[0]->secret;
-				$return_val  = array(
-					'badge'  => $badge,
-					'secret' => $secret,
-				);
+				$return_val  = $badge;
 			}
 			?>
 			<?php
@@ -308,11 +306,10 @@ class SignUpsBase {
 			);
 
 			if ( $results ) {
-				$return_val = array(
-					'badge'  => $results[0]->badge,
-					'secret' => $results[0]->secret,
-				);
+				$return_val = $results[0]->badge;
 			}
+
+			$user_secret = $results[0]->secret;
 		}
 		?>
 
@@ -331,7 +328,7 @@ class SignUpsBase {
 			<tr>
 				<td class="text-right">
 					<span class="mr-1">Remember Badge</span>
-					<input id="remember_me" class="position-relative rolling-add-chk mr-1" 
+					<input id="remember_me" class="position-relative remember-me-chk mr-1" 
 						type="checkbox" name="remember_me" value='' <?php echo $remember_me ? 'checked' : ''; ?>></td>
 				<td class="text-left"><input id="user-edit-id" class="user-edit-id" 
 					type="text" name="secret" value="<?php echo esc_html( $secret ); ?>" placeholder="Enter secret to edit"
@@ -349,6 +346,7 @@ class SignUpsBase {
 			</tr>
 		</table>
 		<input id="user_groups" type="hidden" name="user_groups" value="<?php echo esc_html( $user_group ); ?>">
+		<input id="user-secret" type="hidden" name="user_secret" value="<?php echo esc_html( $user_secret ); ?>">
 		<?php
 
 		return $return_val;
@@ -551,9 +549,7 @@ class SignUpsBase {
 					<form class="signup_form" method="POST">
 						<?php
 						wp_nonce_field( 'signups', 'mynonce' );
-						$user        = $this->create_user_table( $user_group, $signup_id, $secret );
-						$user_badge  = $user['badge'];
-						$user_secret = $user['secret'];
+						$user_badge = $this->create_user_table( $user_group, $signup_id, $secret );
 						?>
 
 						<table id="selection-table" class="table-bordered mb-100px mr-auto ml-auto container selection-font"
@@ -762,7 +758,6 @@ class SignUpsBase {
 							?>
 							<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
 							<input type="hidden" name="add_attendee_session" value="<?php echo esc_html( $signup_id ); ?>">
-							<input type="hidden" name="user_secret" value="<?php echo esc_html( $user_secret ); ?>">
 							<tr class="footer-row">
 								<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="signup_id">Cancel</button></td>
 								<td></td>
@@ -797,6 +792,36 @@ class SignUpsBase {
 	 */
 	protected function add_attendee_rolling( $post ) {
 		global $wpdb;
+
+		$badge = $post['badge_number'];
+		if ( strlen( $badge ) !== 4 || ! preg_match( '~[0-9]+~', $badge ) ) {
+			?>
+			<h2>Data verification failed. Error:0x80420</h2>
+			<?php
+			return;
+		}
+
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE badge = %s',
+				self::ROSTER_TABLE,
+				$post['badge_number']
+			),
+			OBJECT
+		);
+
+		if ( ! $results ||
+			$results[0]->firstname !== $post['firstname'] ||
+			$results[0]->lastname !== $post['lastname'] ||
+			$results[0]->email !== $post['email'] ||
+			$results[0]->phone !== $post['phone'] ) {
+			?>
+			<h2>Data verification failed. Error:0x80421</h2>
+			<?php
+			return;
+		}
 
 		$new_attendee                       = array();
 		$new_attendee['attendee_signup_id'] = $post['add_attendee_session'];

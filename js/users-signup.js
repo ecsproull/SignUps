@@ -31,6 +31,7 @@ jQuery(document).ready(function($){
 				$('.member-email').each(function () { $(this).val(response[0].email); });
 				$('.member-phone').each(function () { $(this).val(response[0].phone);  });
 				$('.member-badge').each(function () { $(this).val(response[0].badge);  });
+				$('#user-secret').val(response[0].secret);
 				$("#selection-table").prop("hidden", false);
 				$('button[type="submit"]').each(function() {
 					$(this).removeAttr('disabled');
@@ -41,13 +42,6 @@ jQuery(document).ready(function($){
 				}
 				$('.rolling-remove-chk').prop("hidden", true);
 				$('badgeclass').prop("hidden", false);
-
-				$("<input />").attr("type", "hidden")
-				.attr("name", "continue_signup")
-				.attr("value", "9")
-				.appendTo(".signup_form");
-				$("#update_butt").attr("clicked", "true");
-				$(".signup_form").submit();
 			} else {
 				alert('Badge number not found.')
 			}
@@ -106,7 +100,7 @@ jQuery(document).ready(function($){
 			$("#update_butt").removeAttr('clicked')
 			$("<input />").attr("type", "hidden")
 				.attr("name", "continue_signup")
-				.attr("value", "9")
+				.attr("value", $("#update_butt").val())
 				.appendTo(".signup_form");
 		    form.submit();
 			return;
@@ -184,9 +178,12 @@ jQuery(document).ready(function($){
 			var classname = '.' + arr[2].replace(' ', '');
 			if (classname.indexOf("Machine") > 0) {
 				var checked = $(".rolling-add-chk:checkbox:checked").length;
-				if (checked == 0) {
+				if (checked > 3) {
+					$(".rolling-add-chk:checkbox:not(:checked)").attr("disabled", true);
+					alert("Only 4 sessions can be selected at a time.");
+				} else if (checked == 0) {
 					$(".rolling-add-chk").attr("disabled", false);
-				} else if (checked == 1) {
+				} else if (checked > 0 && checked < 4) {
 					$(".rolling-add-chk").attr("disabled", true);
 					$(classname).attr("disabled", false);
 				}
