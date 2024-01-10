@@ -180,7 +180,7 @@ jQuery(document).ready(function($){
 				var checked = $(".rolling-add-chk:checkbox:checked").length;
 				if (checked > 3) {
 					$(".rolling-add-chk:checkbox:not(:checked)").attr("disabled", true);
-					alert("Only 4 sessions can be selected at a time.");
+					//alert("Only 4 sessions can be selected at a time.");
 				} else if (checked == 0) {
 					$(".rolling-add-chk").attr("disabled", false);
 				} else if (checked > 0 && checked < 4) {

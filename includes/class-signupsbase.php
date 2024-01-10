@@ -106,6 +106,12 @@ class SignUpsBase {
 	protected const SPIDER_CALENDAR_EVENT_TABLE = 'wp_spidercalendar_event';
 
 	/**
+	 * Spider Calendar Event table.
+	 *
+	 * @var mixed
+	 */
+	protected const TEXT_TABLE = 'wp_scw_text_messages';
+	/**
 	 * Format DateTime as 2020-08-13 6:00 am.
 	 *
 	 * @var mixed
