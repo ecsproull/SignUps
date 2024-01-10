@@ -89,11 +89,11 @@ class SignUpsRestApis extends SignUpsBase {
 
 		$wpdb->insert( self::TEXT_TABLE, $insert_data );
 
-		$server       = 'WC_SERVER\\SQLEXPRESS';
-		$database     = 'WoodClub';
-		$username     = 'memberapp';
-		$password     = 'member';
-		$handle       = new PDO( "sqlsrv:Server=$server;Database=$database;", $username, $password );
+		$server   = 'WC_SERVER\\SQLEXPRESS';
+		$database = 'WoodClub';
+		$username = 'memberapp';
+		$password = 'member';
+		$handle   = new PDO( "sqlsrv:Server=$server;Database=$database;", $username, $password );
 		$handle->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 		$statement = $handle->prepare( "SELECT Badge, FirstName, LastName, Email from MemberRoster WHERE Phone = '$phone_number'" );
 		$result    = $statement->execute();

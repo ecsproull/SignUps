@@ -179,6 +179,22 @@ input[type='radio'] {
 	transform: scale(2); 
 }
 
+.cnc-user-list {
+	display: grid;
+	width: 1000px;
+	grid-template-columns:   10% 10% 10% 10% 30% 30%;
+	align-items: start;
+	justify-content: space-between;
+}
+
+.cnc-report-list {
+	display: grid;
+	width: 1000px;
+	grid-template-columns: 15% 15% 30% 15% 15% 10%;
+	align-items: start;
+	justify-content: space-between;
+}
+
 .signup-category-list {
 	display: grid;
 	width: 1000px;

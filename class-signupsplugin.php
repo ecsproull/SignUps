@@ -37,6 +37,7 @@ require 'includes/class-descriptioneditor.php';
 require 'includes/class-stripepayments.php';
 require 'includes/class-rollingtemplateseditor.php';
 require 'includes/class-sendgridmail.php';
+require 'includes/class-reports.php';
 
 /**
  * Main signups class.
@@ -65,6 +66,13 @@ class SignupsPlugin extends SignUpsBase {
 	private $stripe_payments;
 
 	/**
+	 * Shortcode object for use in api callback.
+	 *
+	 * @var $reports
+	 */
+	private $reports;
+
+	/**
 	 * __construct
 	 *
 	 * @return void
@@ -78,10 +86,12 @@ class SignupsPlugin extends SignUpsBase {
 		$this->short_codes        = new ShortCodes();
 		$this->stripe_payments    = new StripePayments();
 		$this->description_editor = new DescriptionEditor();
+		$this->reports            = new Reports();
 		add_shortcode( 'scw_selectclass', array( $this->short_codes, 'user_signup' ) );
 		add_shortcode( 'scw_payment_success', array( $this->stripe_payments, 'payment_success' ) );
 		add_shortcode( 'scw_payment_failure', array( $this->stripe_payments, 'payment_failure' ) );
 		add_shortcode( 'scw_description_editor', array( $this->description_editor, 'load_description_editor' ) );
+		add_shortcode( 'scw_reports', array( $this->reports, 'class_reports' ) );
 		add_action(
 			'rest_api_init',
 			array( $this, 'regester_payment_route' )
@@ -136,7 +146,10 @@ class SignupsPlugin extends SignUpsBase {
 	 * @param string $host Who is calling.
 	 */
 	public function add_scripts_and_css( $host ) {
-		if ( 'toplevel_page_sign_ups' !== $host && 'signups_page_html_editor' !== $host && 'signups_page_template_editor' !== $host ) {
+		if ( 'toplevel_page_sign_ups' !== $host &&
+		'signups_page_html_editor' !== $host &&
+		'signups_page_template_editor' !== $host &&
+		'cncusagereport' !== $host ) {
 			return;
 		}
 
@@ -168,8 +181,9 @@ class SignupsPlugin extends SignUpsBase {
 		$user_pages[] = 'signup-description-editor';
 		$user_pages[] = 'submit-new-signup';
 		$user_pages[] = 'signups';
+		$user_pages[] = 'cncusagereport';
 		if ( ! is_page( $user_pages ) ) {
-			return;
+			//return;
 		}
 
 		wp_register_style( 'signup_bs_style', plugins_url( '/signups/bootstrap/css/bootstrap.min.css' ), array(), 1 );
