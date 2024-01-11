@@ -93,6 +93,19 @@ jQuery(document).ready(function($){
 		return;
 	})
 
+	$("#toggle-view").click(function(e) {
+		var x = $("#report-view").css('display');
+		if ($("#report-view").css("display") == "block") {
+			$("#report-view").css("display", "none");
+			$("#all-items").css("display", "block");
+			$("#toggle-view").html("Report View");
+		} else {
+			$("#report-view").css("display", "block");
+			$("#all-items").css("display", "none");
+			$("#toggle-view").html("All Slots");
+		}
+	})
+
 	$(".signup_form").submit(function(e){
 		e.preventDefault();
 		var form = this;

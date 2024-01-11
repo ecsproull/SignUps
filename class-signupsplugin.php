@@ -181,9 +181,9 @@ class SignupsPlugin extends SignUpsBase {
 		$user_pages[] = 'signup-description-editor';
 		$user_pages[] = 'submit-new-signup';
 		$user_pages[] = 'signups';
-		$user_pages[] = 'cncusagereport';
+		$user_pages[] = 'cnc-usage-report';
 		if ( ! is_page( $user_pages ) ) {
-			//return;
+			return;
 		}
 
 		wp_register_style( 'signup_bs_style', plugins_url( '/signups/bootstrap/css/bootstrap.min.css' ), array(), 1 );
