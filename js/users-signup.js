@@ -248,6 +248,10 @@ jQuery(document).ready(function($){
 		}
 	});
 
+	$("#download").click(function(e){
+		download($("#csv_data").val() ,"CncUsers.csv", "text/csv;charset=utf-8;")
+	})
+
 	function download(data, filename, type) {
 		var file = new Blob([data], {type: type});
 		if (window.navigator.msSaveOrOpenBlob) // IE10+

@@ -60,7 +60,7 @@ class Reports extends SignUpsBase {
 	 *
 	 * @var mixed
 	 */
-	private $users_report = 'SELECT * from CncSignUpHistory';
+	private $users_report = 'SELECT * from CncSignUpHistory ORDER BY Machine, StartTime';
 
 	/**
 	 * Add the select class shortcode
@@ -163,6 +163,7 @@ class Reports extends SignUpsBase {
 				<button id="toggle-view" type="button" class="btn btn-md bg-primary mr-auto ml-auto">All Slots</button>
 			</div>
 			<div>
+				<button id="download" type="button" class="btn btn-md bg-primary">Download</button>
 			</div>
 			<div class="mt-2">
 				<button type="submit" class="btn btn-md bg-primary mr-auto ml-auto" value="-1" name="submit_query">Update</button>
@@ -185,6 +186,7 @@ class Reports extends SignUpsBase {
 				$current_machine;
 				$hours_count = 0;
 				foreach ( $items as $slot ) {
+
 					if ( ! $current_machine ) {
 						$current_machine = $slot['Machine'];
 					} elseif ( $current_machine !== $slot['Machine'] ) {
@@ -230,6 +232,7 @@ class Reports extends SignUpsBase {
 		<div id="all-items" style="display: none">
 			<?php
 			if ( $items ) {
+				$csv_data = 'Machine,Badge,Email,First Name,Last Name,Start Time,End Time' . PHP_EOL;
 				?>
 				<div class='cnc-user-list'>
 					<div class = 'col'>Machine</div>
@@ -241,6 +244,8 @@ class Reports extends SignUpsBase {
 					<div class = 'col mb-2'>End Time</div>
 					<?php
 					foreach ( $all_items as $slot ) {
+						$csv_data .= trim( $slot['Machine'] ) . ',' . trim( $slot['Badge'] ) . ',' . trim( $slot['Email'] ) . ',' . trim( $slot['FirstName'] );
+						$csv_data .= ',' . trim( $slot['LastName'] ) . ',' . trim( $slot['StartTime'] ) . ',' . trim( $slot['EndTime'] ) . PHP_EOL;
 						?>
 						<div class = 'col'><?php echo trim( esc_html( $slot['Machine'] ) ); ?></div>
 						<div class = 'col'><?php echo trim( esc_html( $slot['Badge'] ) ); ?></div>
@@ -252,6 +257,7 @@ class Reports extends SignUpsBase {
 						<?php
 					}
 					?>
+					<input type="hidden" id="csv_data" name="csv_dater" value="<?php echo esc_html( $csv_data ); ?>" >
 				</div>
 				<?php
 			}

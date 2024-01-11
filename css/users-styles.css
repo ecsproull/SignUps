@@ -191,7 +191,7 @@ input[type='radio'] {
 .cnc-user-list {
 	display: grid;
 	width: 1000px;
-	grid-template-columns:   10% 10% 20% 12% 10% 20% 23%;
+	grid-template-columns:   10% 10% 23% 12% 10% 20% 20%;
 	align-items: start;
 	justify-content: space-between;
 }
