@@ -977,13 +977,13 @@ class SignUpsBase {
 				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 			</form>
 			<h2>Signup complete</h2>
-			<a href="https://edstestsite.site/signups/?signup_id=9&secret=" <?php echo esc_html( $post['user_secret'] ); ?> >Change Signup</a><br>
+			<a href="https://edstestsite.site/signups/?signup_id=<?php echo esc_html( $post['add_attendee_session'] ); ?>&secret=" <?php echo esc_html( $post['user_secret'] ); ?> >Change Signup</a><br>
 			<p>Your key to edit this signup is: &emsp; &emsp; <?php echo esc_html( $post['user_secret'] ); ?> </p>
 		</div>
 		<?php
 		if ( $send_mail ) {
 			$sgm   = new SendGridMail();
-			$link  = "<a href='https://edstestsite.site/signups/?signup_id=9&secret=" . $post['user_secret'] . "'>Edit Signup</a>";
+			$link  = "<a href='https://woodclubtest.site/signups/?signup_id=" . $post['add_attendee_session'] . '&secret=' . $post['user_secret'] . "'>Edit Signup</a>";
 			$body .= '<br><br>' . $link . '<br>';
 			$body .= '<p>Your key to edit this signup is: &emsp; &emsp;' . $post['user_secret'] . '</p>';
 			$sgm->send_mail( $post['email'], 'Montor Signup', $body );

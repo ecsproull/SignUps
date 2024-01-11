@@ -62,6 +62,8 @@ class Reports extends SignUpsBase {
 	 */
 	private $users_report = 'SELECT * from CncSignUpHistory ORDER BY Machine, StartTime';
 
+	private $users_report_where = 'SELECT * from CncSignUpHistory WHERE %s ORDER BY Machine, StartTime';
+
 	/**
 	 * Add the select class shortcode
 	 */
@@ -93,7 +95,7 @@ class Reports extends SignUpsBase {
 		$where_all = '';
 		if ( 'Both' !== $post['machine'] ) {
 			$where     .= "CncSignUpHistory.Machine = '" . $post['machine'] . "'";
-			$where_all .= " WHERE Machine = '" . $post['machine'] . "'";
+			$where_all .= " Machine = '" . $post['machine'] . "'";
 		}
 
 		if ( $post['start_date'] ) {
@@ -102,7 +104,7 @@ class Reports extends SignUpsBase {
 				$where_all .= " AND StartTime >= '" . $post['start_date'] . "'";
 			} else {
 				$where     .= " CncSignUpHistory.StartTime >= '" . $post['start_date'] . "'";
-				$where_all .= " WHERE StartTime >= '" . $post['start_date'] . "'";
+				$where_all .= " StartTime >= '" . $post['start_date'] . "'";
 			}
 		}
 
@@ -112,7 +114,7 @@ class Reports extends SignUpsBase {
 				$where_all .= " AND EndTime >= '" . $post['start_date'] . "'";
 			} else {
 				$where     .= " CncSignUpHistory.EndTime <= '" . $post['end_date'] . "'";
-				$where_all .= " WHERE EndTime <= '" . $post['end_date'] . "'";
+				$where_all .= " EndTime <= '" . $post['end_date'] . "'";
 			}
 		}
 
@@ -120,7 +122,7 @@ class Reports extends SignUpsBase {
 		$query_all = '';
 		if ( $where ) {
 			$query     = sprintf( $this->usage_report_where, $where );
-			$query_all = $this->users_report .= $where_all;
+			$query_all = sprintf( $this->users_report_where, $where_all );
 		} else {
 			$query     = $this->usage_report;
 			$query_all = $this->users_report;

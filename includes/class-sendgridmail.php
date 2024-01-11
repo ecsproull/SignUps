@@ -22,7 +22,7 @@ class SendGridMail extends SignUpsBase {
 	/**
 	 * Used to send an email.
 	 *
-	 * @param  mixed $email Email address of the receipient.
+	 * @param  mixed $email_address Email address of the receipient.
 	 * @param  mixed $subject subject for the email.
 	 * @param  mixed $message Message body for the email.
 	 * @return void
@@ -35,13 +35,7 @@ class SendGridMail extends SignUpsBase {
 		);
 
 		$email->setSubject( $subject );
-		/*$email->addTo(
-			$email_address
-		);*/
-
-		$email->addTo(
-			'ecsproull765@gmail.com'
-		);
+		$email->addTo( $email_address );
 
 		$email->addContent(
 			'text/html',
