@@ -36,6 +36,7 @@ require 'includes/class-htmleditor.php';
 require 'includes/class-descriptioneditor.php';
 require 'includes/class-stripepayments.php';
 require 'includes/class-rollingtemplateseditor.php';
+require 'includes/class-rollingexceptionseditor.php';
 require 'includes/class-sendgridmail.php';
 require 'includes/class-reports.php';
 
@@ -138,6 +139,7 @@ class SignupsPlugin extends SignUpsBase {
 		add_menu_page( '', 'SignUps', 'manage_options', 'sign_ups', array( new SignupSettings(), 'signup_settings_page' ), plugins_url( '/signups/img/frenchie.bmp' ) );
 		add_submenu_page( 'sign_ups', 'Html Editor', 'Descriptions', 'manage_options', 'html_editor', array( new HtmlEditor(), 'load_html_editor' ) );
 		add_submenu_page( 'sign_ups', 'Rolling Templates Editor', 'Rolling Templates', 'manage_options', 'template_editor', array( new RollingTemplatesEditor(), 'load_templates_editor' ) );
+		add_submenu_page( 'sign_ups', 'Rolling Exceptions Editor', 'Exceptions', 'manage_options', 'exceptions_editor', array( new RollingExceptionsEditor(), 'load_exceptions_editor' ) );
 	}
 
 	/**
@@ -149,6 +151,7 @@ class SignupsPlugin extends SignUpsBase {
 		if ( 'toplevel_page_sign_ups' !== $host &&
 		'signups_page_html_editor' !== $host &&
 		'signups_page_template_editor' !== $host &&
+		'signups_page_exceptions_editor' !== $host &&
 		'cncusagereport' !== $host ) {
 			return;
 		}
@@ -159,8 +162,9 @@ class SignupsPlugin extends SignUpsBase {
 		wp_enqueue_style( 'signup_style' );
 		wp_register_style( 'user_signup_style', plugins_url( '/signups/css/users-styles.css' ), array(), 1 );
 		wp_enqueue_style( 'user_signup_style' );
+		wp_enqueue_script( 'jquery' );
 		wp_enqueue_script( 'signup_member_script', plugins_url( 'js/signups.js', __FILE__ ), array( 'jquery' ), '1.0.0.0', false, true );
-		wp_enqueue_script( 'signup_tinymce', 'https://cdn.tiny.cloud/1/s9npqxi5h9knhv5a8g5qfc33xh2qknj1nage4xv5qsbtrzyt/tinymce/6/tinymce.min.js', array( 'jquery' ), '4.9.11', false, true );
+		wp_enqueue_script( 'signup_tinymce', 'https://cdn.tiny.cloud/1/s9npqxi5h9knhv5a8g5qfc33xh2qknj1nage4xv5qsbtrzyt/tinymce/6/tinymce.min.js', array( 'jquery' ), '6.4.2', false, true );
 		wp_localize_script(
 			'signup_member_script',
 			'wpApiSettings',

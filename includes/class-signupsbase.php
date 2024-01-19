@@ -57,6 +57,13 @@ class SignUpsBase {
 	protected const ROLLING_TABLE = 'wp_scw_rolling';
 
 	/**
+	 * Date and time exception for rolling signups. Shop closures.
+	 *
+	 * @var mixed
+	 */
+	protected const ROLLING_EXCEPTIONS_TABLE = 'wp_scw_rolling_exceptions';
+
+	/**
 	 * Payments table.
 	 *
 	 * @var mixed
@@ -338,10 +345,10 @@ class SignUpsBase {
 						type="checkbox" name="remember_me" value='' <?php echo $remember_me ? 'checked' : ''; ?>></td>
 				<td class="text-left"><input id="user-edit-id" class="user-edit-id" 
 					type="text" name="secret" value="<?php echo esc_html( $secret ); ?>" placeholder="Enter secret to edit"
-					<?php echo $signup_id < 9 || $signup_id > 10 ? 'hidden' : ''; ?>></td>
+					<?php echo '7' === $signup_id || '6' === $signup_id ? '' : 'hidden'; ?>></td>
 				<td><button id="update_butt" type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary" 
 					value=<?php echo esc_html( $signup_id ); ?> name="continue_signup" disabled
-					<?php echo $signup_id < 9 || $signup_id > 10 ? 'hidden' : ''; ?> >Reload</button></td>
+					<?php echo '7' === $signup_id || '6' === $signup_id ? 'hidden' : ''; ?> >Reload</button></td>
 			</tr>
 			<tr hidden>
 				<td><input id="phone" class="member-phone" type="text" name="phone"
@@ -779,11 +786,8 @@ class SignUpsBase {
 
 	private function adjust_time( $time_exceptions, &$start_date, &$temp_end_date ) {
 		foreach ( $time_exceptions as $exception ) {
-			if ( $start_date == $exception->begin ) {
+			if ( $start_date >= $exception->begin && $start_date <= $exception->end ) {
 				return false;
-			} elseif ( $exception->begin > $start_date && $exception->begin < $temp_end_date) {
-				$start_date = $exception->begin;
-				return true;
 			}
 		}
 
@@ -977,8 +981,14 @@ class SignUpsBase {
 				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 			</form>
 			<h2>Signup complete</h2>
-			<a href="https://edstestsite.site/signups/?signup_id=<?php echo esc_html( $post['add_attendee_session'] ); ?>&secret=" <?php echo esc_html( $post['user_secret'] ); ?> >Change Signup</a><br>
-			<p>Your key to edit this signup is: &emsp; &emsp; <?php echo esc_html( $post['user_secret'] ); ?> </p>
+			<br>
+			<div class="fs-3 text-dark">
+				<a href="https://woodclubtest.site/signups/?signup_id=<?php echo esc_html( $post['add_attendee_session'] ); ?>&secret=" <?php echo esc_html( $post['user_secret'] ); ?> >Change Signup</a><br>
+				<br>
+				<p>Your key to edit this signup is: &emsp; &emsp; <?php echo esc_html( $post['user_secret'] ); ?> </p>
+				<p>ALSO: An email has been sent to <b><i><?php echo esc_html( $post['email'] ) ?></i></b> with a link to edit this signup.<p>
+			</div>
+			
 		</div>
 		<?php
 		if ( $send_mail ) {
@@ -1011,7 +1021,7 @@ class SignUpsBase {
 		);
 
 		?>
-		<select id="template-select" name="template_id" id="templates">
+		<select id="template-select" name="template_id">
 		<option value="0">None</option>
 		<?php
 		foreach ( $templates as $result ) {

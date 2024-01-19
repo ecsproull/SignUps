@@ -212,6 +212,14 @@ input[type='radio'] {
 	justify-content: space-between;
 }
 
+.rolling-exception-list {
+	display: grid;
+	width: 880px;
+	grid-template-columns: 10% 25% 25% 25%;
+	align-items: start;
+	justify-content: space-between;
+}
+
 .class-description-box {
 	display: grid;
 	width: 1000px;

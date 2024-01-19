@@ -285,7 +285,7 @@ jQuery( document ).ready( function($){
 			$('#html-signup-description-short').show();
 		}
 	})
-
+/*
 	tinymce.init({
 		selector: 'textarea.html-textarea',
 		plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
@@ -297,6 +297,6 @@ jQuery( document ).ready( function($){
 		  { value: 'Email', title: 'Email' },
 		],
 		ai_request: (request, respondWith) => respondWith.string(() => Promise.reject("See docs to implement AI Assistant"))
-	});
+	}); */
 	
 });

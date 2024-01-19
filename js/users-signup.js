@@ -82,8 +82,10 @@ jQuery(document).ready(function($){
 		var len = $(this).val().length;
 		if(len === 36) {
 			$("#update_butt").removeAttr("disabled");
+			$("#update_butt").removeAttr("hidden");
 		} else {
 			$("#update_butt").attr("disabled", true);
+			$("#update_butt").attr("hidden", true);
 		}
 
 	});
@@ -200,9 +202,47 @@ jQuery(document).ready(function($){
 					$(".rolling-add-chk").attr("disabled", true);
 					$(classname).attr("disabled", false);
 				}
+
+				var badge = $('#badge-input').val();
+				$('.attendee-row').each(function(i, e) {
+					var badgeClass = "." + badge;
+					var chillen = $(this).find(badgeClass);
+					if (chillen.length === 1) {
+						var chk = $(this).find(".form-check-input:visible");
+						if (chk.length === 1) {
+							chk.attr("disabled", true);
+						}
+					}
+				});
+
+				checkUsersEdits();
+			} else if (classname.indexOf("Laser") > 0) {
+			
+				var checked = $(".rolling-add-chk:checkbox:checked").length;
+				if (checked > 3) {
+					$(".rolling-add-chk:checkbox:not(:checked)").attr("disabled", true);
+				} else {
+					$(".rolling-add-chk:checkbox:not(:checked)").attr("disabled", false);
+				}
 			}
-	}
+		}
 	});
+
+	$(".rolling-remove-chk").click(function(x) {
+		checkUsersEdits();
+	});
+
+	function checkUsersEdits() {
+		$('.attendee-row').each(function(i, e) {
+			if ($(this).find(".rolling-remove-chk").length) {
+				if ($(this).find(".rolling-remove-chk").is(":checked")) {
+					$(this).find(".rolling-add-chk").attr("disabled", false);
+				} else {
+					$(this).find(".rolling-add-chk").attr("disabled", true);
+				}
+			}
+		});
+	}
 
 	$(".back-button").click(function() {
 		window.location.href = "https://" + location.hostname;
