@@ -231,10 +231,8 @@ class DescriptionEditor extends SignUpsBase {
 			<div class="mt-2">
 				<textarea type="text" id="description_description" class=" w-100 html-textarea" 
 					value="" placeholder name="description_description" required>
-					Complete description of the class. It is recommended creating this in a word processor and then pasting it here.
 				</textarea>
 			</div>
-
 			<div></div>
 			<div><button type="submit" class="btn btn-md bg-primary mr-auto ml-auto" value="-1" name="submit_description">Submit</button></div>
 		</div>

@@ -117,14 +117,27 @@ class HtmlEditor extends SignUpsBase {
 							><?php echo esc_html( $description_object ? $description_object->description_instructions : '' ); ?></textarea>
 					</div>
 				</div>
-
 				<div id="html-signup-description">
-					<textarea class="html-textarea" name="description_html"
-					><?php echo esc_html( $description_object ? $description_object->description_html : '' ); ?></textarea>
+					<?php
+					$name      = 'description_html';
+					$content   = $description_object ? html_entity_decode( $description_object->description_html ) : 'Add description here.';
+					$editor_id = 'description_long';
+					$settings  = array(
+						'textarea_name' => $name,
+					);
+					wp_editor( $content, $editor_id, $settings );
+					?>
 				</div>
 				<div id="html-signup-description-short" style="display: none;">
-					<textarea class="html-textarea" name="description_html_short" 
-					hidden><?php echo esc_html( $description_object ? $description_object->description_html_short : '' ); ?></textarea>
+					<?php
+					$name      = 'description_html_short';
+					$content   = $description_object ? html_entity_decode( $description_object->description_html_short ) : 'Add description here.';
+					$editor_id = 'description_short';
+					$settings  = array(
+						'textarea_name' => $name,
+					);
+					wp_editor( $content, $editor_id, $settings );
+					?>
 				</div>
 				<div class="mt-2">
 					<!-- button type="button" id="display-html" class="btn bt-md btn-primary mr-auto ml-auto mt-2">Preview</button -->

@@ -164,7 +164,6 @@ class SignupsPlugin extends SignUpsBase {
 		wp_enqueue_style( 'user_signup_style' );
 		wp_enqueue_script( 'jquery' );
 		wp_enqueue_script( 'signup_member_script', plugins_url( 'js/signups.js', __FILE__ ), array( 'jquery' ), '1.0.0.0', false, true );
-		wp_enqueue_script( 'signup_tinymce', 'https://cdn.tiny.cloud/1/s9npqxi5h9knhv5a8g5qfc33xh2qknj1nage4xv5qsbtrzyt/tinymce/6/tinymce.min.js', array( 'jquery' ), '6.4.2', false, true );
 		wp_localize_script(
 			'signup_member_script',
 			'wpApiSettings',
@@ -197,7 +196,6 @@ class SignupsPlugin extends SignUpsBase {
 		wp_enqueue_style( 'wp-jquery-ui-dialog' );
 		wp_enqueue_script( 'signup_cookie_script', plugins_url( 'cookie/node_modules/js-cookie/dist/js.cookie.min.js', __FILE__ ), array( 'jquery' ), '3.0.5', false, true );
 		wp_enqueue_script( 'signup_member_script', plugins_url( 'js/users-signup.js', __FILE__ ), array( 'jquery', 'jquery-ui-dialog', 'signup_cookie_script' ), '1.0.0.0', false, true );
-		wp_enqueue_script( 'signup_tinymce', 'https://cdn.tiny.cloud/1/s9npqxi5h9knhv5a8g5qfc33xh2qknj1nage4xv5qsbtrzyt/tinymce/6/tinymce.min.js', array( 'jquery' ), '4.9.11', false, true );
 		wp_localize_script(
 			'signup_member_script',
 			'wpApiSettings',

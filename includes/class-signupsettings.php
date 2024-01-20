@@ -1726,10 +1726,15 @@ class SignupSettings extends SignUpsBase {
 				<label class="label-margin-top mr-2" for="description_description">Description:</label>
 			</div>
 			<div class="mt-2">
-				<textarea type="text" id="description_description" class=" w-100 html-textarea" 
-					value="" placeholder name="description_description" required>
-					Complete description of the class. It is recommended creating this in a word processor and then pasting it here.
-				</textarea>
+				<?php
+					$name      = 'description_description';
+					$content   = 'Complete description of the class. It is recommended creating this in a word processor and then pasting it here.';
+					$editor_id = 'description_description';
+					$settings  = array(
+						'textarea_name' => $name,
+					);
+					wp_editor( $content, $editor_id, $settings );
+					?>
 			</div>
 
 			<div></div>

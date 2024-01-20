@@ -11,9 +11,12 @@ class ComposerStaticInit5d194491e2d62a965f4aa6300f29a17e
     );
 
     public static $prefixLengthsPsr4 = array (
+        'T' => 
+        array (
+            'Twilio\\' => 7,
+        ),
         'S' => 
         array (
-            'Stripe\\' => 7,
             'SendGrid\\Stats\\' => 15,
             'SendGrid\\Mail\\' => 14,
             'SendGrid\\Helper\\' => 16,
@@ -21,12 +24,16 @@ class ComposerStaticInit5d194491e2d62a965f4aa6300f29a17e
             'SendGrid\\Contacts\\' => 18,
             'SendGrid\\' => 9,
         ),
+        'E' => 
+        array (
+            'Ecsproull\\SignUps\\' => 18,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Stripe\\' => 
+        'Twilio\\' => 
         array (
-            0 => __DIR__ . '/..' . '/stripe/stripe-php/lib',
+            0 => __DIR__ . '/..' . '/twilio/sdk/src/Twilio',
         ),
         'SendGrid\\Stats\\' => 
         array (
@@ -51,6 +58,10 @@ class ComposerStaticInit5d194491e2d62a965f4aa6300f29a17e
         'SendGrid\\' => 
         array (
             0 => __DIR__ . '/..' . '/sendgrid/php-http-client/lib',
+        ),
+        'Ecsproull\\SignUps\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
         ),
     );
 
