@@ -17,6 +17,7 @@ class ComposerStaticInit5d194491e2d62a965f4aa6300f29a17e
         ),
         'S' => 
         array (
+            'Stripe\\' => 7,
             'SendGrid\\Stats\\' => 15,
             'SendGrid\\Mail\\' => 14,
             'SendGrid\\Helper\\' => 16,
@@ -34,6 +35,10 @@ class ComposerStaticInit5d194491e2d62a965f4aa6300f29a17e
         'Twilio\\' => 
         array (
             0 => __DIR__ . '/..' . '/twilio/sdk/src/Twilio',
+        ),
+        'Stripe\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/stripe/stripe-php/lib',
         ),
         'SendGrid\\Stats\\' => 
         array (

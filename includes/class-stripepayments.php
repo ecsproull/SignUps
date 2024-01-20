@@ -265,9 +265,8 @@ class StripePayments extends SignUpsBase {
 				),
 				'line_items'  => array(
 					array(
-						'price'       => $price_id,
-						'quantity'    => 1,
-						'description' => $description,
+						'price'    => $price_id,
+						'quantity' => 1,
 					),
 				),
 				'mode'        => 'payment',
