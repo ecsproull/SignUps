@@ -286,16 +286,20 @@ jQuery( document ).ready( function($){
 		}
 	})
 
-/*	tinymce.init({
-		selector: 'textarea.html-textarea',
-		plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
-		toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
-		tinycomments_mode: 'embedded',
-		tinycomments_author: 'Author name',
-		mergetags_list: [
-		  { value: 'First.Name', title: 'First Name' },
-		  { value: 'Email', title: 'Email' },
-		],
-		ai_request: (request, respondWith) => respondWith.string(() => Promise.reject("See docs to implement AI Assistant"))
-	});*/
+	$(".datetime-picker-start").on("change", function(e){
+		var key =  $(e.target).attr('key');
+		var time = $(".datetime-picker-start[key=" + key + "]").val();
+		var len = time.length;
+		time = time.substring(0, len -2) + "00"
+		$(".datetime-picker-start[key=" + key + "]").val(time);
+		$(".datetime-picker-end[key=" + key + "]").val(time);
+	})
+
+	$(".datetime-picker-end").on("change", function(e){
+		var key =  $(e.target).attr('key');
+		var time = $(".datetime-picker-end[key=" + key + "]").val();
+		var len = time.length;
+		time = time.substring(0, len -2) + "00"
+		$(".datetime-picker-end[key=" + key + "]").val(time);
+	})
 });

@@ -11,7 +11,20 @@
  */
 class TimeException {
 	/**
-	 * Gegin time
+	 * Template that it pertains to.
+	 *
+	 * @var mixed
+	 */
+	public $template;
+	/**
+	 * Reason for the exception.
+	 *
+	 * @var mixed
+	 */
+	public $reason;
+
+	/**
+	 * begin time
 	 *
 	 * @var mixed
 	 */

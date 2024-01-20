@@ -493,7 +493,31 @@ class SignUpsBase {
 	 * @return array
 	 */
 	private function create_meeting_exceptions( $start_date, $end_date ) {
+		global $wpdb;
+		$exceptions = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE exc_start >= %s AND exc_start <= %s',
+				self::ROLLING_EXCEPTIONS_TABLE,
+				$start_date->format('Y-m-d'), 
+				$end_date->format('Y-m-d')
+			),
+			OBJECT
+		);
+
 		$time_exceptions = array();
+		foreach ( $exceptions as $exc ) {
+			$dte = new TimeException();
+			$dte->template     = $exc->exc_template_id;
+			$dte->begin        = new DateTime( $exc->exc_start, $this->date_time_zone );
+			$dte->end          = new DateTime( $exc->exc_end, $this->date_time_zone );
+			$dte->reason       = $exc->exc_reason;
+			$time_exceptions[] = $dte;
+		}
+
+		return $time_exceptions;
+
 		$today           = new DateTime( 'now', $this->date_time_zone );
 		for ( $j = 0; $j < 12; $j++ ) {
 			$day      = new DateTime(
@@ -507,7 +531,7 @@ class SignUpsBase {
 			$interval = DateInterval::createFromDateString( '1 day' );
 			$day->add( $interval );
 			$day->SetTime( 12, 0 );
-			$time_exception        = new timeException();
+			$time_exception        = new TimeException();
 			$time_exception->begin = new DateTime( $day->format( self::DATETIME_FORMAT ), $this->date_time_zone );
 			$time_exception->end   = $day;
 			$time_exception->end->add( new DateInterval( 'PT4H' ) );
@@ -725,9 +749,22 @@ class SignUpsBase {
 													<?php
 												}
 											} else {
-												if ( ! $this->adjust_time( $time_exceptions, $start_date, $temp_end_date ) ) {
+												$skip_time_slot = false;
+												$reason         = '';
+												foreach ( $time_exceptions as $exception ) {
+													if ( $start_date >= $exception->begin && 
+														$start_date <= $exception->end  &&
+														($exception->template === $template ||
+														$exception->template === '0')) {
+														$reason = $exception->reason;
+														$skip_time_slot = true;
+														break;
+													}
+												}
+
+												if ( $skip_time_slot ) {
 													?>
-													<td>Shop Closed</td>
+													<td><?php echo esc_html( $reason ); ?></td>
 													<?php
 												} else {
 													$com_name = $comment_name . $comment_index;
@@ -782,16 +819,6 @@ class SignUpsBase {
 			</div>
 		</div>
 		<?php
-	}
-
-	private function adjust_time( $time_exceptions, &$start_date, &$temp_end_date ) {
-		foreach ( $time_exceptions as $exception ) {
-			if ( $start_date >= $exception->begin && $start_date <= $exception->end ) {
-				return false;
-			}
-		}
-
-		return true;
 	}
 
 	/**
@@ -1009,7 +1036,12 @@ class SignUpsBase {
 	 * @param  boolean $add_new Adds an option to add a new template.
 	 * @return void
 	 */
-	protected function load_template_selection( $template_id, $add_new = false ) {
+	protected function load_template_selection(
+		$template_id,
+		$add_new = false,
+		$select_id = 'template-select',
+		$default_title = 'None'
+		) {
 		global $wpdb;
 		$templates = $wpdb->get_results(
 			$wpdb->prepare(
@@ -1021,8 +1053,8 @@ class SignUpsBase {
 		);
 
 		?>
-		<select id="template-select" name="template_id">
-		<option value="0">None</option>
+		<select id="<?php echo esc_html( $select_id ); ?>" name="template_id">
+		<option value="0"><?php echo esc_html( $default_title ); ?></option>
 		<?php
 		foreach ( $templates as $result ) {
 			if ( $template_id === $result->template_id ) {
