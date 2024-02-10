@@ -29,13 +29,6 @@ class SignUpsBase {
 	protected const SIGNUPS_TABLE = 'wp_scw_signups';
 
 	/**
-	 * Database roster table.
-	 *
-	 * @var mixed
-	 */
-	protected const ROSTER_TABLE = 'roster';
-
-	/**
 	 * Database sessions table.
 	 *
 	 * @var mixed
@@ -118,6 +111,21 @@ class SignUpsBase {
 	 * @var mixed
 	 */
 	protected const TEXT_TABLE = 'wp_scw_text_messages';
+
+	/**
+	 * Machine permissions table.
+	 *
+	 * @var mixed
+	 */
+	protected const MEMBERS_TABLE = 'wp_scw_members';
+
+	/**
+	 * Machine permissions table.
+	 *
+	 * @var mixed
+	 */
+	protected const MACHINE_PERMISSIONS_TABLE = 'wp_scw_machine_permissions';
+
 	/**
 	 * Format DateTime as 2020-08-13 6:00 am.
 	 *
@@ -217,16 +225,19 @@ class SignUpsBase {
 	 * @param  string $method POST, GET....etc.
 	 * @return void
 	 */
-	protected function register_route( $namespace, $route, $func, $class_inst, $args, $method ) {
+	protected function register_route( $namespace, $route, $func, $class_inst, $args, $method ) {		
+		$basic_args = array(
+			'methods'             => $method,
+			'callback'            => array( $class_inst, $func ),
+			'permission_callback' => array( $class_inst, 'permissions_check' ),
+		);
+
+		array_merge( $basic_args, $args );
+
 		register_rest_route(
 			$namespace,
 			$route,
-			array(
-				'methods'             => $method,
-				'callback'            => array( $class_inst, $func ),
-				'permission_callback' => array( $class_inst, 'permissions_check' ),
-				'args'                => $args,
-			)
+			$basic_args
 		);
 	}
 
@@ -288,14 +299,14 @@ class SignUpsBase {
 					$wpdb->prepare(
 						'SELECT *
 						FROM %1s
-						WHERE badge = %s',
-						self::ROSTER_TABLE,
+						WHERE member_badge = %s',
+						self::MEMBERS_TABLE,
 						$badge
 					),
 					OBJECT
 				);
 
-				$user_secret = $results[0]->secret;
+				$user_secret = $results[0]->member_secret;
 				$return_val  = $badge;
 			}
 			?>
@@ -305,24 +316,40 @@ class SignUpsBase {
 		if ( ! $return_val && isset( $_COOKIE['signups_scw_badge'] ) ) {
 			$remember_me = true;
 			$cookie      = wp_unslash( $_COOKIE );
-			$badge       = $cookie['signups_scw_badge'];
+			$badge       = $_COOKIE['signups_scw_badge'];
 			$results     = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT *
 					FROM %1s
-					WHERE badge = %s && FIND_IN_SET( %s, `groups`)',
-					self::ROSTER_TABLE,
-					$badge,
-					$user_group
+					WHERE member_badge = %s',
+					self::MEMBERS_TABLE,
+					$badge
 				),
 				OBJECT
 			);
 
-			if ( $results ) {
-				$return_val = $results[0]->badge;
+			$permission = true;
+			if ( $results && $user_group ) {
+				$permission = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT * FROM %1s
+						WHERE permission_badge = %s && permission_machine_name = %s',
+						self::MACHINE_PERMISSIONS_TABLE,
+						$request['badge'],
+						$request['user-groups']
+					),
+					OBJECT
+				);
 			}
 
-			$user_secret = $results[0]->secret;
+			if ( $results && $permission ) {
+				$return_val = $results[0]->member_badge;
+			} else {
+				$return_val = null;
+				$results    = array( 1 );
+			}
+
+			$user_secret = $results[0]->member_secret;
 		}
 		?>
 
@@ -330,12 +357,12 @@ class SignUpsBase {
 			<tr>
 				<td class="text-right">Enter Badge#</td>
 				<td class="text-left"><input id="badge-input" class="member-badge" type="number" name="badge_number" 
-					value="<?php echo $return_val ? esc_html( $results[0]->badge ) : ''; ?>" required></td>
+					value="<?php echo $return_val ? esc_html( $results[0]->member_badge ) : ''; ?>" required></td>
 				<td><input type="button" id="get_member_button" class="btn btn-primary" value='Lookup'></td>
 			</tr>
 			<tr>
-				<td class="text-right"><input id="first-name" class=" member-first-name" type="text" name="firstname" value=<?php echo $return_val ? esc_html( $results[0]->firstname ) : 'First'; ?> required readonly></td>
-				<td  class="text-left"><input id="last-name" class="member-last-name" type="text" name="lastname" value=<?php echo $return_val ? esc_html( $results[0]->lastname ) : 'Last'; ?> required readonly></td>
+				<td class="text-right"><input id="first-name" class=" member-first-name" type="text" name="firstname" value=<?php echo $return_val ? esc_html( $results[0]->member_firstname ) : 'First'; ?> required readonly></td>
+				<td  class="text-left"><input id="last-name" class="member-last-name" type="text" name="lastname" value=<?php echo $return_val ? esc_html( $results[0]->member_lastname ) : 'Last'; ?> required readonly></td>
 				<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="signup_id">Cancel</button></td>
 			</tr>
 			<tr>
@@ -345,21 +372,22 @@ class SignUpsBase {
 						type="checkbox" name="remember_me" value='' <?php echo $remember_me ? 'checked' : ''; ?>></td>
 				<td class="text-left"><input id="user-edit-id" class="user-edit-id" 
 					type="text" name="secret" value="<?php echo esc_html( $secret ); ?>" placeholder="Enter secret to edit"
-					<?php echo '7' === $signup_id || '6' === $signup_id ? '' : 'hidden'; ?>></td>
-				<td><button id="update_butt" type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary" 
+					<?php echo '7' === $signup_id || '6' === $signup_id || '17' === $signup_id ? '' : 'hidden'; ?>></td>
+				<td><button id="update-butt" type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary" 
 					value=<?php echo esc_html( $signup_id ); ?> name="continue_signup" disabled
-					<?php echo '7' === $signup_id || '6' === $signup_id ? 'hidden' : ''; ?> >Reload</button></td>
+					<?php echo '7' === $signup_id || '6' === $signup_id || '17' === $signup_id ? 'hidden' : ''; ?> >Reload</button></td>
 			</tr>
 			<tr hidden>
 				<td><input id="phone" class="member-phone" type="text" name="phone"
-					value=<?php echo $return_val ? esc_html( $results[0]->phone ) : '888-888-8888'; ?> placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required readonly></td>
+					value=<?php echo $return_val ? esc_html( $results[0]->member_phone ) : '888-888-8888'; ?> placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required readonly></td>
 				<td><input id="email" class="member-email" type="email" name="email"
-					value=<?php echo $return_val ? esc_html( $results[0]->email ) : 'foo@bar.com'; ?> placeholder="foo@bar.com" required readonly></td>
+					value=<?php echo $return_val ? esc_html( $results[0]->member_email ) : 'foo@bar.com'; ?> placeholder="foo@bar.com" required readonly></td>
 				<td></td>
 			</tr>
 		</table>
 		<input id="user_groups" type="hidden" name="user_groups" value="<?php echo esc_html( $user_group ); ?>">
 		<input id="user-secret" type="hidden" name="user_secret" value="<?php echo esc_html( $user_secret ); ?>">
+		<input id="rest-nonce" type="hidden" name="rest_nonce" value ="<?php echo wp_create_nonce( 'wp_rest' ); ?>">
 		<?php
 
 		return $return_val;
@@ -508,7 +536,7 @@ class SignUpsBase {
 
 		$time_exceptions = array();
 		foreach ( $exceptions as $exc ) {
-			$dte = new TimeException();
+			$dte               = new TimeException();
 			$dte->template     = $exc->exc_template_id;
 			$dte->begin        = new DateTime( $exc->exc_start, $this->date_time_zone );
 			$dte->end          = new DateTime( $exc->exc_end, $this->date_time_zone );
@@ -518,7 +546,7 @@ class SignUpsBase {
 
 		return $time_exceptions;
 
-		$today           = new DateTime( 'now', $this->date_time_zone );
+		/* $today = new DateTime( 'now', $this->date_time_zone );
 		for ( $j = 0; $j < 12; $j++ ) {
 			$day      = new DateTime(
 				sprintf(
@@ -542,9 +570,9 @@ class SignUpsBase {
 			}
 
 			$today->add( new DateInterval( 'P1M' ) );
-		}
+		} 
 
-		return $time_exceptions;
+		return $time_exceptions;*/
 	}
 
 	/**
@@ -842,18 +870,18 @@ class SignUpsBase {
 			$wpdb->prepare(
 				'SELECT *
 				FROM %1s
-				WHERE badge = %s',
-				self::ROSTER_TABLE,
+				WHERE member_badge = %s',
+				self::MEMBERS_TABLE,
 				$post['badge_number']
 			),
 			OBJECT
 		);
 
 		if ( ! $results ||
-			$results[0]->firstname !== $post['firstname'] ||
-			$results[0]->lastname !== $post['lastname'] ||
-			$results[0]->email !== $post['email'] ||
-			$results[0]->phone !== $post['phone'] ) {
+			$results[0]->member_firstname !== $post['firstname'] ||
+			$results[0]->member_lastname !== $post['lastname'] ||
+			$results[0]->member_email !== $post['email'] ||
+			$results[0]->member_phone !== $post['phone'] ) {
 			?>
 			<h2>Data verification failed. Error:0x80421</h2>
 			<?php
@@ -1010,7 +1038,7 @@ class SignUpsBase {
 			<h2>Signup complete</h2>
 			<br>
 			<div class="fs-3 text-dark">
-				<a href="https://woodclubtest.site/signups/?signup_id=<?php echo esc_html( $post['add_attendee_session'] ); ?>&secret=" <?php echo esc_html( $post['user_secret'] ); ?> >Change Signup</a><br>
+				<a href="https://woodclubtest.site/signups/?signup_id=<?php echo esc_html( $post['add_attendee_session'] ); ?>&secret=<?php echo esc_html( $post['user_secret'] ); ?>" >Change Signup</a><br>
 				<br>
 				<p>Your key to edit this signup is: &emsp; &emsp; <?php echo esc_html( $post['user_secret'] ); ?> </p>
 				<p>ALSO: An email has been sent to <b><i><?php echo esc_html( $post['email'] ) ?></i></b> with a link to edit this signup.<p>
@@ -1023,7 +1051,7 @@ class SignUpsBase {
 			$link  = "<a href='https://woodclubtest.site/signups/?signup_id=" . $post['add_attendee_session'] . '&secret=' . $post['user_secret'] . "'>Edit Signup</a>";
 			$body .= '<br><br>' . $link . '<br>';
 			$body .= '<p>Your key to edit this signup is: &emsp; &emsp;' . $post['user_secret'] . '</p>';
-			$sgm->send_mail( $post['email'], 'Montor Signup', $body );
+			$sgm->send_mail( $post['email'], 'Woodshop Signup', $body );
 		}
 
 		clean_post_cache( $post );
@@ -1034,6 +1062,8 @@ class SignUpsBase {
 	 *
 	 * @param  int     $template_id The id of the selected template.
 	 * @param  boolean $add_new Adds an option to add a new template.
+	 * @param  string  $select_id The name of the selected template.
+	 * @param  boolean $default_title Default title.
 	 * @return void
 	 */
 	protected function load_template_selection(

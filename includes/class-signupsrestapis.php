@@ -12,6 +12,31 @@
 use Twilio\Rest\Client;
 
 /**
+ * User
+ */
+class User {
+	/**
+	 * Member Badge
+	 *
+	 * @var mixed
+	 */
+
+	public $badge;
+	/**
+	 * First Name
+	 *
+	 * @var mixed
+	 */
+	public $first;
+
+	/**
+	 * Last Name
+	 *
+	 * @var mixed
+	 */
+	public $last;
+}
+/**
  * Create the database tables on activation.
  */
 class SignUpsRestApis extends SignUpsBase {
@@ -30,13 +55,7 @@ class SignUpsRestApis extends SignUpsBase {
 					'/members',
 					'get_member',
 					$this,
-					array(
-						'From' => array(
-							'description'       => esc_html( 'Member badge number' ),
-							'type'              => 'string',
-							'validate_callback' => array( $this, 'verify_badge_param' ),
-						),
-					),
+					array(),
 					WP_REST_Server::READABLE
 				);
 			}
@@ -50,17 +69,135 @@ class SignUpsRestApis extends SignUpsBase {
 					'/text',
 					'recieve_text',
 					$this,
-					array(
-						'badge' => array(
-							'description'       => esc_html( 'Endpoint for text messages' ),
-							'type'              => 'string',
-							'validate_callback' => array( $this, 'verify_phone_number' ),
-						),
+					array (
+						'description'       => esc_html( 'Endpoint for text messages' ),
+						'type'              => 'string',
+						'validate_callback' => array( $this, 'verify_phone_number' ),
 					),
 					WP_REST_Server::ALLMETHODS
 				);
 			}
 		);
+
+		add_action(
+			'rest_api_init',
+			function () {
+				$this->register_route(
+					'scwmembers/v1',
+					'/members',
+					'recieve_members',
+					$this,
+					array(
+						'description'       => esc_html( 'Endpoint to update the members database' ),
+						'type'              => 'string',
+						'validate_callback' => array( $this, 'verify_member_data' ),
+					),
+					WP_REST_Server::CREATABLE,
+					'verify_member_data'
+				);
+			}
+		);
+
+		add_action(
+			'rest_api_init',
+			function () {
+				$this->register_route(
+					'scwmembers/v1',
+					'/cookies',
+					'set_member_cookie',
+					$this,
+					array(),
+					WP_REST_Server::READABLE
+				);
+			}
+		);
+	}
+	
+	/**
+	 * Set a members badge as a cookie.
+	 *
+	 * @param  mixed $request Request from an AJAX call.
+	 * @return void
+	 */
+	public function set_member_cookie( $request) {
+		$nonce    = $request->get_header( 'X-WP-Nonce' );
+		$verified = wp_verify_nonce( $nonce, 'wp_rest' );
+		if ( $verified ) {
+			if ( $request['badge'] ) {
+				setcookie( 'signups_scw_badge', $request['badge'] );
+			} else {
+				unset( $_COOKIE['signups_scw_badge'] );
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * Endpoint to recieve the member list needed for signups.
+	 *
+	 * @param  mixed $data json list of members or permissions.
+	 * @return void
+	 */
+	public function recieve_members( $data ) {
+		global $wpdb;
+		$key      = '8c62a157-7ee8-4104-9f91-930eac39fe2f';
+		$data_obj = json_decode( $data->get_body(), false );
+		if ( $data_obj->key !== $key ) {
+			return;
+		}
+		$length   = count( $data_obj->members );
+		for ( $i = 0; $i < $length; $i++ ) {
+			$member = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT *
+					FROM %1s
+					WHERE member_badge = %s',
+					self::MEMBERS_TABLE,
+					$data_obj->members[ $i ]->badge
+				),
+				OBJECT
+			);
+
+			$data = array();
+			$data['member_badge']     = $data_obj->members[ $i ]->badge;
+			$data['member_lastname']  = $data_obj->members[ $i ]->last;
+			$data['member_firstname'] = $data_obj->members[ $i ]->first;
+			$data['member_phone']     = $data_obj->members[ $i ]->phone;
+			$data['member_email']     = $data_obj->members[ $i ]->email;
+			$data['member_secret']    = $data_obj->members[ $i ]->secret;
+
+			if ( $member ) {
+				$wpdb->update( self::MEMBERS_TABLE, $data, $member->badge );
+			} else {
+				$wpdb->insert( self::MEMBERS_TABLE, $data );
+			}
+		}
+
+		$length = count( $data_obj->permissions );
+		for ( $i = 0; $i < $length; $i++ ) {
+			$permission = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT *
+					FROM %1s
+					WHERE permission_badge = %s && permission_machine_id = %d',
+					self::MACHINE_PERMISSIONS_TABLE,
+					$data_obj->permissions[ $i ]->badge,
+					$data_obj->permissions[ $i ]->macine_id
+				),
+				OBJECT
+			);
+
+			if ( ! $permission ) {
+				$data                          = array();
+				$data['permission_badge']      = $data_obj->permissions[ $i ]->badge;
+				$data['permission_machine_id'] = $data_obj->permissions[ $i ]->machine_id;
+				$wpdb->insert( self::MACHINE_PERMISSIONS_TABLE, $data );
+			}
+		}
+	}
+
+	public function verify_member_data( $data ) {
+		return true;
 	}
 
 	/**
@@ -71,7 +208,7 @@ class SignUpsRestApis extends SignUpsBase {
 	 */
 	public function recieve_text( $request ) {
 		global $wpdb;
-		$data    = $request->get_params();
+		$data   = $request->get_params();
 		$sid    = getenv( "TWILIO_ACCOUNT_SID" );
 		$token  = getenv( "TWILIO_AUTH_TOKEN" );
 		$twilio = new Client( $sid, $token );
@@ -122,22 +259,52 @@ class SignUpsRestApis extends SignUpsBase {
 	 * @return array The results of the query.
 	 */
 	public function get_member( $request ) {
-		try {
-			global $wpdb;
-			$results = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT * FROM %1s WHERE badge = %1s && FIND_IN_SET( %s, `groups`)',
-					self::ROSTER_TABLE,
-					$request['badge'],
-					$request['user-groups']
-				),
-				OBJECT
-			);
+		$nonce    = $request->get_header( 'X-WP-Nonce' );
+		$verified = wp_verify_nonce( $nonce, 'wp_rest' );
+		$pattern  = '/^[0-9]{4}$/ms';
+		if ( $verified && preg_match( $pattern, $request['badge'] ) ) {
+			try {
+				global $wpdb;
+				$results = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT * FROM %1s
+						WHERE member_badge = %s',
+						self::MEMBERS_TABLE,
+						$request['badge']
+					),
+					OBJECT
+				);
 
-			return $results;
+				if ( $results ) {
+					if ( $request['user-groups'] ) {
+						$permission = $wpdb->get_results(
+							$wpdb->prepare(
+								'SELECT * FROM %1s
+								WHERE permission_badge = %s && permission_machine_name = %s',
+								self::MACHINE_PERMISSIONS_TABLE,
+								$request['badge'],
+								$request['user-groups']
+							),
+							OBJECT
+						);
 
-		} catch ( Exception $e ) {
-			return $e->getMessage();
+						if ( $permission ) {
+							return $results;
+						} else {
+							return new WP_REST_Response( 'Permission Denied.', 401 );
+						}
+					} else {
+						return $results;
+					}
+				} else {
+					return new WP_REST_Response( array( 'message' => 'Badge not found.' ), 400 );
+				}
+ 
+				return $results;
+
+			} catch ( Exception $e ) {
+				return $e->getMessage();
+			}
 		}
 	}
 
@@ -147,23 +314,6 @@ class SignUpsRestApis extends SignUpsBase {
 	 * @return boolean Always returns true.
 	 */
 	public function permissions_check() {
-		return true;
-	}
-
-	/**
-	 * Verify that the badge parameter is valid.
-	 *
-	 * @param  string $value Value of the badge.
-	 * @param  mixed  $request The request object.
-	 * @param  mixed  $param The name of the parameter.
-	 * @return boolean
-	 */
-	public function verify_badge_param( $value, $request, $param ) {
-		$pattern = '/^[0-9]{4}$/ms';
-		if ( ! preg_match( $pattern, $value ) ) {
-			return new WP_Error( 'Bad data format', esc_html__( 'OMG you cannot pass that crap for a badge number.', 'my-text-domain' ), array( 'status' => 402 ) );
-		}
-
 		return true;
 	}
 }

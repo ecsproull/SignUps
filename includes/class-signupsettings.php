@@ -1314,8 +1314,9 @@ class SignupSettings extends SignUpsBase {
 				<tr>
 					<td class="text-right mr-2"><label>User Group:</label></td>
 					<td><select name="signup_group">
-						<option value="member">Members</option>
+						<option value="">Members</option>
 						<option value="cnc">Cnc Users</option>
+						<option value="laser">Laser Users</option>
 					</select> </td>
 				</tr>
 				<tr>

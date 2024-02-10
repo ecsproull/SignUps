@@ -9,16 +9,16 @@ jQuery(document).ready(function($){
 			},
 			data:{
 				'badge' : $("#badge-input").val(),
-				'user-groups' : $("#user_groups").val() ? $("#user_groups").val() : 'member'
+				'user-groups' : $("#user_groups").val()
 			}
 		}).done(function (response) {
 			if (response.length > 0) {
-				$('.member-first-name').each(function () { $(this).val(response[0].firstname); });
-				$('.member-last-name').each(function () { $(this).val(response[0].lastname); });
-				$('.member-email').each(function () { $(this).val(response[0].email); });
-				$('.member-phone').each(function () { $(this).val(response[0].phone);  });
-				$('.member-badge').each(function () { $(this).val(response[0].badge);  });
-				$('#user-secret').val(response[0].secret);
+				$('.member-first-name').each(function () { $(this).val(response[0].member_firstname); });
+				$('.member-last-name').each(function () { $(this).val(response[0].member_lastname); });
+				$('.member-email').each(function () { $(this).val(response[0].member_email); });
+				$('.member-phone').each(function () { $(this).val(response[0].member_phone);  });
+				$('.member-badge').each(function () { $(this).val(response[0].member_badge);  });
+				$('#user-secret').val(response[0].member_secret);
 				$("#selection-table").prop("hidden", false);
 				$('button[type="submit"]').each(function() {
 					$(this).removeAttr('disabled');
@@ -30,10 +30,16 @@ jQuery(document).ready(function($){
 				$('.rolling-remove-chk').prop("hidden", true);
 				$('badgeclass').prop("hidden", false);
 			} else {
-				alert('Badge number not found.')
+				alert('Badge number not found or Permission for signup denied.')
 			}
 		}).error(function (response) {
-			alert('Error: ' + req.status + ' Verify badge number is correct.');
+			if (response.status == 400) {
+				alert('Error: ' + response.status + ' Badge Number Not Found.');
+			} else if (response.status == 401) {
+				alert('Error: ' + response.status + ' Machine Permission Denied.');
+			} else {
+				alert('Error: ' + response.status + ' Unknown Error.');
+			}
 		});
 	});
 
@@ -67,17 +73,17 @@ jQuery(document).ready(function($){
 
 	$("#user-edit-id").on("input", function() {
 		var len = $(this).val().length;
-		if(len === 36) {
-			$("#update_butt").removeAttr("disabled");
-			$("#update_butt").removeAttr("hidden");
+		if(len === 32) {
+			$("#update-butt").removeAttr("disabled");
+			$("#update-butt").removeAttr("hidden");
 		} else {
-			$("#update_butt").attr("disabled", true);
-			$("#update_butt").attr("hidden", true);
+			$("#update-butt").attr("disabled", true);
+			$("#update-butt").attr("hidden", true);
 		}
 
 	});
 
-	$("#update_butt").click(function(e){
+	$("#update-butt").click(function(e){
 		$(this).attr("clicked", "true");
 		return;
 	})
@@ -98,11 +104,11 @@ jQuery(document).ready(function($){
 	$(".signup_form").submit(function(e){
 		e.preventDefault();
 		var form = this;
-		if ($("#update_butt").attr('clicked')) {
-			$("#update_butt").removeAttr('clicked')
+		if ($("#update-butt").attr('clicked')) {
+			$("#update-butt").removeAttr('clicked')
 			$("<input />").attr("type", "hidden")
 				.attr("name", "continue_signup")
-				.attr("value", $("#update_butt").val())
+				.attr("value", $("#update-butt").val())
 				.appendTo(".signup_form");
 		    form.submit();
 			return;
@@ -164,13 +170,26 @@ jQuery(document).ready(function($){
 	});
 
 	$("#remember_me").click(function() {
+		var badgeToSet = "";
 		if ($("#remember_me").is(":checked")){
 			if ($("#badge-input").val()) {
 				Cookies.set("signups_scw_badge", $("#badge-input").val());
+				badgeToSet = $("#badge-input").val();
 			}
 		} else {
 			Cookies.remove("signups_scw_badge");
 		}
+
+		$.ajax({
+			url: wpApiSettings.root + 'scwmembers/v1/cookies',
+			method: 'GET',
+			beforeSend: function (xhr) {
+				xhr.setRequestHeader('X-WP-Nonce', wpApiSettings.nonce);
+			},
+			data:{
+				"badge" : badgeToSet
+			}
+		});
 	})
 
 	$(".rolling-add-chk").click(function(x) {
@@ -211,6 +230,22 @@ jQuery(document).ready(function($){
 				} else {
 					$(".rolling-add-chk:checkbox:not(:checked)").attr("disabled", false);
 				}
+			} else {
+				var arr = val.split(',');
+				var checked = x.currentTarget.checked;
+				$('.rolling-add-chk').each(function(i, e) {
+					if ($(this).val() === val) {
+						return true;
+					}
+					var x = $(this).val().split(',');
+					if (x[0] == arr[0]) {
+						if (checked) {
+							$(this).attr('disabled', true);
+						} else {
+							$(this).attr('disabled', false);
+						}
+					}
+				});
 			}
 		}
 	});

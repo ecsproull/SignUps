@@ -259,5 +259,30 @@ class DbSignUpTables {
 				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;"
 			);
 		}
+
+		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_members"' ) !== 'wp_scw_members' ) {
+			$wpdb->query(
+				"CREATE TABLE `wp_scw_members` (
+					`member_ID` int NOT NULL AUTO_INCREMENT,
+					`badge` varchar(4) DEFAULT NULL,
+					`firstname` varchar(24) DEFAULT NULL,
+					`lastname` varchar(24) DEFAULT NULL,
+					`secret` varchar(45) DEFAULT NULL,
+					UNIQUE KEY `member_ID` (`member_ID`)
+				) ENGINE=InnoDB AUTO_INCREMENT=707 DEFAULT CHARSET=utf8mb4;"
+			);
+		}
+
+		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_machine_permissions"' ) !== 'wp_scw_machine_permissions' ) {
+			$wpdb->query( 
+				"CREATE TABLE `wp_scw_machine_permissions` (
+					`permission_ID` int NOT NULL AUTO_INCREMENT,
+					`permission_machine_name` varchar(16) NOT NULL,
+					`permission_badge` varchar(12) NOT NULL,
+					PRIMARY KEY (`permission_ID`),
+					UNIQUE KEY `permission_ID` (`permission_ID`)
+				) ENGINE=InnoDB AUTO_INCREMENT=799 DEFAULT CHARSET=utf8mb4;"
+			);
+		}
 	}
 }
