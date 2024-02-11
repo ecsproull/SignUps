@@ -39,6 +39,7 @@ require 'includes/class-rollingtemplateseditor.php';
 require 'includes/class-rollingexceptionseditor.php';
 require 'includes/class-sendgridmail.php';
 require 'includes/class-reports.php';
+require 'includes/class-testplugin.php';
 
 /**
  * Main signups class.
@@ -140,6 +141,7 @@ class SignupsPlugin extends SignUpsBase {
 		add_submenu_page( 'sign_ups', 'Html Editor', 'Descriptions', 'manage_options', 'html_editor', array( new HtmlEditor(), 'load_html_editor' ) );
 		add_submenu_page( 'sign_ups', 'Rolling Templates Editor', 'Rolling Templates', 'manage_options', 'template_editor', array( new RollingTemplatesEditor(), 'load_templates_editor' ) );
 		add_submenu_page( 'sign_ups', 'Rolling Exceptions Editor', 'Exceptions', 'manage_options', 'exceptions_editor', array( new RollingExceptionsEditor(), 'load_exceptions_editor' ) );
+		add_submenu_page( 'sign_ups', 'Test Page', 'Test Drive', 'manage_options', 'test_page', array( new TestPlugin(), 'load_test_page' ) );
 	}
 
 	/**
@@ -152,7 +154,8 @@ class SignupsPlugin extends SignUpsBase {
 		'signups_page_html_editor' !== $host &&
 		'signups_page_template_editor' !== $host &&
 		'signups_page_exceptions_editor' !== $host &&
-		'cncusagereport' !== $host ) {
+		'cncusagereport' !== $host &&
+		'signups_page_test_page' !== $host ) {
 			return;
 		}
 

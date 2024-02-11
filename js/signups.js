@@ -12,25 +12,33 @@ jQuery( document ).ready( function($){
 			}
 		}).done(function (response) {
 			if (response.length > 0) {
-				$('.member-first-name').each(function () { $(this).val(response[0].firstname); });
-				$('.member-last-name').each(function () { $(this).val(response[0].lastname); });
-				$('.member-email').each(function () { $(this).val(response[0].email); });
-				$('.member-phone').each(function () { $(this).val(response[0].phone);  });
-				$('.member-badge').each(function () { $(this).val(response[0].badge);  });
+				$('.member-first-name').each(function () { $(this).val(response[0].member_firstname); });
+				$('.member-last-name').each(function () { $(this).val(response[0].member_lastname); });
+				$('.member-email').each(function () { $(this).val(response[0].member_email); });
+				$('.member-phone').each(function () { $(this).val(response[0].member_phone);  });
+				$('.member-badge').each(function () { $(this).val(response[0].member_badge);  });
+				$('#user-secret').val(response[0].member_secret);
 				$("#selection-table").prop("hidden", false);
 				$('button[type="submit"]').each(function() {
 					$(this).removeAttr('disabled');
 				});
-				var badgeclass = '.' + response[0].badge;
-				//Cookies.set('signups_scw_badge', response[0].badge);
+
+				if ($("#remember_me").is(":checked")){
+					Cookies.set('signups_scw_badge', response[0].badge);
+				}
 				$('.rolling-remove-chk').prop("hidden", true);
-				$(badgeclass).prop("hidden", false);
-				$('#submit_attendees').prop("disabled", false);
+				$('badgeclass').prop("hidden", false);
 			} else {
-				alert('Badge number not found.')
+				alert('Badge number not found or Permission for signup denied.')
 			}
 		}).error(function (response) {
-			alert('Error: ' + req.status + ' Verify badge number is correct.');
+			if (response.status == 400) {
+				alert('Error: ' + response.status + ' Badge Number Not Found.');
+			} else if (response.status == 401) {
+				alert('Error: ' + response.status + ' Machine Permission Denied.');
+			} else {
+				alert('Error: ' + response.status + ' Unknown Error.');
+			}
 		});
 	});
 

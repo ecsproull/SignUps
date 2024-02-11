@@ -1,4 +1,13 @@
 
+h2 {
+  font-size: 20px;
+}
+
+button {
+  border: none;
+  margin-bottom: 10px;
+}
+
 #content {
      /* width: 91%; */
      margin-left: auto;
