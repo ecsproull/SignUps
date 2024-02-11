@@ -54,10 +54,10 @@ class RollingTemplatesEditor extends SignUpsBase {
 
 		if ( -1 == $post['submit_template'] ) {
 			$rows = $wpdb->insert( self::SIGNUP_TEMPLATE_TABLE, $data );
-			if ( $rows == 1 ) {
+			if ( 1 === $rows ) {
 				$post['template_item_id'] = $wpdb->insert_id;
+				$post['submit_template']  = $wpdb->insert_id;
 			}
-
 		} else {
 			$where = array();
 			$where['template_id'] = $post['submit_template'];
@@ -69,7 +69,8 @@ class RollingTemplatesEditor extends SignUpsBase {
 		}
 
 		if ( $post['template_item_day_of_week'] ) {
-			for ( $i = 0; $i < count ($post['template_item_day_of_week'] ); $i++ ) {
+			$count = count( $post['template_item_day_of_week'] );
+			for ( $i = 0; $i < $count; $i++ ) {
 				if ( array_key_exists( 'template_item_delete', $post ) && in_array( $post['template_item_id'][ $i ], $post['template_item_delete'], true ) ) {
 					$template_items = $wpdb->get_results(
 						$wpdb->prepare(
