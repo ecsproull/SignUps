@@ -21,34 +21,34 @@ class DbSignUpTables {
 		global $wpdb;
 		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_attendees"' ) !== 'wp_scw_attendees' ) {
 			$wpdb->query(
-				'CREATE TABLE `wp_scw_attendees` (
-					`attendee_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-					`attendee_session_id` int(12) NOT NULL,
+				"CREATE TABLE `wp_scw_attendees` (
+					`attendee_id` int unsigned NOT NULL AUTO_INCREMENT,
+					`attendee_session_id` int NOT NULL,
 					`attendee_email` varchar(45) NOT NULL,
 					`attendee_phone` varchar(15) NOT NULL,
-					`attendee_balance_owed` int(11) NOT NULL DEFAULT 0,
+					`attendee_balance_owed` int NOT NULL DEFAULT '0',
 					`attendee_lastname` varchar(45) NOT NULL,
 					`attendee_firstname` varchar(45) NOT NULL,
 					`attendee_item` varchar(45) NOT NULL,
 					`attendee_badge` varchar(8) NOT NULL,
 					`attendee_payment_start` varchar(45) DEFAULT NULL,
 					PRIMARY KEY (`attendee_id`)
-				  ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8'
+				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;"
 			);
 		}
 
 		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_payments"' ) !== 'wp_scw_payments' ) {
 			$wpdb->query(
 				"CREATE TABLE `wp_scw_payments` (
-					`payments_id` int(11) NOT NULL AUTO_INCREMENT,
+					`payments_id` int NOT NULL AUTO_INCREMENT,
 					`payments_intent_id` varchar(45) NOT NULL,
 					`payments_customer_id` varchar(45) DEFAULT NULL,
-					`payments_attendee_id` int(11) DEFAULT NULL,
+					`payments_attendee_id` int DEFAULT NULL,
 					`payments_price_id` varchar(45) DEFAULT NULL,
 					`payments_start_time` varchar(45) NOT NULL,
 					`payments_signup_description` varchar(80) DEFAULT NULL,
 					`payments_attendee_badge` varchar(45) DEFAULT NULL,
-					`payments_amount_charged` int(11) DEFAULT NULL,
+					`payments_amount_charged` int DEFAULT NULL,
 					`payments_intent_status_time` varchar(45) DEFAULT NULL,
 					`payments_last_access_time` varchar(45) NOT NULL,
 					`payments_status` varchar(45) DEFAULT 'FAILED',
@@ -75,7 +75,7 @@ class DbSignUpTables {
 				'CREATE TABLE `wp_scw_template_item` (
 					`template_item_id` int NOT NULL AUTO_INCREMENT,
 					`template_item_template_id` int NOT NULL,
-					`template_item_day_of_week` varchar(16) NOT NULL,
+					`template_item_day_of_week` varchar(45) NOT NULL,
 					`template_item_title` varchar(45) NOT NULL,
 					`template_item_slots` int NOT NULL,
 					`template_item_start_time` time NOT NULL,
@@ -105,6 +105,7 @@ class DbSignUpTables {
 					`attendee_end_time` int unsigned NOT NULL DEFAULT '0',
 					`attendee_end_formatted` varchar(45) NOT NULL,
 					`attendee_comment` text,
+					`attendee_secret` varchar(45) DEFAULT NULL,
 					PRIMARY KEY (`attendee_id`)
 				  ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;"
 			);
@@ -132,7 +133,7 @@ class DbSignUpTables {
 				`session_time_of_day` time DEFAULT NULL,
 				`session_multiple_days` tinyint DEFAULT NULL,
 				PRIMARY KEY (`session_id`)
-				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;"
+				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;"
 			);
 		}
 
@@ -264,17 +265,19 @@ class DbSignUpTables {
 			$wpdb->query(
 				"CREATE TABLE `wp_scw_members` (
 					`member_ID` int NOT NULL AUTO_INCREMENT,
-					`badge` varchar(4) DEFAULT NULL,
-					`firstname` varchar(24) DEFAULT NULL,
-					`lastname` varchar(24) DEFAULT NULL,
-					`secret` varchar(45) DEFAULT NULL,
+					`member_badge` varchar(6) NOT NULL,
+					`member_firstname` varchar(24) NOT NULL,
+					`member_lastname` varchar(24) NOT NULL,
+					`member_secret` varchar(45) NOT NULL,
+					`member_email` varchar(45) DEFAULT NULL,
+					`member_phone` varchar(45) DEFAULT NULL,
 					UNIQUE KEY `member_ID` (`member_ID`)
 				) ENGINE=InnoDB AUTO_INCREMENT=707 DEFAULT CHARSET=utf8mb4;"
 			);
 		}
 
 		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_machine_permissions"' ) !== 'wp_scw_machine_permissions' ) {
-			$wpdb->query( 
+			$wpdb->query(
 				"CREATE TABLE `wp_scw_machine_permissions` (
 					`permission_ID` int NOT NULL AUTO_INCREMENT,
 					`permission_machine_name` varchar(16) NOT NULL,
@@ -284,5 +287,18 @@ class DbSignUpTables {
 				) ENGINE=InnoDB AUTO_INCREMENT=799 DEFAULT CHARSET=utf8mb4;"
 			);
 		}
+
+		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_text_messages"' ) !== 'wp_scw_text_messages' ) {
+			$wpdb->query(
+				"CREATE TABLE `wp_scw_text_messages` (
+					`text_id` int unsigned NOT NULL AUTO_INCREMENT,
+					`text_body` text,
+					`text_from_phone` varchar(45) DEFAULT NULL,
+					`text_date_time` varchar(30) DEFAULT NULL,
+					PRIMARY KEY (`text_id`)
+				) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4;"
+			);
+		}
+
 	}
 }

@@ -233,6 +233,13 @@ jQuery(document).ready(function($){
 			} else {
 				var arr = val.split(',');
 				var checked = x.currentTarget.checked;
+				/*var checkedCount = $(".rolling-add-chk:checkbox:checked").length;
+				 if (checkedCount > 2) {
+					alert("Only the first two signups at a time.");
+					x.currentTarget.checked = false;
+					return;
+				} */
+
 				$('.rolling-add-chk').each(function(i, e) {
 					if ($(this).val() === val) {
 						return true;
