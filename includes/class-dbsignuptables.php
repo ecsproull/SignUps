@@ -228,7 +228,8 @@ class DbSignUpTables {
 				('General Shop Fundamentals'),
 				('Lathe Projects'),
 				('Club Classes'),
-				('General Shop Project Classes')"
+				('General Shop Project Classes'),
+				('Miscellaneous')"
 			);
 		}
 
