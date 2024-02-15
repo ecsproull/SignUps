@@ -182,7 +182,7 @@ class SignUpsRestApis extends SignUpsBase {
 					WHERE permission_badge = %s && permission_machine_id = %d',
 					self::MACHINE_PERMISSIONS_TABLE,
 					$data_obj->permissions[ $i ]->badge,
-					$data_obj->permissions[ $i ]->macine_id
+					$data_obj->permissions[ $i ]->macine_name
 				),
 				OBJECT
 			);
@@ -190,7 +190,7 @@ class SignUpsRestApis extends SignUpsBase {
 			if ( ! $permission ) {
 				$data                          = array();
 				$data['permission_badge']      = $data_obj->permissions[ $i ]->badge;
-				$data['permission_machine_id'] = $data_obj->permissions[ $i ]->machine_id;
+				$data['permission_machine_name'] = $data_obj->permissions[ $i ]->machine_name;
 				$wpdb->insert( self::MACHINE_PERMISSIONS_TABLE, $data );
 			}
 		}

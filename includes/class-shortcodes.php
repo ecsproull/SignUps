@@ -430,7 +430,7 @@ class ShortCodes extends SignUpsBase {
 	private function create_select_signup_form( $signups, $categories ) {
 		?>
 		<form method="POST">
-			<div id="usercontent" class="container">
+			<div id="usercontent">
 				<div id="signup-select selection-font" class="signup-category-list mb-100px mr-auto ml-auto mt-5">
 					<?php
 					$count = 0;
@@ -455,14 +455,17 @@ class ShortCodes extends SignUpsBase {
 						<?php
 						$count++;
 					}
-					$remainder = $count % 4;
-					for ( $i = 0; $i < $remainder; $i++ ) {
-						?>
-						<div class="text-center mb-4">
-							<div class="border-top3 pt-2 bg-lightgray h-65px">
+
+					if ( $count % 4 > 0) {
+						$remainder = 4 - ( $count % 4 );
+						for ( $i = 0; $i < $remainder; $i++ ) {
+							?>
+							<div class="text-center mb-4">
+								<div class="border-top3 pt-2 bg-lightgray h-65px">
+								</div>
 							</div>
-						</div>
-						<?php
+							<?php
+						}
 					}
 					?>
 				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
@@ -489,7 +492,7 @@ class ShortCodes extends SignUpsBase {
 			<h1 class="mb-2"><?php echo esc_html( $signup_name ); ?></h1>
 			<div>
 				<form class="signup_form" method="POST">
-					<div id="usercontent" class="container">
+					<div id="usercontent">
 						<?php
 						if ( 'none' == $user_group ) {
 							$user_badge = true;

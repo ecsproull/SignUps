@@ -266,6 +266,28 @@ class SignUpsBase {
 			return null;
 		}
 	}
+	
+	/**
+	 * Is this a rolling signup
+	 *
+	 * @param  mixed $signup_id
+	 * @return boolean True for rolling, else false
+	 */
+	private function is_rolling_signup( $signup_id ) {
+		global $wpdb;
+		$signup = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE signup_id = %s',
+				self::SIGNUPS_TABLE,
+				$signup_id
+			),
+			OBJECT
+		);
+
+		return $signup[0]->signup_rolling_template > '0';
+	}
 
 	/**
 	 * Creates a section of HTML for the user to identify themselves.
@@ -280,6 +302,8 @@ class SignUpsBase {
 		$results     = array( 1 );
 		$remember_me = false;
 		$user_secret = null;
+
+		$rolling_signup = $this->is_rolling_signup( $signup_id );
 
 		if ( $secret ) {
 			$attendees_rolling = $wpdb->get_results(
@@ -350,6 +374,8 @@ class SignUpsBase {
 			}
 
 			$user_secret = $results[0]->member_secret;
+		} else {
+			$remember_me = isset( $_COOKIE['signups_scw_badge'] );
 		}
 		?>
 
@@ -372,10 +398,10 @@ class SignUpsBase {
 						type="checkbox" name="remember_me" value='' <?php echo $remember_me ? 'checked' : ''; ?>></td>
 				<td class="text-left"><input id="user-edit-id" class="user-edit-id" 
 					type="text" name="secret" value="<?php echo esc_html( $secret ); ?>" placeholder="Enter secret to edit"
-					<?php echo '7' === $signup_id || '6' === $signup_id || '17' === $signup_id ? '' : 'hidden'; ?>></td>
+					<?php $rolling_signup ? '' : 'hidden'; ?>></td>
 				<td><button id="update-butt" type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary" 
 					value=<?php echo esc_html( $signup_id ); ?> name="continue_signup" disabled
-					<?php echo '7' === $signup_id || '6' === $signup_id || '17' === $signup_id ? 'hidden' : ''; ?> >Reload</button></td>
+					<?php echo $rolling_signup ? '' : 'hidden'; ?> >Reload</button></td>
 			</tr>
 			<tr hidden>
 				<td><input id="phone" class="member-phone" type="text" name="phone"
@@ -610,14 +636,14 @@ class SignUpsBase {
 		<div id="session_select" class="text-center mw-800px">
 			<h1 class="mb-2"><b><?php echo esc_html( $signup_name ); ?></b></h1>
 			<div>
-				<div class="container">
+				<div>
 					<form class="signup_form" method="POST">
 						<?php
 						wp_nonce_field( 'signups', 'mynonce' );
 						$user_badge = $this->create_user_table( $user_group, $signup_id, $secret );
 						?>
 
-						<table id="selection-table" class="table-bordered mb-100px mr-auto ml-auto container selection-font"
+						<table id="selection-table" class="table-bordered mb-100px mr-auto ml-auto selection-font"
 							<?php echo null === $user_badge && ! $admin ? 'hidden' : ''; ?> >
 							<?php
 							$current_day    = '2000-07-01';

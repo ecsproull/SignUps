@@ -25,7 +25,7 @@ jQuery(document).ready(function($){
 				});
 
 				if ($("#remember_me").is(":checked")){
-					Cookies.set('signups_scw_badge', response[0].badge);
+					Cookies.set('signups_scw_badge', response[0].member_badge);
 				}
 				$('.rolling-remove-chk').prop("hidden", true);
 				$('badgeclass').prop("hidden", false);
@@ -41,6 +41,10 @@ jQuery(document).ready(function($){
 				alert('Error: ' + response.status + ' Unknown Error.');
 			}
 		});
+	});
+
+	$("#session_select").on("load", (e) => {
+		debugger;
 	});
 
 	$("#badge-input").on('keydown', (e) => {
