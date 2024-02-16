@@ -25,6 +25,6 @@ class TestPlugin extends SignUpsBase {
 	 * @return void
 	 */
 	public function load_test_page() {
-		echo do_shortcode( '[scw_selectclass]' );
+		echo do_shortcode( '[scw_selectclass admin=true]' );
 	}
 }

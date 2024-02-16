@@ -359,8 +359,8 @@ class SignUpsBase {
 						'SELECT * FROM %1s
 						WHERE permission_badge = %s && permission_machine_name = %s',
 						self::MACHINE_PERMISSIONS_TABLE,
-						$request['badge'],
-						$request['user-groups']
+						$badge,
+						$user_group
 					),
 					OBJECT
 				);

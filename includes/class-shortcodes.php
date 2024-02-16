@@ -19,7 +19,11 @@ class ShortCodes extends SignUpsBase {
 	/**
 	 * Add the select class shortcode
 	 */
-	public function user_signup() {
+	public function user_signup( $admin_view = false ) {
+		$admin = false;
+		if ( isset( $admin_view['admin'] ) ) {
+			$admin = $admin_view['admin'];
+		}
 		$post = wp_unslash( $_POST );
 		if ( isset( $post['mynonce'] ) && wp_verify_nonce( $post['mynonce'], 'signups' ) ) {
 			if ( isset( $post['continue_signup'] ) ) {
@@ -43,7 +47,7 @@ class ShortCodes extends SignUpsBase {
 					$this->create_description_form( get_query_var( 'signup_id' ) );
 				}
 			} else {
-				$this->create_select_signup();
+				$this->create_select_signup( $admin_view );
 			}
 		}
 	}
@@ -109,20 +113,35 @@ class ShortCodes extends SignUpsBase {
 	 *
 	 * @return void
 	 */
-	private function create_select_signup() {
+	private function create_select_signup( $admin_view = false ) {
 		global $wpdb;
-		$signups = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT signup_id,
-				signup_name,
-				signup_category
-				FROM %1s
-				WHERE signup_admin_approved = 1
-				ORDER BY signup_order',
-				self::SIGNUPS_TABLE
-			),
-			OBJECT
-		);
+		$signups = null;
+		if ( $admin_view ) {
+			$signups = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT signup_id,
+					signup_name,
+					signup_category
+					FROM %1s
+					ORDER BY signup_order',
+					self::SIGNUPS_TABLE
+				),
+				OBJECT
+			);
+		} else {
+			$signups = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT signup_id,
+					signup_name,
+					signup_category
+					FROM %1s
+					WHERE signup_admin_approved = 1
+					ORDER BY signup_order',
+					self::SIGNUPS_TABLE
+				),
+				OBJECT
+			);
+		}
 
 		$categories = $wpdb->get_results(
 			$wpdb->prepare(
