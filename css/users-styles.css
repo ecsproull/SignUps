@@ -3,25 +3,6 @@
 	font-weight: 600;
     color: black;
 }
-/* responsive, form small screens, use 13px font size */
-@media (max-width: 1000px) {
-    .selection-font {
-        font-size: 13px;
-		font-weight: 600;
-		color: black;
-    }
-
-	.date-row {
-		border-top: 3px solid black;
-		border-left: 3px solid black;
-		border-right: 3px solid black;
-		border-bottom: 2px solid gray!important;
-		background-color: lightsteelblue;
-		border-radius: 10px;
-		color:'black'; 
-		font-size:16px;
-	}
-}
 
 #usercontent {
 	background-color: transparent;
@@ -203,10 +184,9 @@ input[type='radio'] {
 	align-items: start;
 	justify-content: space-between;
 }
-
 .signup-category-list {
 	display: grid;
-	#width: 1000px;
+	width: 100%;
 	grid-template-columns: 25% 25% 25% 25%;
 	align-items: start;
 	justify-content: space-between;
@@ -297,4 +277,33 @@ input[type=time]::-webkit-clear-button {
 .class-description-box ::-ms-input-placeholder { /* Microsoft Edge */
   color: red;
 }
-  
+
+@media (max-width: 800px) {
+    h2 {
+		font-size: 20px;
+	}
+	.selection-font {
+        font-size: 18px;
+		font-weight: 600;
+		color: black;
+    }
+
+	.date-row {
+		border-top: 3px solid black;
+		border-left: 3px solid black;
+		border-right: 3px solid black;
+		border-bottom: 2px solid gray!important;
+		background-color: lightsteelblue;
+		border-radius: 10px;
+		color:'black'; 
+		font-size:16px;
+	}
+
+	.signup-category-list {
+		display: grid;
+		width: 100%;
+		grid-template-columns: 50% 50%;
+		align-items: start;
+		justify-content: space-between;
+	}
+}

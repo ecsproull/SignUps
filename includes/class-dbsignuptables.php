@@ -225,10 +225,10 @@ class DbSignUpTables {
 				('Lathe'),
 				('Ring Bowl'),
 				('CNC'),
-				('General Shop Fundamentals'),
+				('Fundamentals'),
 				('Lathe Projects'),
 				('Club Classes'),
-				('General Shop Project Classes'),
+				('Project Classes'),
 				('Miscellaneous')"
 			);
 		}

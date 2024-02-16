@@ -450,7 +450,7 @@ class ShortCodes extends SignUpsBase {
 		?>
 		<form method="POST">
 			<div id="usercontent">
-				<div id="signup-select selection-font" class="signup-category-list mb-100px mr-auto ml-auto mt-5">
+				<div id="signup-select" class="signup-category-list selection-font mb-100px mr-auto ml-auto mt-5">
 					<?php
 					$count = 0;
 					foreach ( $categories as $category ) {
