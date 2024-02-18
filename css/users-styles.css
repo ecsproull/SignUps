@@ -278,12 +278,17 @@ input[type=time]::-webkit-clear-button {
   color: red;
 }
 
+.category-text {
+	font-size: 20px;
+	font-weight: bold;
+}
 @media (max-width: 800px) {
-    h2 {
-		font-size: 20px;
+	.category-text {
+		font-weight: bold;
+		font-size: 18px;
 	}
 	.selection-font {
-        font-size: 18px;
+        font-size: 22px;
 		font-weight: 600;
 		color: black;
     }
@@ -305,5 +310,11 @@ input[type=time]::-webkit-clear-button {
 		grid-template-columns: 50% 50%;
 		align-items: start;
 		justify-content: space-between;
+	}
+}
+
+@media (min-width: 1200px) {
+	.container {
+    	max-width: 100%;
 	}
 }

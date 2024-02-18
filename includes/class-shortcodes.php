@@ -282,159 +282,157 @@ class ShortCodes extends SignUpsBase {
 		$new_attendee['attendee_badge']         = $post['badge_number'];
 		$new_attendee['attendee_payment_start'] = $now->format( self::DATETIME_FORMAT );
 		?>
-		<div class="container">
-			<form method="POST">
-				<table class="mb-100px mr-auto ml-auto">
-					<tr class="attendee-row">
-						<th>Date</th>
-						<th>Time</th>
-						<th>Name</th>
-						<th>Item</th>
-						<th>Status</th>
-					</tr>
-					<?php
-					$wpdb->query(
-						$wpdb->prepare(
-							'LOCK TABLES %1s WRITE, %1s READ',
-							self::ATTENDEES_TABLE,
-							self::SESSIONS_TABLE
-						)
-					);
+		<form method="POST">
+			<table class="mb-100px mr-auto ml-auto">
+				<tr class="attendee-row">
+					<th>Date</th>
+					<th>Time</th>
+					<th>Name</th>
+					<th>Item</th>
+					<th>Status</th>
+				</tr>
+				<?php
+				$wpdb->query(
+					$wpdb->prepare(
+						'LOCK TABLES %1s WRITE, %1s READ',
+						self::ATTENDEES_TABLE,
+						self::SESSIONS_TABLE
+					)
+				);
 
-					$current_session_attendees = $wpdb->get_results(
-						$wpdb->prepare(
-							'SELECT * FROM %1s WHERE attendee_session_id = %d AND attendee_item != "INSTRUCTOR"',
-							self::ATTENDEES_TABLE,
-							$new_attendee['attendee_session_id'],
-						)
-					);
+				$current_session_attendees = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT * FROM %1s WHERE attendee_session_id = %d AND attendee_item != "INSTRUCTOR"',
+						self::ATTENDEES_TABLE,
+						$new_attendee['attendee_session_id'],
+					)
+				);
 
-					$available_slots = $wpdb->get_results(
-						$wpdb->prepare(
-							'SELECT session_slots FROM %1s WHERE session_id = %d',
-							self::SESSIONS_TABLE,
-							$new_attendee['attendee_session_id']
-						)
-					);
+				$available_slots = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT session_slots FROM %1s WHERE session_id = %d',
+						self::SESSIONS_TABLE,
+						$new_attendee['attendee_session_id']
+					)
+				);
 
-					$signed_up_already   = false;
-					$insert_return_value = false;
-					$last_id             = 0;
-					if ( count( $current_session_attendees ) < $available_slots[0]->session_slots ) {
-						if ( $new_attendee['attendee_badge'] ) {
-							$signed_up_already = $wpdb->get_results(
-								$wpdb->prepare(
-									'SELECT attendee_badge FROM %1s WHERE attendee_session_id = %d AND attendee_badge = %d',
-									self::ATTENDEES_TABLE,
-									$new_attendee['attendee_session_id'],
-									$new_attendee['attendee_badge']
-								)
-							);
-						} else {
-							$signed_up_already = $wpdb->get_results(
-								$wpdb->prepare(
-									'SELECT * FROM %1s WHERE attendee_session_id = %d AND 
-										attendee_firstname = %s AND
-										attendee_lastname  = %s AND
-										attendee_phone     = %s',
-									self::ATTENDEES_TABLE,
-									$new_attendee['attendee_session_id'],
-									$new_attendee['attendee_firstname'],
-									$new_attendee['attendee_lastname'],
-									$new_attendee['attendee_phone']
-								)
-							);
-						}
-
-						if ( ! $signed_up_already ) {
-							$insert_return_value = $wpdb->insert( self::ATTENDEES_TABLE, $new_attendee );
-							$last_id             = $wpdb->insert_id;
-						}
+				$signed_up_already   = false;
+				$insert_return_value = false;
+				$last_id             = 0;
+				if ( count( $current_session_attendees ) < $available_slots[0]->session_slots ) {
+					if ( $new_attendee['attendee_badge'] ) {
+						$signed_up_already = $wpdb->get_results(
+							$wpdb->prepare(
+								'SELECT attendee_badge FROM %1s WHERE attendee_session_id = %d AND attendee_badge = %d',
+								self::ATTENDEES_TABLE,
+								$new_attendee['attendee_session_id'],
+								$new_attendee['attendee_badge']
+							)
+						);
+					} else {
+						$signed_up_already = $wpdb->get_results(
+							$wpdb->prepare(
+								'SELECT * FROM %1s WHERE attendee_session_id = %d AND 
+									attendee_firstname = %s AND
+									attendee_lastname  = %s AND
+									attendee_phone     = %s',
+								self::ATTENDEES_TABLE,
+								$new_attendee['attendee_session_id'],
+								$new_attendee['attendee_firstname'],
+								$new_attendee['attendee_lastname'],
+								$new_attendee['attendee_phone']
+							)
+						);
 					}
-					$wpdb->query( 'UNLOCK TABLES' );
 
-					/**
-					 * Four checks before we collect money.
-					 * 1.) There is a balance owed which will be the full amount.
-					 * 2.) The last inserted ID is valid.
-					 * 3.) The insert didn't fail.
-					 * 4.) Exactly one row is inserted. It can be 0 but never more than 1.
-					 */
-					if (
-						0 !== (int) $new_attendee['attendee_balance_owed'] &&
-						0 !== $last_id &&
-						$insert_return_value
-					) {
-						$description = $signup_name . ' - ' . $slot_start->format( self::DATETIME_FORMAT );
-						$payments    = new StripePayments();
-						if ( ! $post['session_price_id'] ) {
-							$signups = $wpdb->get_results(
-								$wpdb->prepare(
-									'SELECT signup_product_id
-									FROM %1s
-									WHERE signup_id = %s',
-									self::SIGNUPS_TABLE,
-									$signup_id
-								),
-								OBJECT
-							);
+					if ( ! $signed_up_already ) {
+						$insert_return_value = $wpdb->insert( self::ATTENDEES_TABLE, $new_attendee );
+						$last_id             = $wpdb->insert_id;
+					}
+				}
+				$wpdb->query( 'UNLOCK TABLES' );
 
-							if ( ! $signups[0]->signup_product_id ) {
-								$ret = $payments->create_product( $post['signup_name'], $cost );
-								if ( $ret ) {
-									$data                            = array();
-									$data['signup_product_id']       = $ret['product_id'];
-									$data['signup_default_price_id'] = $ret['price_id'];
+				/**
+				 * Four checks before we collect money.
+				 * 1.) There is a balance owed which will be the full amount.
+				 * 2.) The last inserted ID is valid.
+				 * 3.) The insert didn't fail.
+				 * 4.) Exactly one row is inserted. It can be 0 but never more than 1.
+				 */
+				if (
+					0 !== (int) $new_attendee['attendee_balance_owed'] &&
+					0 !== $last_id &&
+					$insert_return_value
+				) {
+					$description = $signup_name . ' - ' . $slot_start->format( self::DATETIME_FORMAT );
+					$payments    = new StripePayments();
+					if ( ! $post['session_price_id'] ) {
+						$signups = $wpdb->get_results(
+							$wpdb->prepare(
+								'SELECT signup_product_id
+								FROM %1s
+								WHERE signup_id = %s',
+								self::SIGNUPS_TABLE,
+								$signup_id
+							),
+							OBJECT
+						);
 
-									$where              = array();
-									$where['signup_id'] = $post['session_signup_id'];
-									$affected_row_count = $wpdb->update(
-										'wp_scw_signups',
-										$data,
-										$where
-									);
+						if ( ! $signups[0]->signup_product_id ) {
+							$ret = $payments->create_product( $post['signup_name'], $cost );
+							if ( $ret ) {
+								$data                            = array();
+								$data['signup_product_id']       = $ret['product_id'];
+								$data['signup_default_price_id'] = $ret['price_id'];
 
-									if ( ! $affected_row_count ) {
-										echo 'Failed to update signup with pricing and product info.';
-										return;
-									}
+								$where              = array();
+								$where['signup_id'] = $post['session_signup_id'];
+								$affected_row_count = $wpdb->update(
+									'wp_scw_signups',
+									$data,
+									$where
+								);
 
-									$post['session_price_id'] = $ret['price_id'];
-
-								} else {
-									echo 'Failed to create stripe pricing and product info.';
+								if ( ! $affected_row_count ) {
+									echo 'Failed to update signup with pricing and product info.';
 									return;
 								}
+
+								$post['session_price_id'] = $ret['price_id'];
+
+							} else {
+								echo 'Failed to create stripe pricing and product info.';
+								return;
 							}
 						}
+					}
 
-						$payments->collect_money( $description, $post['session_price_id'], $new_attendee['attendee_badge'], $last_id, $cost );
+					$payments->collect_money( $description, $post['session_price_id'], $new_attendee['attendee_badge'], $last_id, $cost );
+				}
+				?>
+				<tr class="attendee-row">
+					<td><?php echo esc_html( $slot_start->format( self::DATE_FORMAT ) ); ?></td>
+					<td><?php echo esc_html( $slot_start->format( self::TIME_FORMAT ) . ' - ' . $slot_end->format( self::TIME_FORMAT ) ); ?></td>
+					<td><?php echo esc_html( $post['firstname'] . ' ' . $post['lastname'] ); ?></td>
+					<td><?php echo esc_html( $slot_parts[2] ); ?></td>
+					<?php
+					if ( $signed_up_already ) {
+						?>
+						<td style="color:red"><b><i>Failed, Signed up alread</i></b></td>
+						<?php
+					} elseif ( ! $insert_return_value ) {
+						?>
+						<td style="color:red"><b><i>Failed DB Insert</i></b></td>
+						<?php
+					} else {
+						?>
+						<td>Success</td>
+						<?php
 					}
 					?>
-					<tr class="attendee-row">
-						<td><?php echo esc_html( $slot_start->format( self::DATE_FORMAT ) ); ?></td>
-						<td><?php echo esc_html( $slot_start->format( self::TIME_FORMAT ) . ' - ' . $slot_end->format( self::TIME_FORMAT ) ); ?></td>
-						<td><?php echo esc_html( $post['firstname'] . ' ' . $post['lastname'] ); ?></td>
-						<td><?php echo esc_html( $slot_parts[2] ); ?></td>
-						<?php
-						if ( $signed_up_already ) {
-							?>
-							<td style="color:red"><b><i>Failed, Signed up alread</i></b></td>
-							<?php
-						} elseif ( ! $insert_return_value ) {
-							?>
-							<td style="color:red"><b><i>Failed DB Insert</i></b></td>
-							<?php
-						} else {
-							?>
-							<td>Success</td>
-							<?php
-						}
-						?>
-					</tr>
-				</table>
-			</form>
-		</div>
+				</tr>
+			</table>
+		</form>
 		<?php
 	}
 
@@ -457,7 +455,7 @@ class ShortCodes extends SignUpsBase {
 						?>
 						<div class="text-center mb-4">
 							<div class="border-top3 pt-2 bg-lightgray h-65px">
-								<h2><?php echo esc_html( $category->category_title ); ?></h2>
+								<span class="category-text"><?php echo esc_html( $category->category_title ); ?></span>
 							</div>
 							<?php
 							foreach ( $signups as $signup ) {

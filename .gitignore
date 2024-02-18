@@ -1,6 +1,5 @@
 vendor/wp-coding-standards/
 vendor/squizlabs
 .vscode/
-composer.json
 composer.lock
 /vendor/
