@@ -52,6 +52,20 @@ class SignUpsRestApis extends SignUpsBase {
 			function () {
 				$this->register_route(
 					'scwmembers/v1',
+					'/monitors',
+					'get_monitors',
+					$this,
+					array(),
+					WP_REST_Server::READABLE
+				);
+			}
+		);
+
+		add_action(
+			'rest_api_init',
+			function () {
+				$this->register_route(
+					'scwmembers/v1',
 					'/members',
 					'get_member',
 					$this,
@@ -112,7 +126,35 @@ class SignUpsRestApis extends SignUpsBase {
 			}
 		);
 	}
-	
+
+	/**
+	 * Gets the monitors for the specified date.
+	 *
+	 * @param  mixed $request Request from an AJAX call.
+	 * @return mixed $results the results of the query.
+	 */
+	public function get_monitors( $request ) {
+		global $wpdb;
+		$date    = $request['date'];
+		$pattern = '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/ms';
+		if ( preg_match( $pattern, $date ) ) {
+			$members = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT attendee_badge, attendee_item, attendee_start_formatted
+					FROM %1s
+					WHERE attendee_signup_id = 6 && attendee_start_formatted LIKE  %s',
+					self::ATTENDEES_ROLLING_TABLE,
+					$wpdb->esc_like( $date ) . '%'
+				),
+				OBJECT
+			);
+
+			return $members;
+		} else {
+			return 'nice try';
+		}
+	}
+
 	/**
 	 * Set a members badge as a cookie.
 	 *
