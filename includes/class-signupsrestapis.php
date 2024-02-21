@@ -125,6 +125,51 @@ class SignUpsRestApis extends SignUpsBase {
 				);
 			}
 		);
+
+		add_action(
+			'rest_api_init',
+			function () {
+				$this->register_route(
+					'scwmembers/v1',
+					'/unsubscribe',
+					'unsubscribe_list',
+					$this,
+					array(),
+					WP_REST_Server::CREATABLE
+				);
+			}
+		);
+	}
+
+	public function unsubscribe_list( $data ) {
+		global $wpdb;
+		$key      = '8c62a157-7ee8-4104-9f91-930eac39fe2f';
+		$data_obj = json_decode( $data->get_body(), false );
+		if ( $data_obj->key !== $key ) {
+			return;
+		}
+
+		if ( 'get' === $data_obj->action ) {
+			$list = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT *
+					FROM %1s
+					WHERE unsubscribe_complete = false',
+					self::UNSUBSCRIBE_TABLE
+				),
+				OBJECT
+			);
+
+			return $list;
+		} elseif ( 'done' === $data_obj->action ) {
+			foreach ( $data_obj->unsubscribe_secret as $secret ) {
+				$data                         = array();
+				$data['unsubscribe_complete'] = true;
+				$where                        = array();
+				$where['unsubscribe_key']     = $secret;
+				$wpdb->update( self::UNSUBSCRIBE_TABLE, $data, $where );
+			}
+		}
 	}
 
 	/**

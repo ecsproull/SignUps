@@ -127,6 +127,13 @@ class SignUpsBase {
 	protected const MACHINE_PERMISSIONS_TABLE = 'wp_scw_machine_permissions';
 
 	/**
+	 * Members wishing to be unsubscribed from the Monitor Nag Mailer.
+	 *
+	 * @var mixed
+	 */
+	protected const UNSUBSCRIBE_TABLE = 'wp_scw_unsubscribe';
+
+	/**
 	 * Format DateTime as 2020-08-13 6:00 am.
 	 *
 	 * @var mixed

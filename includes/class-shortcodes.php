@@ -46,9 +46,41 @@ class ShortCodes extends SignUpsBase {
 				} else {
 					$this->create_description_form( get_query_var( 'signup_id' ) );
 				}
-			} else {
+			} elseif ( get_query_var( 'unsubscribe' ) ) {
+				$key = get_query_var( 'unsubscribe');
+				$pattern = '/^[0-9a-f]{32}$|^[0-9a-f]{14}\.[0-9]{8}$/ms';
+				if ( preg_match( $pattern, $key ) ) {
+					$this->unsubscribe_nag_mailer( $key );
+				}
+			} else{
 				$this->create_select_signup( $admin_view );
 			}
+		}
+	}
+
+	/**
+	 * Unsubscribe from the monitor nag mailer. This adds the key to be
+	 * unsubscribed to the database for retrieval by the nag mailer.
+	 *
+	 * @param  mixed $key The key that identifies the member.
+	 * @return void
+	 */
+	protected function unsubscribe_nag_mailer( $key ) {
+		global $wpdb;
+		$data                         = array();
+		$data['unsubscribe_key']      = $key;
+		$data['unsubscribe_complete'] = false;
+		$result = $wpdb->insert( self::UNSUBSCRIBE_TABLE, $data );
+		if ( 1 === $result ) {
+			?>
+			<h1 class='ml-auto mr-auto mt-5'>Request queued and should be complete within 8 hours.</h1>
+			<?php
+		} else {
+			?>
+			<div class='ml-auto mr-auto mt-5'>
+				<h1>Opps something failed.</h1>
+				<h2><a href="mailto:treasurer@scwwoodshop.com?subject=Failed Unsubscribe&body=<?php echo esc_html( $key ); ?>">Email Administrator</a><h2>
+			<?php
 		}
 	}
 
