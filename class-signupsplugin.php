@@ -156,6 +156,7 @@ class SignupsPlugin extends SignUpsBase {
 		'signups_page_exceptions_editor' !== $host &&
 		'cncusagereport' !== $host &&
 		'signups_page_test_page' !== $host ) {
+			$this->write_log( 'Failed page to load styles is ' . $host );
 			return;
 		}
 
@@ -189,6 +190,7 @@ class SignupsPlugin extends SignUpsBase {
 		$user_pages[] = 'signups';
 		$user_pages[] = 'cnc-usage-report';
 		if ( ! is_page( $user_pages ) ) {
+			$this->write_log( 'Failed page to load styles is ' . $host );
 			return;
 		}
 

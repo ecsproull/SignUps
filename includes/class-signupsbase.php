@@ -127,6 +127,13 @@ class SignUpsBase {
 	protected const MACHINE_PERMISSIONS_TABLE = 'wp_scw_machine_permissions';
 
 	/**
+	 * Log table.
+	 *
+	 * @var mixed
+	 */
+	protected const LOG_TABLE = 'wp_scw_logs';
+
+	/**
 	 * Format DateTime as 2020-08-13 6:00 am.
 	 *
 	 * @var mixed
@@ -171,6 +178,17 @@ class SignUpsBase {
 		$this->date_time_zone = new DateTimeZone( 'America/Phoenix' );
 	}
 
+	/**
+	 * Write_log.
+	 *
+	 * @param  mixed $log_text The string to write to the log.
+	 * @return void
+	 */
+	protected function write_log( $log_text ) {
+		global $wpdb;
+		$log_data['logs_text'] = $log_text;
+		$wpdb->insert( self::LOG_TABLE, $log_data );
+	}
 	/**
 	 * Formats a string to be passed back in form data.
 	 *
@@ -689,12 +707,13 @@ class SignUpsBase {
 
 								$current_day = $start_date->format( self::DATE_FORMAT );
 								$count       = 0;
+								$col_span    = $template->template_columns + 1;
 								?>
-								<tr class="submit-row" colspan='4'>
-								<td colspan='4'><button type="submit" class="btn btn-md mr-auto ml-auto bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee_session">Submit</button></td>
+								<tr class="submit-row" colspan='<?php echo esc_html( $col_span ); ?>'>
+								<td colspan='<?php echo esc_html( $col_span ); ?>'><button type="submit" class="btn btn-md mr-auto ml-auto bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee_session">Submit</button></td>
 								</tr>
 								<tr class="date-row">
-									<td colspan='4'><span class='mt-3'><?php echo esc_html( $current_day ); ?></span></td>
+									<td colspan='<?php echo esc_html( $col_span ); ?>'><span class='mt-3'><?php echo esc_html( $current_day ); ?></span></td>
 								</tr>
 								<?php
 								foreach ( $group_items as $group_item ) {

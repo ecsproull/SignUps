@@ -173,7 +173,7 @@ class DbSignUpTables {
 				`stripe_api_key` varchar(150) NOT NULL,
 				`stripe_api_secret` varchar(150) NOT NULL,
 				`stripe_endpoint_secret` varchar(120) DEFAULT NULL,
-				`stripe_root_url` varchar(48) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+				`stripe_root_url` varchar(48) NOT NULL,
 				PRIMARY KEY (`stripe_id`)
 				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;"
 			);
@@ -273,7 +273,7 @@ class DbSignUpTables {
 					`member_email` varchar(45) DEFAULT NULL,
 					`member_phone` varchar(45) DEFAULT NULL,
 					UNIQUE KEY `member_ID` (`member_ID`)
-				) ENGINE=InnoDB AUTO_INCREMENT=707 DEFAULT CHARSET=utf8mb4;"
+				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;"
 			);
 		}
 
@@ -285,7 +285,7 @@ class DbSignUpTables {
 					`permission_badge` varchar(12) NOT NULL,
 					PRIMARY KEY (`permission_ID`),
 					UNIQUE KEY `permission_ID` (`permission_ID`)
-				) ENGINE=InnoDB AUTO_INCREMENT=799 DEFAULT CHARSET=utf8mb4;"
+				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;"
 			);
 		}
 
@@ -297,7 +297,29 @@ class DbSignUpTables {
 					`text_from_phone` varchar(45) DEFAULT NULL,
 					`text_date_time` varchar(30) DEFAULT NULL,
 					PRIMARY KEY (`text_id`)
-				) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4;"
+				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;"
+			);
+		}
+
+		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_text_messages"' ) !== 'wp_scw_text_messages' ) {
+			$wpdb->query(
+				"CREATE TABLE `wp_scw_unsubscribe` (
+					`unsubscribe_id` int NOT NULL AUTO_INCREMENT,
+					`unsubscribe_key` varchar(45) NOT NULL,
+					`unsubscribe_complete` tinyint NOT NULL DEFAULT '0',
+					PRIMARY KEY (`unsubscribe_id`),
+					UNIQUE KEY `unsubscribe_id_UNIQUE` (`unsubscribe_id`)
+				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;"
+			);
+		}
+		
+		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_logs"' ) !== 'wp_scw_logs' ) {
+			$wpdb->query(
+				"CREATE TABLE `wp_scw_logs` (
+					`logs_id` int unsigned NOT NULL AUTO_INCREMENT,
+					`logs_text` mediumtext NOT NULL,
+					PRIMARY KEY (`logs_id`)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
 			);
 		}
 

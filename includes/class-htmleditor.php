@@ -188,10 +188,11 @@ class HtmlEditor extends SignUpsBase {
 					OBJECT
 				);
 
+				$signup_url = get_site_url() . '/signups?signup_id=' . $post['description_signup_id'];
 				foreach ( $sessions as $session ) {
 					if ( $session->session_calendar_id ) {
 						$where        = array( 'id' => $session->session_calendar_id );
-						$data         = array( 'text_for_date' => $short_description );
+						$data         = array( 'text_for_date' => $short_description . '<br><br><a href=' . $signup_url . " target='_blank' rel='noopener' >Signup</a>." );
 						$rows_updated = $wpdb->update( self::SPIDER_CALENDAR_EVENT_TABLE, $data, $where );
 					}
 				}
