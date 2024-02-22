@@ -127,6 +127,13 @@ class SignUpsBase {
 	protected const MACHINE_PERMISSIONS_TABLE = 'wp_scw_machine_permissions';
 
 	/**
+	 * Unsubscribe table.
+	 *
+	 * @var mixed
+	 */
+	protected const UNSUBSCRIBE_TABLE = 'wp_scw_unsubscribe';
+
+	/**
 	 * Log table.
 	 *
 	 * @var mixed
