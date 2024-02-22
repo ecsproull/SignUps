@@ -52,6 +52,20 @@ class SignUpsRestApis extends SignUpsBase {
 			function () {
 				$this->register_route(
 					'scwmembers/v1',
+					'/monitors',
+					'get_monitors',
+					$this,
+					array(),
+					WP_REST_Server::READABLE
+				);
+			}
+		);
+
+		add_action(
+			'rest_api_init',
+			function () {
+				$this->register_route(
+					'scwmembers/v1',
 					'/members',
 					'get_member',
 					$this,
@@ -111,8 +125,81 @@ class SignUpsRestApis extends SignUpsBase {
 				);
 			}
 		);
+
+		add_action(
+			'rest_api_init',
+			function () {
+				$this->register_route(
+					'scwmembers/v1',
+					'/unsubscribe',
+					'unsubscribe_list',
+					$this,
+					array(),
+					WP_REST_Server::CREATABLE
+				);
+			}
+		);
 	}
-	
+
+	public function unsubscribe_list( $data ) {
+		global $wpdb;
+		$key      = '8c62a157-7ee8-4104-9f91-930eac39fe2f';
+		$data_obj = json_decode( $data->get_body(), false );
+		if ( $data_obj->key !== $key ) {
+			return;
+		}
+
+		if ( 'get' === $data_obj->action ) {
+			$list = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT *
+					FROM %1s
+					WHERE unsubscribe_complete = false',
+					self::UNSUBSCRIBE_TABLE
+				),
+				OBJECT
+			);
+
+			return $list;
+		} elseif ( 'done' === $data_obj->action ) {
+			foreach ( $data_obj->unsubscribe_secret as $secret ) {
+				$data                         = array();
+				$data['unsubscribe_complete'] = true;
+				$where                        = array();
+				$where['unsubscribe_key']     = $secret;
+				$wpdb->update( self::UNSUBSCRIBE_TABLE, $data, $where );
+			}
+		}
+	}
+
+	/**
+	 * Gets the monitors for the specified date.
+	 *
+	 * @param  mixed $request Request from an AJAX call.
+	 * @return mixed $results the results of the query.
+	 */
+	public function get_monitors( $request ) {
+		global $wpdb;
+		$date    = $request['date'];
+		$pattern = '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/ms';
+		if ( preg_match( $pattern, $date ) ) {
+			$members = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT attendee_badge, attendee_item, attendee_start_formatted
+					FROM %1s
+					WHERE attendee_signup_id = 6 && attendee_start_formatted LIKE  %s',
+					self::ATTENDEES_ROLLING_TABLE,
+					$wpdb->esc_like( $date ) . '%'
+				),
+				OBJECT
+			);
+
+			return $members;
+		} else {
+			return 'nice try';
+		}
+	}
+
 	/**
 	 * Set a members badge as a cookie.
 	 *

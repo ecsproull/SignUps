@@ -113,6 +113,7 @@ class SignupsPlugin extends SignUpsBase {
 		$vars[] .= 'badge';
 		$vars[] .= 'signup_id';
 		$vars[] .= 'secret';
+		$vars[] .= 'unsubscribe';
 		return $vars;
 	}
 
