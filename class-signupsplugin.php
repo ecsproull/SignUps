@@ -3,16 +3,16 @@
  * Summary
  * Database class.
  *
- * @package     SignUps
+ * @package     signups
  * @author      Edward Sproull
  * @copyright   You have the right to copy
  * @license     GPL-2.0+
  */
 
 /**
- * Plugin Name: Signups
+ * Plugin Name: signups
  * Plugin URI:
- * Description: Signups administration tools.
+ * Description: Signups administration tools for the Sun City West Woodshop.
  * Version: 1.0
  * Author: Ed Sproull
  * Author URI:
@@ -157,18 +157,19 @@ class SignupsPlugin extends SignUpsBase {
 		'signups_page_exceptions_editor' !== $host &&
 		'cncusagereport' !== $host &&
 		'signups_page_test_page' !== $host ) {
-			$this->write_log( 'Failed page to load styles is ' . $host );
+			$this->write_log( 'Failed Admin page to load styles is ' . $host );
 			return;
 		}
 
-		wp_register_style( 'signup_bs_style', plugins_url( '/signups/bootstrap/css/bootstrap.min.css' ), array(), 1 );
+		$this->write_log( 'Successful Admin page to load styles is ' . $host );
+		wp_register_style( 'signup_bs_style', plugin_dir_url( __FILE__ ) . 'bootstrap/css/bootstrap.min.css', array(), 1 );
 		wp_enqueue_style( 'signup_bs_style' );
-		wp_register_style( 'signup_style', plugins_url( '/signups/css/style.css' ), array(), 1 );
+		wp_register_style( 'signup_style', plugin_dir_url( __FILE__ ) . 'css/style.css', array(), 1 );
 		wp_enqueue_style( 'signup_style' );
-		wp_register_style( 'user_signup_style', plugins_url( '/signups/css/users-styles.css' ), array(), 1 );
+		wp_register_style( 'user_signup_style', plugin_dir_url( __FILE__ ) . 'css/users-styles.css', array(), 1 );
 		wp_enqueue_style( 'user_signup_style' );
 		wp_enqueue_script( 'jquery' );
-		wp_enqueue_script( 'signup_member_script', plugins_url( 'js/signups.js', __FILE__ ), array( 'jquery' ), '1.0.0.0', false, true );
+		wp_enqueue_script( 'signup_member_script', plugin_dir_url( __FILE__ ) . 'js/signups.js', __FILE__, array( 'jquery' ), '1.0.0.0', false, true );
 		wp_localize_script(
 			'signup_member_script',
 			'wpApiSettings',
@@ -191,17 +192,17 @@ class SignupsPlugin extends SignUpsBase {
 		$user_pages[] = 'signups';
 		$user_pages[] = 'cnc-usage-report';
 		if ( ! is_page( $user_pages ) ) {
-			$this->write_log( 'Failed page to load styles is ' . $host );
+			$this->write_log( 'Failed User page to load styles is ' . $host );
 			return;
 		}
-
-		wp_register_style( 'signup_bs_style', plugins_url( '/signups/bootstrap/css/bootstrap.min.css' ), array(), 1 );
+		$this->write_log( 'Successful User page to load styles is ' . $host );
+		wp_register_style( 'signup_bs_style', plugin_dir_url( __FILE__ ) . 'bootstrap/css/bootstrap.min.css', array(), 1 );
 		wp_enqueue_style( 'signup_bs_style' );
-		wp_register_style( 'signup_style', plugins_url( '/signups/css/users-styles.css' ), array(), 1 );
+		wp_register_style( 'signup_style', plugin_dir_url( __FILE__ ) . 'css/users-styles.css', array(), 1 );
 		wp_enqueue_style( 'signup_style' );
 		wp_enqueue_style( 'wp-jquery-ui-dialog' );
-		wp_enqueue_script( 'signup_cookie_script', plugins_url( 'cookie/node_modules/js-cookie/dist/js.cookie.min.js', __FILE__ ), array( 'jquery' ), '3.0.5', false, true );
-		wp_enqueue_script( 'signup_member_script', plugins_url( 'js/users-signup.js', __FILE__ ), array( 'jquery', 'jquery-ui-dialog', 'signup_cookie_script' ), '1.0.0.0', false, true );
+		wp_enqueue_script( 'signup_cookie_script', plugin_dir_url( __FILE__ ) . 'cookie/node_modules/js-cookie/dist/js.cookie.min.js', array( 'jquery' ), '3.0.5', false, true );
+		wp_enqueue_script( 'signup_member_script', plugin_dir_url( __FILE__ ) . 'js/users-signup.js', array( 'jquery', 'jquery-ui-dialog', 'signup_cookie_script' ), '1.0.0.0', false, true );
 		wp_localize_script(
 			'signup_member_script',
 			'wpApiSettings',

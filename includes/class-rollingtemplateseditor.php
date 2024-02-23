@@ -160,7 +160,7 @@ class RollingTemplatesEditor extends SignUpsBase {
 			</div>
 			<div>
 				<input type="text" id="rolling-name" class="mt-2 w-250px" 
-					value="<?php echo $templates[0]->template_name; ?>" name="template_name">
+					value="<?php echo $templates[0] ? $templates[0]->template_name : ''; ?>" name="template_name">
 			</div>
 
 			<div class="text-right">

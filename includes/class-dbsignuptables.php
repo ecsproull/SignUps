@@ -301,7 +301,7 @@ class DbSignUpTables {
 			);
 		}
 
-		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_text_messages"' ) !== 'wp_scw_text_messages' ) {
+		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_unsubscribe"' ) !== 'wp_scw_unsubscribe' ) {
 			$wpdb->query(
 				"CREATE TABLE `wp_scw_unsubscribe` (
 					`unsubscribe_id` int NOT NULL AUTO_INCREMENT,
