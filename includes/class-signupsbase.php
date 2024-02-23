@@ -735,7 +735,7 @@ class SignUpsBase {
 
 									for ( $s = 0; $s < $group_item[0]->template_item_shifts; $s++ ) {
 										?>
-										<tr  class="attendee-row"  style=<?php echo $i % 2 ? 'background:#cfcfcf;' : 'background:#efefef;'; ?> >
+										<tr  class="attendee-row"  style=<?php echo $s % 2 ? 'background:#cfcfcf;' : 'background:#efefef;'; ?> >
 											<td><?php echo esc_html( $start_date->format( self::TIME_FORMAT ) . ' - ' . $temp_end_date->format( self::TIME_FORMAT ) ); ?></td>
 										<?php
 
@@ -976,7 +976,6 @@ class SignUpsBase {
 						$new_attendee['attendee_item']            = trim( $slot_parts[2] );
 						$comment_name                             = 'comment-' . $slot_parts[3];
 						$slot_count                               = $slot_parts[5];
-						$new_attendee['attendee_comment']         = $post[ $comment_name ];
 
 						$wpdb->query(
 							$wpdb->prepare(

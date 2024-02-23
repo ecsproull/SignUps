@@ -15,12 +15,12 @@ ob_start();
  * @package SignUps
  */
 class ShortCodes extends SignUpsBase {
-	public function __construct() {
-		add_action( 'wp_enqueue_scripts', array( $this, 'add_users_scripts_and_css' ) );
-	}
 
 	/**
-	 * Add the select class shortcode
+	 * Add the select class shortcode.
+	 *
+	 * @param  mixed $admin_view When true it shows all signups whether they are approved or not.
+	 * @return void
 	 */
 	public function user_signup( $admin_view = false ) {
 		$admin = false;

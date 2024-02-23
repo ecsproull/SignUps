@@ -151,17 +151,17 @@ class SignupsPlugin extends SignUpsBase {
 	 * @param string $host Who is calling.
 	 */
 	public function add_scripts_and_css( $host ) {
-		if ( 'toplevel_page_sign_ups' !== $host &&
-		'signups_page_html_editor' !== $host &&
-		'signups_page_template_editor' !== $host &&
-		'signups_page_exceptions_editor' !== $host &&
-		'cncusagereport' !== $host &&
-		'signups_page_test_page' !== $host ) {
-			$this->write_log( 'Failed Admin page to load styles is ' . $host );
+		$user_pages   = array();
+		$user_pages[] = 'toplevel_page_sign_ups';
+		$user_pages[] = 'signups_page_html_editor';
+		$user_pages[] = 'signups_page_template_editor';
+		$user_pages[] = 'signups_page_exceptions_editor';
+		$user_pages[] = 'cncusagereport';
+		$user_pages[] = 'signups_page_test_page';
+		if ( ! in_array( $host, $user_pages, true ) ) {
 			return;
 		}
 
-		$this->write_log( 'Successful Admin page to load styles is ' . $host );
 		wp_register_style( 'signup_bs_style', plugin_dir_url( __FILE__ ) . 'bootstrap/css/bootstrap.min.css', array(), 1 );
 		wp_enqueue_style( 'signup_bs_style' );
 		wp_register_style( 'signup_style', plugin_dir_url( __FILE__ ) . 'css/style.css', array(), 1 );
@@ -183,7 +183,7 @@ class SignupsPlugin extends SignUpsBase {
 	/**
 	 * Adds the CSS that is used to style the users side of the plug-in.
 	 *
-	 * @param string $host Who is calling.
+	 * @param string $host Who is calling. Always empty for 
 	 */
 	public function add_users_scripts_and_css( $host ) {
 		$user_pages   = array();
@@ -192,10 +192,9 @@ class SignupsPlugin extends SignUpsBase {
 		$user_pages[] = 'signups';
 		$user_pages[] = 'cnc-usage-report';
 		if ( ! is_page( $user_pages ) ) {
-			$this->write_log( 'Failed User page to load styles is ' . $host );
 			return;
 		}
-		$this->write_log( 'Successful User page to load styles is ' . $host );
+
 		wp_register_style( 'signup_bs_style', plugin_dir_url( __FILE__ ) . 'bootstrap/css/bootstrap.min.css', array(), 1 );
 		wp_enqueue_style( 'signup_bs_style' );
 		wp_register_style( 'signup_style', plugin_dir_url( __FILE__ ) . 'css/users-styles.css', array(), 1 );

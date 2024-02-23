@@ -42,7 +42,17 @@ class SendGridMail extends SignUpsBase {
 			$message
 		);
 
-		$sendgrid = new \SendGrid( getenv( 'SendGrid' ) );
+		global $wpdb;
+		$stripe_row = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s',
+				self::STRIPE_TABLE,
+			),
+			OBJECT
+		);
+
+		$sendgrid = new \SendGrid( $stripe_row[1]->stripe_api_key );
 
 		try {
 			$response = $sendgrid->send( $email );
