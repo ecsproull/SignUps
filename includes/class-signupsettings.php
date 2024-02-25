@@ -252,6 +252,7 @@ class SignupSettings extends SignUpsBase {
 		$post['signup_cost']             = (int) $post['signup_cost'];
 		$post['signup_default_slots']    = (int) $post['signup_default_slots'];
 		$post['signup_rolling_template'] = (int) $post['template_id'];
+		$post['signup_group']            = 'member' === $post['signup_group'] ? '' : $post['signup_group'];
 		unset( $post['template_id'] );
 
 		$duration_parts = explode( ':', $post['signup_default_duration'] );
@@ -1638,8 +1639,9 @@ class SignupSettings extends SignUpsBase {
 			</div>
 			<div>
 				<select id="signup_group" class="mt-2 w-100 h-2rem" name="description_group">
-					<option value="member">Members</option>
+					<option value="">Members</option>
 					<option value="cnc">Cnc Users</option>
+					<option value="laser">Laser Users</option>
 				</select>
 			</div>
 

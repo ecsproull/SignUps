@@ -94,11 +94,6 @@ class SignupsPlugin extends SignUpsBase {
 		add_shortcode( 'scw_payment_failure', array( $this->stripe_payments, 'payment_failure' ) );
 		add_shortcode( 'scw_description_editor', array( $this->description_editor, 'load_description_editor' ) );
 		add_shortcode( 'scw_reports', array( $this->reports, 'class_reports' ) );
-		add_action(
-			'rest_api_init',
-			array( $this, 'regester_payment_route' )
-		);
-
 		add_filter( 'query_vars', array( $this, 'wwp_custom_query_vars_filter' ) );
 	}
 
@@ -117,28 +112,12 @@ class SignupsPlugin extends SignUpsBase {
 		return $vars;
 	}
 
-	/**
-	 * Route used for Stripe.com callback.
-	 *
-	 * @return void
-	 */
-	public function regester_payment_route() {
-		register_rest_route(
-			'scwmembers/v1',
-			'/payments',
-			array(
-				'methods'             => 'POST',
-				'callback'            => array( $this->stripe_payments, 'payment_event' ),
-				'permission_callback' => array( $this->stripe_payments, 'permissions_check' ),
-			)
-		);
-	}
 
 	/**
 	 * Adds the one and only menu item for the plugin.
 	 */
 	public function signup_plugin_top_menu() {
-		add_menu_page( '', 'SignUps', 'manage_options', 'sign_ups', array( new SignupSettings(), 'signup_settings_page' ), plugins_url( '/signups/img/frenchie.bmp' ) );
+		add_menu_page( '', 'SignUps', 'manage_options', 'sign_ups', array( new SignupSettings(), 'signup_settings_page' ), plugin_dir_url( __FILE__ ) . 'img/frenchie.bmp' );
 		add_submenu_page( 'sign_ups', 'Html Editor', 'Descriptions', 'manage_options', 'html_editor', array( new HtmlEditor(), 'load_html_editor' ) );
 		add_submenu_page( 'sign_ups', 'Rolling Templates Editor', 'Rolling Templates', 'manage_options', 'template_editor', array( new RollingTemplatesEditor(), 'load_templates_editor' ) );
 		add_submenu_page( 'sign_ups', 'Rolling Exceptions Editor', 'Exceptions', 'manage_options', 'exceptions_editor', array( new RollingExceptionsEditor(), 'load_exceptions_editor' ) );

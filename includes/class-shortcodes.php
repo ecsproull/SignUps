@@ -354,6 +354,7 @@ class ShortCodes extends SignUpsBase {
 				$signed_up_already   = false;
 				$insert_return_value = false;
 				$last_id             = 0;
+				$wp_last_error       = '';
 				if ( count( $current_session_attendees ) < $available_slots[0]->session_slots ) {
 					if ( $new_attendee['attendee_badge'] ) {
 						$signed_up_already = $wpdb->get_results(
@@ -382,6 +383,9 @@ class ShortCodes extends SignUpsBase {
 
 					if ( ! $signed_up_already ) {
 						$insert_return_value = $wpdb->insert( self::ATTENDEES_TABLE, $new_attendee );
+						if ( ! $insert_return_value ) {
+							$wp_last_error = $wpdb->last_error;
+						}
 						$last_id             = $wpdb->insert_id;
 					}
 				}
@@ -457,7 +461,7 @@ class ShortCodes extends SignUpsBase {
 						<?php
 					} elseif ( ! $insert_return_value ) {
 						?>
-						<td style="color:red"><b><i>Failed DB Insert</i></b></td>
+						<td style="color:red"><b><i>Failed DB Insert : <?php echo esc_html( $wp_last_error ); ?></i></b></td>
 						<?php
 					} else {
 						?>

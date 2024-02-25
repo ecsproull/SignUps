@@ -42,11 +42,19 @@ class User {
 class SignUpsRestApis extends SignUpsBase {
 
 	/**
+	 * Shortcode object for use in api callback.
+	 *
+	 * @var $stripe_payments
+	 */
+	private $stripe_payments;
+
+	/**
 	 * __construct
 	 *
 	 * @return void
 	 */
 	public function __construct() {
+		$this->stripe_payments = new StripePayments();
 		add_action(
 			'rest_api_init',
 			function () {
@@ -138,6 +146,28 @@ class SignUpsRestApis extends SignUpsBase {
 					WP_REST_Server::CREATABLE
 				);
 			}
+		);
+
+		add_action(
+			'rest_api_init',
+			array( $this, 'regester_payment_route' )
+		);
+	}
+
+	/**
+	 * Route used for Stripe.com callback.
+	 *
+	 * @return void
+	 */
+	public function regester_payment_route() {
+		register_rest_route(
+			'scwmembers/v1',
+			'/payments',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this->stripe_payments, 'payment_event' ),
+				'permission_callback' => array( $this->stripe_payments, 'permissions_check' ),
+			)
 		);
 	}
 

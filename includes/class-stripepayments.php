@@ -72,6 +72,7 @@ class StripePayments extends SignUpsBase {
 		 * Verification is done in the Payment Event handler.
 		 */
 	public function permissions_check() {
+		$this->write_log( 'Permissions Check' );
 		return true;
 	}
 
@@ -80,7 +81,7 @@ class StripePayments extends SignUpsBase {
 	 */
 	public function payment_event() {
 		global $wpdb;
-
+		$this->write_log( 'Payment event begin.' );
 		\Stripe\Stripe::setApiKey( $this->stripe_api_key );
 
 		$payload = @file_get_contents( 'php://input' );
@@ -90,6 +91,7 @@ class StripePayments extends SignUpsBase {
 			$event = \Stripe\Event::constructFrom(
 				json_decode( $payload, true )
 			);
+			$this->write_log( 'Event json = ' . $event );
 		} catch ( \UnexpectedValueException $e ) {
 			echo '⚠️  Webhook error while parsing basic request.';
 			http_response_code( 400 );
@@ -161,7 +163,7 @@ class StripePayments extends SignUpsBase {
 					$where = array( 'payments_intent_id' => $payment_intent->payment_intent );
 					$wpdb->update( self::PAYMENTS_TABLE, $new_payment, $where );
 
-					if ( 'succeeded' === $payment_row[0]->payments_status ) {
+					if ( 'succeeded' === $payment_row[0]->payments_status || 'complete' === $payment_row[0]->payments_status ) {
 						$update = array( 'attendee_balance_owed' => 0 );
 						$where  = array( 'attendee_id' => $payment_intent->metadata['attendee_id'] );
 						$wpdb->update( self::ATTENDEES_TABLE, $update, $where );
@@ -207,7 +209,7 @@ class StripePayments extends SignUpsBase {
 
 					$wpdb->update( self::PAYMENTS_TABLE, $update, $where );
 
-					if ( 'succeeded' === $payment_intent->status ) {
+					if ( 'succeeded' === $payment_intent->status || 'complete' === $payment_intent->status ) {
 						$update = array(
 							'attendee_balance_owed' => 0,
 						);
@@ -229,14 +231,17 @@ class StripePayments extends SignUpsBase {
 				$wpdb->query( 'UNLOCK TABLES' );
 				break;
 			case 'payment_method.attached':
-				$payment_method = $event->data->object; // Contains a \Stripe\PaymentMethod.
-
-				// Then define and call a method to handle the successful attachment of a PaymentMethod.
-				// handlePaymentMethodAttached($paymentMethod);.
+				$payment_method = $event->data->object; // Contains a \Stripe\PaymentMethod.;.
+				break;
+			case 'checkout.session.expired':
+			case 'payment_intent.payment_failed':
+			case 'payment_intent.canceled':
+				$this->write_log( 'Unhandled Event = ' . $event->type );
 				break;
 			default:
 				// Unexpected event type.
 				error_log( 'Received unknown event type' );
+				$this->write_log( 'Unhandled Event = ' . $event->type );
 		}
 	}
 
@@ -253,6 +258,7 @@ class StripePayments extends SignUpsBase {
 	public function collect_money( $description, $price_id, $badge, $attendee_id, $cost ) {
 		\Stripe\Stripe::setApiKey( $this->stripe_api_secret );
 		header( 'Content-Type: application/json' );
+		$this->write_log( 'Creating checkout session, secret: ' . $this->stripe_api_secret . '  root: ' . $this->stripe_root_url );
 		$signup_domain    = $this->stripe_root_url;
 		$checkout_session = \Stripe\Checkout\Session::create(
 			array(
@@ -277,6 +283,8 @@ class StripePayments extends SignUpsBase {
 
 		header( 'HTTP/1.1 303 See Other' );
 		header( 'Location: ' . $checkout_session->url );
+
+		$this->write_log( 'Checkout session exit.' );
 	}
 
 	/**
@@ -302,7 +310,8 @@ class StripePayments extends SignUpsBase {
 		<h2>Payment for badge: <?php echo esc_html( $badge_number ); ?></h2>
 		<?php
 		if ( $payment_row ) {
-			if ( 'succeeded' !== $payment_row->payments_status && 'completed' !== $payment_row->payments_status ) {
+			if ( 'succeeded' !== $payment_row->payments_status && 'complete' !== $payment_row->payments_status ) {
+				$this->write_log( 'Payment Status = ' . $payment_row->payments_status );
 				?>
 				<meta http-equiv="Refresh" content="2">
 				<?php

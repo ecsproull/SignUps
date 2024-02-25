@@ -648,8 +648,8 @@ class SignUpsBase {
 		$admin,
 		$secret
 	) {
-		$start_date = new DateTime( 'now', $this->date_time_zone );
-		$end_date = new DateTime( 'now', $this->date_time_zone );
+		$start_date     = new DateTime( 'now', $this->date_time_zone );
+		$end_date       = new DateTime( 'now', $this->date_time_zone );
 		$end_date->add( new DateInterval( 'P' . $template->template_rolling_days . 'D' ) );
 		$one_day_interval = new DateInterval( 'P1D' );
 		$time_exceptions  = $this->create_meeting_exceptions( $start_date, $end_date );
@@ -756,7 +756,7 @@ class SignUpsBase {
 														<?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?>
 														<input class="form-check-input ml-2 rolling-remove-chk mt-2 <?php echo esc_html( $attendee->attendee_badge ); ?>" 
 															type="checkbox" name="remove_slots[]" 
-															<?php echo ( $user_badge === $attendee->attendee_badge && $attendee->attendee_secret === $secret ) || $admin ? '' : 'hidden'; ?>
+															<?php echo $this->add_remove_chk( $start_date, $user_badge, $attendee, $secret, $template ) || $admin ? '' : 'hidden'; ?>
 															value="
 															<?php
 															echo esc_html(
@@ -802,7 +802,7 @@ class SignUpsBase {
 															<?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?>
 															<input class="form-check-input ml-2 rolling-remove-chk mt-2 <?php echo esc_html( $attendee->attendee_badge ); ?>" 
 																type="checkbox" name="remove_slots[]" 
-																<?php echo ( $user_badge === $attendee->attendee_badge && $attendee->attendee_secret === $secret ) || $admin ? '' : 'hidden'; ?>
+																<?php echo $this->add_remove_chk( $start_date, $user_badge, $attendee, $secret, $template ) || $admin ? '' : 'hidden'; ?>
 																value="
 																<?php
 																echo esc_html(
@@ -899,6 +899,24 @@ class SignUpsBase {
 			</div>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Determins if the remove checkbox should be added.
+	 *
+	 * @param  mixed $start_date The date of the signup.
+	 * @param  mixed $user_badge The users badge.
+	 * @param  mixed $attendee Current attendee for the slot.
+	 * @param  mixed $secret Current users secret to be able to unsubscribe.
+	 * @param  mixed $template The template for the signup.
+	 * @return boolean True if it is ok to cancel the session, false if not.
+	 */
+	private function add_remove_chk( $start_date, $user_badge, $attendee, $secret, $template ) {
+		$sd  = clone $start_date;
+		$now = date_create( 'now' );
+		date_sub( $sd, date_interval_create_from_date_string( $template->template_days_to_cancel . 'days' ) );
+		$ret_val = $user_badge === $attendee->attendee_badge && $attendee->attendee_secret === $secret && $now < $sd;
+		return $ret_val;
 	}
 
 	/**
