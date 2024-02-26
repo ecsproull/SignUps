@@ -224,6 +224,19 @@ input[type='radio'] {
 	align-items: start;
 	justify-content: space-between;
 }
+.payment-items {
+	display: grid;
+	width: 80%;
+	grid-template-columns: 25% 20% 35% 5% 3% 10%;
+	align-items: start;
+	justify-content: space-between;
+}
+
+
+/* .payment-items div {
+	border: 1px solid black;
+} */
+
 .description-block {
 	font-size: 16px;
 	color:black;

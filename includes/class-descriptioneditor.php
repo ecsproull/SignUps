@@ -54,7 +54,7 @@ class DescriptionEditor extends SignUpsBase {
 		?>
 		<form method="POST" name="template_form" >
 		<div class="description-box mt-4">
-		<div class="text-right">
+		  	<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_title">Title:</label>
 			</div>
 			<div>
