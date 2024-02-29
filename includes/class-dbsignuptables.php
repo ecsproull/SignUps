@@ -252,7 +252,7 @@ class DbSignUpTables {
 		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_rolling_exceptions"' ) !== 'wp_scw_rolling_exceptions' ) {
 			$wpdb->query(
 				"CREATE TABLE `wp_scw_rolling_exceptions` (
-					`exc_id` int unsigned NOT NULL,
+					`exc_id` int unsigned NOT NULL AUTO_INCREMENT,
 					`exc_template_id` int NOT NULL DEFAULT '0',
 					`exc_start` datetime NOT NULL,
 					`exc_end` datetime NOT NULL,

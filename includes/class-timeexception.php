@@ -24,16 +24,24 @@ class TimeException {
 	public $reason;
 
 	/**
-	 * begin time
+	 * Begin time
 	 *
 	 * @var mixed
 	 */
 
 	public $begin;
+
 	/**
 	 * End time
 	 *
 	 * @var mixed
 	 */
 	public $end;
+
+	/**
+	 * End time
+	 *
+	 * @var mixed
+	 */
+	public $delete;
 }

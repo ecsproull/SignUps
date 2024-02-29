@@ -263,8 +263,14 @@ class SignupSettings extends SignUpsBase {
 
 		if ( isset( $post['signup_admin_approved'] ) ) {
 			$post['signup_admin_approved'] = 1;
+			if ( $where['signup_id'] ) {
+				$this->add_remove_from_calendar( $where['signup_id'], $post['signup_name'], true );
+			}
 		} else {
 			$post['signup_admin_approved'] = 0;
+			if ( $where['signup_id'] ) {
+				$this->add_remove_from_calendar( $where['signup_id'], $post['signup_name'], false );
+			}
 		}
 
 		$affected_row_count = 0;
@@ -299,6 +305,48 @@ class SignupSettings extends SignUpsBase {
 		}
 
 		$this->update_message( $affected_row_count, $wpdb->last_error );
+	}
+
+	/**
+	 * Removes items from the calendar in respose to removing Admin Approved
+	 *
+	 * @param  mixed $signup_id The sighup id that owns the sessions.
+	 * @return void
+	 */
+	private function add_remove_from_calendar( $signup_id, $signup_name, $add ) {
+		global $wpdb;
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE session_signup_id = %s',
+				self::SESSIONS_TABLE,
+				$signup_id
+			),
+			OBJECT
+		);
+
+		if ( $results ) {
+			foreach ( $results as $session ) {
+				if ( $session->session_calendar_id || ( ! $session->session_calendar_id && $add ) ) {
+					$mini_post = array(
+						'signup_id'           => $session->session_signup_id,
+						'session_id'          => $session->session_id,
+						'signup_name'         => $signup_name,
+						'session_calendar_id' => $session->session_calendar_id,
+					);
+
+					if ( $add ) {
+						$mini_post['update'] = true;
+					}
+
+					$this->update_calendar( $mini_post );
+					$where = array( 'session_id' => $session->session_id );
+					$data  = array( 'session_calendar_id' => '' );
+					$wpdb->update( self::SESSIONS_TABLE, $data, $where );
+				}
+			}
+		}
 	}
 
 	/**
@@ -513,25 +561,34 @@ class SignupSettings extends SignUpsBase {
 		$end   = new DateTime( 'now' );
 
 		if ( $results[0]->signup_default_day_of_month ) {
-			$start = new DateTime(
-				sprintf(
-					'%s of %s %s',
-					$results[0]->signup_default_day_of_month,
-					$start->format( 'F' ),
-					$start->format( 'Y' )
-				),
-				$this->date_time_zone
+			$start_date_string = sprintf(
+				'%s of %s %s',
+				$results[0]->signup_default_day_of_month,
+				$start->format( 'F' ),
+				$start->format( 'Y' )
 			);
 
-			$end = new DateTime(
-				sprintf(
-					'%s of %s %s',
-					$results[0]->signup_default_day_of_month,
-					$end->format( 'F' ),
-					$end->format( 'Y' )
-				),
-				$this->date_time_zone
-			);
+			$test_start = strtotime( $start_date_string );
+			if ( $test_start ) {
+				$start = new DateTime(
+					$start_date_string,
+					$this->date_time_zone
+				);
+
+				$end = new DateTime(
+					sprintf(
+						'%s of %s %s',
+						$results[0]->signup_default_day_of_month,
+						$end->format( 'F' ),
+						$end->format( 'Y' )
+					),
+					$this->date_time_zone
+				);
+			} else {
+				?>
+				<h1 style="color:red;">Default day of month is not valid: <?php echo esc_html( $results[0]->signup_default_day_of_month ); ?> "</h1>"
+				<?php
+			}
 		}
 
 		$start_time_parts = explode( ':', $results[0]->signup_default_start_time );
@@ -596,27 +653,31 @@ class SignupSettings extends SignUpsBase {
 
 		if ( $session_item->session_day_of_month ) {
 			for ( $i = 0; $i < $session_item->session_add_slots_count; $i++ ) {
-				$start = new DateTime(
-					sprintf(
-						'%s of %s %s',
-						$session_item->session_day_of_month,
-						$today->format( 'F' ),
-						$today->format( 'Y' )
-					),
-					$this->date_time_zone
+				$start_date_string = sprintf(
+					'%s of %s %s',
+					$session_item->session_day_of_month,
+					$today->format( 'F' ),
+					$today->format( 'Y' )
 				);
 
-				if ( $start < $now ) {
-					$today = $today->modify( '+1 month' );
+				$test_start = strtotime( $start_date_string );
+				if ( $test_start ) {
 					$start = new DateTime(
-						sprintf(
-							'%s of %s %s',
-							$session_item->session_day_of_month,
-							$today->format( 'F' ),
-							$today->format( 'Y' )
-						),
+						$start_date_string,
 						$this->date_time_zone
 					);
+
+					if ( $start < $now ) {
+						$today = $today->modify( '+1 month' );
+						$start = new DateTime(
+							$start_date_string,
+							$this->date_time_zone
+						);
+					}
+				} else {
+					?>
+					<h1 style="color:red;">Default day of month is not valid: <?php echo esc_html( $results[0]->signup_default_day_of_month ); ?> "</h1>"
+					<?php
 				}
 
 				$end = clone $start;
@@ -849,6 +910,8 @@ class SignupSettings extends SignUpsBase {
 		$repost = array(
 			'edit_sessions_signup_id' => $post['signup_id'],
 		);
+
+		//TODO: Send attendee update email?
 		$this->load_session_selection( $repost );
 	}
 
@@ -973,10 +1036,10 @@ class SignupSettings extends SignUpsBase {
 						?>
 					</table>
 					<?php
-					$this->create_user_table( 'member', $signup_id );
+					$this->create_user_table( '', $signup_id );
 					?>
 					<input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="window.history.go( -1 );" value="Back"></td>
-					<input id="submit_attendees" class="btn btn-primary mt-2" type="submit" value="Complete Add" name="submit_attendees" disabled="true"><td>
+					<input id="submit_attendees" class="btn btn-primary mt-2" type="submit" value="Complete Add" name="submit_attendees"><td>
 					<input type='hidden' name='sessions' value="<?php echo esc_html( htmlentities( serialize( $sessions ) ) ); ?>" />
 					<input type='hidden' name='signup_id' value="<?php echo esc_html( $signup_id ); ?>" />
 					<input type='hidden' name='signup_name' value="<?php echo esc_html( $signup_name ); ?>" />
@@ -1062,7 +1125,8 @@ class SignupSettings extends SignUpsBase {
 						}
 					}
 
-					$count = 0;
+					$count    = 0;
+					$category = '';
 					foreach ( $results as $result ) {
 						if ( $result->signup_category !== $category ) {
 							$category   = $result->signup_category;

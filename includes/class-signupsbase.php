@@ -404,7 +404,7 @@ class SignUpsBase {
 		}
 		?>
 
-		<table id="lookup-member" class="mb-100px table table-bordered mr-auto ml-auto selection-font">
+		<table id="lookup-member" class="mb-50px table table-bordered mr-auto ml-auto selection-font">
 			<tr>
 				<td class="text-right">Enter Badge#</td>
 				<td class="text-left"><input id="badge-input" class="member-badge" type="number" name="badge_number" 
@@ -596,34 +596,6 @@ class SignUpsBase {
 		}
 
 		return $time_exceptions;
-
-		/* $today = new DateTime( 'now', $this->date_time_zone );
-		for ( $j = 0; $j < 12; $j++ ) {
-			$day      = new DateTime(
-				sprintf(
-					'First Monday of %s %s',
-					$today->format( 'F' ),
-					$today->format( 'Y' )
-				),
-				$this->date_time_zone
-			);
-			$interval = DateInterval::createFromDateString( '1 day' );
-			$day->add( $interval );
-			$day->SetTime( 12, 0 );
-			$time_exception        = new TimeException();
-			$time_exception->begin = new DateTime( $day->format( self::DATETIME_FORMAT ), $this->date_time_zone );
-			$time_exception->end   = $day;
-			$time_exception->end->add( new DateInterval( 'PT4H' ) );
-
-			if ( $time_exception->begin >= $start_date &&
-				$time_exception->begin <= $end_date ) {
-				$time_exceptions[] = $time_exception;
-			}
-
-			$today->add( new DateInterval( 'P1M' ) );
-		} 
-
-		return $time_exceptions;*/
 	}
 
 	/**
@@ -664,11 +636,14 @@ class SignUpsBase {
 				<div>
 					<form class="signup_form" method="POST">
 						<?php
+						$user_badge = null;
 						wp_nonce_field( 'signups', 'mynonce' );
-						$user_badge = $this->create_user_table( $user_group, $signup_id, $secret );
+						if ( ! $admin ) {
+							$user_badge = $this->create_user_table( $user_group, $signup_id, $secret );
+						}
 						?>
 
-						<table id="selection-table" class="table-bordered mb-100px mr-auto ml-auto selection-font"
+						<table id="selection-table" class="table-bordered mr-auto ml-auto selection-font"
 							<?php echo null === $user_badge && ! $admin ? 'hidden' : ''; ?> >
 							<?php
 							$current_day    = '2000-07-01';
@@ -789,9 +764,9 @@ class SignUpsBase {
 													}
 
 													if ( count( $slot_attendees ) === (int) $item->template_item_slots ) {
-														echo "<span class='text-primary'><i>All " . esc_html( $item->template_item_slots . ' ' . $item->template_item_title ) . ' Slots Filled</i></span><br>';
+														echo "<span class='text-primary'><i>All " . esc_html( $item->template_item_slots . ' ' . $item->template_item_title ) . ' Filled</i></span><br>';
 													} else {
-														echo "<span class='text-primary'><i>" . count( $slot_attendees ) . ' of ' . esc_html( $item->template_item_slots ) . ' Slots Filled </i></span><br>';
+														echo "<span class='text-primary'><i>" . count( $slot_attendees ) . ' of ' . esc_html( $item->template_item_slots ) . ' Filled </i></span><br>';
 													}
 
 													$count         = 1;
@@ -860,7 +835,7 @@ class SignUpsBase {
 															<?php echo $this->is_attendee_free( $attendees, $start_date, $user_badge ) ? '' : 'disabled'; ?> >
 															<?php
 															if ( $item->template_item_slots > '1' && count( $slot_attendees ) === 0 ) {
-																echo "<br><span class='text-primary'><i>" . count( $slot_attendees ) . ' of ' . esc_html( $item->template_item_slots ) . ' Slots Filled </i></span><br>';
+																echo "<br><span class='text-primary'><i>" . count( $slot_attendees ) . ' of ' . esc_html( $item->template_item_slots ) . ' Filled </i></span><br>';
 															}
 															?>
 													</td>
@@ -888,9 +863,23 @@ class SignUpsBase {
 							?>
 							<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
 							<input type="hidden" name="add_attendee_session" value="<?php echo esc_html( $signup_id ); ?>">
+							<?php
+							if ( $admin ) {
+								?>
+								<input type="hidden" name="is_admin" value="true">
+								<?php
+							}
+							?>
 							<tr class="footer-row">
 								<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="signup_id">Cancel</button></td>
-								<td></td>
+								<?php
+								$current_column = 1;
+								for ( ; $current_column < $template->template_columns; $current_column++ ) {
+									?>
+									<td></td>
+									<?php
+								}
+								?>
 								<td><button type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee_session">Submit</button></td>
 							</tr>
 						</form>
@@ -927,6 +916,63 @@ class SignUpsBase {
 	 */
 	protected function add_attendee_rolling( $post ) {
 		global $wpdb;
+		?>
+		<table class="mb-100px mr-auto ml-auto">
+			<tr class="attendee-row">
+				<th>Date</th>
+				<th>Time</th>
+				<th>Name</th>
+				<th>Item</th>
+				<th>Status</th>
+			</tr>
+		<?php
+
+		if ( isset( $post['remove_slots'] ) ) {
+			foreach ( $post['remove_slots'] as $slot ) {
+				$slot_parts           = explode( ',', $slot );
+				$slot_start           = new DateTime( $slot_parts[0], $this->date_time_zone );
+				$slot_end             = new DateTime( $slot_parts[1], $this->date_time_zone );
+				$slot_id              = $slot_parts[4];
+				$where                = array();
+				$where['attendee_id'] = $slot_id;
+
+				$wpdb->query(
+					$wpdb->prepare(
+						'LOCK TABLES %1s WRITE',
+						self::ATTENDEES_ROLLING_TABLE
+					)
+				);
+
+				$delete_return_value = $wpdb->delete( self::ATTENDEES_ROLLING_TABLE, $where );
+				$wpdb->query( 'UNLOCK TABLES' );
+				?>
+				<tr class="attendee-row" style="background-color:#FFCCCB;">
+					<td><?php echo esc_html( $slot_start->format( self::DATE_FORMAT ) ); ?></td>
+					<td><?php echo esc_html( $slot_start->format( self::TIME_FORMAT ) . ' - ' . $slot_end->format( self::TIME_FORMAT ) ); ?></td>
+					<td><?php echo esc_html( $post['firstname'] . ' ' . $post['lastname'] ); ?></td>
+					<td><?php echo esc_html( $slot_parts[2] ); ?></td>
+					<?php
+					if ( ! $delete_return_value ) {
+						?>
+						<td style="color:red"><b><i>Failed</i></b></td>
+						<?php
+					} else {
+						?>
+						<td>Success</td>
+						<?php
+					}
+					?>
+				</tr>
+				<?php
+			}
+		}
+
+		if ( isset( $post['is_admin'] ) ) {
+			?>
+			</table>
+			<?php
+			return;
+		}
 
 		$badge = $post['badge_number'];
 		if ( strlen( $badge ) !== 4 || ! preg_match( '~[0-9]+~', $badge ) ) {
@@ -972,14 +1018,6 @@ class SignUpsBase {
 		?>
 		<div class="container">
 			<form method="POST">
-				<table class="mb-100px mr-auto ml-auto">
-					<tr class="attendee-row">
-						<th>Date</th>
-						<th>Time</th>
-						<th>Name</th>
-						<th>Item</th>
-						<th>Status</th>
-					</tr>
 				<?php
 				$body .= '<b><pre>      Date           Time           Name             Item         Status</pre></b>';
 				if ( isset( $post['time_slots'] ) ) {
@@ -1052,45 +1090,6 @@ class SignUpsBase {
 					}
 				}
 
-				if ( isset( $post['remove_slots'] ) ) {
-					foreach ( $post['remove_slots'] as $slot ) {
-						$slot_parts           = explode( ',', $slot );
-						$slot_start           = new DateTime( $slot_parts[0], $this->date_time_zone );
-						$slot_end             = new DateTime( $slot_parts[1], $this->date_time_zone );
-						$slot_id              = $slot_parts[4];
-						$where                = array();
-						$where['attendee_id'] = $slot_id;
-
-						$wpdb->query(
-							$wpdb->prepare(
-								'LOCK TABLES %1s WRITE',
-								self::ATTENDEES_ROLLING_TABLE
-							)
-						);
-
-						$delete_return_value = $wpdb->delete( self::ATTENDEES_ROLLING_TABLE, $where );
-						$wpdb->query( 'UNLOCK TABLES' );
-						?>
-						<tr class="attendee-row" style="background-color:#FFCCCB;">
-							<td><?php echo esc_html( $slot_start->format( self::DATE_FORMAT ) ); ?></td>
-							<td><?php echo esc_html( $slot_start->format( self::TIME_FORMAT ) . ' - ' . $slot_end->format( self::TIME_FORMAT ) ); ?></td>
-							<td><?php echo esc_html( $post['firstname'] . ' ' . $post['lastname'] ); ?></td>
-							<td><?php echo esc_html( $slot_parts[2] ); ?></td>
-							<?php
-							if ( ! $delete_return_value ) {
-								?>
-								<td style="color:red"><b><i>Failed</i></b></td>
-								<?php
-							} else {
-								?>
-								<td>Success</td>
-								<?php
-							}
-							?>
-						</tr>
-						<?php
-					}
-				}
 				?>
 				<tr class="attendee-row">
 					<td></td>
@@ -1107,7 +1106,7 @@ class SignUpsBase {
 			<h2>Signup complete</h2>
 			<br>
 			<div class="fs-3 text-dark">
-				<a href="https://woodclubtest.site/signups/?signup_id=<?php echo esc_html( $post['add_attendee_session'] ); ?>&secret=<?php echo esc_html( $post['user_secret'] ); ?>" >Change Signup</a><br>
+				<a href="https://scwwoodshop.com/signups/?signup_id=<?php echo esc_html( $post['add_attendee_session'] ); ?>&secret=<?php echo esc_html( $post['user_secret'] ); ?>" >Change Signup</a><br>
 				<br>
 				<p>Your key to edit this signup is: &emsp; &emsp; <?php echo esc_html( $post['user_secret'] ); ?> </p>
 				<p>ALSO: An email has been sent to <b><i><?php echo esc_html( $post['email'] ) ?></i></b> with a link to edit this signup.<p>
@@ -1117,7 +1116,7 @@ class SignUpsBase {
 		<?php
 		if ( $send_mail ) {
 			$sgm   = new SendGridMail();
-			$link  = "<a href='https://woodclubtest.site/signups/?signup_id=" . $post['add_attendee_session'] . '&secret=' . $post['user_secret'] . "'>Edit Signup</a>";
+			$link  = "<a href='https://scwwoodshop.com/signups/?signup_id=" . $post['add_attendee_session'] . '&secret=' . $post['user_secret'] . "'>Edit Signup</a>";
 			$body .= '<br><br>' . $link . '<br>';
 			$body .= '<p>Your key to edit this signup is: &emsp; &emsp;' . $post['user_secret'] . '</p>';
 			$sgm->send_mail( $post['email'], 'Woodshop Signup', $body );
@@ -1152,7 +1151,7 @@ class SignUpsBase {
 		);
 
 		?>
-		<select id="<?php echo esc_html( $select_id ); ?>" name="template_id">
+		<select id="<?php echo esc_html( $select_id ); ?>" name="exc_template_id">
 		<option value="0"><?php echo esc_html( $default_title ); ?></option>
 		<?php
 		foreach ( $templates as $result ) {

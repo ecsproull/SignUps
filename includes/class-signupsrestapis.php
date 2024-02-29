@@ -249,7 +249,7 @@ class SignUpsRestApis extends SignUpsBase {
 	}
 
 	/**
-	 * 
+	 *
 	 * Endpoint to recieve the member list needed for signups.
 	 *
 	 * @param  mixed $data json list of members or permissions.
@@ -257,11 +257,24 @@ class SignUpsRestApis extends SignUpsBase {
 	 */
 	public function recieve_members( $data ) {
 		global $wpdb;
+		$dt_now = new DateTime( 'now', new DateTimeZone( 'America/Phoenix' ) );
+		$this->write_log( 'Begin member update ' . $dt_now->format( self::DATETIME_FORMAT_INPUT ) );
 		$key      = '8c62a157-7ee8-4104-9f91-930eac39fe2f';
 		$data_obj = json_decode( $data->get_body(), false );
 		if ( $data_obj->key !== $key ) {
 			return;
 		}
+
+		$all_members = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				ORDER BY member_badge',
+				self::MEMBERS_TABLE,
+			),
+			OBJECT
+		);
+
 		$length   = count( $data_obj->members );
 		for ( $i = 0; $i < $length; $i++ ) {
 			$member = $wpdb->get_results(
@@ -281,13 +294,32 @@ class SignUpsRestApis extends SignUpsBase {
 			$data['member_firstname'] = $data_obj->members[ $i ]->first;
 			$data['member_phone']     = $data_obj->members[ $i ]->phone;
 			$data['member_email']     = $data_obj->members[ $i ]->email;
-			$data['member_secret']    = $data_obj->members[ $i ]->secret;
+
+			if ( ! $member ) {
+				$data['member_secret'] = $data_obj->members[ $i ]->secret;
+			}
 
 			if ( $member ) {
 				$wpdb->update( self::MEMBERS_TABLE, $data, $member->badge );
+				$count_remaining = count( $all_members );
+				for ( $m =  0; $m < $count_remaining; $m++ ) {
+					if ( $all_members[ $m ]->member_badge === $member[0]->member_badge ) {
+						array_splice( $all_members, $m, 1 );
+						break;
+					}
+				}
 			} else {
 				$wpdb->insert( self::MEMBERS_TABLE, $data );
 			}
+		}
+
+		if ( $data_obj->clean_permissions ) {
+			$delete = $wpdb->query(
+				$wpdb->prepare(
+					'TRUNCATE TABLE %1s',
+					self::MACHINE_PERMISSIONS_TABLE,
+				)
+			);
 		}
 
 		$length = count( $data_obj->permissions );
@@ -305,12 +337,22 @@ class SignUpsRestApis extends SignUpsBase {
 			);
 
 			if ( ! $permission ) {
-				$data                          = array();
-				$data['permission_badge']      = $data_obj->permissions[ $i ]->badge;
+				$data                            = array();
+				$data['permission_badge']        = $data_obj->permissions[ $i ]->badge;
 				$data['permission_machine_name'] = $data_obj->permissions[ $i ]->machine_name;
 				$wpdb->insert( self::MACHINE_PERMISSIONS_TABLE, $data );
 			}
 		}
+
+		foreach( $all_members as $extra_member ) {
+			$where = array( 'member_ID' => $extra_member->member_ID );
+			$wpdb->delete( self::MEMBERS_TABLE, $where );
+
+			$where = array( 'badge' => $extra_member->member_badge );
+			$wpdb->delete( self::MACHINE_PERMISSIONS_TABLE, $where );
+		}
+
+		$this->write_log( 'Member update complete' );
 	}
 
 	public function verify_member_data( $data ) {
@@ -416,7 +458,7 @@ class SignUpsRestApis extends SignUpsBase {
 				} else {
 					return new WP_REST_Response( array( 'message' => 'Badge not found.' ), 400 );
 				}
- 
+
 				return $results;
 
 			} catch ( Exception $e ) {

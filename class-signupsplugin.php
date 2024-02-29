@@ -152,6 +152,7 @@ class SignupsPlugin extends SignUpsBase {
 		wp_enqueue_style( 'user_signup_style' );
 		wp_enqueue_script( 'jquery' );
 		wp_enqueue_script( 'signup_member_script', plugin_dir_url( __FILE__ ) . 'js/signups.js', __FILE__, array( 'jquery' ), '1.0.0.0', false, true );
+		wp_enqueue_script( 'signup_cookie_script', plugin_dir_url( __FILE__ ) . 'cookie/node_modules/js-cookie/dist/js.cookie.min.js', array( 'jquery' ), '3.0.5', false, true );
 		wp_localize_script(
 			'signup_member_script',
 			'wpApiSettings',

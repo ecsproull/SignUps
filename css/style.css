@@ -62,6 +62,10 @@ button {
   margin-bottom: 10px;
 }
 
+.mb-50px {
+  margin-bottom: 50px!important;
+}
+
 .mb-100px {
     margin-bottom: 100px!important;
 }

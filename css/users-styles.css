@@ -1,7 +1,15 @@
+.mb-50px {
+	margin-bottom: 50px!important;
+}
+
 .selection-font {  
     font-size: 20px;
 	font-weight: 600;
     color: black;
+}
+
+#selection-table {
+	width: 100%;
 }
 
 #usercontent {

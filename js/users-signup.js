@@ -18,7 +18,7 @@ jQuery(document).ready(function($){
 				$('.member-email').each(function () { $(this).val(response[0].member_email); });
 				$('.member-phone').each(function () { $(this).val(response[0].member_phone);  });
 				$('.member-badge').each(function () { $(this).val(response[0].member_badge);  });
-				$('#user-secret').val(response[0].member_secret);
+				//$('#user-secret').val(response[0].member_secret);
 				$("#selection-table").prop("hidden", false);
 				$('button[type="submit"]').each(function() {
 					$(this).removeAttr('disabled');
