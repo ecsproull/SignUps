@@ -18,7 +18,7 @@ jQuery(document).ready(function($){
 				$('.member-email').each(function () { $(this).val(response[0].member_email); });
 				$('.member-phone').each(function () { $(this).val(response[0].member_phone);  });
 				$('.member-badge').each(function () { $(this).val(response[0].member_badge);  });
-				//$('#user-secret').val(response[0].member_secret);
+				$('#user-secret').val(response[0].member_secret);
 				$("#selection-table").prop("hidden", false);
 				$('button[type="submit"]').each(function() {
 					$(this).removeAttr('disabled');
@@ -27,7 +27,23 @@ jQuery(document).ready(function($){
 				if ($("#remember_me").is(":checked")){
 					Cookies.set('signups_scw_badge', response[0].member_badge);
 				}
+
 				$('.rolling-remove-chk').prop("hidden", true);
+				
+				var daysToCancel = $('#template_days_to_cancel').val();
+				var removeChkClass = '.rolling-remove-chk.' + response[0].member_badge;
+				var currentDate = new Date();
+				var newDate = new Date(currentDate);
+				newDate.setDate(currentDate.getDate() + Number(daysToCancel));
+				$(removeChkClass).each(function() {
+					var items = $(this).val().trim().split(',');
+					var slotDate = Date.parse(items[0].substr(0,10));
+					var cutoffDate = Date.parse(newDate.toDateString());
+					if (slotDate > cutoffDate) {
+						$(this).prop("hidden", false);
+					}
+				});
+
 				$('badgeclass').prop("hidden", false);
 			} else {
 				alert('Badge number not found or Permission for signup denied.')

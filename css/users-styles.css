@@ -202,8 +202,9 @@ input[type='radio'] {
 
 .rolling-exception-list {
 	display: grid;
-	width: 880px;
-	grid-template-columns: 10% 25% 25% 25%;
+	width: 80%;
+	max-width: 1000px;
+	grid-template-columns: 8% 23% 23% 23% 13%;
 	align-items: start;
 	justify-content: space-between;
 }

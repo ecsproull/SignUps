@@ -417,16 +417,16 @@ class SignUpsBase {
 				<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="signup_id">Cancel</button></td>
 			</tr>
 			<tr>
-				<td class="text-right">
+				<td class="text-center" colspan="2">
 					<span class="mr-1">Remember Badge</span>
 					<input id="remember_me" class="position-relative remember-me-chk mr-1" 
 						type="checkbox" name="remember_me" value='' <?php echo $remember_me ? 'checked' : ''; ?>></td>
 				<td class="text-left"><input id="user-edit-id" class="user-edit-id" 
 					type="text" name="secret" value="<?php echo esc_html( $secret ); ?>" placeholder="Enter secret to edit"
-					<?php $rolling_signup ? '' : 'hidden'; ?>></td>
+					<?php echo $rolling_signup ? 'hidden' : 'hidden'; ?>></td>
 				<td><button id="update-butt" type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary" 
 					value=<?php echo esc_html( $signup_id ); ?> name="continue_signup" disabled
-					<?php echo $rolling_signup ? '' : 'hidden'; ?> >Reload</button></td>
+					<?php echo $rolling_signup ? 'hidden' : 'hidden'; ?> >Reload</button></td>
 			</tr>
 			<tr hidden>
 				<td><input id="phone" class="member-phone" type="text" name="phone"
@@ -863,6 +863,8 @@ class SignUpsBase {
 							?>
 							<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
 							<input type="hidden" name="add_attendee_session" value="<?php echo esc_html( $signup_id ); ?>">
+							<input id="template_days_to_cancel" type="hidden" name="template_days_to_cancel" 
+								value="<?php echo esc_html( $template->template_days_to_cancel ); ?>">
 							<?php
 							if ( $admin ) {
 								?>
@@ -904,7 +906,8 @@ class SignUpsBase {
 		$sd  = clone $start_date;
 		$now = date_create( 'now' );
 		date_sub( $sd, date_interval_create_from_date_string( $template->template_days_to_cancel . 'days' ) );
-		$ret_val = $user_badge === $attendee->attendee_badge && $attendee->attendee_secret === $secret && $now < $sd;
+		//$ret_val = $user_badge === $attendee->attendee_badge && $attendee->attendee_secret === $secret && $now < $sd;
+		$ret_val = $user_badge === $attendee->attendee_badge && $now < $sd;
 		return $ret_val;
 	}
 

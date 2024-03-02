@@ -67,6 +67,13 @@ class RollingExceptionsEditor extends SignUpsBase {
 			}
 		}
 
+		if ( isset( $post['exc_delete'] ) ) {
+			foreach( $post['exc_delete'] as $item ) {
+				$where = array( 'exc_id' => $item );
+				$wpdb->delete( self::ROLLING_EXCEPTIONS_TABLE, $where );
+			}
+		}
+
 		$this->load_exceptions_form();
 	}
 
@@ -95,6 +102,7 @@ class RollingExceptionsEditor extends SignUpsBase {
 			<div>Start</div>
 			<div>End</Div>
 			<div>Description</Div>
+			<div>Delete</div>
 			<?php
 			$count = 1;
 			foreach ( $exceptions as $exc ) {
@@ -105,6 +113,7 @@ class RollingExceptionsEditor extends SignUpsBase {
 				<div><input class="datetime-picker-end" type='datetime-local' key="<?php echo esc_html( $count++ ); ?>"
 					name="exc_end[]" value='<?php echo esc_html( $exc->exc_end ); ?>' required ></div>
 				<div><input type='text' name="exc_reason[]" value='<?php echo esc_html( $exc->exc_reason ); ?>' required ></div>
+				<div><input type='checkbox' name="exc_delete[]" value='<?php echo esc_html( $exc->exc_id ); ?>' ></div>
 				<input type="hidden" name="exc_id[]" value='<?php echo esc_html( $exc->exc_id ); ?>' >
 				<?php
 			}
@@ -113,6 +122,7 @@ class RollingExceptionsEditor extends SignUpsBase {
 			<div><input class="datetime-picker-start" type='datetime-local' name="exc_start[]" value='' key="<?php echo esc_html( $count ); ?>"></div>
 			<div><input class="datetime-picker-end" type='datetime-local' name="exc_end[]" value='' key="<?php echo esc_html( $count++ ); ?>"></div>
 			<div><input type='text' name="exc_reason[]" value='Shop Closed'></div>
+			<div></div>
 			<input type="hidden" name = "exc_id[]" value = "-1">
 		</div>
 		<div class="row" style="width: 1000px">
