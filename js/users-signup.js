@@ -26,6 +26,10 @@ jQuery(document).ready(function($){
 
 				if ($("#remember_me").is(":checked")){
 					Cookies.set('signups_scw_badge', response[0].member_badge);
+					SetServerCookie(response[0].member_badge);
+				} else {
+					SetServerCookie("");
+					Cookies.set('signups_scw_badge');
 				}
 
 				$('.rolling-remove-chk').prop("hidden", true);
@@ -59,8 +63,12 @@ jQuery(document).ready(function($){
 		});
 	});
 
+	$("#badge-input").on("change", (e) => {
+		$("#get_member_button").trigger("click");
+	});
+
 	$("#session_select").on("load", (e) => {
-		debugger;
+		//debugger;
 	});
 
 	$("#badge-input").on('keydown', (e) => {
@@ -200,6 +208,10 @@ jQuery(document).ready(function($){
 			Cookies.remove("signups_scw_badge");
 		}
 
+		SetServerCookie( badgeToSet );
+	})
+
+	function SetServerCookie( badgeToSet ) {
 		$.ajax({
 			url: wpApiSettings.root + 'scwmembers/v1/cookies',
 			method: 'GET',
@@ -210,7 +222,7 @@ jQuery(document).ready(function($){
 				"badge" : badgeToSet
 			}
 		});
-	})
+	}
 
 	$(".rolling-add-chk").click(function(x) {
 		var val = x.currentTarget.value;

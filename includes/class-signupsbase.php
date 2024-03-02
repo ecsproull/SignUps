@@ -362,10 +362,10 @@ class SignUpsBase {
 			<?php
 		}
 
-		if ( ! $return_val && isset( $_COOKIE['signups_scw_badge'] ) ) {
+		if ( ! $return_val && isset( $_COOKIE['signups_scw_badge'] ) && sanitize_key( $_COOKIE['signups_scw_badge'] ) ) {
 			$remember_me = true;
 			$cookie      = wp_unslash( $_COOKIE );
-			$badge       = $_COOKIE['signups_scw_badge'];
+			$badge       = sanitize_key( $_COOKIE['signups_scw_badge'] );
 			$results     = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT *
@@ -409,12 +409,12 @@ class SignUpsBase {
 				<td class="text-right">Enter Badge#</td>
 				<td class="text-left"><input id="badge-input" class="member-badge" type="number" name="badge_number" 
 					value="<?php echo $return_val ? esc_html( $results[0]->member_badge ) : ''; ?>" required></td>
-				<td><input type="button" id="get_member_button" class="btn btn-primary" value='Lookup'></td>
+				<td><input type="button" id="get_member_button" class="btn btn-primary" value='Lookup' hidden></td>
 			</tr>
 			<tr>
 				<td class="text-right"><input id="first-name" class=" member-first-name" type="text" name="firstname" value=<?php echo $return_val ? esc_html( $results[0]->member_firstname ) : 'First'; ?> required readonly></td>
 				<td  class="text-left"><input id="last-name" class="member-last-name" type="text" name="lastname" value=<?php echo $return_val ? esc_html( $results[0]->member_lastname ) : 'Last'; ?> required readonly></td>
-				<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="signup_id">Cancel</button></td>
+				<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="signup_id" hidden>Cancel</button></td>
 			</tr>
 			<tr>
 				<td class="text-center" colspan="2">
@@ -919,6 +919,9 @@ class SignUpsBase {
 	 */
 	protected function add_attendee_rolling( $post ) {
 		global $wpdb;
+		$send_mail = false;
+		$body      = '<h2>' . $post['signup_name'] . '</h2><br>';
+		$body     .= '<b><pre>      Date           Time           Name             Item         Status</pre></b>';
 		?>
 		<table class="mb-100px mr-auto ml-auto">
 			<tr class="attendee-row">
@@ -955,14 +958,19 @@ class SignUpsBase {
 					<td><?php echo esc_html( $post['firstname'] . ' ' . $post['lastname'] ); ?></td>
 					<td><?php echo esc_html( $slot_parts[2] ); ?></td>
 					<?php
+					$body     .= '<pre>' . $slot_start->format( self::DATE_FORMAT ) . ' ' . $slot_start->format( self::TIME_FORMAT ) . ' - ' . $slot_end->format( self::TIME_FORMAT );
+					$body     .= '  ' . $post['firstname'] . ' ' . $post['lastname'] . '    ' . $slot_parts[2];
+					$send_mail = true;
 					if ( ! $delete_return_value ) {
 						?>
 						<td style="color:red"><b><i>Failed</i></b></td>
 						<?php
+						$body .= '  Removed Failed </pre>';
 					} else {
 						?>
 						<td>Success</td>
 						<?php
+						$body .= '  Removed Success </pre>';
 					}
 					?>
 				</tr>
@@ -1016,13 +1024,10 @@ class SignUpsBase {
 		$new_attendee['attendee_badge']     = $post['badge_number'];
 		$new_attendee['attendee_secret']    = $post['user_secret'];
 		$insert_return_value                = false;
-		$send_mail                          = false;
-		$body                               = '<h2>' . $post['signup_name'] . '</h2><br>';
 		?>
 		<div class="container">
 			<form method="POST">
 				<?php
-				$body .= '<b><pre>      Date           Time           Name             Item         Status</pre></b>';
 				if ( isset( $post['time_slots'] ) ) {
 					foreach ( $post['time_slots'] as $slot ) {
 						$slot_parts                               = explode( ',', $slot );
@@ -1109,9 +1114,9 @@ class SignUpsBase {
 			<h2>Signup complete</h2>
 			<br>
 			<div class="fs-3 text-dark">
-				<a href="https://scwwoodshop.com/signups/?signup_id=<?php echo esc_html( $post['add_attendee_session'] ); ?>&secret=<?php echo esc_html( $post['user_secret'] ); ?>" >Change Signup</a><br>
+				<a href="<?php echo esc_html( get_site_url() ); ?>/signups/?signup_id=<?php echo esc_html( $post['add_attendee_session'] ); ?>&secret=<?php echo esc_html( $post['user_secret'] ); ?>" >Change Signup</a><br>
 				<br>
-				<p>Your key to edit this signup is: &emsp; &emsp; <?php echo esc_html( $post['user_secret'] ); ?> </p>
+				<!--<p>Your key to edit this signup is: &emsp; &emsp; <?php echo esc_html( $post['user_secret'] ); ?> </p> -->
 				<p>ALSO: An email has been sent to <b><i><?php echo esc_html( $post['email'] ) ?></i></b> with a link to edit this signup.<p>
 			</div>
 			
@@ -1119,9 +1124,10 @@ class SignUpsBase {
 		<?php
 		if ( $send_mail ) {
 			$sgm   = new SendGridMail();
-			$link  = "<a href='https://scwwoodshop.com/signups/?signup_id=" . $post['add_attendee_session'] . '&secret=' . $post['user_secret'] . "'>Edit Signup</a>";
+			$url   = get_site_url();
+			$link  = "<a href='$url/signups/?signup_id=" . $post['add_attendee_session'] . '&secret=' . $post['user_secret'] . "'>Edit Signup</a>";
 			$body .= '<br><br>' . $link . '<br>';
-			$body .= '<p>Your key to edit this signup is: &emsp; &emsp;' . $post['user_secret'] . '</p>';
+			//$body .= '<p>Your key to edit this signup is: &emsp; &emsp;' . $post['user_secret'] . '</p>';
 			$sgm->send_mail( $post['email'], 'Woodshop Signup', $body );
 		}
 
