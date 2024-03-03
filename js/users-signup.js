@@ -63,7 +63,7 @@ jQuery(document).ready(function($){
 		});
 	});
 
-	$("#badge-input").on("change", (e) => {
+	$("#badge-input").on("blur", (e) => {
 		$("#get_member_button").trigger("click");
 	});
 

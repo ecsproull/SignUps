@@ -246,6 +246,11 @@ input[type='radio'] {
 	border: 1px solid black;
 } */
 
+.html-font {
+	color: black;
+    font-weight: 600;
+}
+
 .description-block {
 	font-size: 16px;
 	color:black;

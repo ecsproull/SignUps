@@ -291,7 +291,7 @@ class SignUpsBase {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Is this a rolling signup
 	 *
@@ -318,6 +318,7 @@ class SignUpsBase {
 	 * Creates a section of HTML for the user to identify themselves.
 	 *
 	 * @param string $user_group The required group for this signup. Normally "member".
+	 * @param string $signup_id The id for the signup.
 	 * @param string $secret Secret supplied by member to edit their signups.
 	 * @return boolean
 	 */
@@ -404,12 +405,13 @@ class SignUpsBase {
 		}
 		?>
 
-		<table id="lookup-member" class="mb-50px table table-bordered mr-auto ml-auto selection-font">
+		<table id="lookup-member" class="mb-2 table table-bordered mr-auto ml-auto selection-font">
 			<tr>
 				<td class="text-right">Enter Badge#</td>
 				<td class="text-left"><input id="badge-input" class="member-badge" type="number" name="badge_number" 
-					value="<?php echo $return_val ? esc_html( $results[0]->member_badge ) : ''; ?>" required></td>
-				<td><input type="button" id="get_member_button" class="btn btn-primary" value='Lookup' hidden></td>
+					value="<?php echo $return_val ? esc_html( $results[0]->member_badge ) : ''; ?>" required>
+				<input type="button" id="get_member_button" class="btn btn-primary rounded" value='Lookup'></td>
+				<td></td>
 			</tr>
 			<tr>
 				<td class="text-right"><input id="first-name" class=" member-first-name" type="text" name="firstname" value=<?php echo $return_val ? esc_html( $results[0]->member_firstname ) : 'First'; ?> required readonly></td>
@@ -512,6 +514,12 @@ class SignUpsBase {
 			OBJECT
 		);
 
+		$description_html = null;
+		$description = $this->get_signup_html( $rolling_signup_id );
+		if ( $description ) {
+			$description_html = $description->description_html;
+		}
+
 		$this->create_rolling_session_select_form2(
 			$signups[0]->signup_name,
 			$attendees_rolling,
@@ -520,7 +528,8 @@ class SignUpsBase {
 			$template_items,
 			$signups[0]->signup_group,
 			$admin,
-			$secret
+			$secret,
+			$description_html
 		);
 	}
 
@@ -618,10 +627,11 @@ class SignUpsBase {
 		$template_items,
 		$user_group,
 		$admin,
-		$secret
+		$secret,
+		$description
 	) {
-		$start_date     = new DateTime( 'now', $this->date_time_zone );
-		$end_date       = new DateTime( 'now', $this->date_time_zone );
+		$start_date = new DateTime( 'now', $this->date_time_zone );
+		$end_date   = new DateTime( 'now', $this->date_time_zone );
 		$end_date->add( new DateInterval( 'P' . $template->template_rolling_days . 'D' ) );
 		$one_day_interval = new DateInterval( 'P1D' );
 		$time_exceptions  = $this->create_meeting_exceptions( $start_date, $end_date );
@@ -640,6 +650,9 @@ class SignUpsBase {
 						wp_nonce_field( 'signups', 'mynonce' );
 						if ( ! $admin ) {
 							$user_badge = $this->create_user_table( $user_group, $signup_id, $secret );
+							?>
+							<div class="text-left mb-2 html-font"><?php echo html_entity_decode( $description ); ?></div>
+							<?php
 						}
 						?>
 

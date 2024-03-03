@@ -698,7 +698,8 @@ class ShortCodes extends SignUpsBase {
 				signup_default_slots,
 				signup_default_minimum,
 				signup_multiple_days,
-				signup_schedule_desc
+				signup_schedule_desc,
+				signup_rolling_template
 				FROM %1s
 				WHERE signup_id = %s',
 				self::SIGNUPS_TABLE,
@@ -748,7 +749,7 @@ class ShortCodes extends SignUpsBase {
 			$schedule .= '.';
 		}
 
-		if ( ! $description_object ) {
+		if ( ! $description_object || $signup->signup_rolling_template ) {
 			$this->create_signup_form( $signup_id, $secret );
 		} else {
 			?>
