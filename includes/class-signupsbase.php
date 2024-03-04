@@ -430,6 +430,11 @@ class SignUpsBase {
 					value=<?php echo esc_html( $signup_id ); ?> name="continue_signup" disabled
 					<?php echo $rolling_signup ? 'hidden' : 'hidden'; ?> >Reload</button></td>
 			</tr>
+			<tr>
+				<td colspan=3>
+					<h3 style="text-align: center;"><a href="mailto:ecsproull@outlook.com?subject=Signup Issue">Contact Signup Administrator</a></h3>
+				</td>
+			</tr>
 			<tr hidden>
 				<td><input id="phone" class="member-phone" type="text" name="phone"
 					value=<?php echo $return_val ? esc_html( $results[0]->member_phone ) : '888-888-8888'; ?> placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required readonly></td>
@@ -566,7 +571,7 @@ class SignUpsBase {
 		foreach ( $attendees as $attendee ) {
 			if ( $attendee->attendee_start_time === $start_date->format( 'U' ) &&
 				$badge === $attendee->attendee_badge ) {
-				return false;
+				return true;
 			}
 		}
 

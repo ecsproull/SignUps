@@ -32,6 +32,8 @@ jQuery(document).ready(function($){
 					Cookies.set('signups_scw_badge');
 				}
 
+				//$('#update-butt').click();
+
 				$('.rolling-remove-chk').prop("hidden", true);
 				
 				var daysToCancel = $('#template_days_to_cancel').val();
@@ -63,7 +65,7 @@ jQuery(document).ready(function($){
 		});
 	});
 
-	$("#badge-input").on("blur", (e) => {
+	$("#badge-inp").on("blur", (e) => {
 		$("#get_member_button").trigger("click");
 	});
 
@@ -231,14 +233,14 @@ jQuery(document).ready(function($){
 			var classname = '.' + arr[2].replace(' ', '');
 			if (classname.indexOf("Machine") > 0) {
 				var checked = $(".rolling-add-chk:checkbox:checked").length;
-				if (checked > 3) {
-					$(".rolling-add-chk:checkbox:not(:checked)").attr("disabled", true);
+				if (checked > 8) {
+					//$(".rolling-add-chk:checkbox:not(:checked)").attr("disabled", true);
 					//alert("Only 4 sessions can be selected at a time.");
 				} else if (checked == 0) {
 					$(".rolling-add-chk").attr("disabled", false);
 				} else if (checked > 0 && checked < 4) {
-					$(".rolling-add-chk").attr("disabled", true);
-					$(classname).attr("disabled", false);
+					//$(".rolling-add-chk").attr("disabled", true);
+					//$(classname).attr("disabled", false);
 				}
 
 				var badge = $('#badge-input').val();
@@ -253,7 +255,7 @@ jQuery(document).ready(function($){
 					}
 				});
 
-				checkUsersEdits();
+				//checkUsersEdits();
 			} else if (classname.indexOf("Laser") > 0) {
 			
 				var checked = $(".rolling-add-chk:checkbox:checked").length;
@@ -290,16 +292,18 @@ jQuery(document).ready(function($){
 	});
 
 	$(".rolling-remove-chk").click(function(x) {
-		checkUsersEdits();
+		//checkUsersEdits();
 	});
 
 	function checkUsersEdits() {
 		$('.attendee-row').each(function(i, e) {
-			if ($(this).find(".rolling-remove-chk").length) {
+			if ($(this).find(".rolling-remove-chk:visible").length) {
 				if ($(this).find(".rolling-remove-chk").is(":checked")) {
 					$(this).find(".rolling-add-chk").attr("disabled", false);
 				} else {
-					$(this).find(".rolling-add-chk").attr("disabled", true);
+					if (!$(this).find(".rolling-remove-chk").is(":hidden")) {
+						$(this).find(".rolling-add-chk").attr("disabled", true);
+					}
 				}
 			}
 		});
