@@ -78,6 +78,8 @@ class ShortCodes extends SignUpsBase {
 			?>
 			<h1 class='ml-auto mr-auto mt-5'>Request queued and should be complete within 8 hours.</h1>
 			<?php
+			$sgm = new SendGridMail();
+			$sgm->send_mail( 'treasurer@scwwoodshop.com', 'Unsubscribe', $key );
 		} else {
 			?>
 			<div class='ml-auto mr-auto mt-5'>

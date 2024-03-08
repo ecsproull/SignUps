@@ -250,7 +250,7 @@ jQuery(document).ready(function($){
 					if (chillen.length === 1) {
 						var chk = $(this).find(".form-check-input:visible");
 						if (chk.length === 1) {
-							chk.attr("disabled", true);
+							//chk.attr("disabled", true);
 						}
 					}
 				});
@@ -259,7 +259,7 @@ jQuery(document).ready(function($){
 			} else if (classname.indexOf("Laser") > 0) {
 			
 				var checked = $(".rolling-add-chk:checkbox:checked").length;
-				if (checked > 3) {
+				if (checked > 8) {
 					$(".rolling-add-chk:checkbox:not(:checked)").attr("disabled", true);
 				} else {
 					$(".rolling-add-chk:checkbox:not(:checked)").attr("disabled", false);
