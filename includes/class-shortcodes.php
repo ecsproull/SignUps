@@ -33,6 +33,8 @@ class ShortCodes extends SignUpsBase {
 				$this->create_signup_form( $post['continue_signup'], $post['secret'] );
 			} elseif ( isset( $post['add_attendee_session'] ) ) {
 				$this->add_attendee_rolling( $post );
+			} elseif ( isset( $post['move_me'] ) ) {
+				$this->move_attendee_class( $post );
 			} elseif ( isset( $post['add_attendee_class'] ) ) {
 				$this->add_attendee_class( $post );
 			} elseif ( isset( $post['signup_id'] ) ) {
@@ -292,6 +294,47 @@ class ShortCodes extends SignUpsBase {
 				$signups[0]->signup_group
 			);
 		}
+	}
+
+	/**
+	 * Move a paid attendee to another class
+	 *
+	 * @param  mixed $post Data from the form.
+	 * @return void
+	 */
+	private function move_attendee_class( $post ) {
+		global $wpdb;
+		if ( count( $post['time_slots'] ) === 1 ) {
+			$parts          = explode( ',', $post['time_slots'][0] );
+			$new_session_id = $parts[3];
+			$where          = array( 'attendee_id' => $post['move_me'] );
+			$data           = array( 'attendee_session_id' => $new_session_id );
+			$result         = $wpdb->update( self::ATTENDEES_TABLE, $data, $where );
+
+			?>
+			<form method="POST">
+				<div class="text-center">
+					<?php
+					if ( 1 === $result ) {
+						?>
+						<h1 class=" mt-3">Successfully moved to session starting at <?php echo esc_html( $parts[0] ); ?></h1>
+						<?php
+					} else {
+						?>
+						<h1 class=" mt-3">Failed moving session, did you pick another session to move to?</h1>
+						<?php
+					}
+					?>
+					<button class="mt-3 mr-3 btn btn-primary signup-submit" type="submit" name="signup_id" 
+						value="<?php echo esc_html( $post['session_signup_id'] ); ?>" >Return to Class</button>
+					<button class="mt-3 ml-3 btn btn-primary signup-submit" type="submit" name="signup_id" 
+						value="-1" >Class List</button>
+				</div>
+				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+			</form>
+			<?php
+		}
+
 	}
 
 	/**
@@ -628,13 +671,14 @@ class ShortCodes extends SignUpsBase {
 											<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
 											<td><?php echo esc_html( $attendee->attendee_item ); ?></td>
 											<?php
-											if ( 'INSTRUCTOR' === $attendee->attendee_item ) {
+											if ( '0' === $attendee->attendee_balance_owed ) {
+												$can_move = $attendee->attendee_badge === $user_badge;
 												?>
-												<td><?php echo esc_html( $attendee->attendee_email ); ?></td>
-												<?php
-											} elseif ( '0' === $attendee->attendee_balance_owed ) {
-												?>
-												<td><?php echo esc_html( 'Paid' ); ?></td>
+												<td class="move <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? '' : 'hidden'; ?> ><?php echo esc_html( 'Move' ); ?>
+												<input id="move_me" class="position-relative remember-me-chk ml-1" 
+													type="checkbox" name="move_me" value='<?php echo esc_html( $attendee->attendee_id ); ?>' ></td>
+
+												<td class="paid <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? 'hidden' : ''; ?> ><?php echo esc_html( 'Paid' ); ?></td>
 												<?php
 											} else {
 												?>

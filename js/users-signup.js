@@ -2,47 +2,51 @@ jQuery(document).ready(function($){
 	var scw_submitting = 0;
 	$("#get_member_button").click(function(){
 		var req = $.ajax({
-			url: wpApiSettings.root + 'scwmembers/v1/members',
-			method: 'GET',
+			url: wpApiSettings.root + "scwmembers/v1/members",
+			method: "GET",
 			beforeSend: function (xhr) {
-				xhr.setRequestHeader('X-WP-Nonce', wpApiSettings.nonce);
+				xhr.setRequestHeader("X-WP-Nonce", wpApiSettings.nonce);
 			},
 			data:{
-				'badge' : $("#badge-input").val(),
-				'user-groups' : $("#user_groups").val()
+				"badge" : $("#badge-input").val(),
+				"user-groups" : $("#user_groups").val()
 			}
 		}).done(function (response) {
 			if (response.length > 0) {
-				$('.member-first-name').each(function () { $(this).val(response[0].member_firstname); });
-				$('.member-last-name').each(function () { $(this).val(response[0].member_lastname); });
-				$('.member-email').each(function () { $(this).val(response[0].member_email); });
-				$('.member-phone').each(function () { $(this).val(response[0].member_phone);  });
-				$('.member-badge').each(function () { $(this).val(response[0].member_badge);  });
-				$('#user-secret').val(response[0].member_secret);
+				$(".member-first-name").each(function () { $(this).val(response[0].member_firstname); });
+				$(".member-last-name").each(function () { $(this).val(response[0].member_lastname); });
+				$(".member-email").each(function () { $(this).val(response[0].member_email); });
+				$(".member-phone").each(function () { $(this).val(response[0].member_phone);  });
+				$(".member-badge").each(function () { $(this).val(response[0].member_badge);  });
+				$("#user-secret").val(response[0].member_secret);
 				$("#selection-table").prop("hidden", false);
-				$('button[type="submit"]').each(function() {
-					$(this).removeAttr('disabled');
+				$("button[type='submit']").each(function() {
+					$(this).removeAttr("disabled");
 				});
 
 				if ($("#remember_me").is(":checked")){
-					Cookies.set('signups_scw_badge', response[0].member_badge);
+					Cookies.set("signups_scw_badge", response[0].member_badge);
 					SetServerCookie(response[0].member_badge);
 				} else {
 					SetServerCookie("");
-					Cookies.set('signups_scw_badge');
+					Cookies.set("signups_scw_badge");
 				}
 
-				//$('#update-butt').click();
+				//$("#update-butt").click();
 
-				$('.rolling-remove-chk').prop("hidden", true);
+				$(".rolling-remove-chk").prop("hidden", true);
+				$(".move").prop("hidden", true);
+				$(".paid").prop("hidden", false);
+				$(".paid." + response[0].member_badge).prop("hidden", true);
+				$(".move." + response[0].member_badge).prop("hidden", false);
 				
-				var daysToCancel = $('#template_days_to_cancel').val();
-				var removeChkClass = '.rolling-remove-chk.' + response[0].member_badge;
+				var daysToCancel = $("#template_days_to_cancel").val();
+				var removeChkClass = ".rolling-remove-chk." + response[0].member_badge;
 				var currentDate = new Date();
 				var newDate = new Date(currentDate);
 				newDate.setDate(currentDate.getDate() + Number(daysToCancel));
 				$(removeChkClass).each(function() {
-					var items = $(this).val().trim().split(',');
+					var items = $(this).val().trim().split(",");
 					var slotDate = Date.parse(items[0].substr(0,10));
 					var cutoffDate = Date.parse(newDate.toDateString());
 					if (slotDate > cutoffDate) {
@@ -50,17 +54,17 @@ jQuery(document).ready(function($){
 					}
 				});
 
-				$('badgeclass').prop("hidden", false);
+				$("badgeclass").prop("hidden", false);
 			} else {
-				alert('Badge number not found or Permission for signup denied.')
+				alert("Badge number not found or Permission for signup denied.")
 			}
 		}).error(function (response) {
 			if (response.status == 400) {
-				alert('Error: ' + response.status + ' Badge Number Not Found.');
+				alert("Error: " + response.status + " Badge Number Not Found.");
 			} else if (response.status == 401) {
-				alert('Error: ' + response.status + ' Machine Permission Denied.');
+				alert("Error: " + response.status + " Machine Permission Denied.");
 			} else {
-				alert('Error: ' + response.status + ' Unknown Error.');
+				alert("Error: " + response.status + " Unknown Error.");
 			}
 		});
 	});
@@ -73,25 +77,25 @@ jQuery(document).ready(function($){
 		//debugger;
 	});
 
-	$("#badge-input").on('keydown', (e) => {
-		if (e.code === 'Enter' || e.code === 'NumpadEnter') { 
+	$("#badge-input").on("keydown", (e) => {
+		if (e.code === "Enter" || e.code === "NumpadEnter") { 
 			$("#get_member_button").trigger("click");
 			e.preventDefault();
 		}
 	});
 
-	$("#description_duration").on('keydown', (e) => {
+	$("#description_duration").on("keydown", (e) => {
 		if(e.which === 8 || e.which === 46 || e.which === 37 || e.which === 39 ) {
 			return;
 		}
 
 		var val = $("#description_duration").val(); 
 		var len = val.length;
-		if (len === 2 && !val.includes(':')) {
-			$("#description_duration").val(val + ':');
+		if (len === 2 && !val.includes(":")) {
+			$("#description_duration").val(val + ":");
 		}
 
-		if (val.includes(':') && e.which == 186) {
+		if (val.includes(":") && e.which == 186) {
 			e.preventDefault();
 			return;
 		}
@@ -119,7 +123,7 @@ jQuery(document).ready(function($){
 	})
 
 	$("#toggle-view").click(function(e) {
-		var x = $("#report-view").css('display');
+		var x = $("#report-view").css("display");
 		if ($("#report-view").css("display") == "block") {
 			$("#report-view").css("display", "none");
 			$("#all-items").css("display", "block");
@@ -134,8 +138,8 @@ jQuery(document).ready(function($){
 	$(".signup_form").submit(function(e){
 		e.preventDefault();
 		var form = this;
-		if ($("#update-butt").attr('clicked')) {
-			$("#update-butt").removeAttr('clicked')
+		if ($("#update-butt").attr("clicked")) {
+			$("#update-butt").removeAttr("clicked")
 			$("<input />").attr("type", "hidden")
 				.attr("name", "continue_signup")
 				.attr("value", $("#update-butt").val())
@@ -158,11 +162,11 @@ jQuery(document).ready(function($){
 		}
 		var selectedSessionsTable = "<table><tr class='text-center font-weight-bold'><td>Start</td><td>End</td><td>Item</td><td>Cost</td></tr>";
 		selectedValues.forEach((item) => {
-			var arr = item.split(',');
+			var arr = item.split(",");
 			var inputName = "comment-" + arr[3];
 
-			if ($('input[name=' + inputName + ']').val()) {
-				selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>" + $('input[name=' + inputName + ']').val() + "</td></tr>";
+			if ($("input[name=" + inputName + "]").val()) {
+				selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>" + $("input[name=" + inputName + "]").val() + "</td></tr>";
 			} else {
 				if (arr[4] && arr[4] != "0") {
 					selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>Cost: $" + arr[4] + "</td></tr>";
@@ -174,26 +178,26 @@ jQuery(document).ready(function($){
 		});
 
 		deletedValues.forEach((item) => {
-			var arr = item.split(',');
+			var arr = item.split(",");
 				selectedSessionsTable += "<tr style='background-color:#FFCCCB;'><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>DELETE</td></tr>";
 		});
 		selectedSessionsTable += "</table>"
 
 		scw_submitting = 1;
-		$('<div style="padding: 10px; max-width: 800px; word-wrap: break-word;">' + selectedSessionsTable + '</div>').dialog({
+		$("<div style='padding: 10px; max-width: 800px; word-wrap: break-word;'>" + selectedSessionsTable + "</div>").dialog({
 			draggable: true,
 			modal: true,
 			resizable: false,
-			width: 'auto',
-			title: 'Confirm Times',
+			width: "auto",
+			title: "Confirm Times",
 			minHeight: 75,
 			buttons: {
 			  Submit: function () {
 				form.submit();
-				$(this).dialog('destroy');
+				$(this).dialog("destroy");
 			  },
 			  Change: function () {
-				$(this).dialog('destroy');
+				$(this).dialog("destroy");
 			  }
 			}
 		  });
@@ -215,10 +219,10 @@ jQuery(document).ready(function($){
 
 	function SetServerCookie( badgeToSet ) {
 		$.ajax({
-			url: wpApiSettings.root + 'scwmembers/v1/cookies',
-			method: 'GET',
+			url: wpApiSettings.root + "scwmembers/v1/cookies",
+			method: "GET",
 			beforeSend: function (xhr) {
-				xhr.setRequestHeader('X-WP-Nonce', wpApiSettings.nonce);
+				xhr.setRequestHeader("X-WP-Nonce", wpApiSettings.nonce);
 			},
 			data:{
 				"badge" : badgeToSet
@@ -229,8 +233,8 @@ jQuery(document).ready(function($){
 	$(".rolling-add-chk").click(function(x) {
 		var val = x.currentTarget.value;
 		if (val) {
-			var arr = val.split(',');
-			var classname = '.' + arr[2].replace(' ', '');
+			var arr = val.split(",");
+			var classname = "." + arr[2].replace(" ", "");
 			if (classname.indexOf("Machine") > 0) {
 				var checked = $(".rolling-add-chk:checkbox:checked").length;
 				if (checked > 8) {
@@ -243,8 +247,8 @@ jQuery(document).ready(function($){
 					//$(classname).attr("disabled", false);
 				}
 
-				var badge = $('#badge-input').val();
-				$('.attendee-row').each(function(i, e) {
+				var badge = $("#badge-input").val();
+				$(".attendee-row").each(function(i, e) {
 					var badgeClass = "." + badge;
 					var chillen = $(this).find(badgeClass);
 					if (chillen.length === 1) {
@@ -265,7 +269,7 @@ jQuery(document).ready(function($){
 					$(".rolling-add-chk:checkbox:not(:checked)").attr("disabled", false);
 				}
 			} else {
-				var arr = val.split(',');
+				var arr = val.split(",");
 				var checked = x.currentTarget.checked;
 				/*var checkedCount = $(".rolling-add-chk:checkbox:checked").length;
 				 if (checkedCount > 2) {
@@ -274,16 +278,16 @@ jQuery(document).ready(function($){
 					return;
 				} */
 
-				$('.rolling-add-chk').each(function(i, e) {
+				$(".rolling-add-chk").each(function(i, e) {
 					if ($(this).val() === val) {
 						return true;
 					}
-					var x = $(this).val().split(',');
+					var x = $(this).val().split(",");
 					if (x[0] == arr[0]) {
 						if (checked) {
-							$(this).attr('disabled', true);
+							$(this).attr("disabled", true);
 						} else {
-							$(this).attr('disabled', false);
+							$(this).attr("disabled", false);
 						}
 					}
 				});
@@ -296,7 +300,7 @@ jQuery(document).ready(function($){
 	});
 
 	function checkUsersEdits() {
-		$('.attendee-row').each(function(i, e) {
+		$(".attendee-row").each(function(i, e) {
 			if ($(this).find(".rolling-remove-chk:visible").length) {
 				if ($(this).find(".rolling-remove-chk").is(":checked")) {
 					$(this).find(".rolling-add-chk").attr("disabled", false);
@@ -314,13 +318,13 @@ jQuery(document).ready(function($){
 	});
 
 	$("#selection-table input:radio").click (function(e) {
-		var arr = e.currentTarget.value.split(',');
+		var arr = e.currentTarget.value.split(",");
 		var active_submit_id = "submit_" + arr[3];
 		$("#selection-table :submit").each(function(i, s) {
-			if (s.id != active_submit_id && !s.classList.contains('back-button')) {
-				s.style.display = 'none';
+			if (s.id != active_submit_id && !s.classList.contains("back-button")) {
+				s.style.display = "none";
 			} else {
-				s.style.display = 'block';
+				s.style.display = "block";
 			}
 		})
 
@@ -329,21 +333,23 @@ jQuery(document).ready(function($){
 				s.checked = false;
 			}
 		})
+
+		$(".custom-alert").hide();
 	});
 
-	$(window).on('beforeunload', function(){
+	$(window).on("beforeunload", function(){
 		if (scw_submitting) {
 			scw_submitting = 0;
 			return;
 		}
-		if ($('.rolling-remove-chk:checkbox:checked').length > 0 ||
-		$('.rolling-add-chk:checkbox:checked').length > 0) {
-			return 'You have unsaved items, are you sure you want to leave the page?';
+		if ($(".rolling-remove-chk:checkbox:checked").length > 0 ||
+		$(".rolling-add-chk:checkbox:checked").length > 0) {
+			return "You have unsaved items, are you sure you want to leave the page?";
 		}
 	});
 
-	$('.expand-button').click( function(event) {
-		var data = $.parseJSON($(this).attr('data-button'));
+	$(".expand-button").click( function(event) {
+		var data = $.parseJSON($(this).attr("data-button"));
 		if ($(".expand-button").html() == "Show All") {
 			$("." + data.session_id).prop("hidden", false);
 			$(".expand-button").html("Hide");
@@ -355,6 +361,19 @@ jQuery(document).ready(function($){
 
 	$("#download").click(function(e){
 		download($("#csv_data").val() ,"CncUsers.csv", "text/csv;charset=utf-8;")
+	})
+
+	$("#move_me").click(function(e) {
+		//alert("Select session to move to.");
+		if ($("#move_me")[0].checked && $("#selection-table input:radio:checked").length === 0) {
+			const message = "Select session to move to.";
+			const customAlert = document.createElement("div");
+			customAlert.className = "custom-alert";
+			customAlert.textContent = message;
+			document.body.appendChild(customAlert);
+		} else {
+			$(".custom-alert").hide();
+		}
 	})
 
 	function download(data, filename, type) {
@@ -375,75 +394,75 @@ jQuery(document).ready(function($){
 		}
 	}
 
-	//$(table).find('tbody').append("<tr><td>aaaa</td></tr>");
+	//$(table).find("tbody").append("<tr><td>aaaa</td></tr>");
 	
 	///// Sripe payment stuff below here. /////
 	// show shipping address if different
 	function showMe() {
-		var box = document.getElementById('same');
+		var box = document.getElementById("same");
 		var vis = (box.checked) ? "block" : "none";
-		document.getElementById('shipping-address').style.display = vis;
+		document.getElementById("shipping-address").style.display = vis;
 	}
 	
 	// close address section on "next" click
 	function closeAddress() {
-		var elems = document.querySelector('.collapsible');
+		var elems = document.querySelector(".collapsible");
 		var instances = M.Collapsible.init(elems);
 		instances.close(1);
 	}
 	// open submit section on "next" click
 	function openSubmit() {
-		var elems = document.querySelector('.collapsible');
+		var elems = document.querySelector(".collapsible");
 		var instances = M.Collapsible.init(elems);
 		instances.open(2);
 	}
 	// credit card iframe styling
 	var custom_style = {
-		'styles': {
-			'base': {
-				'color': 'grey',
-				'border': '1px solid grey',
-				'border-top': 'none',
-				'border-right': 'none',
-				'border-left': 'none',
-				'font-weight': '200',
-				'font-family': 'Arial',
-				'padding': '0px',
-				'margin-bottom': '5px',
-				':focus': {
-					'border': '2px solid #4db6ac',
-					'border-top': 'none',
-					'border-right': 'none',
-					'border-left': 'none'
+		"styles": {
+			"base": {
+				"color": "grey",
+				"border": "1px solid grey",
+				"border-top": "none",
+				"border-right": "none",
+				"border-left": "none",
+				"font-weight": "200",
+				"font-family": "Arial",
+				"padding": "0px",
+				"margin-bottom": "5px",
+				":focus": {
+					"border": "2px solid #4db6ac",
+					"border-top": "none",
+					"border-right": "none",
+					"border-left": "none"
 				},
-				'::placeholder': {
-					'text-transform': 'lowercase',
-					'color': '#D3D3D3',
-					'font-size': '17px'
+				"::placeholder": {
+					"text-transform": "lowercase",
+					"color": "#D3D3D3",
+					"font-size": "17px"
 				}
 			},
-			'invalid': {
-				'color': '#CD5C5C',
-				'border-color': '#CD5C5C'
+			"invalid": {
+				"color": "#CD5C5C",
+				"border-color": "#CD5C5C"
 			},
-			'valid': {
-				'color': '#4db6ac',
-				'border-color': '#4db6ac'
+			"valid": {
+				"color": "#4db6ac",
+				"border-color": "#4db6ac"
 			},
-			'labels': {
-				'base': {
-					'color': 'gray',
-					'font-family': 'Arial',
-					'font-size': '13px',
-					'font-weight': '1',
-					'text-transform': 'lowercase',
-					'padding': '0px',
-					'padding-left': '0px'
+			"labels": {
+				"base": {
+					"color": "gray",
+					"font-family": "Arial",
+					"font-size": "13px",
+					"font-weight": "1",
+					"text-transform": "lowercase",
+					"padding": "0px",
+					"padding-left": "0px"
 				}
 			},
-			'errors': {
-				'invalid': {
-					'color': '#CD5C5C'
+			"errors": {
+				"invalid": {
+					"color": "#CD5C5C"
 				}
 			}
 		}
