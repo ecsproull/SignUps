@@ -52,10 +52,11 @@ class ShortCodes extends SignUpsBase {
 					$this->create_description_form( get_query_var( 'signup_id' ) );
 				}
 			} elseif ( get_query_var( 'unsubscribe' ) ) {
-				$key = get_query_var( 'unsubscribe');
+				$key   = get_query_var( 'unsubscribe' );
+				$badge = get_query_var( 'badge' );
 				$pattern = '/^[0-9a-f]{32}$|^[0-9a-f]{14}\.[0-9]{8}$/ms';
 				if ( preg_match( $pattern, $key ) ) {
-					$this->unsubscribe_nag_mailer( $key );
+					$this->unsubscribe_nag_mailer( $key, $badge );
 				}
 			} else{
 				$this->create_select_signup( $admin_view );
@@ -70,18 +71,19 @@ class ShortCodes extends SignUpsBase {
 	 * @param  mixed $key The key that identifies the member.
 	 * @return void
 	 */
-	protected function unsubscribe_nag_mailer( $key ) {
+	protected function unsubscribe_nag_mailer( $key, $badge ) {
 		global $wpdb;
 		$data                         = array();
 		$data['unsubscribe_key']      = $key;
 		$data['unsubscribe_complete'] = false;
-		$result = $wpdb->insert( self::UNSUBSCRIBE_TABLE, $data );
+		$data['unsubscribe_badge']    = $badge;
+		$result                       = $wpdb->insert( self::UNSUBSCRIBE_TABLE, $data );
 		if ( 1 === $result ) {
 			?>
 			<h1 class='ml-auto mr-auto mt-5'>Request queued and should be complete within 8 hours.</h1>
 			<?php
 			$sgm = new SendGridMail();
-			$sgm->send_mail( 'treasurer@scwwoodshop.com', 'Unsubscribe', $key );
+			$sgm->send_mail( 'treasurer@scwwoodshop.com', 'Unsubscribe', $key . ' ' . $badge );
 		} else {
 			?>
 			<div class='ml-auto mr-auto mt-5'>
@@ -307,9 +309,27 @@ class ShortCodes extends SignUpsBase {
 		if ( count( $post['time_slots'] ) === 1 ) {
 			$parts          = explode( ',', $post['time_slots'][0] );
 			$new_session_id = $parts[3];
-			$where          = array( 'attendee_id' => $post['move_me'] );
-			$data           = array( 'attendee_session_id' => $new_session_id );
-			$result         = $wpdb->update( self::ATTENDEES_TABLE, $data, $where );
+
+			$result = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT * FROM %1s 
+					WHERE attendee_session_id = %s && attendee_badge = %s',
+					self::ATTENDEES_TABLE,
+					$new_session_id,
+					$post['badge_number']
+				)
+			);
+
+			if ( $result ) {
+				?>
+					<h1 class=" mt-3">Failed moving session, You are already signed up for that session.</h1>
+				<?php
+				return;
+			}
+
+			$where  = array( 'attendee_id' => $post['move_me'][0] );
+			$data   = array( 'attendee_session_id' => $new_session_id );
+			$result = $wpdb->update( self::ATTENDEES_TABLE, $data, $where );
 
 			?>
 			<form method="POST">
@@ -675,8 +695,8 @@ class ShortCodes extends SignUpsBase {
 												$can_move = $attendee->attendee_badge === $user_badge;
 												?>
 												<td class="move <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? '' : 'hidden'; ?> ><?php echo esc_html( 'Move' ); ?>
-												<input id="move_me" class="position-relative remember-me-chk ml-1" 
-													type="checkbox" name="move_me" value='<?php echo esc_html( $attendee->attendee_id ); ?>' ></td>
+												<input class="move_me position-relative ml-1" 
+													type="checkbox" name="move_me[]" value='<?php echo esc_html( $attendee->attendee_id ); ?>' ></td>
 
 												<td class="paid <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? 'hidden' : ''; ?> ><?php echo esc_html( 'Paid' ); ?></td>
 												<?php

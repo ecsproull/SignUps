@@ -72,7 +72,6 @@ class StripePayments extends SignUpsBase {
 		 * Verification is done in the Payment Event handler.
 		 */
 	public function permissions_check() {
-		$this->write_log( 'Permissions Check' );
 		return true;
 	}
 
@@ -81,7 +80,6 @@ class StripePayments extends SignUpsBase {
 	 */
 	public function payment_event() {
 		global $wpdb;
-		$this->write_log( 'Payment event begin.' );
 		\Stripe\Stripe::setApiKey( $this->stripe_api_key );
 
 		$payload = @file_get_contents( 'php://input' );
@@ -91,7 +89,6 @@ class StripePayments extends SignUpsBase {
 			$event = \Stripe\Event::constructFrom(
 				json_decode( $payload, true )
 			);
-			$this->write_log( 'Event json = ' . $event );
 		} catch ( \UnexpectedValueException $e ) {
 			echo '⚠️  Webhook error while parsing basic request.';
 			http_response_code( 400 );
@@ -236,12 +233,8 @@ class StripePayments extends SignUpsBase {
 			case 'checkout.session.expired':
 			case 'payment_intent.payment_failed':
 			case 'payment_intent.canceled':
-				$this->write_log( 'Unhandled Event = ' . $event->type );
 				break;
 			default:
-				// Unexpected event type.
-				error_log( 'Received unknown event type' );
-				$this->write_log( 'Unhandled Event = ' . $event->type );
 		}
 	}
 
@@ -258,7 +251,6 @@ class StripePayments extends SignUpsBase {
 	public function collect_money( $description, $price_id, $badge, $attendee_id, $cost ) {
 		\Stripe\Stripe::setApiKey( $this->stripe_api_secret );
 		header( 'Content-Type: application/json' );
-		$this->write_log( 'Creating checkout session, secret: ' . $this->stripe_api_secret . '  root: ' . $this->stripe_root_url );
 		$signup_domain    = $this->stripe_root_url;
 		$checkout_session = \Stripe\Checkout\Session::create(
 			array(
@@ -283,8 +275,6 @@ class StripePayments extends SignUpsBase {
 
 		header( 'HTTP/1.1 303 See Other' );
 		header( 'Location: ' . $checkout_session->url );
-
-		$this->write_log( 'Checkout session exit.' );
 	}
 
 	/**
@@ -311,7 +301,6 @@ class StripePayments extends SignUpsBase {
 		<?php
 		if ( $payment_row ) {
 			if ( 'succeeded' !== $payment_row->payments_status && 'complete' !== $payment_row->payments_status ) {
-				$this->write_log( 'Payment Status = ' . $payment_row->payments_status );
 				?>
 				<meta http-equiv="Refresh" content="2">
 				<?php

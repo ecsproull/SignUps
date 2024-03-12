@@ -363,9 +363,16 @@ jQuery(document).ready(function($){
 		download($("#csv_data").val() ,"CncUsers.csv", "text/csv;charset=utf-8;")
 	})
 
-	$("#move_me").click(function(e) {
-		//alert("Select session to move to.");
-		if ($("#move_me")[0].checked && $("#selection-table input:radio:checked").length === 0) {
+	$(".move_me").click(function(e) {
+		var count = $("input[name='move_me[]']:checked").length;
+		if (count > 1) {
+			alert("You can only move one session.");
+			$(".move_me").prop("checked", false);
+			$(".custom-alert").hide();
+			return;
+		}
+
+		if (1 === count && $("#selection-table input:radio:checked").length === 0) {
 			const message = "Select session to move to.";
 			const customAlert = document.createElement("div");
 			customAlert.className = "custom-alert";

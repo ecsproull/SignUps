@@ -251,9 +251,9 @@ class SignupSettings extends SignUpsBase {
 
 		$post['signup_cost']             = (int) $post['signup_cost'];
 		$post['signup_default_slots']    = (int) $post['signup_default_slots'];
-		$post['signup_rolling_template'] = (int) $post['template_id'];
+		$post['signup_rolling_template'] = (int) $post['signup_rolling_template'];
 		$post['signup_group']            = 'member' === $post['signup_group'] ? '' : $post['signup_group'];
-		unset( $post['template_id'] );
+		//unset( $post['template_id'] );
 
 		$duration_parts = explode( ':', $post['signup_default_duration'] );
 		if ( $duration_parts[0] > 12 ) {
@@ -310,7 +310,9 @@ class SignupSettings extends SignUpsBase {
 	/**
 	 * Removes items from the calendar in respose to removing Admin Approved
 	 *
-	 * @param  mixed $signup_id The sighup id that owns the sessions.
+	 * @param  mixed $signup_id The signup id that owns the sessions.
+	 * @param  mixed $signup_name The sighup name.
+	 * @param  mixed $add To add or remove from the calendar.
 	 * @return void
 	 */
 	private function add_remove_from_calendar( $signup_id, $signup_name, $add ) {
@@ -1436,7 +1438,7 @@ class SignupSettings extends SignUpsBase {
 					<td class="text-right mr-2"><label>Rolling Template:</label></td>
 					<td>
 					<?php
-						$this->load_template_selection( $data->signup_rolling_template, false );
+						$this->load_template_selection( $data->signup_rolling_template, false, 'signup_rolling_template' );
 					?>
 					</td>
 				</tr>

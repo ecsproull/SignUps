@@ -151,7 +151,7 @@ class RollingTemplatesEditor extends SignUpsBase {
 		<div class="text-center">
 			<label class="mr-2" for="template-select:">Select Template:</label>
 		<?php
-		$this->load_template_selection( $template_id, true );
+		$this->load_template_selection( $template_id, true, 'signup_rolling_template' );
 		?>
 		</div>
 		<div class="box mt-4 ml-auto mr-auto">

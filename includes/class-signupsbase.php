@@ -1164,6 +1164,7 @@ class SignUpsBase {
 	protected function load_template_selection(
 		$template_id,
 		$add_new = false,
+		$template_id_name,
 		$select_id = 'template-select',
 		$default_title = 'None'
 		) {
@@ -1178,7 +1179,7 @@ class SignUpsBase {
 		);
 
 		?>
-		<select id="<?php echo esc_html( $select_id ); ?>" name="exc_template_id">
+		<select id="<?php echo esc_html( $select_id ); ?>" name="<?php echo esc_html( $template_id_name ); ?>">
 		<option value="0"><?php echo esc_html( $default_title ); ?></option>
 		<?php
 		foreach ( $templates as $result ) {
