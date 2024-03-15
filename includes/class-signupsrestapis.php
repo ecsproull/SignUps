@@ -184,7 +184,7 @@ class SignUpsRestApis extends SignUpsBase {
 				$wpdb->prepare(
 					'SELECT *
 					FROM %1s
-					WHERE unsubscribe_complete = false',
+					WHERE unsubscribe_complete = 0',
 					self::UNSUBSCRIBE_TABLE
 				),
 				OBJECT
@@ -194,7 +194,15 @@ class SignUpsRestApis extends SignUpsBase {
 		} elseif ( 'done' === $data_obj->action ) {
 			foreach ( $data_obj->unsubscribe_secret as $secret ) {
 				$data                         = array();
-				$data['unsubscribe_complete'] = true;
+				$data['unsubscribe_complete'] = 1;
+				$where                        = array();
+				$where['unsubscribe_key']     = $secret;
+				$wpdb->update( self::UNSUBSCRIBE_TABLE, $data, $where );
+			}
+
+			foreach ( $data_obj->unsubscribe_secret_failed as $secret ) {
+				$data                         = array();
+				$data['unsubscribe_complete'] = -1;
 				$where                        = array();
 				$where['unsubscribe_key']     = $secret;
 				$wpdb->update( self::UNSUBSCRIBE_TABLE, $data, $where );
@@ -289,18 +297,20 @@ class SignUpsRestApis extends SignUpsBase {
 			);
 
 			$data = array();
-			$data['member_badge']     = $data_obj->members[ $i ]->badge;
-			$data['member_lastname']  = $data_obj->members[ $i ]->last;
-			$data['member_firstname'] = $data_obj->members[ $i ]->first;
-			$data['member_phone']     = $data_obj->members[ $i ]->phone;
-			$data['member_email']     = $data_obj->members[ $i ]->email;
+			$data['member_badge']        = $data_obj->members[ $i ]->badge;
+			$data['member_lastname']     = $data_obj->members[ $i ]->last;
+			$data['member_firstname']    = $data_obj->members[ $i ]->first;
+			$data['member_phone']        = $data_obj->members[ $i ]->phone;
+			$data['member_email']        = $data_obj->members[ $i ]->email;
+			$data['member_email_secret'] = $data_obj->members[ $i ]->email_secret;
 
 			if ( ! $member ) {
 				$data['member_secret'] = $data_obj->members[ $i ]->secret;
 			}
 
 			if ( $member ) {
-				$wpdb->update( self::MEMBERS_TABLE, $data, $member->badge );
+				$where           = array( 'member_badge' => $member[0]->member_badge );
+				$result          = $wpdb->update( self::MEMBERS_TABLE, $data, $where );
 				$count_remaining = count( $all_members );
 				for ( $m =  0; $m < $count_remaining; $m++ ) {
 					if ( $all_members[ $m ]->member_badge === $member[0]->member_badge ) {

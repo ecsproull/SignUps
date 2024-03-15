@@ -307,6 +307,7 @@ class DbSignUpTables {
 					`unsubscribe_id` int NOT NULL AUTO_INCREMENT,
 					`unsubscribe_key` varchar(45) NOT NULL,
 					`unsubscribe_complete` tinyint NOT NULL DEFAULT '0',
+					`unsubscribe_badge` varchar(6) NOT NULL,
 					PRIMARY KEY (`unsubscribe_id`),
 					UNIQUE KEY `unsubscribe_id_UNIQUE` (`unsubscribe_id`)
 				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;"

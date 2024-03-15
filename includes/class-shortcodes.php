@@ -52,13 +52,18 @@ class ShortCodes extends SignUpsBase {
 					$this->create_description_form( get_query_var( 'signup_id' ) );
 				}
 			} elseif ( get_query_var( 'unsubscribe' ) ) {
-				$key   = get_query_var( 'unsubscribe' );
-				$badge = get_query_var( 'badge' );
-				$pattern = '/^[0-9a-f]{32}$|^[0-9a-f]{14}\.[0-9]{8}$/ms';
-				if ( preg_match( $pattern, $key ) ) {
+				$ip_address    = $_SERVER['REMOTE_ADDR'];
+				$key           = get_query_var( 'unsubscribe' );
+				$badge         = get_query_var( 'badge' );
+				$pattern_key   = '/^[0-9a-f]{32}$|^[0-9a-f]{14}\.[0-9]{8}$/ms';
+				$pattern_badge = '/^[0-9]{4}$/ms';
+				if ( preg_match( $pattern_key, $key ) && preg_match( $pattern_badge, $badge ) ) {
 					$this->unsubscribe_nag_mailer( $key, $badge );
+				} else {
+					$sgm = new SendGridMail();
+					$sgm->send_mail( 'treasurer@scwwoodshop.com', 'Failed Validation', $key . ' ' . $badge . ' ip : ' . $ip_address );
 				}
-			} else{
+			} else {
 				$this->create_select_signup( $admin_view );
 			}
 		}
@@ -73,23 +78,45 @@ class ShortCodes extends SignUpsBase {
 	 */
 	protected function unsubscribe_nag_mailer( $key, $badge ) {
 		global $wpdb;
+		$ip_address                   = $_SERVER['REMOTE_ADDR'];
 		$data                         = array();
 		$data['unsubscribe_key']      = $key;
 		$data['unsubscribe_complete'] = false;
 		$data['unsubscribe_badge']    = $badge;
-		$result                       = $wpdb->insert( self::UNSUBSCRIBE_TABLE, $data );
-		if ( 1 === $result ) {
-			?>
-			<h1 class='ml-auto mr-auto mt-5'>Request queued and should be complete within 8 hours.</h1>
-			<?php
-			$sgm = new SendGridMail();
-			$sgm->send_mail( 'treasurer@scwwoodshop.com', 'Unsubscribe', $key . ' ' . $badge );
+		$member = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				where member_email_secret = %s',
+				self::MEMBERS_TABLE,
+				$key
+			),
+			OBJECT
+		);
+
+		$sgm = new SendGridMail();
+		if ( $member && $member[0]->member_badge === $badge ) {
+			$result = $wpdb->insert( self::UNSUBSCRIBE_TABLE, $data );
+			if ( 1 === $result ) {
+				?>
+				<h1 class='ml-auto mr-auto mt-5'>Request queued and should be complete within 8 hours.</h1>
+				<?php
+				$sgm->send_mail( 'treasurer@scwwoodshop.com', 'Unsubscribe', $key . ' ' . $badge . ' ip : ' . $ip_address );
+			} else {
+				?>
+				<div class='ml-auto mr-auto mt-5'>
+					<h1>Opps something failed.</h1>
+					<h2><a href="mailto:treasurer@scwwoodshop.com?subject=Failed Unsubscribe&body=<?php echo esc_html( $key ); ?>">Email Administrator</a><h2>
+				<?php
+				$sgm->send_mail( 'treasurer@scwwoodshop.com', 'Unsubscribe Failed', $key . ' ' . $badge . ' ip : ' . $ip_address );
+			}
 		} else {
 			?>
 			<div class='ml-auto mr-auto mt-5'>
-				<h1>Opps something failed.</h1>
-				<h2><a href="mailto:treasurer@scwwoodshop.com?subject=Failed Unsubscribe&body=<?php echo esc_html( $key ); ?>">Email Administrator</a><h2>
+				<h1>Sorry, couldn't locate member. Please email the admin to get removed.</h1>
+				<h2><a href="mailto:treasurer@scwwoodshop.com?subject=Failed Member Not found.&body=<?php echo esc_html( $key ); ?>">Email Administrator</a><h2>
 			<?php
+			$sgm->send_mail( 'treasurer@scwwoodshop.com', 'Unsubscribe Failed', $key . ' ' . $badge . ' ip : ' . $ip_address );
 		}
 	}
 
