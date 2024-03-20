@@ -38,7 +38,7 @@ class RollingTemplatesEditor extends SignUpsBase {
 			} elseif ( isset( $post['template_id'] ) ) { 
 				$this->load_template_form( $post['template_id'] );
 			}else {
-				$this->load_template_form( 1 );
+				$this->load_template_form( $post['signup_rolling_template'] );
 			}
 		} else {
 			$this->load_template_form( 1 );
@@ -177,6 +177,13 @@ class RollingTemplatesEditor extends SignUpsBase {
 			<div>
 				<input type="number" for="rolling-columns" class="mt-2 w-75px" 
 					value="<?php echo $templates[0]->template_columns; ?>" name="template_columns">
+			</div>
+			<div class="text-right">
+				<label class="mt-2 mr-2" for="rolling-days-to-cancel">Days to Cancel:</label>
+			</div>
+			<div>
+				<input type="number" for="rolling-days-to-cancel" class="mt-2 w-75px" 
+					value="<?php echo $templates[0]->template_days_to_cancel; ?>" name="template_days_to_cancel">
 			</div>
 		</div>
 		<table class="mt-3 table mr-auto d-flex template-table">

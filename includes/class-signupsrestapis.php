@@ -218,21 +218,62 @@ class SignUpsRestApis extends SignUpsBase {
 	 */
 	public function get_monitors( $request ) {
 		global $wpdb;
-		$date    = $request['date'];
-		$pattern = '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/ms';
+		$template_id = 6;
+		$date        = $request['date'];
+		$pattern     = '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/ms';
 		if ( preg_match( $pattern, $date ) ) {
-			$members = $wpdb->get_results(
+			$date_time = new DateTime( $date );
+			$templates  = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT *
+					FROM %1s
+					WHERE template_item_id < 3',
+					self::SIGNUP_TEMPLATE_ITEM_TABLE,
+					$signups[0]->signup_rolling_template
+				),
+				OBJECT
+			);
+
+			$time_exceptions = $this->create_meeting_exceptions( $date_time, $date_time );
+			$attendees       = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT attendee_badge, attendee_item, attendee_start_formatted
 					FROM %1s
-					WHERE attendee_signup_id = 6 && attendee_start_formatted LIKE  %s',
+					WHERE attendee_signup_id = %d && attendee_start_formatted LIKE  %s',
 					self::ATTENDEES_ROLLING_TABLE,
+					$template_id,
 					$wpdb->esc_like( $date ) . '%'
 				),
 				OBJECT
 			);
 
-			return $members;
+			$slots = array();
+			$day_of_week = $date_time->format( 'w' ) + 1;
+			foreach ( $templates as $template ) {
+				if ( str_contains( $template->template_item_day_of_week, (string) $day_of_week ) ) {
+					$start_time_parts = explode( ':', $template->template_item_start_time );
+					$duration_parts   = explode( ':', $template->template_item_duration );
+					$start_hour       = $start_time_parts[0];
+					$start_minutes    = $start_time_parts[1];
+					$start_date       = $date_time->SetTime( $start_hour, $start_minutes )->format( self::DATETIME_FORMAT );
+					$duration         = new DateInterval( 'PT' . $duration_parts[0] . 'H' . $duration_parts[1] . 'M' );
+					$temp_end_date    = new DateTime( $start_date->format( self::DATETIME_FORMAT ), $this->date_time_zone );
+					$temp_end_date->Add( $duration );
+					for ( $i = 0; $i < $template->template_item_slots; $i++ ) {
+						foreach ( $time_exceptions as $exception ) {
+							if ( $start_date >= $exception->begin &&
+								$start_date <= $exception->end &&
+								( $exception->template === $template ||
+								'0' === $exception->template ) ) {
+								continue;
+							}
+						}
+
+					}
+				}
+			}
+
+			return $attendees;
 		} else {
 			return 'nice try';
 		}

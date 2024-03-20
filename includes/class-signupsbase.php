@@ -432,7 +432,7 @@ class SignUpsBase {
 			</tr>
 			<tr>
 				<td colspan=3>
-					<h3 style="text-align: center;"><a href="mailto:ecsproull@outlook.com?subject=Signup Issue">Contact Signup Administrator</a></h3>
+					<h3 style="text-align: center;"><a href="mailto:treasurer@scwwoodshop.com?subject=Signup Issue">Contact Signup Administrator</a></h3>
 				</td>
 			</tr>
 			<tr hidden>
@@ -585,7 +585,7 @@ class SignUpsBase {
 	 * @param  mixed $end_date Date to end creating exceptions.
 	 * @return array
 	 */
-	private function create_meeting_exceptions( $start_date, $end_date ) {
+	public function create_meeting_exceptions( $start_date, $end_date ) {
 		global $wpdb;
 		$exceptions = $wpdb->get_results(
 			$wpdb->prepare(
@@ -593,7 +593,7 @@ class SignUpsBase {
 				FROM %1s
 				WHERE exc_start >= %s AND exc_start <= %s',
 				self::ROLLING_EXCEPTIONS_TABLE,
-				$start_date->format('Y-m-d'), 
+				$start_date->format('Y-m-d'),
 				$end_date->format('Y-m-d')
 			),
 			OBJECT

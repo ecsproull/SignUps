@@ -41,6 +41,7 @@ require 'includes/class-sendgridmail.php';
 require 'includes/class-reports.php';
 require 'includes/class-testplugin.php';
 require 'includes/class-paymentsreview.php';
+require 'includes/class-rollingslot.php';
 
 /**
  * Main signups class.

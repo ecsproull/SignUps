@@ -671,6 +671,13 @@ class SignupSettings extends SignUpsBase {
 
 					if ( $start < $now ) {
 						$today = $today->modify( '+1 month' );
+						$start_date_string = sprintf(
+							'%s of %s %s',
+							$session_item->session_day_of_month,
+							$today->format( 'F' ),
+							$today->format( 'Y' )
+						);
+
 						$start = new DateTime(
 							$start_date_string,
 							$this->date_time_zone
@@ -1537,7 +1544,7 @@ class SignupSettings extends SignUpsBase {
 				</tr>
 				<tr <?php echo $data->session_id ? 'hidden' : ''; ?>>
 					<td class="text-right mr-2"><label>Add to Calendar:</label></td>
-					<td><input class="w-250px mb-2" type="checkbox" name="add_to_calendar" checked /></td>
+					<td><input class="w-250px mb-2" type="checkbox" name="add_to_calendar" /></td>
 				</tr>
 				<?php
 				$data_items_count = count( $data->session_start_formatted );
@@ -1731,14 +1738,14 @@ class SignupSettings extends SignUpsBase {
 				<label class="label-margin-top mr-2" for="signup_admin_approved">Admin Approved:</label>
 			</div>
 			<div class="text-left ml-2 pt-2"><input type="checkbox" id="signup_admin_approved" class="mt-2"  
-				name="signup_admin_approved" checked /> 
+				name="signup_admin_approved" /> 
 			</div>
 
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_add_cal">Add to Calendar:</label>
 			</div>
 			<div class="text-left ml-2 pt-2"><input type="checkbox" id="description_add_cal" class="mt-2"  
-				name="description_add_cal" checked /> 
+				name="description_add_cal" /> 
 			</div>
 
 			<div class="text-right">

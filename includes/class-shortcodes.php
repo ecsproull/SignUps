@@ -52,17 +52,9 @@ class ShortCodes extends SignUpsBase {
 					$this->create_description_form( get_query_var( 'signup_id' ) );
 				}
 			} elseif ( get_query_var( 'unsubscribe' ) ) {
-				$ip_address    = $_SERVER['REMOTE_ADDR'];
-				$key           = get_query_var( 'unsubscribe' );
-				$badge         = get_query_var( 'badge' );
-				$pattern_key   = '/^[0-9a-f]{32}$|^[0-9a-f]{14}\.[0-9]{8}$/ms';
-				$pattern_badge = '/^[0-9]{4}$/ms';
-				if ( preg_match( $pattern_key, $key ) && preg_match( $pattern_badge, $badge ) ) {
-					$this->unsubscribe_nag_mailer( $key, $badge );
-				} else {
-					$sgm = new SendGridMail();
-					$sgm->send_mail( 'treasurer@scwwoodshop.com', 'Failed Validation', $key . ' ' . $badge . ' ip : ' . $ip_address );
-				}
+				$key   = get_query_var( 'unsubscribe' );
+				$badge = get_query_var( 'badge' );
+				$this->unsubscribe_nag_mailer( $key, $badge );
 			} else {
 				$this->create_select_signup( $admin_view );
 			}
@@ -74,11 +66,20 @@ class ShortCodes extends SignUpsBase {
 	 * unsubscribed to the database for retrieval by the nag mailer.
 	 *
 	 * @param  mixed $key The key that identifies the member.
+	 * @param  mixed $badge The member's badge number.
 	 * @return void
 	 */
 	protected function unsubscribe_nag_mailer( $key, $badge ) {
 		global $wpdb;
-		$ip_address                   = $_SERVER['REMOTE_ADDR'];
+		$ip_address    = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : 'No Ip Address';
+		$pattern_key   = '/^[0-9a-f]{32}$|^[0-9a-f]{14}\.[0-9]{8}$/ms';
+		$pattern_badge = '/^[0-9]{4}$/ms';
+		if ( ! preg_match( $pattern_key, $key ) || ! preg_match( $pattern_badge, $badge ) ) {
+			$sgm = new SendGridMail();
+			$sgm->send_mail( 'treasurer@scwwoodshop.com', 'Failed Validation', $key . ' ' . $badge . ' ip : ' . $ip_address );
+			return;
+		}
+
 		$data                         = array();
 		$data['unsubscribe_key']      = $key;
 		$data['unsubscribe_complete'] = false;
@@ -116,7 +117,7 @@ class ShortCodes extends SignUpsBase {
 				<h1>Sorry, couldn't locate member. Please email the admin to get removed.</h1>
 				<h2><a href="mailto:treasurer@scwwoodshop.com?subject=Failed Member Not found.&body=<?php echo esc_html( $key ); ?>">Email Administrator</a><h2>
 			<?php
-			$sgm->send_mail( 'treasurer@scwwoodshop.com', 'Unsubscribe Failed', $key . ' ' . $badge . ' ip : ' . $ip_address );
+			$sgm->send_mail( 'treasurer@scwwoodshop.com', 'Unsubscribe Failed to Locate Member', $key . ' ' . $badge . ' ip : ' . $ip_address );
 		}
 	}
 
@@ -779,6 +780,16 @@ class ShortCodes extends SignUpsBase {
 	 */
 	private function create_description_form( $signup_id, $secret = null ) {
 		global $wpdb;
+		$body           = 'Signup id : ' . $signup_id . ' Secret : ' . $secret;
+		$pattern_secret = '/^[0-9a-f]{32}$/ms';
+		if ( ! ctype_digit( $signup_id ) || ( $secret && ! preg_match( $pattern_secret, $secret ) ) ) {
+			?>
+			<h1 class="mt-3">Unknown signup</h1>
+			<h2><a href="mailto:treasurer@scwwoodshop.com?subject=Failed Signup Parameters&body=<?php echo esc_html( $body ); ?>">Email Administrator</a><h2>
+			<?php
+			return;
+		}
+
 		$signups = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT signup_name,
@@ -800,6 +811,14 @@ class ShortCodes extends SignUpsBase {
 			),
 			OBJECT
 		);
+
+		if ( ! $signups ) {
+			?>
+			<h1 class="mt-3">Signup Not Found</h1>
+			<h2><a href="mailto:treasurer@scwwoodshop.com?subject=Failed Load Signup&body=<?php echo esc_html( $body ); ?>">Email Administrator</a><h2>
+			<?php
+			return;
+		}
 
 		$signup             = $signups[0];
 		$description_object = $this->get_signup_html( $signup_id );
