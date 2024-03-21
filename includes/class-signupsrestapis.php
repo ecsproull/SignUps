@@ -234,7 +234,8 @@ class SignUpsRestApis extends SignUpsBase {
 				OBJECT
 			);
 
-			$time_exceptions = $this->create_meeting_exceptions( $date_time, $date_time );
+			$exc_end_date = clone $date_time;
+			$time_exceptions = $this->create_meeting_exceptions( $date_time, $exc_end_date->add( new DateInterval( 'P1D' ) ) );
 			$attendees       = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT attendee_badge, attendee_item, attendee_start_formatted
@@ -247,7 +248,7 @@ class SignUpsRestApis extends SignUpsBase {
 				OBJECT
 			);
 
-			$slots = array();
+			$slots       = array();
 			$day_of_week = $date_time->format( 'w' ) + 1;
 			foreach ( $templates as $template ) {
 				if ( str_contains( $template->template_item_day_of_week, (string) $day_of_week ) ) {
@@ -255,25 +256,42 @@ class SignUpsRestApis extends SignUpsBase {
 					$duration_parts   = explode( ':', $template->template_item_duration );
 					$start_hour       = $start_time_parts[0];
 					$start_minutes    = $start_time_parts[1];
-					$start_date       = $date_time->SetTime( $start_hour, $start_minutes )->format( self::DATETIME_FORMAT );
+					$start_date       = $date_time->SetTime( $start_hour, $start_minutes );
 					$duration         = new DateInterval( 'PT' . $duration_parts[0] . 'H' . $duration_parts[1] . 'M' );
-					$temp_end_date    = new DateTime( $start_date->format( self::DATETIME_FORMAT ), $this->date_time_zone );
-					$temp_end_date->Add( $duration );
-					for ( $i = 0; $i < $template->template_item_slots; $i++ ) {
+					for ( $i = 0; $i < $template->template_item_shifts; $i++ ) {
+						$skip_slot = false;
 						foreach ( $time_exceptions as $exception ) {
 							if ( $start_date >= $exception->begin &&
-								$start_date <= $exception->end &&
+								$start_date < $exception->end &&
 								( $exception->template === $template ||
 								'0' === $exception->template ) ) {
+								$start_date = $start_date->add( $duration );
+								$skip_slot = true;
 								continue;
 							}
 						}
 
+						if ( ! $skip_slot ) {
+							$rolling_slot                  = new RollingSlot();
+							$rolling_slot->start_time_date = $start_date->format( self::DATETIME_FORMAT );
+							$rolling_slot->item            = $template->template_item_title;
+
+							foreach ( $attendees as $attendee ) {
+								if ( $rolling_slot->start_time_date === $attendee->attendee_start_formatted &&
+									$attendee->attendee_item === $rolling_slot->item ) {
+										$rolling_slot->badge = $attendee->attendee_badge;
+										break;
+								}
+							}
+
+							$slots[]    = $rolling_slot;
+							$start_date = $start_date->add( $duration );
+						}
 					}
 				}
 			}
 
-			return $attendees;
+			return $slots;
 		} else {
 			return 'nice try';
 		}

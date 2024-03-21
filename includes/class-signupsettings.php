@@ -1573,9 +1573,19 @@ class SignupSettings extends SignUpsBase {
 					</td>
 				</tr>
 				<tr>
-					<td class="text-right"><button class="btn bt-md btn-danger mt-4 mr-5" style="cursor:pointer;" type="submit" name="edit_sessions_signup_id"
+					<td>___________________________________</td>
+					<td>___________________________________</td>
+					<td>___________________________________</td>
+				</tr>
+				<tr>
+					<td colspan='3' class="text-center"><h2>When everthing above apears correct, then submit to the database.</h2></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td class="text-right"><button class="btn bt-md btn-danger mt-2 mr-5" style="cursor:pointer;" type="submit" name="edit_sessions_signup_id"
 					value="<?php echo esc_html( $data->session_signup_id ); ?>">Back</button></td>
-					<td class="text-left"><input class="btn bt-md btn-primary mr-auto ml-auto mt-4 ml-2" type="submit" value="Submit Session" name="submit_session"></td>
+					<td class="text-left"><input class="btn bt-md btn-success mr-auto ml-auto ml-2" type="submit" value="Submit Session" name="submit_session"></td>
 				</tr>
 			</table>
 			<input type="hidden" name="session_signup_id" value="<?php echo esc_html( $data->session_signup_id ); ?>">

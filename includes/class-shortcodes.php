@@ -280,7 +280,9 @@ class ShortCodes extends SignUpsBase {
 					session_end_formatted,
 					session_start_time,
 					session_slots,
-					session_price_id
+					session_price_id,
+					session_contact_name,
+					session_contact_email
 					FROM %1s
 					WHERE session_signup_id = %s
 					ORDER BY session_start_time',
@@ -679,6 +681,11 @@ class ShortCodes extends SignUpsBase {
 											' - ' . $start_date->format( self::TIME_FORMAT ) . ' - ' . $end_date->format( self::TIME_FORMAT )
 										);
 										?>
+								</tr>
+								<tr class="attendee-row bg-lg">
+									<td>Session Contact</td>
+									<td><b><?php echo esc_html( $session->session_contact_name ); ?></b></td>
+									<td><a href="mailto:<?php echo esc_html( $session->session_contact_email ); ?>?subject=<?php echo esc_html( $signup_name . ' Session ' . $session->session_start_formatted ); ?>">Email</a></td>
 								</tr>
 								<input type="hidden" name="add_attendee_class">
 								<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">

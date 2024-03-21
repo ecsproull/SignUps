@@ -826,7 +826,7 @@ class SignUpsBase {
 												$reason         = '';
 												foreach ( $time_exceptions as $exception ) {
 													if ( $start_date >= $exception->begin && 
-														$start_date <= $exception->end  &&
+														$start_date < $exception->end  &&
 														($exception->template === $template ||
 														$exception->template === '0')) {
 														$reason = $exception->reason;
