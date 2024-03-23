@@ -134,6 +134,20 @@ class SignUpsBase {
 	protected const UNSUBSCRIBE_TABLE = 'wp_scw_unsubscribe';
 
 	/**
+	 * Unsubscribe table.
+	 *
+	 * @var mixed
+	 */
+	protected const INSTRUCTORS_TABLE = 'wp_scw_instructors';
+
+	/**
+	 * Unsubscribe table.
+	 *
+	 * @var mixed
+	 */
+	protected const SESSION_INSTRUCTORS_TABLE = 'wp_scw_session_instructors';
+	
+	/**
 	 * Log table.
 	 *
 	 * @var mixed

@@ -18,6 +18,10 @@ button {
      border: 2px solid lightgray;
 }
 
+.bk-lg {
+  background-color: rgb(245, 243, 243);
+}
+
 .w-125px {
   width: 125px;
 }
@@ -36,6 +40,10 @@ button {
 
 .w-90 {
   width: 90%!important;
+}
+
+.w-99 {
+  width: 99%!important;
 }
 
 .mt-25px {
@@ -74,10 +82,27 @@ button {
     margin-right: 100px;
 }
 
+.select-lg {
+  height: 3rem;
+  font-size: 20px!important;
+  font-weight: bold;
+  border-radius: 12px!important;
+  border-block-width: 2px;
+}
+
 .box {
   display: grid;
   width: 300px;
   grid-template-columns: 155px 249px;
+  align-items: start;
+  justify-content: space-between;
+}
+
+.instructor-list {
+  display: grid;
+  width: 80%;
+  max-width: 700px;
+  grid-template-columns: 10% 30% 30% 30% 10%;
   align-items: start;
   justify-content: space-between;
 }
@@ -139,6 +164,11 @@ tr > td > div.bg-danger {
   font-weight: bold;
 }
 
+.instructor {
+  color: blue;
+  font-weight: bold;
+}
+
 .addChk {
   background-color: lightgreen!important;
 }
@@ -187,7 +217,7 @@ tr > td > div.bg-danger {
     -webkit-animation: fadeIn 1s;
     animation: fadeIn 1s;
     top: 26px;
-    height: 16.5rem;
+    height: 19.5rem;
   }
 
   /* Add animation (fade in the popup) */

@@ -42,6 +42,7 @@ require 'includes/class-reports.php';
 require 'includes/class-testplugin.php';
 require 'includes/class-paymentsreview.php';
 require 'includes/class-rollingslot.php';
+require 'includes/class-instructorseditor.php';
 
 /**
  * Main signups class.
@@ -124,6 +125,7 @@ class SignupsPlugin extends SignUpsBase {
 		add_submenu_page( 'sign_ups', 'Rolling Templates Editor', 'Rolling Templates', 'manage_options', 'template_editor', array( new RollingTemplatesEditor(), 'load_templates_editor' ) );
 		add_submenu_page( 'sign_ups', 'Rolling Exceptions Editor', 'Exceptions', 'manage_options', 'exceptions_editor', array( new RollingExceptionsEditor(), 'load_exceptions_editor' ) );
 		add_submenu_page( 'sign_ups', 'Payments Report', 'Payments Report', 'manage_options', 'payments_report', array( new PaymentsReview(), 'review_payments' ) );
+		add_submenu_page( 'sign_ups', 'Instructors', 'Instructors', 'manage_options', 'instructors_editor', array( new InstructorsEditor(), 'instructors_editor' ) );
 		add_submenu_page( 'sign_ups', 'Test Page', 'Test Drive', 'manage_options', 'test_page', array( new TestPlugin(), 'load_test_page' ) );
 	}
 
@@ -141,6 +143,7 @@ class SignupsPlugin extends SignUpsBase {
 		$user_pages[] = 'cncusagereport';
 		$user_pages[] = 'signups_page_test_page';
 		$user_pages[] = 'signups_page_payments_report';
+		$user_pages[] = 'signups_page_instructors_editor';
 		if ( ! in_array( $host, $user_pages, true ) ) {
 			return;
 		}

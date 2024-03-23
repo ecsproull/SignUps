@@ -211,8 +211,13 @@ jQuery( document ).ready( function($){
 	})
 
 	// Add rolling information to the create class form.
-	$( "#rolling-signup" ).change( function( e ) {
+	$("#rolling-signup").change( function(e) {
 		alert(e.currentTarget.value);
+	});
+
+	$("#select_class").change(function(e) {
+		$("#reload").val("1");
+		$("#instructors-form").submit();
 	});
 
 	$( "button#add-time-slot" ).click( function( event ) {
@@ -230,6 +235,29 @@ jQuery( document ).ready( function($){
 
 		let val_int = parseInt(val_str);
 		$( "button#add-time-slot" ).val(++val_int);
+	});
+
+	$("#add-instructor").click( function(e) {
+		$('#inst-list').append(
+			'<div><input class="w-99" type="text" name="instructors_badge[]" value="' + $('.member-badge').val() + '"></div>' +
+			'<div><input class="w-99" type="text" name="instructors_name[]" value="' + $('.member-first-name').val() + ' ' + $('.member-last-name').val() + '"></div>' +
+			'<div><input class="w-99" type="text" name="instructors_email[]" value="' + $('.member-email').val() + '"></div>' +
+			'<div><input class="w-99" type="text" name="instructors_phone[]" value="' + $('.member-phone').val() + '"></div>' +
+			'<div><input class="form-check-input ml-2 remove-chk mt-2" type="checkbox" name="instructors_remove[]"' +
+						'value="' + $('.member-badge').val() + '"></div>' +
+			'<input type="hidden" name="instructors_id[]" value="">'
+		);
+	});
+
+	$(".email-button").click( function(e) {
+		var emailId = '.' + e.target.value;
+		var emailAddresses = '';
+		$(emailId).each( function() {
+			emailAddresses += $(this).text() + ';';
+		});
+
+		document.location.href = "mailto:" + emailAddresses;
+		//alert(emailId);
 	});
 
 	$("#signup_duration").on('keydown', (e) => {

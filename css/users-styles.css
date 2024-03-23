@@ -159,8 +159,14 @@ table#signup-select > tbody > tr > td {
 	box-shadow: 2px 2px 2px, -2px -2px 2px, -2px 2px 2px, 2px -2px 2px;
 }
 
+.remove-chk,
 .rolling-remove-chk {
 	outline: 2px solid #FF0000!important;
+	box-shadow: 2px 2px 2px, -2px -2px 2px, -2px 2px 2px, 2px -2px 2px!important;
+}
+
+.add-chk {
+	outline: 2px solid #00ff00!important;
 	box-shadow: 2px 2px 2px, -2px -2px 2px, -2px 2px 2px, 2px -2px 2px!important;
 }
 
