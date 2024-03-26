@@ -337,18 +337,22 @@ class StripePayments extends SignUpsBase {
 	 * @return The new price id.
 	 */
 	public function update_price( $price_id, $product_id, $new_cost ) {
+		$result = null;
+		try {
+			$stripe = new \Stripe\StripeClient( $this->stripe_api_secret );
+			$result = $stripe->prices->create(
+				array(
+					'unit_amount' => (int) ( $new_cost . '00' ),
+					'currency'    => 'usd',
+					'product'     => $product_id,
+				)
+			);
 
-		$stripe = new \Stripe\StripeClient( $this->stripe_api_secret );
-		$result = $stripe->prices->create(
-			array(
-				'unit_amount' => (int) ( $new_cost . '00' ),
-				'currency'    => 'usd',
-				'product'     => $product_id,
-			)
-		);
+			if ( 200 === (int) $result->code ) {
+				return $result->id;
+			}
+		} catch ( Exception $e ) {
 
-		if ( 200 === (int) $result->code ) {
-			return $result->id;
 		}
 
 		return $result->id;

@@ -281,8 +281,7 @@ class SignupSettings extends SignUpsBase {
 				if ( $new_price_id ) {
 					$post['signup_default_price_id'] = $new_price_id;
 				} else {
-					echo 'Failed to update new price';
-					return;
+					$post['signup_product_id'] = '';
 				}
 			}
 

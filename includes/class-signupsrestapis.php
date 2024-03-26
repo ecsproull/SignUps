@@ -218,7 +218,7 @@ class SignUpsRestApis extends SignUpsBase {
 	 */
 	public function get_monitors( $request ) {
 		global $wpdb;
-		$template_id = 6;
+		$template_id = 1;
 		$date        = $request['date'];
 		$pattern     = '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/ms';
 		if ( preg_match( $pattern, $date ) ) {
@@ -227,21 +227,28 @@ class SignUpsRestApis extends SignUpsBase {
 				$wpdb->prepare(
 					'SELECT *
 					FROM %1s
-					WHERE template_item_id < 3',
+					WHERE template_item_template_id = 1',
 					self::SIGNUP_TEMPLATE_ITEM_TABLE,
 					$signups[0]->signup_rolling_template
 				),
 				OBJECT
 			);
 
-			$exc_end_date = clone $date_time;
+			$exc_end_date    = clone $date_time;
 			$time_exceptions = $this->create_meeting_exceptions( $date_time, $exc_end_date->add( new DateInterval( 'P1D' ) ) );
 			$attendees       = $wpdb->get_results(
 				$wpdb->prepare(
-					'SELECT attendee_badge, attendee_item, attendee_start_formatted
+					'SELECT wp_scw_rolling_attendees.attendee_badge,
+						wp_scw_rolling_attendees.attendee_firstname,
+						wp_scw_rolling_attendees.attendee_lastname,
+						wp_scw_rolling_attendees.attendee_item,
+						wp_scw_rolling_attendees.attendee_start_formatted,
+						wp_scw_members.member_email
 					FROM %1s
+					LEFT JOIN %1s ON wp_scw_rolling_attendees.attendee_badge = wp_scw_members.member_badge
 					WHERE attendee_signup_id = %d && attendee_start_formatted LIKE  %s',
 					self::ATTENDEES_ROLLING_TABLE,
+					self::MEMBERS_TABLE,
 					$template_id,
 					$wpdb->esc_like( $date ) . '%'
 				),
@@ -249,7 +256,7 @@ class SignUpsRestApis extends SignUpsBase {
 			);
 
 			$slots       = array();
-			$day_of_week = $date_time->format( 'w' ) + 1;
+			$day_of_week = $date_time->format( 'N' );
 			foreach ( $templates as $template ) {
 				if ( str_contains( $template->template_item_day_of_week, (string) $day_of_week ) ) {
 					$start_time_parts = explode( ':', $template->template_item_start_time );
@@ -272,19 +279,28 @@ class SignUpsRestApis extends SignUpsBase {
 						}
 
 						if ( ! $skip_slot ) {
-							$rolling_slot                  = new RollingSlot();
-							$rolling_slot->start_time_date = $start_date->format( self::DATETIME_FORMAT );
-							$rolling_slot->item            = $template->template_item_title;
-
+							$slot_attendees = array();
 							foreach ( $attendees as $attendee ) {
-								if ( $rolling_slot->start_time_date === $attendee->attendee_start_formatted &&
-									$attendee->attendee_item === $rolling_slot->item ) {
-										$rolling_slot->badge = $attendee->attendee_badge;
-										break;
+								if ( $start_date->format( self::DATETIME_FORMAT ) === $attendee->attendee_start_formatted &&
+									$attendee->attendee_item === $template->template_item_title ) {
+										$slot_attendees[] = $attendee;
 								}
 							}
+							for ( $j = 0; $j < $template->template_item_slots; $j++ ) {
+								$rolling_slot                  = new RollingSlot();
+								$rolling_slot->start_time_date = $start_date->format( self::DATETIME_FORMAT );
+								$rolling_slot->start_time      = strtotime( $rolling_slot->start_time_date );
+								$rolling_slot->item            = $template->template_item_title;
 
-							$slots[]    = $rolling_slot;
+								if ( $j < count( $slot_attendees ) ) {
+									$rolling_slot->badge      = $slot_attendees[ $j ]->attendee_badge;
+									$rolling_slot->first_name = $slot_attendees[ $j ]->attendee_firstname;
+									$rolling_slot->last_name  = $slot_attendees[ $j ]->attendee_lastname;
+									$rolling_slot->email      = $slot_attendees[ $j ]->member_email;
+								}
+
+								$slots[]    = $rolling_slot;
+							}
 							$start_date = $start_date->add( $duration );
 						}
 					}

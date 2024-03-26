@@ -324,5 +324,31 @@ class DbSignUpTables {
 			);
 		}
 
+		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_session_instructors"' ) !== 'wp_scw_session_instructors' ) {
+			$wpdb->query(
+				"CREATE TABLE `wp_scw_session_instructors` (
+					`si_id` int unsigned NOT NULL AUTO_INCREMENT,
+					`si_signup_id` int NOT NULL,
+					`si_session_id` int NOT NULL,
+					`si_instructor_id` int NOT NULL,
+					PRIMARY KEY (`si_id`)
+				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;"
+			);
+		}
+
+		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_instructors"' ) !== 'wp_scw_instructors' ) {
+			$wpdb->query(
+				"CREATE TABLE `wp_scw_instructors` (
+					`instructors_id` int unsigned NOT NULL AUTO_INCREMENT,
+					`instructors_badge` varchar(6) NOT NULL,
+					`instructors_name` varchar(45) NOT NULL,
+					`instructors_email` varchar(45) NOT NULL,
+					`instructors_phone` varchar(12) NOT NULL,
+					`instructors_class_id` int NOT NULL,
+					`instructors_class_title` varchar(64) NOT NULL,
+					PRIMARY KEY (`instructors_id`)
+				  ) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4;"
+			);
+		}
 	}
 }
