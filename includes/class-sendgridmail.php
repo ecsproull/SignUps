@@ -25,7 +25,7 @@ class SendGridMail extends SignUpsBase {
 	 * @param  mixed $email_address Email address of the receipient.
 	 * @param  mixed $subject subject for the email.
 	 * @param  mixed $message Message body for the email.
-	 * @return void
+	 * @return True on success, false on failure.
 	 */
 	public function send_mail( $email_address, $subject, $message ) {
 		$email = new Mail();
@@ -55,9 +55,10 @@ class SendGridMail extends SignUpsBase {
 		$sendgrid = new \SendGrid( $stripe_row[1]->stripe_api_key );
 
 		try {
-			$response = $sendgrid->send( $email );
+			return $sendgrid->send( $email );
 		} catch ( Exception $e ) {
 				echo 'Caught exception: ' . esc_html( $e->getMessage() ) . "\n";
+				return false;
 		}
 	}
 }

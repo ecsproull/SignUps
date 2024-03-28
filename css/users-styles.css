@@ -19,7 +19,7 @@
 #badge-input {
 	width: 100px;
 	background-color: transparent;
-	height: 45px;
+	height: 39px;
 	border-radius: 8px!important;
 }
 
@@ -172,6 +172,27 @@ table#signup-select > tbody > tr > td {
 
 input[type='radio'] { 
 	transform: scale(2); 
+}
+
+.w-100pr {
+	width:100%
+}
+#send-email {
+	display: grid;
+	width: 80%;
+	grid-template-columns:   20% 80%;
+	align-items: center;
+	text-align: center;
+	justify-content: space-between;
+}
+
+.submit-block {
+	display: grid;
+	width: 80%;
+	grid-template-columns:   50% 50%;
+	align-items: center;
+	text-align: center;
+	justify-content: space-between;
 }
 
 .cnc-query-params {

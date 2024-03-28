@@ -31,6 +31,10 @@ class ShortCodes extends SignUpsBase {
 		if ( isset( $post['mynonce'] ) && wp_verify_nonce( $post['mynonce'], 'signups' ) ) {
 			if ( isset( $post['continue_signup'] ) ) {
 				$this->create_signup_form( $post['continue_signup'], $post['secret'] );
+			} elseif ( isset( $post['email_admin'] ) ) {
+				$this->create_email_form( $post );
+			} elseif ( isset( $post['send_email'] ) ) {
+				$this->send_email( $post );
 			} elseif ( isset( $post['add_attendee_session'] ) ) {
 				$this->add_attendee_rolling( $post );
 			} elseif ( isset( $post['move_me'] ) ) {
@@ -38,7 +42,7 @@ class ShortCodes extends SignUpsBase {
 			} elseif ( isset( $post['add_attendee_class'] ) ) {
 				$this->add_attendee_class( $post );
 			} elseif ( isset( $post['signup_id'] ) ) {
-				if ( '-1' === $post['signup_id'] ) {
+				if ( '-1' === $post['signup_id'] || isset( $post['cancel_email'] ) ) {
 					$this->create_select_signup();
 				} else {
 					$this->create_description_form( $post['signup_id'] );
@@ -59,6 +63,32 @@ class ShortCodes extends SignUpsBase {
 				$this->create_select_signup( $admin_view );
 			}
 		}
+	}
+
+	/**
+	 * Send the email.
+	 *
+	 * @param mixed $post Data to use to send the mail.
+	 * @return void
+	 */
+	protected function send_email( $post ) {
+		$sgm = new SendGridMail();
+		$email_status = $sgm->send_mail( 'treasurer@scwwoodshop.com', $post['subject'], $post['email'] . ' ' . $post['body'] );
+		?>
+		<form class="email_form" method="POST">
+			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+			<div class="text-center"><h2>Email Sent</h2</div>
+			<div class="text-center submit-block mt-4">
+				<div class="text-right">
+					<button class="btn btn-primary" type="submit" name="continue_signup" 
+						value="<?php echo esc_html( $post['signup_id'] ); ?>">Continue Signup</button>
+				</div>
+				<div>
+				<button class="btn btn-danger" type="submit" name="cancel_email" value="-1">Cancel</button>
+				</div>
+			</div>
+		</form>
+		<?php
 	}
 
 	/**
@@ -730,7 +760,7 @@ class ShortCodes extends SignUpsBase {
 												$can_move = $attendee->attendee_badge === $user_badge;
 												?>
 												<td class="move <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? '' : 'hidden'; ?> ><?php echo esc_html( 'Move' ); ?>
-												<input class="move_me position-relative ml-1" 
+												<input class="move_me add-chk position-relative ml-1" 
 													type="checkbox" name="move_me[]" value='<?php echo esc_html( $attendee->attendee_id ); ?>' ></td>
 
 												<td class="paid <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? 'hidden' : ''; ?> ><?php echo esc_html( 'Paid' ); ?></td>
@@ -928,6 +958,77 @@ class ShortCodes extends SignUpsBase {
 			</div>
 			<?php
 		}
+	}
+
+	/**
+	 * Create the form for sending the admin an email.
+	 *
+	 * @param mixed $post Data from the calling form.
+	 * @return void
+	 */
+	protected function create_email_form( $post ) {
+		?>
+		<form class="email_form" method="POST">
+			<?php
+			$user_badge = null;
+			wp_nonce_field( 'signups', 'mynonce' );
+			$email = '';
+			if ( isset( $post['email'] ) ) {
+				$email = $post['email'];
+			}
+
+			$subject = "";
+			if ( isset( $post['signup_name'] ) ) {
+				$subject = $post['signup_name'] . ' Issue';
+			}
+			?>
+			<div id="send-email">
+				<div class="text-right mt-2">
+					<label for="email-from" class="mr-2">Your email:</label>
+				</div>
+				<div class="mt-2">
+					<input id="email-from" class="w-100pr" type="email" name="email"
+						value=<?php echo esc_html( $email ); ?> placeholder="foo@bar.com">
+				</div>
+				<div class="text-right mt-2">
+					<label for="email-subject" class="mr-2">Subject:</label>
+				</div>
+				<div class="mt-2">
+					<input id="email-subject" class="w-100pr" type="text" name="subject" value="<?php echo esc_html( $subject ); ?>">
+				</div>
+				<div class="text-right mt2">
+					<label for="email-body" class="mr-2">Message:</label>
+				</div>
+				<div class="mt-2">
+					<textarea id="email-body" class="w-100pr" name="body" style="height:200px"
+						value=""></textarea>
+				</div>
+			</div>
+			<div class="text-center submit-block mt-4">
+				<div class="text-right">
+					<button class="btn btn-primary" type="submit" name="send_email" value="1">Send Email</button>
+				</div>
+				<div>
+				<button class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="window.history.go( -1 );">Back</button>
+				</div>
+			</div>
+			<?php
+			if ( isset( $post['add_attendee_session'] ) ) {
+				?>
+				<input type="hidden" name="signup_id" value="<?php echo esc_html( $post['add_attendee_session'] ); ?>" >
+				<?php
+			} elseif ( isset( $post['attendee_session_id'] ) ) {
+				?>
+				<input type="hidden" name="signup_id" value="<?php echo esc_html( $post['attendee_session_id'] ); ?>" >
+				<?php
+			} elseif ( isset( $post['session_signup_id'] ) ) {
+				?>
+				<input type="hidden" name="signup_id" value="<?php echo esc_html( $post['session_signup_id'] ); ?>" >
+				<?php
+			}
+			?>
+		</form>
+		<?php
 	}
 
 	/**

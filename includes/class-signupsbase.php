@@ -146,7 +146,7 @@ class SignUpsBase {
 	 * @var mixed
 	 */
 	protected const SESSION_INSTRUCTORS_TABLE = 'wp_scw_session_instructors';
-	
+
 	/**
 	 * Log table.
 	 *
@@ -423,8 +423,8 @@ class SignUpsBase {
 			<tr>
 				<td class="text-right">Enter Badge#</td>
 				<td class="text-left"><input id="badge-input" class="member-badge" type="number" name="badge_number" 
-					value="<?php echo $return_val ? esc_html( $results[0]->member_badge ) : ''; ?>" required>
-				<input type="button" id="get_member_button" class="btn btn-primary rounded" value='Lookup'></td>
+					value="<?php echo $return_val ? esc_html( $results[0]->member_badge ) : ''; ?>">
+				<button type="button" id="get_member_button" class="btn btn-primary rounded">Lookup</button></td>
 				<td></td>
 			</tr>
 			<tr>
@@ -446,7 +446,9 @@ class SignUpsBase {
 			</tr>
 			<tr>
 				<td colspan=3>
-					<h3 style="text-align: center;"><a href="mailto:treasurer@scwwoodshop.com?subject=Signup Issue">Contact Signup Administrator</a></h3>
+					<h3 style="text-align: center;">
+						<button id="email-admin" class="btn btn-primary rounded" type="submit" name="email_admin" value="1">Email Administrator</button>
+					</h3>
 				</td>
 			</tr>
 			<tr hidden>
@@ -457,6 +459,7 @@ class SignUpsBase {
 				<td></td>
 			</tr>
 		</table>
+		<div id="email"></div>
 		<input id="user_groups" type="hidden" name="user_groups" value="<?php echo esc_html( $user_group ); ?>">
 		<input id="user-secret" type="hidden" name="user_secret" value="<?php echo esc_html( $user_secret ); ?>">
 		<input id="rest-nonce" type="hidden" name="rest_nonce" value ="<?php echo wp_create_nonce( 'wp_rest' ); ?>">
@@ -468,8 +471,9 @@ class SignUpsBase {
 	/**
 	 * Creates a rolling signup based on a template
 	 *
-	 * @param  mixed $rolling_signup_id The id for the signup.
-	 * @param  mixed $admin Set to true if an admin is using this function.
+	 * @param  mixed  $rolling_signup_id The id for the signup.
+	 * @param  string $secret A secret key used to indentify a user.
+	 * @param  mixed  $admin Set to true if an admin is using this function.
 	 * @return void
 	 */
 	protected function create_rolling_session( $rolling_signup_id, $secret, $admin = false ) {

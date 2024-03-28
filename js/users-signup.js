@@ -138,6 +138,12 @@ jQuery(document).ready(function($){
 	$(".signup_form").submit(function(e){
 		e.preventDefault();
 		var form = this;
+		if (document.activeElement.getAttribute('name') == 'email_admin') {
+			$("#email").append('<input type="hidden" name="email_admin" value="1" />');
+			form.submit();
+			return;
+		}
+
 		if ($("#update-butt").attr("clicked")) {
 			$("#update-butt").removeAttr("clicked")
 			$("<input />").attr("type", "hidden")
