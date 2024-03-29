@@ -174,7 +174,7 @@ class SignUpsBase {
 	 *
 	 * @var mixed
 	 */
-	protected const DATE_FORMAT = 'D Y-m-d';
+	protected const DATE_FORMAT = 'D m-d-Y';
 
 	/**
 	 * Format Date as 2020-08-13.
@@ -476,7 +476,7 @@ class SignUpsBase {
 	 * @param  mixed  $admin Set to true if an admin is using this function.
 	 * @return void
 	 */
-	protected function create_rolling_session( $rolling_signup_id, $secret, $admin = false ) {
+	protected function create_rolling_session( $rolling_signup_id, $secret, $admin = false, $rolling_days = null ) {
 		global $wpdb;
 		$today = new DateTime( 'now', $this->date_time_zone );
 		$today->SetTime( 8, 0 );
@@ -552,7 +552,8 @@ class SignUpsBase {
 			$signups[0]->signup_group,
 			$admin,
 			$secret,
-			$description_html
+			$description_html,
+			$rolling_days
 		);
 	}
 
@@ -651,11 +652,17 @@ class SignUpsBase {
 		$user_group,
 		$admin,
 		$secret,
-		$description
+		$description,
+		$rolling_days = null
 	) {
 		$start_date = new DateTime( 'now', $this->date_time_zone );
 		$end_date   = new DateTime( 'now', $this->date_time_zone );
-		$end_date->add( new DateInterval( 'P' . $template->template_rolling_days . 'D' ) );
+		
+		if ( ! $rolling_days ) {
+			$rolling_days = $template->template_rolling_days;
+		}
+
+		$end_date->add( new DateInterval( 'P' . $rolling_days . 'D' ) );
 		$one_day_interval = new DateInterval( 'P1D' );
 		$time_exceptions  = $this->create_meeting_exceptions( $start_date, $end_date );
 
@@ -679,6 +686,15 @@ class SignUpsBase {
 						}
 						?>
 
+						<div class="rolling-days-select">
+							<label for="rolling-days">Days</label>
+							<select id="rolling-days" name="rolling_days">
+								<option value="30" <?php echo '30' === $rolling_days ? 'selected' : ''; ?>>30</option>
+								<option value="60" <?php echo '60' === $rolling_days ? 'selected' : ''; ?>>60</option>
+								<option value="90" <?php echo '90' === $rolling_days ? 'selected' : ''; ?>>90</option>
+							</select>
+						</div>
+
 						<table id="selection-table" class="table-bordered mr-auto ml-auto selection-font"
 							<?php echo null === $user_badge && ! $admin ? 'hidden' : ''; ?> >
 							<?php
@@ -695,6 +711,17 @@ class SignUpsBase {
 									},
 									ARRAY_FILTER_USE_BOTH
 								);
+
+								/* $datetime = new DateTime( '05/01/2024 12:00 AM' );
+								if ( $start_date > $datetime ) {
+									foreach ( $day_items as $item ) {
+										if ( 'Floor Manager' === $item->template_item_title ||
+											'Tool Crib' === $item->template_item_title ) {
+												$item->template_item_shifts   = '4';
+												$item->template_item_duration = '02:00:00';
+										}
+									}
+								} */
 
 								usort(
 									$day_items,

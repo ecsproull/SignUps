@@ -23,6 +23,15 @@
 	border-radius: 8px!important;
 }
 
+#rolling-days {
+	font-size: 16px;
+}
+
+.rolling-days-select {
+	font-size: 18px;
+	font-weight: bold;
+}
+
 .validate,
 .comment-text,
 #last-name,

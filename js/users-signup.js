@@ -135,11 +135,27 @@ jQuery(document).ready(function($){
 		}
 	})
 
+	$("#rolling-days").on("change", function(e) {
+		e.preventDefault();
+		$("<input />").attr("type", "hidden")
+				.attr("name", "rolling_days")
+				.attr("value", this.value)
+				.attr("id", "rolling-days")
+				.appendTo(".signup_form");
+
+		$(".signup_form").submit();
+	});
+
 	$(".signup_form").submit(function(e){
 		e.preventDefault();
 		var form = this;
 		if (document.activeElement.getAttribute('name') == 'email_admin') {
 			$("#email").append('<input type="hidden" name="email_admin" value="1" />');
+			form.submit();
+			return;
+		}
+
+		if ($("#rolling-days")) {
 			form.submit();
 			return;
 		}
