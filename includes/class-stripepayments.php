@@ -284,11 +284,12 @@ class StripePayments extends SignUpsBase {
 	 */
 	public function payment_success() {
 		global $wpdb;
-		$attendee_id  = sanitize_text_field( get_query_var( 'attendee_id' ) );
-		$badge_number = sanitize_text_field( get_query_var( 'badge' ) );
-		$payment_row  = $wpdb->get_row(
+		$payment_complete = false;
+		$attendee_id      = sanitize_text_field( get_query_var( 'attendee_id' ) );
+		$badge_number     = sanitize_text_field( get_query_var( 'badge' ) );
+		$payment_row      = $wpdb->get_row(
 			$wpdb->prepare(
-				'SELECT payments_signup_description, payments_status
+				'SELECT payments_intent_id, payments_signup_description, payments_status
 				FROM %1s
 				WHERE payments_attendee_id = %s',
 				self::PAYMENTS_TABLE,
@@ -304,6 +305,8 @@ class StripePayments extends SignUpsBase {
 				?>
 				<meta http-equiv="Refresh" content="2">
 				<?php
+			} else {
+				$payment_complete = true;
 			}
 			?>
 			<h2>Status: <?php echo esc_html( $payment_row->payments_status ); ?></h2>
@@ -312,6 +315,30 @@ class StripePayments extends SignUpsBase {
 			?>
 			<h2>Status: <?php echo esc_html( ' Unknown' ); ?></h2>
 			<?php
+		}
+
+		if ( $payment_complete ) {
+			$results = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT * FROM %1s
+					WHERE member_badge = %s',
+					self::MEMBERS_TABLE,
+					$badge_number
+				),
+				OBJECT
+			);
+
+			if ( $results[0]->member_email ) {
+				$signup_parts = explode( '-', $payment_row->payments_signup_description );
+				$body         = 'You are signed up for ' . $payment_row->payments_signup_description . ' and your payment id is : ' . $payment_row->payments_intent_id;
+				$sgm          = new SendGridMail();
+				$email_status = $sgm->send_mail( $results[0]->member_email, 'You are signed up for ' . $signup_parts[0], $body );
+				if ( $email_status ) {
+					?>
+					<h2>An email was set to <?php echo esc_html( $results[0]->member_email ); ?> with your payment id : <?php echo esc_html( $payment_row->payments_intent_id ); ?></h2>
+					<?php
+				}
+			}
 		}
 	}
 

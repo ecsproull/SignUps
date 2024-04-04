@@ -35,8 +35,8 @@ class ShortCodes extends SignUpsBase {
 				$this->create_email_form( $post );
 			} elseif ( isset( $post['send_email'] ) ) {
 				$this->send_email( $post );
-			} elseif ( isset( $post['rolling_days'] ) ) {
-				$this-> create_rolling_session( $post['add_attendee_session'], null, false, $post['rolling_days'] );
+			} elseif ( isset( $post['rolling_days_new'] ) ) {
+				$this-> create_rolling_session( $post['add_attendee_session'], null, false, $post['rolling_days_new'] );
 			} elseif ( isset( $post['add_attendee_session'] ) ) {
 				$this->add_attendee_rolling( $post );
 			} elseif ( isset( $post['move_me'] ) ) {

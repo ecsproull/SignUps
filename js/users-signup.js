@@ -138,9 +138,9 @@ jQuery(document).ready(function($){
 	$("#rolling-days").on("change", function(e) {
 		e.preventDefault();
 		$("<input />").attr("type", "hidden")
-				.attr("name", "rolling_days")
+				.attr("name", "rolling_days_new")
 				.attr("value", this.value)
-				.attr("id", "rolling-days")
+				.attr("id", "rolling-days-id")
 				.appendTo(".signup_form");
 
 		$(".signup_form").submit();
@@ -155,7 +155,7 @@ jQuery(document).ready(function($){
 			return;
 		}
 
-		if ($("#rolling-days")) {
+		if ($("#rolling-days-id").val()) {
 			form.submit();
 			return;
 		}

@@ -479,7 +479,7 @@ class SignUpsBase {
 	protected function create_rolling_session( $rolling_signup_id, $secret, $admin = false, $rolling_days = null ) {
 		global $wpdb;
 		$today = new DateTime( 'now', $this->date_time_zone );
-		$today->SetTime( 8, 0 );
+		$today->SetTime( 5, 0 );
 		$signups = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT signup_id,
@@ -494,6 +494,12 @@ class SignUpsBase {
 			),
 			OBJECT
 		);
+
+		if ( $rolling_days && 'Past' === $rolling_days ) {
+			$date_interval         = new DateInterval( 'P30D' );
+			$date_interval->invert = 1;
+			$today->add( $date_interval );
+		}
 
 		$attendees_rolling = $wpdb->get_results(
 			$wpdb->prepare(
@@ -657,12 +663,19 @@ class SignUpsBase {
 	) {
 		$start_date = new DateTime( 'now', $this->date_time_zone );
 		$end_date   = new DateTime( 'now', $this->date_time_zone );
-		
-		if ( ! $rolling_days ) {
+
+		if ( ! $rolling_days && 'Past' !== $rolling_days ) {
 			$rolling_days = $template->template_rolling_days;
 		}
 
-		$end_date->add( new DateInterval( 'P' . $rolling_days . 'D' ) );
+		if ( 'Past' !== $rolling_days ) {
+			$end_date->add( new DateInterval( 'P' . $rolling_days . 'D' ) );
+		} else {
+			$date_interval = new DateInterval( 'P30D' );
+			$end_date->add( $date_interval );
+			$date_interval->invert = 1;
+			$start_date->add( $date_interval );
+		}
 		$one_day_interval = new DateInterval( 'P1D' );
 		$time_exceptions  = $this->create_meeting_exceptions( $start_date, $end_date );
 
@@ -687,11 +700,12 @@ class SignUpsBase {
 						?>
 
 						<div class="rolling-days-select">
-							<label for="rolling-days">Days</label>
+							<label for="rolling-days-sel">Days</label>
 							<select id="rolling-days" name="rolling_days">
 								<option value="30" <?php echo '30' === $rolling_days ? 'selected' : ''; ?>>30</option>
 								<option value="60" <?php echo '60' === $rolling_days ? 'selected' : ''; ?>>60</option>
 								<option value="90" <?php echo '90' === $rolling_days ? 'selected' : ''; ?>>90</option>
+								<option value="Past">Past</option>
 							</select>
 						</div>
 

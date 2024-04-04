@@ -339,12 +339,13 @@ class SignupSettings extends SignUpsBase {
 
 					if ( $add ) {
 						$mini_post['update'] = true;
+						$this->update_calendar( $mini_post );
+					} else {
+						$this->update_calendar( $mini_post );
+						$where = array( 'session_id' => $session->session_id );
+						$data  = array( 'session_calendar_id' => '' );
+						$wpdb->update( self::SESSIONS_TABLE, $data, $where );
 					}
-
-					$this->update_calendar( $mini_post );
-					$where = array( 'session_id' => $session->session_id );
-					$data  = array( 'session_calendar_id' => '' );
-					$wpdb->update( self::SESSIONS_TABLE, $data, $where );
 				}
 			}
 		}
@@ -1480,8 +1481,8 @@ class SignupSettings extends SignUpsBase {
 					<td class="text-right mr-2"><label>User Group:</label></td>
 					<td><select name="signup_group">
 						<option value="">Members</option>
-						<option value="cnc">Cnc Users</option>
-						<option value="laser">Laser Users</option>
+						<option value="cnc" <?php echo 'cnc' === $data->signup_group ? 'selected' : ''; ?> >Cnc Users</option>
+						<option value="laser" <?php echo 'laser' === $data->signup_group ? 'selected' : ''; ?> >Laser Users</option>
 					</select> </td>
 				</tr>
 				<tr>
