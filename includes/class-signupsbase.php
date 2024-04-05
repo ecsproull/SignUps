@@ -377,7 +377,7 @@ class SignUpsBase {
 			<?php
 		}
 
-		if ( ! $return_val && isset( $_COOKIE['signups_scw_badge'] ) && sanitize_key( $_COOKIE['signups_scw_badge'] ) ) {
+		if ( ! $return_val && isset( $_COOKIE['signups_scw_badge'] ) && sanitize_key( $_COOKIE['signups_scw_badge'] ) !== 'undefined' ) {
 			$remember_me = true;
 			$cookie      = wp_unslash( $_COOKIE );
 			$badge       = sanitize_key( $_COOKIE['signups_scw_badge'] );
@@ -415,7 +415,7 @@ class SignUpsBase {
 
 			$user_secret = $results[0]->member_secret;
 		} else {
-			$remember_me = isset( $_COOKIE['signups_scw_badge'] );
+			$remember_me = isset( $_COOKIE['signups_scw_badge'] ) && sanitize_key( $_COOKIE['signups_scw_badge'] ) !== 'undefined';
 		}
 		?>
 
