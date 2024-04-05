@@ -210,6 +210,11 @@ jQuery( document ).ready( function($){
 
 	})
 
+	$("#copy-signup-link").click( function(e) {
+		var copyText = $("#signup-url").text();
+		navigator.clipboard.writeText(copyText);
+   });
+
 	// Add rolling information to the create class form.
 	$("#rolling-signup").change( function(e) {
 		alert(e.currentTarget.value);

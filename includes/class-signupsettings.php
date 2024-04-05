@@ -211,8 +211,8 @@ class SignupSettings extends SignUpsBase {
 			if ( isset( $post['session_calendar_id'] ) && $post['session_calendar_id'] > 0 ) {
 				$where = array( 'id' => $post['session_calendar_id'] );
 				$rows  = $wpdb->update( self::SPIDER_CALENDAR_EVENT_TABLE, $data, $where );
-				if ( ! $rows ) {
-					echo '<h1>Failed to update Calendar id: </h1)' . esc_html( $post['session_calendar_id'] );
+				if ( $rows === false ) {
+					echo '<h1>Failed to update Calendar id: </h1)' . esc_html( $post['session_calendar_id'] . ' with error : ' . $wpdb->last_error );
 				}
 				return;
 
@@ -280,8 +280,10 @@ class SignupSettings extends SignUpsBase {
 				$new_price_id = $stripe->update_price( $signup_default_price_id, $signup_product_id, $post['signup_cost'] );
 				if ( $new_price_id ) {
 					$post['signup_default_price_id'] = $new_price_id;
+					$this->update_sessions_price_id( $where['signup_id'], $new_price_id );
 				} else {
 					$post['signup_product_id'] = '';
+					$post['signup_default_price_id'] = '0';
 				}
 			}
 
@@ -1433,6 +1435,8 @@ class SignupSettings extends SignUpsBase {
 	 */
 	private function create_signup_form( $data ) {
 		global $wpdb;
+		$url        = isset( $_SERVER['HTTP_ORIGIN'] ) ? $_SERVER['HTTP_ORIGIN'] : 'No Ip Address';
+		$signup_url  = $url . '/signups/?signup_id=' . $data->signup_id;
 		$categories = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
@@ -1447,6 +1451,16 @@ class SignupSettings extends SignUpsBase {
 		</div>
 		<form method="POST" >
 			<table class="table table-striped mr-auto ml-auto">
+				<tr>
+					<td class="text-right">
+						<button type="button" id="copy-signup-link" class="btn btn-secondary mr-2 mt-2">Copy URL</button>
+					</td>
+					<td id="signup-url">
+						<?php
+						echo esc_html( $signup_url );
+						?>
+					</td>
+				</tr>
 				<tr>
 					<td class="text-right mr-2"><label>Class Name:</label></td>
 					<td><input class="w-250px" type="text" name="signup_name" value="<?php echo esc_html( $data->signup_name ); ?>" /> </td>
@@ -2023,16 +2037,36 @@ class SignupSettings extends SignUpsBase {
 		$duration_total_minutes                = $duration_hours * 60 + $duration_minutes;
 		$new_signup['signup_default_duration'] = date_format( $duration, 'H:i' );
 
+		if ( $new_signup['signup_cost'] > 0 ) 
+
 		$affected_row_count = $wpdb->insert( self::SIGNUPS_TABLE, $new_signup );
 		if ( 1 === $affected_row_count ) {
-			$signup_id = $wpdb->insert_id;
-			$data      = array( 'signup_order' => $signup_id );
-			$where     = array( 'signup_id' => $signup_id );
-			$wpdb->update(
-				self::SIGNUPS_TABLE,
-				$data,
-				$where
-			);
+			$signup_id     = $wpdb->insert_id;
+			$data          = null;
+			if ( $new_signup['signup_cost'] > 0 ) {
+				$stripe        = new StripePayments();
+				$product_price = $stripe->create_product( $new_signup['signup_name'], $new_signup['signup_cost'] );
+				if ( count( $product_price ) === 2 ) {
+					$data = array(
+						'signup_order'      => $signup_id,
+						'signup_product_id' => $product_price['product_id'],
+						'signup_default_price_id'   => $product_price['price_id'],
+					);
+				} else {
+					$data  = array( 'signup_order' => $signup_id );
+				}
+			} else {
+				$data  = array( 'signup_order' => $signup_id );
+			}
+
+			if ( $data ) {
+				$where = array( 'signup_id' => $signup_id );
+				$wpdb->update(
+					self::SIGNUPS_TABLE,
+					$data,
+					$where
+				);
+			}
 
 			$new_description = array(
 				'description_signup_id'    => $signup_id,

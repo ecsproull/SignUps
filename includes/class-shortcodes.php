@@ -566,6 +566,7 @@ class ShortCodes extends SignUpsBase {
 
 								$post['session_price_id'] = $ret['price_id'];
 
+								$this->update_sessions_price_id( $where['signup_id'], $ret['price_id'] );
 							} else {
 								echo 'Failed to create stripe pricing and product info.';
 								return;

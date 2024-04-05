@@ -1263,4 +1263,31 @@ class SignUpsBase {
 		</select>
 		<?php
 	}
+
+	/**
+	 * Updates the price id of all sessions for a signup.
+	 *
+	 * @param  mixed $signup_id The id of the parent signup to the sessions.
+	 * @param  mixed $new_price_id The new price id.
+	 * @return void
+	 */
+	protected function update_sessions_price_id( $signup_id, $new_price_id ) {
+		global $wpdb;
+		$sessions = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE session_signup_id = %s',
+				self::SESSIONS_TABLE,
+				$signup_id
+			),
+			ARRAY_A
+		);
+
+		foreach ( $sessions as $session ) {
+			$where = array( 'session_id' => $session['session_id'] );
+			$data  = array( 'session_price_id' => $new_price_id );
+			$wpdb->update( self::SESSIONS_TABLE, $data, $where );
+		}
+	}
 }
