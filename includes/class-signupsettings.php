@@ -276,15 +276,22 @@ class SignupSettings extends SignUpsBase {
 		$affected_row_count = 0;
 		$stripe             = new StripePayments();
 		if ( $where['signup_id'] ) {
-			if ( $original_cost !== $post['signup_cost'] && $signup_product_id ) {
-				$new_price_id = $stripe->update_price( $signup_default_price_id, $signup_product_id, $post['signup_cost'] );
-				if ( $new_price_id ) {
-					$post['signup_default_price_id'] = $new_price_id;
-					$this->update_sessions_price_id( $where['signup_id'], $new_price_id );
+			if ( (int) $original_cost !== $post['signup_cost'] ) {
+				$new_price_id = null;
+				if ( ! $signup_product_id ) {
+					$price_data = $stripe->create_product( $post['signup_name'], $post['signup_cost'] );
+					if ( 2 === count( $price_data ) ) {
+						$post['signup_default_price_id'] = $price_data['price_id'];
+						$post['signup_product_id']       = $price_data['product_id'];
+					} else {
+						echo '<h2>Error retrieving  price and product ID';
+					}
 				} else {
-					$post['signup_product_id'] = '';
-					$post['signup_default_price_id'] = '0';
+					$post['signup_default_price_id'] = $stripe->update_price( $signup_default_price_id, $signup_product_id, $post['signup_cost'] );
 				}
+
+				$this->update_sessions_price_id( $where['signup_id'], $post['signup_default_price_id'] );
+				echo "<h2 class='text-center'>Price updated</h2>";
 			}
 
 			$affected_row_count = $wpdb->update(
@@ -1943,7 +1950,7 @@ class SignupSettings extends SignUpsBase {
 			</div>
 
 			<div class="text-right">
-				<label class="label-margin-top mr-2" for="description_instructions">Preclass:</label>
+				<label class="label-margin-top mr-2" for="description_instructions">Instructions:</label>
 			</div>
 			<div>
 				<textarea type="text" id="description_instructions" class="mt-2 w-100"

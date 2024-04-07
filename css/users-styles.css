@@ -116,7 +116,16 @@ table#new-member > tbody > tr > td > input {
 	font-size:28px;
 }
 
-.submit-row {
+.submit-row-grid {
+	display: grid;
+	width: 80%;
+	grid-template-columns:   50% 50%;
+	align-items: center;
+	text-align: center;
+	justify-content: space-between;
+}
+
+.submit-row {	
 	border-top: 3px solid black;
 	border-left: 3px solid black;
 	border-right: 3px solid black;
@@ -186,6 +195,17 @@ input[type='radio'] {
 .w-100pr {
 	width:100%
 }
+
+.email-button {
+	background: none!important;
+    border: none;
+    padding: 0!important;
+    font-family: arial, sans-serif; /* Use an OS-specific font-family for consistency */
+    color: #069;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 #send-email {
 	display: grid;
 	width: 80%;

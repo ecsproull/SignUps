@@ -217,7 +217,7 @@ class DescriptionEditor extends SignUpsBase {
 			</div>
 
 			<div class="text-right">
-				<label class="label-margin-top mr-2" for="description_instructions">Preclass:</label>
+				<label class="label-margin-top mr-2" for="description_instructions">Instructions:</label>
 			</div>
 			<div>
 				<textarea type="text" id="description_instructions" class="mt-2 w-100" rows="4" cols="120"

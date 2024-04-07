@@ -36,15 +36,17 @@ class ShortCodes extends SignUpsBase {
 			} elseif ( isset( $post['send_email'] ) ) {
 				$this->send_email( $post );
 			} elseif ( isset( $post['rolling_days_new'] ) ) {
-				$this-> create_rolling_session( $post['add_attendee_session'], null, false, $post['rolling_days_new'] );
+				$this->create_rolling_session( $post['add_attendee_session'], null, false, $post['rolling_days_new'] );
 			} elseif ( isset( $post['add_attendee_session'] ) ) {
 				$this->add_attendee_rolling( $post );
 			} elseif ( isset( $post['move_me'] ) ) {
 				$this->move_attendee_class( $post );
 			} elseif ( isset( $post['add_attendee_class'] ) ) {
 				$this->add_attendee_class( $post );
+			} elseif ( isset( $post['home'] ) ) {
+				$this->create_select_signup();
 			} elseif ( isset( $post['signup_id'] ) ) {
-				if ( '-1' === $post['signup_id'] || isset( $post['cancel_email'] ) ) {
+				if ( '-1' === $post['signup_id']  ) {
 					$this->create_select_signup();
 				} else {
 					$this->create_description_form( $post['signup_id'] );
@@ -75,7 +77,7 @@ class ShortCodes extends SignUpsBase {
 	 */
 	protected function send_email( $post ) {
 		$sgm = new SendGridMail();
-		$email_status = $sgm->send_mail( 'treasurer@scwwoodshop.com', $post['subject'], $post['email'] . ' ' . $post['body'] );
+		$email_status = $sgm->send_mail( $post['contact_email'], $post['subject'], 'Reply To: ' . $post['email'] . '<br><br>' . $post['body'] );
 		?>
 		<form class="email_form" method="POST">
 			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
@@ -86,7 +88,7 @@ class ShortCodes extends SignUpsBase {
 						value="<?php echo esc_html( $post['signup_id'] ); ?>">Continue Signup</button>
 				</div>
 				<div>
-				<button class="btn btn-danger" type="submit" name="cancel_email" value="-1">Cancel</button>
+				<button class="btn btn-danger" type="submit" name="home" value="-1">Cancel</button>
 				</div>
 			</div>
 		</form>
@@ -108,7 +110,7 @@ class ShortCodes extends SignUpsBase {
 		$pattern_badge = '/^[0-9]{4}$/ms';
 		if ( ! preg_match( $pattern_key, $key ) || ! preg_match( $pattern_badge, $badge ) ) {
 			$sgm = new SendGridMail();
-			$sgm->send_mail( 'treasurer@scwwoodshop.com', 'Failed Validation', $key . ' ' . $badge . ' ip : ' . $ip_address );
+			$sgm->send_mail( 'ecsproull765@gmail.com', 'Failed Validation', $key . ' ' . $badge . ' ip : ' . $ip_address );
 			return;
 		}
 
@@ -134,22 +136,22 @@ class ShortCodes extends SignUpsBase {
 				?>
 				<h1 class='ml-auto mr-auto mt-5'>Request queued and should be complete within 8 hours.</h1>
 				<?php
-				$sgm->send_mail( 'treasurer@scwwoodshop.com', 'Unsubscribe', $key . ' ' . $badge . ' ip : ' . $ip_address );
+				$sgm->send_mail( 'ecsproull765@gmail.com', 'Unsubscribe', $key . ' ' . $badge . ' ip : ' . $ip_address );
 			} else {
 				?>
 				<div class='ml-auto mr-auto mt-5'>
 					<h1>Opps something failed.</h1>
-					<h2><a href="mailto:treasurer@scwwoodshop.com?subject=Failed Unsubscribe&body=<?php echo esc_html( $key ); ?>">Email Administrator</a><h2>
+					<h2><a href="mailto:ecsproull765@gmail.com?subject=Failed Unsubscribe&body=<?php echo esc_html( $key ); ?>">Email Administrator</a><h2>
 				<?php
-				$sgm->send_mail( 'treasurer@scwwoodshop.com', 'Unsubscribe Failed', $key . ' ' . $badge . ' ip : ' . $ip_address );
+				$sgm->send_mail( 'ecsproull765@gmail.com', 'Unsubscribe Failed', $key . ' ' . $badge . ' ip : ' . $ip_address );
 			}
 		} else {
 			?>
 			<div class='ml-auto mr-auto mt-5'>
 				<h1>Sorry, couldn't locate member. Please email the admin to get removed.</h1>
-				<h2><a href="mailto:treasurer@scwwoodshop.com?subject=Failed Member Not found.&body=<?php echo esc_html( $key ); ?>">Email Administrator</a><h2>
+				<h2><a href="mailto:ecsproull765@gmail.com?subject=Failed Member Not found.&body=<?php echo esc_html( $key ); ?>">Email Administrator</a><h2>
 			<?php
-			$sgm->send_mail( 'treasurer@scwwoodshop.com', 'Unsubscribe Failed to Locate Member', $key . ' ' . $badge . ' ip : ' . $ip_address );
+			$sgm->send_mail( 'ecsproull765@gmail.com', 'Unsubscribe Failed to Locate Member', $key . ' ' . $badge . ' ip : ' . $ip_address );
 		}
 	}
 
@@ -266,7 +268,7 @@ class ShortCodes extends SignUpsBase {
 		global $wpdb;
 		$signups = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT signup_id, signup_name, signup_cost, signup_rolling_template, signup_default_price_id, signup_group
+				'SELECT *
 				FROM %1s
 				WHERE signup_id = %s',
 				self::SIGNUPS_TABLE,
@@ -275,8 +277,10 @@ class ShortCodes extends SignUpsBase {
 			OBJECT
 		);
 
-		$rolling     = $signups[0]->signup_rolling_template > 0;
-		$signup_name = $signups[0]->signup_name;
+		$rolling             = $signups[0]->signup_rolling_template > 0;
+		$signup_name         = $signups[0]->signup_name;
+		$signup_email        = $signups[0]->signup_contact_email;
+		$signup_contact_name = $signups[0]->signup_default_contact_name;
 
 		if ( $rolling ) {
 			$this->create_rolling_session( $signup_id, $secret );
@@ -355,7 +359,9 @@ class ShortCodes extends SignUpsBase {
 				$instructors,
 				$signup_cost,
 				$signup_id,
-				$signups[0]->signup_group
+				$signups[0]->signup_group,
+				$signup_email,
+				$signup_contact_name
 			);
 		}
 	}
@@ -670,7 +676,17 @@ class ShortCodes extends SignUpsBase {
 	 * @param  string $user_group The group that defines who can signup.  CNC, Member...etc.
 	 * @return void
 	 */
-	private function create_session_select_form( $signup_name, $sessions, $attendees, $instructors, $cost, $signup_id, $user_group ) {
+	private function create_session_select_form(
+		$signup_name,
+		$sessions,
+		$attendees,
+		$instructors,
+		$cost,
+		$signup_id,
+		$user_group,
+		$signup_email,
+		$signup_contact_name
+		) {
 		?>
 		<div id="session_select" class="text-center mw-800px">
 			<h1 class="mb-2"><?php echo esc_html( $signup_name ); ?></h1>
@@ -717,8 +733,8 @@ class ShortCodes extends SignUpsBase {
 								</tr>
 								<tr class="attendee-row bg-lg">
 									<td>Session Contact</td>
-									<td><b><?php echo esc_html( $session->session_contact_name ); ?></b></td>
-									<td><a href="mailto:<?php echo esc_html( $session->session_contact_email ); ?>?subject=<?php echo esc_html( $signup_name . ' Session ' . $session->session_start_formatted ); ?>">Email</a></td>
+									<td><?php $this->create_email_link( $signup_email, $signup_contact_name, $signup_name ); ?></td>
+									<td>Select</td>
 								</tr>
 								<input type="hidden" name="add_attendee_class">
 								<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
@@ -825,7 +841,7 @@ class ShortCodes extends SignUpsBase {
 		if ( ! ctype_digit( $signup_id ) || ( $secret && ! preg_match( $pattern_secret, $secret ) ) ) {
 			?>
 			<h1 class="mt-3">Unknown signup</h1>
-			<h2><a href="mailto:treasurer@scwwoodshop.com?subject=Failed Signup Parameters&body=<?php echo esc_html( $body ); ?>">Email Administrator</a><h2>
+			<h2><a href="mailto:ecsproull765@gmail.com?subject=Failed Signup Parameters&body=<?php echo esc_html( $body ); ?>">Email Administrator</a><h2>
 			<?php
 			return;
 		}
@@ -855,7 +871,10 @@ class ShortCodes extends SignUpsBase {
 		if ( ! $signups ) {
 			?>
 			<h1 class="mt-3">Signup Not Found</h1>
-			<h2><a href="mailto:treasurer@scwwoodshop.com?subject=Failed Load Signup&body=<?php echo esc_html( $body ); ?>">Email Administrator</a><h2>
+			<!-- h2><a href="mailto:ecsproull765@gmail.com?subject=Failed Load Signup&body=<?php echo esc_html( $body ); ?>">Email Administrator</a><h2 -->
+			<h2><button id="email-admin" class="btn btn-primary rounded" type="submit" name="email_admin" value="1">Email Administrator</button></h2>
+			<input type="hidden" name="contact_email" value="ecsproull765@gmail.com" >
+			<input type="hidden" name="contact_name" value="Signup Admin" >
 			<?php
 			return;
 		}
@@ -918,6 +937,14 @@ class ShortCodes extends SignUpsBase {
 					<?php
 				}
 				?>
+				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Contact:</div>
+				<div>
+					<form method="POST">
+						<?php $this->create_email_link( $signup->signup_contact_email, $signup->signup_default_contact_name, $signup->signup_name ); ?>
+						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+					</form>
+				</div>
+				
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Schedule: </div>
 				<div><?php echo esc_html( $schedule ); ?></div>
 
@@ -946,21 +973,38 @@ class ShortCodes extends SignUpsBase {
 
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Description: </div>
 				<div><?php echo html_entity_decode( $description_object->description_html ); ?></div>
-
-				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Contact: </div>
-				<div><a href="mailto:<?php echo esc_html( $signup->signup_contact_email ); ?>?subject=<?php echo esc_html( $signup->signup_name ); ?>">
-					<?php echo esc_html( $signup->signup_default_contact_name ); ?></a></div>
 			</div>
-			<div class="row">
-				<form class="ml-auto mr-auto" method="POST">
-					<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
-					<button type="submit" class="btn btn-md bg-primary mr-2" value="-1" name="signup_id">Cancel</button>
-					<button id='accept_conditions' class="btn btn-primary" type='submit' value="<?php echo esc_html( $signup_id ); ?>" name="continue_signup">Continue</button>
-					<input type="hidden" name="secret" value="<?php echo esc_html( $secret ); ?>">
-				</form>
-			</div>
+			<form class="ml-auto mr-auto" method="POST">
+				<div class="submit-row-grid mt-4">
+					<div>
+						<button type="submit" class="btn btn-md bg-primary mr-2" value="-1" name="home">Cancel</button>
+					</div>
+					<div>
+						<button id='accept_conditions' class="btn btn-primary" type='submit' value="<?php echo esc_html( $signup_id ); ?>" name="continue_signup">Continue</button>
+					</div>
+				</div>
+				<input type="hidden" name="secret" value="<?php echo esc_html( $secret ); ?>">
+				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+			</form>
 			<?php
 		}
+	}
+
+	/**
+	 * Create an email link that opens the email form with the proper parameters.
+	 *
+	 * @param  mixed $contact_email The person being emailed.
+	 * @param  mixed $contact_name The name of the person being emailed.
+	 * @param  mixed $signup_name The signup name.
+	 * @return void
+	 */
+	private function create_email_link( $contact_email, $contact_name, $signup_name ) {
+		?>
+		<button id="email-admin" class="email-button" type="submit" name="email_admin" value="1"><?php echo esc_html( $contact_name ); ?></button>
+		<input type="hidden" name="contact_email" value="<?php echo esc_html( $contact_email ); ?>" >
+		<input type="hidden" name="contact_name" value="<?php echo esc_html( $contact_name ); ?>" >
+		<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>" >
+		<?php
 	}
 
 	/**
@@ -969,7 +1013,7 @@ class ShortCodes extends SignUpsBase {
 	 * @param mixed $post Data from the calling form.
 	 * @return void
 	 */
-	protected function create_email_form( $post ) {
+	private function create_email_form( $post ) {
 		?>
 		<form class="email_form" method="POST">
 			<?php
@@ -980,24 +1024,31 @@ class ShortCodes extends SignUpsBase {
 				$email = $post['email'];
 			}
 
-			$subject = "";
+			$subject = '';
 			if ( isset( $post['signup_name'] ) ) {
-				$subject = $post['signup_name'] . ' Issue';
+				$subject = $post['signup_name'];
 			}
 			?>
 			<div id="send-email">
 				<div class="text-right mt-2">
-					<label for="email-from" class="mr-2">Your email:</label>
+					<label for="email-to" class="mr-2">To:</label>
+				</div>
+				<div class="mt-2">
+					<input id="email-to" class="w-100pr" type="text" name="contact_name"
+						value="<?php echo esc_html( $post['contact_name'] ); ?>" disabled>
+				</div>
+				<div class="text-right mt-2">
+					<label for="email-from" class="mr-2">From:</label>
 				</div>
 				<div class="mt-2">
 					<input id="email-from" class="w-100pr" type="email" name="email"
-						value=<?php echo esc_html( $email ); ?> placeholder="foo@bar.com">
+						value="<?php echo esc_html( $email ); ?>" placeholder="Your email address" required>
 				</div>
 				<div class="text-right mt-2">
 					<label for="email-subject" class="mr-2">Subject:</label>
 				</div>
 				<div class="mt-2">
-					<input id="email-subject" class="w-100pr" type="text" name="subject" value="<?php echo esc_html( $subject ); ?>">
+					<input id="email-subject" class="w-100pr" type="text" name="subject" value="<?php echo esc_html( $subject ); ?>" required>
 				</div>
 				<div class="text-right mt2">
 					<label for="email-body" class="mr-2">Message:</label>
@@ -1012,9 +1063,10 @@ class ShortCodes extends SignUpsBase {
 					<button class="btn btn-primary" type="submit" name="send_email" value="1">Send Email</button>
 				</div>
 				<div>
-				<button class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="window.history.go( -1 );">Back</button>
+				<button type="submit" class="btn btn-md bg-primary mr-2" value="-1" name="home" formnovalidate>Cancel</button>
 				</div>
 			</div>
+			<input type="hidden" name="contact_email" value="<?php echo esc_html( $post['contact_email'] ); ?>" >
 			<?php
 			if ( isset( $post['add_attendee_session'] ) ) {
 				?>
@@ -1059,7 +1111,7 @@ class ShortCodes extends SignUpsBase {
 		?>
 		<form method="POST">
 			<tr class="footer-row">
-				<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="signup_id">Cancel</button></td>
+				<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="home">Cancel</button></td>
 				<?php
 				for ( $i = 1; $i < $column_count; $i++ ) {
 					?>

@@ -447,7 +447,9 @@ class SignUpsBase {
 			<tr>
 				<td colspan=3>
 					<h3 style="text-align: center;">
-						<button id="email-admin" class="btn btn-primary rounded" type="submit" name="email_admin" value="1">Email Administrator</button>
+						<button id="email-admin" class="btn btn-primary rounded" type="submit" name="email_admin" value="ecsproull765@gmail.com">Email Administrator</button>
+						<input type="hidden" name="contact_email" value="ecsproull765@gmail.com" >
+						<input type="hidden" name="contact_name" value="Signup Admin" >
 					</h3>
 				</td>
 			</tr>
@@ -462,7 +464,7 @@ class SignUpsBase {
 		<div id="email"></div>
 		<input id="user_groups" type="hidden" name="user_groups" value="<?php echo esc_html( $user_group ); ?>">
 		<input id="user-secret" type="hidden" name="user_secret" value="<?php echo esc_html( $user_secret ); ?>">
-		<input id="rest-nonce" type="hidden" name="rest_nonce" value ="<?php echo wp_create_nonce( 'wp_rest' ); ?>">
+		<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 		<?php
 
 		return $return_val;
@@ -705,7 +707,7 @@ class SignUpsBase {
 								<option value="30" <?php echo '30' === $rolling_days ? 'selected' : ''; ?>>30</option>
 								<option value="60" <?php echo '60' === $rolling_days ? 'selected' : ''; ?>>60</option>
 								<option value="90" <?php echo '90' === $rolling_days ? 'selected' : ''; ?>>90</option>
-								<option value="Past">Past</option>
+								<option value="Past" <?php echo 'Past' === $rolling_days ? 'selected' : ''; ?>>Past</option>
 							</select>
 						</div>
 

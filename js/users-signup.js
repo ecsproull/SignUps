@@ -147,6 +147,7 @@ jQuery(document).ready(function($){
 	});
 
 	$(".signup_form").submit(function(e){
+		debugger;
 		e.preventDefault();
 		var form = this;
 		if (document.activeElement.getAttribute('name') == 'email_admin') {
