@@ -254,13 +254,18 @@ jQuery( document ).ready( function($){
 		);
 	});
 
-	$(".email-button").click( function(e) {
+	$(".email-butt").click( function(e) {
+		debugger;
 		var emailId = '.' + e.target.value;
 		var emailAddresses = '';
 		$(emailId).each( function() {
 			emailAddresses += $(this).text() + ';';
 		});
 
+		const htmlContent = $("#instructions").html();
+		const blob = new Blob([htmlContent], { type: "text/html" });
+		const clipboardItem = new ClipboardItem({ "text/html": blob });
+		navigator.clipboard.write([clipboardItem])
 		document.location.href = "mailto:" + emailAddresses;
 		//alert(emailId);
 	});
@@ -338,12 +343,27 @@ jQuery( document ).ready( function($){
 	});
 
 	$('.nav-link').click( function (e) {
-		if (e.currentTarget.innerText == "Long") {
+		if (e.currentTarget.innerText == "Long Desc") {
 			$('#html-signup-description').show();
 			$('#html-signup-description-short').hide();
-		} else {
+			$('#html-signup-instructions').hide();
+			$('.inst').css("background-color", "#F8F8F8");
+			$('.short-desc').css("background-color", "#F8F8F8");
+			$('.long-desc').css("background-color", "#BEBEBE");
+		} else if (e.currentTarget.innerText == "Short Desc") {
             $('#html-signup-description').hide();
 			$('#html-signup-description-short').show();
+			$('#html-signup-instructions').hide();
+			$('.inst').css("background-color", "#F8F8F8");
+			$('.short-desc').css("background-color", "#BEBEBE");
+			$('.long-desc').css("background-color", "#F8F8F8");
+		} if (e.currentTarget.innerText == "Instructions") {
+			$('#html-signup-instructions').show();
+            $('#html-signup-description').hide();
+			$('#html-signup-description-short').hide();
+			$('.inst').css("background-color", "#BEBEBE");
+			$('.short-desc').css("background-color", "#F8F8F8");
+			$('.long-desc').css("background-color", "#F8F8F8");
 		}
 	})
 

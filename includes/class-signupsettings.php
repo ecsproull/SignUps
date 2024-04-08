@@ -1031,6 +1031,21 @@ class SignupSettings extends SignUpsBase {
 
 		$rolling     = $class[0]->signup_rolling_template > 0;
 		$signup_name = $class[0]->signup_name;
+		$description  = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT description_instructions
+				FROM %1s
+				WHERE description_signup_id = %s',
+				self::DESCRIPTIONS_TABLE,
+				$signup_id
+			),
+			OBJECT
+		);
+
+		$instructions = '';
+		if ( $description ) {
+			$instructions = html_entity_decode( $description[0]->description_instructions );
+		}
 
 		if ( $rolling ) {
 			$this->create_rolling_session( $signup_id, null, true );
@@ -1090,7 +1105,8 @@ class SignupSettings extends SignUpsBase {
 				$sessions,
 				$attendees,
 				$post['edit_sessions_signup_id'],
-				$instructors
+				$instructors,
+				$instructions
 			);
 		}
 	}
@@ -1293,7 +1309,7 @@ class SignupSettings extends SignUpsBase {
 	 * @param  array  $instructors An array of instructors for each session.
 	 * @return void
 	 */
-	private function create_session_select_form( $signup_name, $sessions, $attendees, $signup_id, $instructors ) {
+	private function create_session_select_form( $signup_name, $sessions, $attendees, $signup_id, $instructors, $instructions ) {
 		?>
 		<div id="session_select" class="text-center mt-2">
 			<h1><?php echo esc_html( $signup_name ); ?></h1>
@@ -1370,7 +1386,7 @@ class SignupSettings extends SignUpsBase {
 												<?php
 											}
 											?>
-											<button class="btn btn-primary w-90 mb-1 email-button" 
+											<button class="btn btn-primary w-90 mb-1 email-butt" 
 												type="button"
 												name="email_session"
 												value="<?php echo esc_html( $email_id ); ?>">Email Session</button> 
@@ -1423,10 +1439,13 @@ class SignupSettings extends SignUpsBase {
 							}
 							?>
 						</form>
-							<?php
+						<?php
 						}
 						?>
 				</table>
+				<div id="instructions" hidden>
+					<?php echo $instructions; ?>
+				</div>
 			</div>
 		</div>
 		<input class="btn btn-danger mt-2" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back">

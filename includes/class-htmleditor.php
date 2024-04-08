@@ -72,15 +72,7 @@ class HtmlEditor extends SignUpsBase {
 				<?php
 				$this->load_signup_selection( $signup_id );
 				?>
-				<ul class="nav mt-2 border">
-					<li class="nav-item">
-						<a class="nav-link active" aria-current="page" href="#">Long</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#">Short</a>
-					</li>
-				</ul>
-				<div class="description-box">
+				<div class="description-box mt-3">
 					<div class="text-right">
 						<label class="label-margin-top mr-2" for="description_instructors">Instructors:</label>
 					</div>
@@ -107,16 +99,18 @@ class HtmlEditor extends SignUpsBase {
 							placeholder="Wood, glue, ..., Leave blank to omit this section." name="description_materials"
 							><?php echo esc_html( $description_object ? $description_object->description_materials : '' ); ?></textarea>
 					</div>
-
-					<div class="text-right">
-						<label class="label-margin-top mr-2" for="description_instructions">Instructions:</label>
-					</div>
-					<div>
-						<textarea type="text" id="description_instructions" class="mt-2 w-100" 
-							placeholder="Glue wood in layers..., Leave blank to omit this section." name="description_instructions"
-							><?php echo esc_html( $description_object ? $description_object->description_instructions : '' ); ?></textarea>
-					</div>
 				</div>
+				<ul class="nav mt-2 border bg-light mb-2">
+					<li class="nav-item border" style="background-color: #BEBEBE">
+						<b><a class="nav-link long-desc active" aria-current="page" href="#">Long Desc</a></b>
+					</li>
+					<li class="nav-item border">
+						<b><a class="nav-link short-desc" href="#">Short Desc</a></b>
+					</li>
+					<li class="nav-item border">
+						<b><a class="nav-link inst" href="#">Instructions</a></b>
+					</li>
+				</ul>
 				<div id="html-signup-description">
 					<?php
 					$name      = 'description_html';
@@ -133,6 +127,17 @@ class HtmlEditor extends SignUpsBase {
 					$name      = 'description_html_short';
 					$content   = $description_object ? html_entity_decode( $description_object->description_html_short ) : 'Add description here.';
 					$editor_id = 'description_short';
+					$settings  = array(
+						'textarea_name' => $name,
+					);
+					wp_editor( $content, $editor_id, $settings );
+					?>
+				</div>
+				<div id="html-signup-instructions" style="display: none;">
+					<?php
+					$name      = 'description_instructions';
+					$content   = $description_object ? html_entity_decode( $description_object->description_instructions ) : 'None';
+					$editor_id = 'description_instructions';
 					$settings  = array(
 						'textarea_name' => $name,
 					);
@@ -164,9 +169,10 @@ class HtmlEditor extends SignUpsBase {
 	 */
 	private function submit_html( $post ) {
 		global $wpdb;
-		$short_description              = $post['description_html'];
-		$post['description_html']       = htmlentities( $post['description_html'] );
-		$post['description_html_short'] = htmlentities( $post['description_html_short'] );
+		$short_description                = $post['description_html'];
+		$post['description_html']         = htmlentities( $post['description_html'] );
+		$post['description_html_short']   = htmlentities( $post['description_html_short'] );
+		$post['description_instructions'] = htmlentities( $post['description_instructions'] );
 		unset( $post['_wp_http_referer'] );
 		unset( $post['submit_html'] );
 		unset( $post['signup'] );

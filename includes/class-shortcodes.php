@@ -965,8 +965,8 @@ class ShortCodes extends SignUpsBase {
 
 				if ( $description_object->description_instructions ) {
 					?>
-					<div class="text-right pr-2 font-weight-bold text-dark mb-2">Instructions: </div>
-					<div><?php echo $description_object->description_instructions; ?></div>
+					<div class="text-right pr-2 font-weight-bold text-dark mb-3">Instructions: </div>
+					<div class="mb-3"><?php echo html_entity_decode( $description_object->description_instructions ); ?></div>
 					<?php
 				}
 				?>
