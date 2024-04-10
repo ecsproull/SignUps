@@ -944,7 +944,7 @@ class ShortCodes extends SignUpsBase {
 						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 					</form>
 				</div>
-				
+
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Schedule: </div>
 				<div><?php echo esc_html( $schedule ); ?></div>
 
@@ -966,13 +966,13 @@ class ShortCodes extends SignUpsBase {
 				if ( $description_object->description_instructions ) {
 					?>
 					<div class="text-right pr-2 font-weight-bold text-dark mb-3">Instructions: </div>
-					<div class="mb-3"><?php echo html_entity_decode( $description_object->description_instructions ); ?></div>
+					<div class="mb-3 instruct"><?php echo html_entity_decode( $description_object->description_instructions ); ?></div>
 					<?php
 				}
 				?>
 
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Description: </div>
-				<div><?php echo html_entity_decode( $description_object->description_html ); ?></div>
+				<div class="instruct"><?php echo html_entity_decode( $description_object->description_html ); ?></div>
 			</div>
 			<form class="ml-auto mr-auto" method="POST">
 				<div class="submit-row-grid mt-4">

@@ -1292,4 +1292,182 @@ class SignUpsBase {
 			$wpdb->update( self::SESSIONS_TABLE, $data, $where );
 		}
 	}
+	
+	/**
+	 * Creates the description, short description and instructions input block.
+	 *
+	 * @return void
+	 */
+	protected function create_description_section( $description_object ) {
+		?>
+		<div class="description-box">
+			<div></div>
+			<div>
+				<ul class="nav mt-2 border bg-light mb-2">
+					<li class="nav-item border" style="background-color: #BEBEBE">
+						<b><a class="nav-link long-desc active" aria-current="page" href="#">Description</a></b>
+					</li>
+					<li class="nav-item border">
+						<b><a class="nav-link short-desc" href="#">Calendar</a></b>
+					</li>
+					<li class="nav-item border">
+						<b><a class="nav-link inst" href="#">Instructions</a></b>
+					</li>
+				</ul>
+				<div id="html-signup-description">
+				<textarea id="description_long"
+					name='description_html'><?php echo $description_object ? html_entity_decode( $description_object->description_html ) : 'Add description here.'; ?>
+				</textarea>
+				</div>
+				<div id="html-signup-description-short" style="display: none;">
+					<textarea id="description_short" 
+						name='description_html_short'><?php echo $description_object ? html_entity_decode( $description_object->description_html_short ) : 'Add description here.'; ?>
+					</textarea>
+				</div>
+				<div id="html-signup-instructions" style="display: none;">
+					<textarea id="description_instructions" 
+						name='description_instructions'><?php echo $description_object ? html_entity_decode( $description_object->description_instructions ) : 'Add description here.'; ?>
+					</textarea>
+				</div>
+			<div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Removes items from the calendar in respose to removing Admin Approved
+	 *
+	 * @param  mixed $signup_id The signup id that owns the sessions.
+	 * @param  mixed $signup_name The sighup name.
+	 * @param  mixed $add To add or remove from the calendar.
+	 * @return void
+	 */
+	protected function add_remove_from_calendar( $signup_id, $signup_name, $add ) {
+		global $wpdb;
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE session_signup_id = %s',
+				self::SESSIONS_TABLE,
+				$signup_id
+			),
+			OBJECT
+		);
+
+		if ( $results ) {
+			foreach ( $results as $session ) {
+				if ( $session->session_calendar_id || ( ! $session->session_calendar_id && $add ) ) {
+					$mini_post = array(
+						'signup_id'           => $session->session_signup_id,
+						'session_id'          => $session->session_id,
+						'signup_name'         => $signup_name,
+						'session_calendar_id' => $session->session_calendar_id,
+					);
+
+					if ( $add ) {
+						$mini_post['update'] = true;
+						$this->update_calendar( $mini_post );
+					} else {
+						$this->update_calendar( $mini_post );
+						$where = array( 'session_id' => $session->session_id );
+						$data  = array( 'session_calendar_id' => '' );
+						$wpdb->update( self::SESSIONS_TABLE, $data, $where );
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Updates the clubs calendar.
+	 *
+	 * @param int $post The posted data from the form.
+	 */
+	protected function update_calendar( $post ) {
+		global $wpdb;
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE session_id = %s',
+				self::SESSIONS_TABLE,
+				$post['session_id']
+			),
+			OBJECT
+		);
+
+		$description = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE description_signup_id = %s',
+				self::DESCRIPTIONS_TABLE,
+				$post['signup_id']
+			),
+			OBJECT
+		);
+
+		$session         = $results[0];
+		$new_calendar_id = 0;
+		if ( $session->session_calendar_id > 0 && ! isset( $post['update'] ) ) {
+			$where_session = array( 'id' => $session->session_calendar_id );
+			$wpdb->delete( self::SPIDER_CALENDAR_EVENT_TABLE, $where_session );
+		} else {
+			$datetime   = new DateTime( $session->session_start_formatted );
+			$date       = $datetime->format( 'Y-m-d' );
+			$start_time = $datetime->format( 'g:iA' );
+			$datetime   = new DateTime( $session->session_end_formatted );
+			$end_time   = $datetime->format( 'g:iA' );
+			$signup_url = get_site_url() . '/signups?signup_id=' . $post['signup_id'];
+
+			$text_for_date;
+			if ( $description ) {
+				$text_for_date = html_entity_decode( $description[0]->description_html_short );
+			}
+			$text_for_date .= '<br><br><a href=' . $signup_url . " target='_blank' rel='noopener' >More Info</a>.";
+
+			$data                  = array();
+			$data['calendar']      = 1;
+			$data['date']          = $date;
+			$data['date_end']      = $date;
+			$data['title']         = $post['signup_name'];
+			$data['category']      = 7;
+			$data['time']          = $start_time . '-' . $end_time;
+			$data['text_for_date'] = $text_for_date;
+			$data['userID']        = '';
+			$data['repeat_method'] = 'no_repeat';
+			$data['repeat']        = '1';
+			$data['week']          = '';
+			$data['month']         = '';
+			$data['month_type']    = '1';
+			$data['monthly_list']  = '';
+			$data['month_week']    = '';
+			$data['year_month']    = '1';
+			$data['published']     = 1;
+
+			if ( isset( $post['session_calendar_id'] ) && $post['session_calendar_id'] > 0 ) {
+				$where = array( 'id' => $post['session_calendar_id'] );
+				$rows  = $wpdb->update( self::SPIDER_CALENDAR_EVENT_TABLE, $data, $where );
+				if ( $rows === false ) {
+					echo '<h1>Failed to update Calendar id: </h1)' . esc_html( $post['session_calendar_id'] . ' with error : ' . $wpdb->last_error );
+				}
+				return;
+
+			} else {
+				$rows            = $wpdb->insert( self::SPIDER_CALENDAR_EVENT_TABLE, $data );
+				$new_calendar_id = $wpdb->insert_id;
+			}
+		}
+
+		$where                         = array();
+		$update                        = array();
+		$where['session_id']           = $post['session_id'];
+		$update['session_calendar_id'] = $new_calendar_id;
+		$affected_row_count            = $wpdb->update(
+			'wp_scw_sessions',
+			$update,
+			$where
+		);
+	}
 }

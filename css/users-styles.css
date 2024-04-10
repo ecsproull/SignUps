@@ -1,3 +1,13 @@
+
+.instruct ol,
+.instruct ul {
+	margin-bottom: 10px
+}
+
+.instruct p {
+	margin: 0 0 5px;
+}
+
 .mb-50px {
 	margin-bottom: 50px!important;
 }
@@ -377,6 +387,39 @@ input[type=time]::-webkit-clear-button {
 .category-text {
 	font-size: 20px;
 	font-weight: bold;
+}
+
+/* CKEditor styles go here */
+.wrap-image {
+	text-align: justified;
+    background : url(../desktop/background.gif);
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden;
+}
+
+.wrap-image figure {
+	margin: 1em;
+}
+
+.wrap-image img {
+	float: left;
+	padding: 10px;
+}
+
+.wrap-image p {
+	position: relative;
+}
+.image {
+ text-align: center;
+} 
+
+.image-style-block-align-left {
+	text-align: left;
+}
+
+.image-style-block-align-right {
+	text-align: right;
 }
 @media (max-width: 800px) {
 	.category-text {

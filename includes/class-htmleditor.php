@@ -100,50 +100,9 @@ class HtmlEditor extends SignUpsBase {
 							><?php echo esc_html( $description_object ? $description_object->description_materials : '' ); ?></textarea>
 					</div>
 				</div>
-				<ul class="nav mt-2 border bg-light mb-2">
-					<li class="nav-item border" style="background-color: #BEBEBE">
-						<b><a class="nav-link long-desc active" aria-current="page" href="#">Long Desc</a></b>
-					</li>
-					<li class="nav-item border">
-						<b><a class="nav-link short-desc" href="#">Short Desc</a></b>
-					</li>
-					<li class="nav-item border">
-						<b><a class="nav-link inst" href="#">Instructions</a></b>
-					</li>
-				</ul>
-				<div id="html-signup-description">
-					<?php
-					$name      = 'description_html';
-					$content   = $description_object ? html_entity_decode( $description_object->description_html ) : 'Add description here.';
-					$editor_id = 'description_long';
-					$settings  = array(
-						'textarea_name' => $name,
-					);
-					wp_editor( $content, $editor_id, $settings );
-					?>
-				</div>
-				<div id="html-signup-description-short" style="display: none;">
-					<?php
-					$name      = 'description_html_short';
-					$content   = $description_object ? html_entity_decode( $description_object->description_html_short ) : 'Add description here.';
-					$editor_id = 'description_short';
-					$settings  = array(
-						'textarea_name' => $name,
-					);
-					wp_editor( $content, $editor_id, $settings );
-					?>
-				</div>
-				<div id="html-signup-instructions" style="display: none;">
-					<?php
-					$name      = 'description_instructions';
-					$content   = $description_object ? html_entity_decode( $description_object->description_instructions ) : 'None';
-					$editor_id = 'description_instructions';
-					$settings  = array(
-						'textarea_name' => $name,
-					);
-					wp_editor( $content, $editor_id, $settings );
-					?>
-				</div>
+				<?php
+				$this->create_description_section( $description_object )
+				?>
 				<div class="mt-2">
 					<!-- button type="button" id="display-html" class="btn bt-md btn-primary mr-auto ml-auto mt-2">Preview</button -->
 					<input class="btn bt-md btn-primary mr-auto ml-auto mt-2" type="submit" value="Submit" name="submit_html">
@@ -173,9 +132,23 @@ class HtmlEditor extends SignUpsBase {
 		$post['description_html']         = htmlentities( $post['description_html'] );
 		$post['description_html_short']   = htmlentities( $post['description_html_short'] );
 		$post['description_instructions'] = htmlentities( $post['description_instructions'] );
+
+		$signup = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT signup_name
+				FROM %1s
+				WHERE signup_id = %s',
+				self::SIGNUPS_TABLE,
+				$post['description_signup_id']
+			),
+			OBJECT
+		);
+
+		$signup_name = $signup[0]->signup_name;
 		unset( $post['_wp_http_referer'] );
 		unset( $post['submit_html'] );
 		unset( $post['signup'] );
+		unset( $post['signup_name'] );
 
 		if ( isset( $post['description_id'] ) ) {
 			$where                   = array();
@@ -206,6 +179,8 @@ class HtmlEditor extends SignUpsBase {
 		} else {
 			$rows_updated = $wpdb->insert( self::DESCRIPTIONS_TABLE, $post );
 		}
+
+		$this->add_remove_from_calendar( $post['description_signup_id'], $signup_name, true );
 
 		$this->load_description_form( $post['description_signup_id'] );
 	}
