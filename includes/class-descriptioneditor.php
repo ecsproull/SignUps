@@ -148,16 +148,7 @@ class DescriptionEditor extends SignUpsBase {
 					<option value="member">Members</option>
 					<option value="cnc">Cnc Users</option>
 				</select>
-			</div>
-
-			<div class="text-right">
-				<label class="label-margin-top mr-2" for="signup_multiple_days">Multi Day:</label>
-			</div>
-			<div>
-				<input id="signup_multiple_days" class="mt-2 w-100" name="signup_multiple_days" 
-					value="1" >
-			</div>
-
+			</div> 
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_end_repeat">End Repeat:</label>
 			</div>

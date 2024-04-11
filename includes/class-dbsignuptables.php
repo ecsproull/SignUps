@@ -131,7 +131,6 @@ class DbSignUpTables {
 				`session_days_between_sessions` tinyint DEFAULT NULL,
 				`session_day_of_month` varchar(60) DEFAULT NULL,
 				`session_time_of_day` time DEFAULT NULL,
-				`session_multiple_days` tinyint DEFAULT NULL,
 				PRIMARY KEY (`session_id`)
 				) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;"
 			);
@@ -152,7 +151,6 @@ class DbSignUpTables {
 				`signup_product_id` varchar(45) DEFAULT NULL,
 				`signup_default_price_id` varchar(45) DEFAULT '',
 				`signup_admin_approved` tinyint NOT NULL DEFAULT '0',
-				`signup_multiple_days` tinyint NOT NULL DEFAULT '1',
 				`signup_default_start_time` time DEFAULT NULL,
 				`signup_default_duration` time DEFAULT NULL,
 				`signup_default_days_between_sessions` tinyint DEFAULT NULL,

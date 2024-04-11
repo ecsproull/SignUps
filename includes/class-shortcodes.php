@@ -857,7 +857,6 @@ class ShortCodes extends SignUpsBase {
 				signup_cost,
 				signup_default_slots,
 				signup_default_minimum,
-				signup_multiple_days,
 				signup_schedule_desc,
 				signup_rolling_template
 				FROM %1s
@@ -895,10 +894,6 @@ class ShortCodes extends SignUpsBase {
 
 			if ( '00' !== $dt_parts[1] ) {
 				$schedule .= ' & ' . $dt_parts[1] . ' minutes';
-			}
-
-			if ( $signup->signup_multiple_days > 1 ) {
-				$schedule .= ' for ' . $signup->signup_multiple_days . ' days';
 			}
 
 			if ( $signup->signup_default_day_of_month ) {
