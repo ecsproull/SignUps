@@ -148,6 +148,13 @@ class SignUpsBase {
 	protected const SESSION_INSTRUCTORS_TABLE = 'wp_scw_session_instructors';
 
 	/**
+	 * New members are held here until they complete orientation.
+	 *
+	 * @var mixed
+	 */
+	protected const NEW_MEMBER_TABLE = 'wp_scw_new_member';
+
+	/**
 	 * Log table.
 	 *
 	 * @var mixed
@@ -327,6 +334,77 @@ class SignUpsBase {
 
 		return $signup[0]->signup_rolling_template > '0';
 	}
+	
+	/**
+	 * Creates a form for new users to apply for membership
+	 *
+	 * @return void
+	 */
+	protected function create_new_member_form() {
+		?>
+		<div class='new-member-form mb-3'>
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="rec_card">Rec Card Number:</label>
+			</div>
+			<div class="text-left">
+				<input type="text" id="rec_card" class="mt-2 w-100" 
+					value="" placeholder="123456" name="new_member_rec_card" required>
+			</div>
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="first_name">First Name:</label>
+			</div>
+			<div class="text-left">
+				<input type="text" id="first_name" class="mt-2 w-100" 
+					value="" placeholder="John" name="firstname" required>
+			</div>
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="last_name">Last Name:</label>
+			</div>
+			<div class="text-left">
+				<input type="text" id="last_name" class="mt-2 w-100" 
+					value="" placeholder="Doe" name="lastname" required>
+			</div>
+			<div></div>
+			<div class="text-left">
+				<h3 class="mt-1 mb-1">Phone number format xxx-xxx-xxxx.</h3>
+			</div>
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="phone">Phone:</label>
+			</div>
+			<div class="text-left">
+				<input id="phone" class="member-phone" type="text" name="phone"
+					value="" placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required>
+			</div>
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="first_name">Email:</label>
+			</div>
+			<div class="text-left">
+				<input type="email" id="first_name" class="mt-2 w-100" 
+					value="" placeholder="john@doe.com" name="email" required>
+			</div>
+			<div></div>
+			<div class="text-left">
+				<h3 class="mt-1 mb-1">Sun City West street address.</h3>
+			</div>
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="first_name">Address:</label>
+			</div>
+			<div class="text-left">
+				<input type="text" id="first_name" class="mt-2 w-100" 
+					value="" placeholder="1234 N RH Johnson" name="new_member_street" required>
+			</div>
+		</div>
+		<div class="text-center">
+			<h3 style="text-align: center;">
+				<button class="btn btn-primary rounded" 
+					type="submit" name="email_admin" value="ecsproull765@gmail.com" formnovalidate>Email Administrator</button>
+				<input type="hidden" name="contact_email" value="ecsproull765@gmail.com" >
+				<input type="hidden" name="contact_name" value="Signup Admin" >
+				<div id="email" style="height:0px"></div>
+			</h3>
+		</div>
+		<?php
+	}
 
 	/**
 	 * Creates a section of HTML for the user to identify themselves.
@@ -447,7 +525,7 @@ class SignUpsBase {
 			<tr>
 				<td colspan=3>
 					<h3 style="text-align: center;">
-						<button id="email-admin" class="btn btn-primary rounded" type="submit" name="email_admin" value="ecsproull765@gmail.com">Email Administrator</button>
+						<button class="btn btn-primary rounded" type="submit" name="email_admin" value="ecsproull765@gmail.com">Email Administrator</button>
 						<input type="hidden" name="contact_email" value="ecsproull765@gmail.com" >
 						<input type="hidden" name="contact_name" value="Signup Admin" >
 					</h3>

@@ -147,11 +147,17 @@ jQuery(document).ready(function($){
 	});
 
 	$(".signup_form").submit(function(e){
-		debugger;
+		//debugger;
 		e.preventDefault();
 		var form = this;
 		if (document.activeElement.getAttribute('name') == 'email_admin') {
 			$("#email").append('<input type="hidden" name="email_admin" value="1" />');
+			form.submit();
+			return;
+		}
+		
+		if (document.activeElement.getAttribute('name') == 'email_session') {
+			$("#email").append('<input type="hidden" name="email_session" value="1" />');
 			form.submit();
 			return;
 		}

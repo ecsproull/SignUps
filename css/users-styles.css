@@ -292,6 +292,14 @@ input[type='radio'] {
 	justify-content: space-between;
 }
 
+.new-member-form {
+	width: 80%;
+    max-width: 1100px;
+	display: grid;
+	grid-template-columns: 30% 60%;
+	align-items: start;
+}
+
 .title-category-box {
 	display: grid;
 	width: 1000px;

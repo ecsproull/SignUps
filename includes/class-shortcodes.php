@@ -33,7 +33,9 @@ class ShortCodes extends SignUpsBase {
 				$this->create_signup_form( $post['continue_signup'], $post['secret'] );
 			} elseif ( isset( $post['email_admin'] ) ) {
 				$this->create_email_form( $post );
-			} elseif ( isset( $post['send_email'] ) ) {
+			} elseif ( isset( $post['email_session'] ) ) {
+				$this->create_email_form( $post, false );
+			}elseif ( isset( $post['send_email'] ) ) {
 				$this->send_email( $post );
 			} elseif ( isset( $post['rolling_days_new'] ) ) {
 				$this->create_rolling_session( $post['add_attendee_session'], null, false, $post['rolling_days_new'] );
@@ -281,6 +283,7 @@ class ShortCodes extends SignUpsBase {
 		$signup_name         = $signups[0]->signup_name;
 		$signup_email        = $signups[0]->signup_contact_email;
 		$signup_contact_name = $signups[0]->signup_default_contact_name;
+		$signup_orientation  = 'residents' === $signups[0]->signup_group;
 
 		if ( $rolling ) {
 			$this->create_rolling_session( $signup_id, $secret );
@@ -288,7 +291,8 @@ class ShortCodes extends SignUpsBase {
 			$bad_debt = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT attendee_id, 
-					attendee_payment_start
+					attendee_payment_start,
+					attendee_badge
 					FROM %1s
 					WHERE 0 < attendee_balance_owed',
 					self::ATTENDEES_TABLE
@@ -302,6 +306,11 @@ class ShortCodes extends SignUpsBase {
 				$dt_start = new DateTime( $bd->attendee_payment_start, $this->date_time_zone );
 				$dt_start->add( $five_minutes );
 				if ( $dt_start->format( 'U' ) < $dt_now->format( 'U' ) ) {
+					if ( $signup_orientation ) {
+						$where = array( 'new_member_id' => $bd->attendee_badge );
+						$wpdb->delete( self::NEW_MEMBER_TABLE, $where );
+					}
+
 					$where = array( 'attendee_id' => $bd->attendee_id );
 					$wpdb->delete( self::ATTENDEES_TABLE, $where );
 				}
@@ -433,6 +442,27 @@ class ShortCodes extends SignUpsBase {
 	 */
 	private function add_attendee_class( $post ) {
 		global $wpdb;
+
+		if ( isset( $post['new_member_rec_card'] ) ) {
+			$new_member                        = array();
+			$new_member['new_member_rec_card'] = $post['new_member_rec_card'];
+			$new_member['new_member_first']    = $post['firstname'];
+			$new_member['new_member_last']     = $post['lastname'];
+			$new_member['new_member_phone']    = $post['phone'];
+			$new_member['new_member_email']    = $post['email'];
+			$new_member['new_member_street']   = $post['new_member_street'];
+
+			$result = $wpdb->insert( self::NEW_MEMBER_TABLE, $new_member );
+			if ( $result ) {
+				$post['badge_number'] = $wpdb->insert_id;
+				
+			} else {
+				?>
+				<h2>Failed to insert new member into database.</h2>
+				<?php
+			}
+		}
+
 		$now                                    = new DateTime( 'now', $this->date_time_zone );
 		$slot_parts                             = explode( ',', $post['time_slots'][0] );
 		$slot_start                             = new DateTime( $slot_parts[0], $this->date_time_zone );
@@ -694,9 +724,13 @@ class ShortCodes extends SignUpsBase {
 				<form class="signup_form" method="POST">
 					<div id="usercontent">
 						<?php
-						if ( 'none' == $user_group ) {
+						if ( 'none' === $user_group || 'residents' === $user_group ) {
 							$user_badge = true;
-							$this->create_new_user_table();
+							if ( 'residents' === $user_group ) {
+								$this->create_new_member_form();
+							} else {
+								$this->create_new_user_table();
+							}
 						} else {
 							$user_badge = $this->create_user_table( $user_group, $signup_id );
 						}
@@ -733,7 +767,7 @@ class ShortCodes extends SignUpsBase {
 								</tr>
 								<tr class="attendee-row bg-lg">
 									<td>Session Contact</td>
-									<td><?php $this->create_email_link( $signup_email, $signup_contact_name, $signup_name ); ?></td>
+									<td><?php $this->create_session_email_link( $signup_email, $signup_contact_name, $signup_name ); ?></td>
 									<td>Select</td>
 								</tr>
 								<input type="hidden" name="add_attendee_class">
@@ -935,7 +969,7 @@ class ShortCodes extends SignUpsBase {
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Contact:</div>
 				<div>
 					<form method="POST">
-						<?php $this->create_email_link( $signup->signup_contact_email, $signup->signup_default_contact_name, $signup->signup_name ); ?>
+						<?php $this->create_session_email_link( $signup->signup_contact_email, $signup->signup_default_contact_name, $signup->signup_name ); ?>
 						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 					</form>
 				</div>
@@ -993,11 +1027,11 @@ class ShortCodes extends SignUpsBase {
 	 * @param  mixed $signup_name The signup name.
 	 * @return void
 	 */
-	private function create_email_link( $contact_email, $contact_name, $signup_name ) {
+	private function create_session_email_link( $contact_email, $contact_name, $signup_name ) {
 		?>
-		<button id="email-admin" class="email-button" type="submit" name="email_admin" value="1"><?php echo esc_html( $contact_name ); ?></button>
-		<input type="hidden" name="contact_email" value="<?php echo esc_html( $contact_email ); ?>" >
-		<input type="hidden" name="contact_name" value="<?php echo esc_html( $contact_name ); ?>" >
+		<button class="email-button" type="submit" name="email_session" value="1" formnovalidate><?php echo esc_html( $contact_name ); ?></button>
+		<input type="hidden" name="session_email" value="<?php echo esc_html( $contact_email ); ?>" >
+		<input type="hidden" name="session_name" value="<?php echo esc_html( $contact_name ); ?>" >
 		<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>" >
 		<?php
 	}
@@ -1008,7 +1042,13 @@ class ShortCodes extends SignUpsBase {
 	 * @param mixed $post Data from the calling form.
 	 * @return void
 	 */
-	private function create_email_form( $post ) {
+	private function create_email_form( $post, $admin = true ) {
+		$contact_email = $post['contact_email'];
+		$contact_name  = $post['contact_name'];
+		if ( ! $admin ) {
+			$contact_email = $post['session_email'];
+			$contact_name  = $post['session_name'];
+		}
 		?>
 		<form class="email_form" method="POST">
 			<?php
@@ -1030,7 +1070,7 @@ class ShortCodes extends SignUpsBase {
 				</div>
 				<div class="mt-2">
 					<input id="email-to" class="w-100pr" type="text" name="contact_name"
-						value="<?php echo esc_html( $post['contact_name'] ); ?>" disabled>
+						value="<?php echo esc_html( $contact_name ); ?>" disabled>
 				</div>
 				<div class="text-right mt-2">
 					<label for="email-from" class="mr-2">From:</label>
@@ -1061,7 +1101,7 @@ class ShortCodes extends SignUpsBase {
 				<button type="submit" class="btn btn-md bg-primary mr-2" value="-1" name="home" formnovalidate>Cancel</button>
 				</div>
 			</div>
-			<input type="hidden" name="contact_email" value="<?php echo esc_html( $post['contact_email'] ); ?>" >
+			<input type="hidden" name="contact_email" value="<?php echo esc_html( $contact_email ); ?>" >
 			<?php
 			if ( isset( $post['add_attendee_session'] ) ) {
 				?>
@@ -1104,19 +1144,16 @@ class ShortCodes extends SignUpsBase {
 	 */
 	private function create_table_footer( $column_count = 3 ) {
 		?>
-		<form method="POST">
-			<tr class="footer-row">
-				<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="home">Cancel</button></td>
-				<?php
-				for ( $i = 1; $i < $column_count; $i++ ) {
-					?>
-					<td></td>
-					<?php
-				}
+		<tr class="footer-row">
+			<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="home">Cancel</button></td>
+			<?php
+			for ( $i = 1; $i < $column_count; $i++ ) {
 				?>
-			</tr>
-			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
-		</form>
+				<td></td>
+				<?php
+			}
+			?>
+		</tr>
 		<?php
 	}
 }

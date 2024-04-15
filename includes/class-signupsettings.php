@@ -810,8 +810,36 @@ class SignupSettings extends SignUpsBase {
 	 */
 	private function delete_session_attendees( $post ) {
 		global $wpdb;
+		$signups = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT signup_group
+				FROM %1s
+				WHERE signup_id = %s',
+				self::SIGNUPS_TABLE,
+				$post['signup_id']
+			),
+			OBJECT
+		);
+
+		$orientation = 'residents' === $signups[0]->signup_group;
 		foreach ( $post['selectedAttendee'] as $attendee ) {
 			$attendee_id = explode( ',', $attendee )[0];
+			if ( $orientation ) {
+				$attendee = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT attendee_badge
+						FROM %1s
+						WHERE attendee_id = %s',
+						self::ATTENDEES_TABLE,
+						$attendee_id
+					),
+					OBJECT
+				);
+
+				$where = array( 'new_member_id' => $attendee[0]->attendee_badge );
+				$wpdb->delete( self::NEW_MEMBER_TABLE, $where );
+			}
+
 			$wpdb->delete( self::ATTENDEES_TABLE, array( 'attendee_id' => $attendee_id ) );
 		}
 
@@ -1374,6 +1402,7 @@ class SignupSettings extends SignUpsBase {
 					<td class="text-right mr-2"><label>User Group:</label></td>
 					<td><select name="signup_group">
 						<option value="">Members</option>
+						<option value="residents" <?php echo 'residents' === $data->signup_group ? 'selected' : ''; ?> >Residents</option>
 						<option value="cnc" <?php echo 'cnc' === $data->signup_group ? 'selected' : ''; ?> >Cnc Users</option>
 						<option value="laser" <?php echo 'laser' === $data->signup_group ? 'selected' : ''; ?> >Laser Users</option>
 					</select> </td>
@@ -1733,6 +1762,7 @@ class SignupSettings extends SignUpsBase {
 			<div>
 				<select id="signup_group" class="mt-2 w-100 h-2rem" name="description_group">
 					<option value="">Members</option>
+					<option value="residents">Residents</option>
 					<option value="cnc">Cnc Users</option>
 					<option value="laser">Laser Users</option>
 				</select>
