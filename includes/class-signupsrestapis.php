@@ -150,8 +150,109 @@ class SignUpsRestApis extends SignUpsBase {
 
 		add_action(
 			'rest_api_init',
+			function () {
+				$this->register_route(
+					'scwmembers/v1',
+					'/orientation',
+					'get_orientation_list',
+					$this,
+					array(),
+					WP_REST_Server::CREATABLE
+				);
+			}
+		);
+
+		add_action(
+			'rest_api_init',
+			function () {
+				$this->register_route(
+					'scwmembers/v1',
+					'/attendees',
+					'get_attendee_list',
+					$this,
+					array(),
+					WP_REST_Server::CREATABLE
+				);
+			}
+		);
+
+		add_action(
+			'rest_api_init',
 			array( $this, 'regester_payment_route' )
 		);
+	}
+
+	/**
+	 * Get the attendees for an upcomming class
+	 *
+	 * @param  mixed $data Posted data that tells the date for the classes.
+	 * @return void
+	 */
+	public function get_attendee_list( $data ) {
+		global $wpdb;
+		$key      = '8c52a157-8ee7-5401-9f91-930cea39fe2f';
+		$data_obj = json_decode( $data->get_body(), false );
+		if ( $data_obj->key !== $key ) {
+			return;
+		}
+
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT wp_scw_attendees.attendee_email,
+					wp_scw_attendees.attendee_firstname,
+					wp_scw_attendees.attendee_lastname,
+					wp_scw_signups.signup_name,
+					wp_scw_sessions.session_start_formatted
+				FROM wp_scw_attendees
+				LEFT JOIN wp_scw_sessions
+				ON wp_scw_sessions.session_id = wp_scw_attendees.attendee_session_id
+				LEFT JOIN wp_scw_signups
+				ON wp_scw_signups.signup_id =  wp_scw_sessions.session_signup_id
+				WHERE wp_scw_sessions.session_start_time > %s AND wp_scw_sessions.session_start_time < %s',
+				$data_obj->start_date,
+				$data_obj->end_date
+			),
+			OBJECT
+		);
+
+		return $results;
+	}
+
+	/**
+	 * Get's the next orientation attendee list
+	 *
+	 * @param  mixed $data Data for the request.
+	 * @return void
+	 */public function get_orientation_list( $data ) {
+		global $wpdb;
+		$key      = '8c62a157-7ee8-5401-9f91-930eac39fe2f';
+		$data_obj = json_decode( $data->get_body(), false );
+		if ( $data_obj->key !== $key ) {
+			return;
+		}
+
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT wp_scw_new_member.new_member_rec_card,
+					wp_scw_new_member.new_member_first,
+					wp_scw_new_member.new_member_last,
+					wp_scw_new_member.new_member_phone,
+					wp_scw_new_member.new_member_email,
+					wp_scw_new_member.new_member_street,
+					wp_scw_sessions.session_start_formatted
+				FROM  wp_scw_new_member
+				LEFT JOIN wp_scw_attendees
+				ON wp_scw_attendees.attendee_badge = wp_scw_new_member.new_member_id
+				LEFT JOIN wp_scw_sessions
+				ON wp_scw_sessions.session_id = wp_scw_attendees.attendee_session_id
+				WHERE wp_scw_sessions.session_start_time > %s AND wp_scw_sessions.session_start_time < %s',
+				$data_obj->start_date,
+				$data_obj->end_date
+			),
+			OBJECT
+		);
+
+		return $results;
 	}
 
 	/**

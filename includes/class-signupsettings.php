@@ -1193,7 +1193,7 @@ class SignupSettings extends SignUpsBase {
 	private function create_session_select_form( $signup_name, $sessions, $attendees, $signup_id, $instructors, $instructions ) {
 		?>
 		<div id="session_select" class="text-center mt-2">
-			<h1><?php echo esc_html( $signup_name ); ?></h1>
+			<h1 id="signup_name"><?php echo esc_html( $signup_name ); ?></h1>
 			<div>
 				<div id="content" class="container">
 					<table id="select_table" class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-25px">

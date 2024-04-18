@@ -146,7 +146,7 @@ jQuery( document ).ready( function($){
 			]
 		})
 		.catch(error => {
-            console.error(error);
+            //console.error(error);
         });
 
 		CKEDITOR.editorConfig = function(config) {
@@ -412,7 +412,6 @@ jQuery( document ).ready( function($){
 	});
 
 	$(".email-butt").click( function(e) {
-		debugger;
 		var emailId = '.' + e.target.value;
 		var emailAddresses = '';
 		$(emailId).each( function() {
@@ -423,8 +422,7 @@ jQuery( document ).ready( function($){
 		const blob = new Blob([htmlContent], { type: "text/html" });
 		const clipboardItem = new ClipboardItem({ "text/html": blob });
 		navigator.clipboard.write([clipboardItem])
-		document.location.href = "mailto:" + emailAddresses;
-		//alert(emailId);
+		document.location.href = "mailto:" + emailAddresses + "?subject=" +  $("#signup_name").text();
 	});
 
 	$("#signup_duration").on('keydown', (e) => {

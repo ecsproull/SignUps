@@ -347,51 +347,58 @@ class SignUpsBase {
 				<label class="label-margin-top mr-2" for="rec_card">Rec Card Number:</label>
 			</div>
 			<div class="text-left">
-				<input type="text" id="rec_card" class="mt-2 w-100" 
+				<input type="number" id="rec_card" class="mt-2 w-100" pattern="[0-9]{5-10}" max="9999995"
 					value="" placeholder="123456" name="new_member_rec_card" required>
 			</div>
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="first_name">First Name:</label>
 			</div>
 			<div class="text-left">
-				<input type="text" id="first_name" class="mt-2 w-100" 
+				<input type="text" id="first_name" class="mt-2 w-100" maxlength="42"
 					value="" placeholder="John" name="firstname" required>
 			</div>
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="last_name">Last Name:</label>
 			</div>
 			<div class="text-left">
-				<input type="text" id="last_name" class="mt-2 w-100" 
+				<input type="text" id="last_name" class="mt-2 w-100" maxlength="42"
 					value="" placeholder="Doe" name="lastname" required>
 			</div>
 			<div></div>
 			<div class="text-left">
-				<h3 class="mt-1 mb-1">Phone number format xxx-xxx-xxxx.</h3>
+				<h3 class="mt-1 mb-1 text-danger">Phone number format xxx-xxx-xxxx.</h3>
 			</div>
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="phone">Phone:</label>
 			</div>
 			<div class="text-left">
-				<input id="phone" class="member-phone" type="text" name="phone"
+				<input id="phone" class="member-phone" type="text" name="phone" maxlength="13"
 					value="" placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required>
 			</div>
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="first_name">Email:</label>
 			</div>
 			<div class="text-left">
-				<input type="email" id="first_name" class="mt-2 w-100" 
+				<input type="email" id="first_name" class="mt-2 w-100"  maxlength="60"
 					value="" placeholder="john@doe.com" name="email" required>
 			</div>
 			<div></div>
 			<div class="text-left">
-				<h3 class="mt-1 mb-1">Sun City West street address.</h3>
+				<h3 class="mt-1 mb-1 text-danger">Sun City West Address.</h3>
 			</div>
 			<div class="text-right">
-				<label class="label-margin-top mr-2" for="first_name">Address:</label>
+				<label class="label-margin-top mr-2" for="first_name">Street:</label>
 			</div>
 			<div class="text-left">
-				<input type="text" id="first_name" class="mt-2 w-100" 
+				<input type="text" id="first_name" class="mt-2 w-100" maxlength="60"
 					value="" placeholder="1234 N RH Johnson" name="new_member_street" required>
+			</div>
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="city-state-zip">City, State, Zip:</label>
+			</div>
+			<div class="text-left">
+				<input type="text" id="city-state-zip" class="mt-2 w-100" maxlength="60"
+					value="Sun City West AZ  85375" name="new_member_street" readonly disabled>
 			</div>
 		</div>
 		<div class="text-center">
