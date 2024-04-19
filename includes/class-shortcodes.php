@@ -453,13 +453,18 @@ class ShortCodes extends SignUpsBase {
 			$new_member['new_member_street']   = $post['new_member_street'];
 
 			$result = $wpdb->insert( self::NEW_MEMBER_TABLE, $new_member );
-			if ( $result ) {
-				$post['badge_number'] = $wpdb->insert_id;
-				
+			if ( $result && $wpdb->insert_id ) {
+				$insert_id            = $wpdb->insert_id;
+				$post['badge_number'] = $insert_id;
 			} else {
-				?>
-				<h2>Failed to insert new member into database.</h2>
-				<?php
+				$insert_id = '9999';
+				$sgm       = new SendGridMail();
+				$body      = '';
+				foreach ( $new_member as $key => $value ) {
+					$body .= "Key: $key, Value: $value\n";
+				}
+
+				$email_status = $sgm->send_mail( 'ecsproull765@gmail.com', 'Failed New Member', 'Data: ' . $body );
 			}
 		}
 

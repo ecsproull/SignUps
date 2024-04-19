@@ -781,6 +781,26 @@ class SignupSettings extends SignUpsBase {
 		global $wpdb;
 		$sessions = unserialize( $post['sessions'] );
 		foreach ( $sessions as $session ) {
+			if ( isset( $post['new_member_rec_card'] ) ) {
+				$new_member                        = array();
+				$new_member['new_member_rec_card'] = $post['new_member_rec_card'];
+				$new_member['new_member_first']    = $post['firstname'];
+				$new_member['new_member_last']     = $post['lastname'];
+				$new_member['new_member_phone']    = $post['phone'];
+				$new_member['new_member_email']    = $post['email'];
+				$new_member['new_member_street']   = $post['new_member_street'];
+	
+				$result = $wpdb->insert( self::NEW_MEMBER_TABLE, $new_member );
+				if ( $result && $wpdb->insert_id ) {
+					$insert_id            = $wpdb->insert_id;
+					$post['badge_number'] = $insert_id;
+				} else {
+					?>
+					<h1>Failed to insert new member into NEW_MEMBER_TABLE</h1>
+					<?php
+					return;
+				}
+			}
 
 			$new_attendee = array(
 				'attendee_session_id'   => (int) $session->session_id,
@@ -1023,7 +1043,11 @@ class SignupSettings extends SignUpsBase {
 						?>
 					</table>
 					<?php
-					$this->create_user_table( '', $signup_id );
+					if ( strpos( $signup_name, 'Woodshop Orientation' ) !== false ) {
+						$this->create_new_member_form();
+					} else {
+						$this->create_user_table( '', $signup_id );
+					}
 					?>
 					<input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="window.history.go( -1 );" value="Back"></td>
 					<input id="submit_attendees" class="btn btn-primary mt-2" type="submit" value="Complete Add" name="submit_attendees"><td>
