@@ -1394,7 +1394,7 @@ class SignupSettings extends SignUpsBase {
 				</tr>
 				<tr>
 					<td class="text-right mr-2"><label>Class Name:</label></td>
-					<td><input class="w-250px" type="text" name="signup_name" value="<?php echo esc_html( $data->signup_name ); ?>" /> </td>
+					<td><input class="w-250px" type="text" name="signup_name" value="<?php echo esc_html( $data->signup_name ); ?>" maxlength="148" /> </td>
 				</tr>
 				<tr>
 					<td class="text-right mr-2"><label>Category:</label></td>
@@ -1673,7 +1673,7 @@ class SignupSettings extends SignUpsBase {
 				<label class="label-margin-top mr-2" for="description_title">*Title:</label>
 			</div>
 			<div>
-				<input type="text" id="description_title" class="mt-2 w-100" 
+				<input type="text" id="description_title" class="mt-2 w-100" maxlength="148"
 					value="" placeholder="Description Title" name="description_title" required>
 			</div>
 			<div class="text-right">

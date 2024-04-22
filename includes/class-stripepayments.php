@@ -318,24 +318,41 @@ class StripePayments extends SignUpsBase {
 		}
 
 		if ( $payment_complete ) {
-			$results = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT * FROM %1s
-					WHERE member_badge = %s',
-					self::MEMBERS_TABLE,
-					$badge_number
-				),
-				OBJECT
-			);
+			$email = null;
+			if ( (int) $badge_number > 1000 ) {
+				$results = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT * FROM %1s
+						WHERE member_badge = %s',
+						self::MEMBERS_TABLE,
+						$badge_number
+					),
+					OBJECT
+				);
 
-			if ( $results[0]->member_email ) {
+				$email = $results[0]->member_email;
+			} else {
+				$results = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT * FROM %1s
+						WHERE new_member_id = %s',
+						self::NEW_MEMBER_TABLE,
+						$badge_number
+					),
+					OBJECT
+				);
+
+				$email = $results[0]->new_member_email;
+			}
+
+			if ( $email ) {
 				$signup_parts = explode( '-', $payment_row->payments_signup_description );
 				$body         = 'You are signed up for ' . $payment_row->payments_signup_description . ' and your payment id is : ' . $payment_row->payments_intent_id;
 				$sgm          = new SendGridMail();
-				$email_status = $sgm->send_mail( $results[0]->member_email, 'You are signed up for ' . $signup_parts[0], $body );
+				$email_status = $sgm->send_mail( $email, 'You are signed up for ' . $signup_parts[0], $body );
 				if ( $email_status ) {
 					?>
-					<h2>An email was set to <?php echo esc_html( $results[0]->member_email ); ?> with your payment id : <?php echo esc_html( $payment_row->payments_intent_id ); ?></h2>
+					<h2>An email was set to <?php echo esc_html( $email ); ?> with your payment id : <?php echo esc_html( $payment_row->payments_intent_id ); ?></h2>
 					<?php
 				}
 			}
