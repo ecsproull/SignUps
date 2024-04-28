@@ -206,6 +206,7 @@ input[type='radio'] {
 	width:100%
 }
 
+.report-form button,
 .email-button {
 	background: none!important;
     border: none;
@@ -223,6 +224,13 @@ input[type='radio'] {
 	align-items: center;
 	text-align: center;
 	justify-content: space-between;
+}
+
+.attendees_list {
+	display: grid;
+	grid-template-columns:   33% 33% 34%;
+	text-align: left;
+	font-size: large;
 }
 
 .submit-block {
@@ -276,11 +284,12 @@ input[type='radio'] {
 }
 
 .class-description-box {
+	width: 80%;
+    max-width: 1100px;
+	margin-left: 60px;
 	display: grid;
-	#width: 1000px;
-	grid-template-columns: 15% 18% 15% 18% 12% 21%;
+	grid-template-columns: 13% 18% 13% 18% 13% 18%;
 	align-items: start;
-	justify-content: space-between;
 }
 
 .description-box {
@@ -466,6 +475,15 @@ input::-webkit-inner-spin-button {
 		grid-template-columns: 50% 50%;
 		align-items: start;
 		justify-content: space-between;
+	}
+
+	.class-description-box {
+		width: 80%;
+		max-width: 1100px;
+		margin-left: 60px;
+		display: grid;
+		grid-template-columns: 20% 30% 20% 30%;
+		align-items: start;
 	}
 }
 

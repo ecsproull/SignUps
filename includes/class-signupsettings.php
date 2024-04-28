@@ -1381,117 +1381,164 @@ class SignupSettings extends SignUpsBase {
 			<h1><?php echo esc_html( $data->signup_name ); ?> </h1>
 		</div>
 		<form method="POST" >
-			<table class="table table-striped mr-auto ml-auto">
-				<tr>
-					<td class="text-right">
-						<button type="button" id="copy-signup-link" class="btn btn-secondary mr-2 mt-2">Copy URL</button>
-					</td>
-					<td id="signup-url">
-						<?php
-						echo esc_html( $signup_url );
+			<div class="description-box mr-auto ml-auto">
+				<div class="text-right">
+					<button type="button" id="copy-signup-link" class="btn btn-secondary mr-2 mt-2">Copy URL</button>
+				</div>
+				<div id="signup-url" class="mt-3">
+					<?php
+					echo esc_html( $signup_url );
+					?>
+				</div>
+
+				<div class="text-right mr-2">
+					<label>Class Name:</label>
+				</div>
+
+				<div>
+					<input class="mb-2 w-250px" type="text" name="signup_name" value="<?php echo esc_html( $data->signup_name ); ?>" maxlength="148" />
+				</div>
+
+				<div class="text-right mr-2">
+					<label>Category:</label>
+				</div>
+				<div class="mb-2">
+					<select name="signup_category">
+					<?php
+					foreach ( $categories as $category ) {
 						?>
-					</td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>Class Name:</label></td>
-					<td><input class="w-250px" type="text" name="signup_name" value="<?php echo esc_html( $data->signup_name ); ?>" maxlength="148" /> </td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>Category:</label></td>
-					<td><select name="signup_category">
+						<option value=<?php	echo esc_html( $category->category_id ); ?> 
+							<?php echo $category->category_id === $data->signup_category ? 'selected' : ''; ?>
+							><?php echo esc_html( $category->category_title ); ?></option>
 						<?php
-						foreach ( $categories as $category ) {
-							?>
-							<option value=<?php	echo esc_html( $category->category_id ); ?> 
-								<?php echo $category->category_id === $data->signup_category ? 'selected' : ''; ?>
-								><?php echo esc_html( $category->category_title ); ?></option>
-							<?php
-						}
-						?>
-					</select></td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>Contact Email:</label></td>
-					<td><input class="w-250px" type="email" name="signup_contact_email" value="<?php echo esc_html( $data->signup_contact_email ); ?>" /> </td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>Contact Name:</label></td>
-					<td><input class="w-250px" type="text" name="signup_default_contact_name" value="<?php echo esc_html( $data->signup_default_contact_name ); ?>" /> </td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>Location:</label></td>
-					<td><input class="w-250px" type="text" name="signup_location" value="<?php echo esc_html( $data->signup_location ); ?>" /> </td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>User Group:</label></td>
-					<td><select name="signup_group">
+					}
+					?>
+					</select>
+				</div>
+
+				<div class="text-right mr-2">
+					<label>Contact Email:</label>
+				</div>
+				<div class="mb-2">
+					<input class="w-250px" type="email" name="signup_contact_email" value="<?php echo esc_html( $data->signup_contact_email ); ?>" />
+				</div>
+
+				<div class="text-right mr-2">
+					<label>Contact Name:</label>
+				</div>
+				<div class="mb-2">
+					<input class="w-250px" type="text" name="signup_default_contact_name" value="<?php echo esc_html( $data->signup_default_contact_name ); ?>" />
+				</div>
+
+				<div class="text-right mr-2">
+					<label>Location:</label>
+				</div>
+				<div class="mb-2">
+					<input class="w-250px" type="text" name="signup_location" value="<?php echo esc_html( $data->signup_location ); ?>" />
+				</div>
+
+				<div class="text-right mr-2">
+					<label>User Group:</label>
+				</div>
+				<div class="mb-2">
+					<select name="signup_group">
 						<option value="">Members</option>
 						<option value="residents" <?php echo 'residents' === $data->signup_group ? 'selected' : ''; ?> >Residents</option>
 						<option value="cnc" <?php echo 'cnc' === $data->signup_group ? 'selected' : ''; ?> >Cnc Users</option>
 						<option value="laser" <?php echo 'laser' === $data->signup_group ? 'selected' : ''; ?> >Laser Users</option>
-					</select> </td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>Cost:</label></td>
-					<td><input class="w-75px" type="number" name="signup_cost" 
-						value="<?php echo esc_html( $data->signup_cost ); ?>" /> </td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>Default Slots:</label></td>
-					<td><input class="w-75px" type="number" name="signup_default_slots" 
-						value="<?php echo esc_html( $data->signup_default_slots ); ?>" /> </td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>Default Minimum:</label></td>
-					<td><input class="w-75px" type="number" name="signup_default_minimum" 
-						value="<?php echo esc_html( $data->signup_default_minimum ); ?>" /> </td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>Default Start Time of Day:</label></td>
-					<td><input class="w-125px" type="time" name="signup_default_start_time" placeholder="12:00 AM" 
-						value="<?php echo esc_html( $data->signup_default_start_time ); ?>" /> </td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>Default Class Duration:</label></td>
-					<td><input id="signup_duration" class="w-125px" type="text" name="signup_default_duration" 
-						value="<?php echo esc_html( substr( $data->signup_default_duration, 0, 5 ) ); ?>"
-						placeholder="--:--" pattern="[0-9]{1,2}:[0-9]{2}" /> </td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>Default Days Between Classes:</label></td>
-					<td><input class="w-75px" type="number" name="signup_default_days_between_sessions" 
-						value="<?php echo esc_html( $data->signup_default_days_between_sessions ); ?>" /> </td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>Default Day of Month:</label></td>
-					<td><input class="w-250px" type="text" name="signup_default_day_of_month" 
-						value="<?php echo esc_html( $data->signup_default_day_of_month ); ?>" /> </td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>Schedule Description:</label></td>
-					<td><input class="w-250px" type="text" name="signup_schedule_desc"
-						value="<?php echo esc_html( $data->signup_schedule_desc ); ?>"
-						placeholder="Leave Blank unless the class doesn't meet regularly" /> </td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>Rolling Template:</label></td>
-					<td>
-					<?php
-						$this->load_template_selection( $data->signup_rolling_template, false, 'signup_rolling_template' );
-					?>
-					</td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>Admin Approved:</label></td>
-					<td><input class="w-75px" type="checkbox" name="signup_admin_approved" value="" 
-						<?php echo esc_html( $data->signup_admin_approved ) == '1' ? 'checked ' : ''; ?> /> </td>
+					</select>
+				</div>
 
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back"></td>
-					<td><input class="btn bt-md btn-primary mr-auto ml-auto mt-2" type="submit" value="Submit" name="submit_class"></td>
-				</tr>
-			</table>
+				<div class="text-right mr-2">
+					<label>Cost:</label>
+				</div>
+				<div class="mb-2"><input class="w-75px" type="number" name="signup_cost" 
+					value="<?php echo esc_html( $data->signup_cost ); ?>" />
+				</div>
+
+				<div class="text-right mr-2">
+					<label>Default Slots:</label>
+				</div>
+				<div class="mb-2"><input class="w-75px" type="number" name="signup_default_slots" 
+					value="<?php echo esc_html( $data->signup_default_slots ); ?>" />
+				</div>
+
+				<div class="text-right mr-2">
+					<label>Default Minimum:</label>
+				</div>
+				<div class="mb-2"><input class="w-75px" type="number" name="signup_default_minimum" 
+					value="<?php echo esc_html( $data->signup_default_minimum ); ?>" />
+				</div>
+
+				<div class="text-right mr-2">
+					<label>Default Start Time of Day:</label>
+				</div>
+				<div class="mb-2"><input class="w-125px" type="time" name="signup_default_start_time" placeholder="12:00 AM" 
+					value="<?php echo esc_html( $data->signup_default_start_time ); ?>" />
+				</div>
+
+				<div class="text-right mr-2">
+					<label>Default Class Duration:</label>
+				</div>
+				<div class="mb-2"><input id="signup_duration" class="w-125px" type="text" name="signup_default_duration" 
+					value="<?php echo esc_html( substr( $data->signup_default_duration, 0, 5 ) ); ?>"
+					placeholder="--:--" pattern="[0-9]{1,2}:[0-9]{2}" />
+				</div>
+
+				<div class="text-right mr-2">
+					<label>Default Days Between Classes:</label>
+				</div>
+				<div class="mb-2"><input class="w-75px" type="number" name="signup_default_days_between_sessions" 
+					value="<?php echo esc_html( $data->signup_default_days_between_sessions ); ?>" />
+				</div>
+
+				<div class="text-right mr-2">
+					<label>Default Day of Month:</label>
+				</div>
+				<div class="mb-2">
+					<input class="w-250px" type="text" name="signup_default_day_of_month" 
+						value="<?php echo esc_html( $data->signup_default_day_of_month ); ?>" />
+				</div>
+
+				<div class="text-right mr-2">
+					<label>Schedule Description:</label>
+				</div>
+				<div class="mb-2"><input class="w-250px" type="text" name="signup_schedule_desc"
+					value="<?php echo esc_html( $data->signup_schedule_desc ); ?>"
+					placeholder="Leave Blank unless the class doesn't meet regularly" />
+				</div>
+
+				<div class="text-right mr-2">
+					<label>Rolling Template:</label>
+				</div>
+				<div class="mb-2">
+				<?php
+					$this->load_template_selection( $data->signup_rolling_template, false, 'signup_rolling_template' );
+				?>
+				</div>
+
+				<div class="text-right mr-2">
+					<label>Admin Approved:</label>
+				</div>
+				<div class="mb-2"><input class="w-75px" type="checkbox" name="signup_admin_approved" value="" 
+					<?php echo esc_html( $data->signup_admin_approved ) == '1' ? 'checked ' : ''; ?> /> </div>
+
+				<div class="text-right mr-2">
+					<input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back">
+				</div>
+				<div class=>
+					<input class="btn bt-md btn-primary mr-auto ml-auto mt-2" type="submit" value="Submit" name="submit_class">
+				</div>
+
+				<div class="text-right">
+					<label class="label-margin-top mr-2" for="description_preclass_mail">Pre-class Email:</label>
+				</div>
+				<div class="text-left pt-2">
+					<input type="number" id="description_preclass_mail" class="w-100" 
+						value="1" name="signup_preclass_email" required>
+				</div>
+
+			</div>
 			<input type="hidden" name="id" value="<?php echo esc_html( $data->signup_id ); ?>">
 			<input type="hidden" name="original_cost" value="<?php echo esc_html( $data->signup_cost ); ?>">
 			<input type="hidden" name="signup_default_price_id" value="<?php echo esc_html( $data->signup_default_price_id ); ?>">
@@ -1706,7 +1753,7 @@ class SignupSettings extends SignUpsBase {
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_contact_name">*Contact Name:</label>
 			</div>
-			<div>
+			<div class="text-left">
 				<input type="text" id="description_contact_name" class="mt-2 w-100" 
 					value="" placeholder="Contact Names" name="description_contact_name" required>
 			</div>
@@ -1714,7 +1761,7 @@ class SignupSettings extends SignUpsBase {
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_contact_email">*Contact Email:</label>
 			</div>
-			<div>
+			<div class="text-left">
 				<input type="text" id="description_contact_email" class="mt-2 w-100" 
 					value="" placeholder="Contact Email" name="description_contact_email" required>
 			</div>
@@ -1722,7 +1769,7 @@ class SignupSettings extends SignUpsBase {
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_location">*Location:</label>
 			</div>
-			<div>
+			<div class="text-left">
 				<input type="text" id="description_location" class="mt-2 w-100 without_ampm"
 					value="SCW Woodclub" placeholder="Woodshop, library..." name="description_location" required>
 			</div>
@@ -1730,7 +1777,7 @@ class SignupSettings extends SignUpsBase {
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_slots">*Slots:</label>
 			</div>
-			<div>
+			<div class="text-left">
 				<input type="number" id="description_slots" class="mt-2 w-100 h-2rem" 
 					value="3" name="description_slots" required>
 			</div>
@@ -1738,7 +1785,7 @@ class SignupSettings extends SignUpsBase {
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="signup_default_minimum">*Min Attendees:</label>
 			</div>
-			<div>
+			<div class="text-left">
 				<input type="number" id="signup_default_minimum" class="mt-2 w-100" 
 					value="1" name="signup_default_minimum" required>
 			</div>
@@ -1746,7 +1793,7 @@ class SignupSettings extends SignUpsBase {
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_start">*First Session:</label>
 			</div>
-			<div>
+			<div class="text-left">
 				<input type="datetime-local" id="description_start" class="mt-2 w-100 h-2rem" 
 					value="" name="description_start" required>
 			</div>
@@ -1754,7 +1801,7 @@ class SignupSettings extends SignUpsBase {
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_cost">*Cost:</label>
 			</div>
-			<div>
+			<div class="text-left">
 				<input type="number" id="description_cost" class="mt-2 w-100 h-2rem" 
 					value="0" name="description_cost" required>
 			</div>
@@ -1762,7 +1809,7 @@ class SignupSettings extends SignUpsBase {
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_duration">*Duration:</label>
 			</div>
-			<div>
+			<div class="text-left">
 				<input type="text" id="description_duration" class="mt-2 w-100 without_ampm h-2rem"
 					value="2:00" placeholder="--:--" pattern="[0-9]{1,2}:[0-9]{2}" name="description_duration" required>
 			</div>
@@ -1770,7 +1817,7 @@ class SignupSettings extends SignUpsBase {
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="signup_Repeat">Repeat:</label>
 			</div>
-			<div>
+			<div class="text-left">
 				<select id="signup_Repeat" class="mt-2 w-100 h-2rem" name="description_repeat">
 					<option value="7">Weekly</option>
 					<option value="14">Two Weeks</option>
@@ -1783,7 +1830,7 @@ class SignupSettings extends SignUpsBase {
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="signup_group">User Group:</label>
 			</div>
-			<div>
+			<div class="text-left">
 				<select id="signup_group" class="mt-2 w-100 h-2rem" name="description_group">
 					<option value="">Members</option>
 					<option value="residents">Residents</option>
@@ -1795,14 +1842,14 @@ class SignupSettings extends SignUpsBase {
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="session_end_repeat">End Repeat:</label>
 			</div>
-			<div>
+			<div class="text-left">
 				<input type="date" id="session_end_repeat" class="mt-2 w-100 h-2rem" 
 					value="" placeholder="" name="session_end_repeat">
 			</div>
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="session_add_slots_count">Repeat Count:</label>
 			</div>
-			<div>
+			<div class="text-left">
 				<input type="number" id="session_add_slots_count" class="mt-2 w-100" 
 					value="1" name="session_add_slots_count" required>
 			</div>
@@ -1818,6 +1865,13 @@ class SignupSettings extends SignUpsBase {
 			</div>
 			<div class="text-left ml-2 pt-2"><input type="checkbox" id="description_add_cal" class="mt-2"  
 				name="description_add_cal" /> 
+			</div>
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="description_preclass_mail">Pre-class Email:</label>
+			</div>
+			<div class="text-left pt-2">
+			<input type="number" id="description_preclass_mail" class="w-100" title="Days B4 lass to send reminder"
+					value="1" name="signup_preclass_email" required>
 			</div>
 		</div>
 

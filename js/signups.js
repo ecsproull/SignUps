@@ -155,7 +155,7 @@ jQuery( document ).ready( function($){
 			config.height = '500px';
 		};
 	}
-	var scw_submitting = 0;
+
 	$("#get_member_button").click(function(){
 		var req = $.ajax({
 			url: wpApiSettings.root + 'scwmembers/v1/members',

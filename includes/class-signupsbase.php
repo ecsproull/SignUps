@@ -629,7 +629,37 @@ class SignUpsBase {
 			),
 			OBJECT
 		);
+		
+		////************To be removed */
+		$template2 = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE template_id = %s',
+				self::SIGNUP_TEMPLATE_TABLE,
+				'4'
+			),
+			OBJECT
+		);
 
+		$template_items2 = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT template_item_day_of_week,
+				template_item_title,
+				template_item_slots,
+				template_item_start_time,
+				template_item_duration,
+				template_item_shifts,
+				template_item_group,
+				template_item_column
+				FROM %1s
+				WHERE template_item_template_id = %s',
+				self::SIGNUP_TEMPLATE_ITEM_TABLE,
+				$template2[0]->template_id
+			),
+			OBJECT
+		);
+		////************************ */
 		$description_html = null;
 		$description = $this->get_signup_html( $rolling_signup_id );
 		if ( $description ) {
@@ -646,6 +676,8 @@ class SignUpsBase {
 			$admin,
 			$secret,
 			$description_html,
+			$template2,
+			$template_items2,
 			$rolling_days
 		);
 	}
@@ -746,6 +778,8 @@ class SignUpsBase {
 		$admin,
 		$secret,
 		$description,
+		$template2,
+		$template_items2,
 		$rolling_days = null
 	) {
 		$start_date = new DateTime( 'now', $this->date_time_zone );
@@ -804,6 +838,12 @@ class SignUpsBase {
 							$comment_name   = 'comment-';
 							$comment_row_id = 'comment-row-';
 							while ( $start_date <= $end_date ) {
+								$datetime = new DateTime( '04/29/2024 12:00 AM' );
+								if ( $start_date > $datetime && $signup_id === '1') {
+									//$template       = $template2;
+									$template_items = $template_items2;
+								}
+
 								$day_of_week = $start_date->format( 'N' );
 								$day_items   = array_filter(
 									$template_items,
@@ -812,18 +852,6 @@ class SignUpsBase {
 									},
 									ARRAY_FILTER_USE_BOTH
 								);
-
-								/* $datetime = new DateTime( '05/01/2024 12:00 AM' );
-								if ( $start_date > $datetime ) {
-									foreach ( $day_items as $item ) {
-										if ( 'Floor Manager' === $item->template_item_title ||
-											'Tool Crib' === $item->template_item_title ) {
-												$item->template_item_shifts   = '4';
-												$item->template_item_duration = '02:00:00';
-										}
-									}
-								} */
-
 								usort(
 									$day_items,
 									function ( $a, $b ) {

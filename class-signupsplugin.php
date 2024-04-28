@@ -178,7 +178,7 @@ class SignupsPlugin extends SignUpsBase {
 		$user_pages[] = 'signup-description-editor';
 		$user_pages[] = 'submit-new-signup';
 		$user_pages[] = 'signups';
-		$user_pages[] = 'cnc-usage-report';
+		$user_pages[] = 'reports';
 		if ( ! is_page( $user_pages ) ) {
 			return;
 		}

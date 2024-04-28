@@ -28,6 +28,9 @@ class ShortCodes extends SignUpsBase {
 			$admin = $admin_view['admin'];
 		}
 		$post = wp_unslash( $_POST );
+		if ( 0 === count( $post ) ) {
+			$post = wp_unslash( $_GET );
+		}
 		if ( isset( $post['mynonce'] ) && wp_verify_nonce( $post['mynonce'], 'signups' ) ) {
 			if ( isset( $post['continue_signup'] ) ) {
 				$this->create_signup_form( $post['continue_signup'], $post['secret'] );
@@ -35,7 +38,7 @@ class ShortCodes extends SignUpsBase {
 				$this->create_email_form( $post );
 			} elseif ( isset( $post['email_session'] ) ) {
 				$this->create_email_form( $post, false );
-			}elseif ( isset( $post['send_email'] ) ) {
+			} elseif ( isset( $post['send_email'] ) ) {
 				$this->send_email( $post );
 			} elseif ( isset( $post['rolling_days_new'] ) ) {
 				$this->create_rolling_session( $post['add_attendee_session'], null, false, $post['rolling_days_new'] );
@@ -48,7 +51,7 @@ class ShortCodes extends SignUpsBase {
 			} elseif ( isset( $post['home'] ) ) {
 				$this->create_select_signup();
 			} elseif ( isset( $post['signup_id'] ) ) {
-				if ( '-1' === $post['signup_id']  ) {
+				if ( '-1' === $post['signup_id'] ) {
 					$this->create_select_signup();
 				} else {
 					$this->create_description_form( $post['signup_id'] );
@@ -654,7 +657,7 @@ class ShortCodes extends SignUpsBase {
 	 */
 	private function create_select_signup_form( $signups, $categories ) {
 		?>
-		<form method="POST">
+		<form method="GET">
 			<div id="usercontent">
 				<div id="signup-select" class="signup-category-list selection-font mb-100px mr-auto ml-auto mt-5">
 					<?php
@@ -1008,7 +1011,7 @@ class ShortCodes extends SignUpsBase {
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Description: </div>
 				<div class="instruct"><?php echo html_entity_decode( $description_object->description_html ); ?></div>
 			</div>
-			<form class="ml-auto mr-auto" method="POST">
+			<form class="ml-auto mr-auto" method="GET">
 				<div class="submit-row-grid mt-4">
 					<div>
 						<button type="submit" class="btn btn-md bg-primary mr-2" value="-1" name="home">Cancel</button>
