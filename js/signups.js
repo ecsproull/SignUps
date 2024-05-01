@@ -199,6 +199,91 @@ jQuery( document ).ready( function($){
 		});
 	});
 
+	$("#search_button").click(function(){
+
+		if ($('#search-results').html()) {
+			$('#search-results').html("");
+		}
+
+		if (!$("#search-input").val()) {
+			return;
+		}
+
+		$.ajax({
+			url: wpApiSettings.root + 'scwmembers/v1/search',
+			method: 'GET',
+			beforeSend: function (xhr) {
+				xhr.setRequestHeader('X-WP-Nonce', wpApiSettings.nonce);
+			},
+			data:{
+				'text' : $("#search-input").val(),
+				'key' : '9523a157-8ee7-5401-9f91-abccea39fe2f'
+			}
+		}).done(function (response) {
+			if (response.length === 1) {
+				$('.member-first-name').each(function () { $(this).val(response[0].member_firstname); });
+				$('.member-last-name').each(function () { $(this).val(response[0].member_lastname); });
+				$('.member-email').each(function () { $(this).val(response[0].member_email); });
+				$('.member-phone').each(function () { $(this).val(response[0].member_phone);  });
+				$('.member-badge').each(function () { $(this).val(response[0].member_badge);  });
+				$('#user-secret').val(response[0].member_secret);
+				$("#selection-table").prop("hidden", false);
+				$('button[type="submit"]').each(function() {
+					$(this).removeAttr('disabled');
+				});
+
+				if ($("#remember_me").is(":checked")){
+					Cookies.set('signups_scw_badge', response[0].badge);
+				}
+				$('.rolling-remove-chk').prop("hidden", true);
+				$('badgeclass').prop("hidden", false);
+			} else if (response.length > 1) {
+				response.forEach(function (r,i) {
+					var val = r.member_badge + ',' + r.member_firstname + ',' + r.member_lastname + ',' + r.member_email + ',' + r.member_phone;
+					$('#search-results').append(
+					'<div><button class="btn btn-primary add-instructor-button"type="button" value="' + val + '">Add</button></div>' +
+					'<div>' + r.member_badge + '</div>' +
+					'<div>' + r.member_firstname + '</div>' +
+					'<div>' + r.member_lastname + '</div>' +
+					'<div>' + r.member_email + '</div>')
+					'<div>' + r.member_phone + '</div>';
+				});
+
+				$(".add-instructor-button").click( function(e) {
+					var data = $(this).val().split(',');
+					if ($('#inst-list').length) {
+						$('#inst-list').append(
+							'<div><input class="w-99" type="text" name="instructors_badge[]" value="' + data[0] + '"></div>' +
+							'<div><input class="w-99" type="text" name="instructors_name[]" value="' + data[1] + ' ' + data[2] + '"></div>' +
+							'<div><input class="w-99" type="text" name="instructors_email[]" value="' + data[3] + '"></div>' +
+							'<div><input class="w-99" type="text" name="instructors_phone[]" value="' + data[4] + '"></div>' +
+							'<div><input class="form-check-input ml-2 remove-chk mt-2" type="checkbox" name="instructors_remove[]"' +
+										'value="' + $('.member-badge').val() + '"></div>' +
+							'<input type="hidden" name="instructors_id[]" value="">'
+						);
+					} else {
+						$('.member-first-name').each(function () { $(this).val(data[1]); });
+						$('.member-last-name').each(function () { $(this).val(data[2]); });
+						$('.member-email').each(function () { $(this).val(data[3]); });
+						$('.member-phone').each(function () { $(this).val(data[4]);  });
+						$('.member-badge').each(function () { $(this).val(data[0]);  });
+						$('#search-results').html("");
+					}
+				});
+			} else {
+				alert('Search string not found')
+			}
+		}).error(function (response) {
+			if (response.status == 409) {
+				alert('Error: ' + response.status + ' Search string must be at least 3 characters. \n Letters, numbers, the @ and a period will be accepted.');
+			} else if (response.status == 401) {
+				alert('Error: ' + response.status + ' Unauthorized Access.');
+			} else {
+				alert('Error: ' + response.status + ' Unknown Error.');
+			}
+		});
+	});
+
 	$("#remember_me").click(function() {
 		var badgeToSet = "";
 		if ($("#remember_me").is(":checked")){

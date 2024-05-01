@@ -148,8 +148,7 @@ class SignupSettings extends SignUpsBase {
 	 */
 	private function submit_class( $post ) {
 		global $wpdb;
-		$where                   = array();
-		$where['signup_id']      = (int) $post['id'];
+		$signup_id               = (int) $post['id'];
 		$original_cost           = $post['original_cost'];
 		$signup_default_price_id = $post['signup_default_price_id'];
 		$signup_product_id       = $post['signup_product_id'];
@@ -157,11 +156,11 @@ class SignupSettings extends SignUpsBase {
 		unset( $post['id'] );
 		unset( $post['original_cost'] );
 
-		$post['signup_cost']             = (int) $post['signup_cost'];
-		$post['signup_default_slots']    = (int) $post['signup_default_slots'];
-		$post['signup_rolling_template'] = (int) $post['signup_rolling_template'];
-		$post['signup_group']            = 'member' === $post['signup_group'] ? '' : $post['signup_group'];
-		//unset( $post['template_id'] );
+		$post['signup_cost']                 = (int) $post['signup_cost'];
+		$post['signup_default_slots']        = (int) $post['signup_default_slots'];
+		$post['signup_rolling_template']     = (int) $post['signup_rolling_template'];
+		$post['signup_group']                = 'member' === $post['signup_group'] ? '' : $post['signup_group'];
+		$post['signup_default_contact_name'] = $post['signup_contact_firstname'] . ' ' . $post['signup_contact_lastname'];
 
 		$duration_parts = explode( ':', $post['signup_default_duration'] );
 		if ( $duration_parts[0] > 12 ) {
@@ -171,19 +170,21 @@ class SignupSettings extends SignUpsBase {
 
 		if ( isset( $post['signup_admin_approved'] ) ) {
 			$post['signup_admin_approved'] = 1;
-			if ( $where['signup_id'] ) {
-				$this->add_remove_from_calendar( $where['signup_id'], $post['signup_name'], true );
+			if ( $signup_id ) {
+				$this->add_remove_from_calendar( $signup_id, $post['signup_name'], true );
 			}
 		} else {
 			$post['signup_admin_approved'] = 0;
-			if ( $where['signup_id'] ) {
-				$this->add_remove_from_calendar( $where['signup_id'], $post['signup_name'], false );
+			if ( $signup_id ) {
+				$this->add_remove_from_calendar( $signup_id, $post['signup_name'], false );
 			}
 		}
 
 		$affected_row_count = 0;
 		$stripe             = new StripePayments();
-		if ( $where['signup_id'] ) {
+		if ( $signup_id ) {
+			$where              = array();
+			$where['signup_id'] = $signup_id;
 			if ( (int) $original_cost !== $post['signup_cost'] ) {
 				$new_price_id = null;
 				if ( ! $signup_product_id ) {
@@ -210,7 +211,8 @@ class SignupSettings extends SignUpsBase {
 		} else {
 			$affected_row_count = $wpdb->insert( self::SIGNUPS_TABLE, $post );
 			if ( 1 === $affected_row_count ) {
-				$data               = array( 'signup_order' => $wpdb->insert_id );
+				$signup_id          = $wpdb->insert_id;
+				$data               = array( 'signup_order' => $signup_id );
 				$where              = array( 'signup_id' => $wpdb->insert_id );
 				$affected_row_count = $wpdb->update(
 					'wp_scw_signups',
@@ -220,9 +222,85 @@ class SignupSettings extends SignUpsBase {
 			}
 		}
 
-		$this->update_message( $affected_row_count, $wpdb->last_error, 'Class' );
-	}
+		if ( false !== $affected_row_count ) {
+			$class_instructors = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT *
+					FROM %1s
+					WHERE instructors_class_id = %d && instructors_badge = %s',
+					self::INSTRUCTORS_TABLE,
+					$signup_id,
+					$post['signup_contact_badge']
+				),
+				OBJECT
+			);
 
+			$instructor_id = -1;
+			if ( ! $class_instructors ) {
+				$data                            = array();
+				$data['instructors_badge']       = $post['signup_contact_badge'];
+				$data['instructors_name']        = $post['signup_default_contact_name'];
+				$data['instructors_email']       = $post['signup_contact_email'];
+				$data['instructors_phone']       = $post['signup_contact_phone'];
+				$data['instructors_class_id']    = $signup_id;
+				$data['instructors_class_title'] = $post['signup_name'];
+				$ret                             = $wpdb->insert( self::INSTRUCTORS_TABLE, $data );
+
+				if ( $ret ) {
+					$instructor_id = $wpdb->insert_id;
+				}
+			} else {
+				$instructor_id = $class_instructors[0]->instructors_id;
+			}
+
+			if ( $instructor_id ) {
+				$sessions_updated = 0;
+				$sessions = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT *
+						FROM %1s
+						WHERE session_signup_id = %s',
+						self::SESSIONS_TABLE,
+						$signup_id
+					),
+					OBJECT
+				);
+
+				foreach ( $sessions as $session ) {
+					$session_instructors = $wpdb->get_results(
+						$wpdb->prepare(
+							'SELECT *
+							FROM %1s
+							WHERE si_signup_id = %d && si_session_id = %d',
+							self::SESSION_INSTRUCTORS_TABLE,
+							$signup_id,
+							$session->session_id
+						),
+						OBJECT
+					);
+
+					if ( ! $session_instructors ) {
+						$data                     = array();
+						$data['si_signup_id']     = $signup_id;
+						$data['si_session_id']    = $session->session_id;
+						$data['si_instructor_id'] = (int) $instructor_id;
+						$sessions_updated += $wpdb->insert( self::SESSION_INSTRUCTORS_TABLE, $data );
+					}
+				}
+			} else {
+				?>
+				<h2> Failed to get instructor </h1>
+				<?php
+				return;
+			}
+		}
+
+		if ( $affected_rows === 0 && $sessions_updated < 0 ) {
+			$this->update_message( $sessions_updated, $wpdb->last_error, 'Session Instructors Added' );
+		} else {
+			$this->update_message( $affected_row_count, $wpdb->last_error, 'Class' );
+		}
+	}
 
 	/**
 	 * Submit session to databse.
@@ -233,7 +311,7 @@ class SignupSettings extends SignUpsBase {
 		global $wpdb;
 		$signup = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT signup_default_price_id
+				'SELECT signup_id, signup_default_price_id, signup_contact_badge
 				FROM %1s
 				WHERE signup_id = %s',
 				self::SIGNUPS_TABLE,
@@ -241,6 +319,20 @@ class SignupSettings extends SignUpsBase {
 			),
 			OBJECT
 		);
+
+		$default_instructor = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT instructors_id
+				FROM %1s
+				WHERE instructors_class_id = %s && instructors_badge = %s',
+				self::INSTRUCTORS_TABLE,
+				$post['session_signup_id'],
+				$signup[0]->signup_contact_badge
+			),
+			OBJECT
+		);
+
+		$default_instructor_id = $default_instructor->instructors_id;
 
 		$wpdb->get_results(
 			$wpdb->prepare(
@@ -279,7 +371,12 @@ class SignupSettings extends SignUpsBase {
 		$total_rows_updated = 0;
 		unset( $post['add_to_calendar'] );
 		array_map(
-			function( $start, $end, $keys ) use ( $post, $signup, $add_to_calendar, &$total_rows_updated ) {
+			function( $start, $end, $keys ) use (
+				$post,
+				$signup,
+				$add_to_calendar,
+				$default_instructor_id,
+				&$total_rows_updated ) {
 				global $wpdb;
 				if ( $start && $end ) {
 					$session = $post;
@@ -323,14 +420,23 @@ class SignupSettings extends SignUpsBase {
 						}
 					} else {
 						$rows_updated = $wpdb->insert( 'wp_scw_sessions', $session );
-						if ( 1 === $rows_updated && $add_to_calendar ) {
-							$mini_post = array(
-								'signup_id'   => $post['session_signup_id'],
-								'session_id'  => $wpdb->insert_id,
-								'signup_name' => $signup_name,
-							);
+						if ( 1 === $rows_updated ) {
+							$session_id = $wpdb->insert_id;
+							if ( $add_to_calendar ) {
+								$mini_post = array(
+									'signup_id'   => $post['session_signup_id'],
+									'session_id'  => $session_id,
+									'signup_name' => $signup_name,
+								);
 
-							$this->update_calendar( $mini_post );
+								$this->update_calendar( $mini_post );
+							}
+
+							$data                     = array();
+							$data['si_signup_id']     = $signup[0]->signup_id;
+							$data['si_session_id']    = $session_id;
+							$data['si_instructor_id'] = (int) $default_instructor_id;
+							$wpdb->insert( self::SESSION_INSTRUCTORS_TABLE, $data );
 						}
 					}
 
@@ -719,6 +825,16 @@ class SignupSettings extends SignUpsBase {
 		$rows          = $wpdb->delete( self::SESSIONS_TABLE, $where_session );
 		if ( $rows ) {
 			$rows_updated += $rows;
+			$wpdb->query(
+				$wpdb->prepare(
+					'DELETE FROM %1s
+					WHERE si_session_id = %d AND si_signup_id = %d',
+					self::SESSION_INSTRUCTORS_TABLE,
+					$post['session_id'],
+					$post['signup_id']
+				),
+				OBJECT
+			);
 		} else {
 			echo '<h1>Failed to delete session, id: ' . esc_html( $post['session_id'] ) . '</h1><br>';
 			$last_errors .= $wpdb->last_error;
@@ -1110,14 +1226,14 @@ class SignupSettings extends SignUpsBase {
 			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 			<div id="content" class="container">
 				<table class="mb-100px table mr-auto ml-auto mt-5">
-					<tr>
+					<!-- <tr>
 						<td>Add SignUp</td>
 						<td></td>
 						<td></td>
 						<td></td>
 						<td></td>
 						<td> <input class="submitbutton addItem" type="submit" name="add_new_class" value=""></td>
-					</tr>
+					</tr> -->
 					<tr>
 						<td>Add SignUp, Sessions and Description</td>
 						<td></td>
@@ -1415,8 +1531,22 @@ class SignupSettings extends SignUpsBase {
 					?>
 					</select>
 				</div>
-
 				<div class="text-right mr-2">
+					<label style="margin-top:75px;">Contact:</label>
+				</div>
+				<div class="text-left mb-3">
+				<?php
+				$this->create_lookup_member_table(
+					false,
+					$data->signup_contact_badge ? $data->signup_contact_badge : $data->signup_contact_email,
+					$data->signup_contact_firstname,
+					$data->signup_contact_lastname,
+					$data->signup_contact_email,
+					$data->signup_contact_phone
+				);
+				?>
+				</div>
+				<!-- <div class="text-right mr-2">
 					<label>Contact Email:</label>
 				</div>
 				<div class="mb-2">
@@ -1429,7 +1559,7 @@ class SignupSettings extends SignUpsBase {
 				<div class="mb-2">
 					<input class="w-250px" type="text" name="signup_default_contact_name" value="<?php echo esc_html( $data->signup_default_contact_name ); ?>" />
 				</div>
-
+ -->
 				<div class="text-right mr-2">
 					<label>Location:</label>
 				</div>
@@ -1517,6 +1647,14 @@ class SignupSettings extends SignUpsBase {
 				?>
 				</div>
 
+				<div class="text-right">
+					<label class="label-margin-top mr-2" for="description_preclass_mail">Pre-class Email:</label>
+				</div>
+				<div class="text-left pt-2">
+					<input type="number" id="description_preclass_mail" class="w-125px" 
+						value="1" name="signup_preclass_email" required disabled>
+				</div>
+
 				<div class="text-right mr-2">
 					<label>Admin Approved:</label>
 				</div>
@@ -1529,15 +1667,6 @@ class SignupSettings extends SignUpsBase {
 				<div class=>
 					<input class="btn bt-md btn-primary mr-auto ml-auto mt-2" type="submit" value="Submit" name="submit_class">
 				</div>
-
-				<div class="text-right">
-					<label class="label-margin-top mr-2" for="description_preclass_mail">Pre-class Email:</label>
-				</div>
-				<div class="text-left pt-2">
-					<input type="number" id="description_preclass_mail" class="w-100" 
-						value="1" name="signup_preclass_email" required>
-				</div>
-
 			</div>
 			<input type="hidden" name="id" value="<?php echo esc_html( $data->signup_id ); ?>">
 			<input type="hidden" name="original_cost" value="<?php echo esc_html( $data->signup_cost ); ?>">
@@ -1749,8 +1878,13 @@ class SignupSettings extends SignUpsBase {
 				</select>
 			</div>
 		</div>
+		<div class="contact-info">
+		<h2 class="text-center mt-3">--------------------- Contact Information ---------------------</h2>
+			<?php $this->create_lookup_member_table( true ); ?>
+		<h2 class="text-center">----------------------------------------------------------------</h2>
+		</div>
 		<div class="class-description-box">
-			<div class="text-right">
+		<!--	<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_contact_name">*Contact Name:</label>
 			</div>
 			<div class="text-left">
@@ -1765,7 +1899,7 @@ class SignupSettings extends SignUpsBase {
 				<input type="text" id="description_contact_email" class="mt-2 w-100" 
 					value="" placeholder="Contact Email" name="description_contact_email" required>
 			</div>
-
+				-->
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_location">*Location:</label>
 			</div>
@@ -1854,19 +1988,13 @@ class SignupSettings extends SignUpsBase {
 					value="1" name="session_add_slots_count" required>
 			</div>
 			<div class="text-right">
-				<label class="label-margin-top mr-2" for="signup_admin_approved">Admin Approved:</label>
+				<label class="label-margin-top mr-2" for="signup_admin_approved">Approved:</label>
 			</div>
 			<div class="text-left ml-2 pt-2"><input type="checkbox" id="signup_admin_approved" class="mt-2"  
 				name="signup_admin_approved" /> 
 			</div>
 
-			<div class="text-right">
-				<label class="label-margin-top mr-2" for="description_add_cal">Add to Calendar:</label>
-			</div>
-			<div class="text-left ml-2 pt-2"><input type="checkbox" id="description_add_cal" class="mt-2"  
-				name="description_add_cal" /> 
-			</div>
-			<div class="text-right">
+		    <div class="text-right">
 				<label class="label-margin-top mr-2" for="description_preclass_mail">Pre-class Email:</label>
 			</div>
 			<div class="text-left pt-2">
@@ -1931,7 +2059,7 @@ class SignupSettings extends SignUpsBase {
 		$new_signup                                = array();
 		$new_signup['signup_name']                 = $post['description_title'];
 		$new_signup['signup_contact_email']        = $post['description_contact_email'];
-		$new_signup['signup_default_contact_name'] = $post['description_contact_name'];
+		$new_signup['signup_default_contact_name'] = $post['signup_contact_firstname'] . ' ' . $post['signup_contact_lastname'];
 		$new_signup['signup_location']             = $post['description_location'];
 		$new_signup['signup_cost']                 = $post['description_cost'];
 		$new_signup['signup_default_slots']        = $post['description_slots'];
@@ -1941,6 +2069,11 @@ class SignupSettings extends SignUpsBase {
 		$new_signup['signup_schedule_desc']        = $post['signup_schedule_desc'];
 		$new_signup['signup_default_minimum']      = $post['signup_default_minimum'];
 		$new_signup['signup_category']             = $post['signup_category'];
+		$new_signup['signup_contact_firstname']    = $post['signup_contact_firstname'];
+		$new_signup['signup_contact_lastname']     = $post['signup_contact_lastname'];
+		$new_signup['signup_contact_badge']        = $post['signup_contact_badge'];
+		$new_signup['signup_contact_email']        = $post['signup_contact_email'];
+		$new_signup['signup_contact_phone']        = $post['signup_contact_phone'];
 
 		$start_date                              = new DateTime( $post['description_start'], $this->date_time_zone );
 		$new_signup['signup_default_start_time'] = date_format( $start_date, 'H:i' );
@@ -2028,6 +2161,7 @@ class SignupSettings extends SignUpsBase {
 				$new_session                            = array();
 				$new_session['session_start_time']      = $start_date->format( 'U' );
 				$new_session['session_start_formatted'] = $start_date->format( self::DATETIME_FORMAT );
+				
 				$start_date->modify( '+' . $duration_total_minutes . ' minutes' );
 				$new_session['session_end_time']              = $start_date->format( 'U' );
 				$new_session['session_end_formatted']         = $start_date->format( self::DATETIME_FORMAT );
@@ -2056,7 +2190,7 @@ class SignupSettings extends SignUpsBase {
 					if ( 1 !== $affected_row_count ) {
 						echo '<h1>Failed to Create Initial Session : ' . esc_html( $wpdb->last_error ) . '</h1>';
 					} else {
-						if ( isset( $post['description_add_cal'] ) ) {
+						if ( isset( $post['signup_admin_approved'] ) ) {
 							$mini_post = array(
 								'signup_id'   => $signup_id,
 								'session_id'  => $wpdb->insert_id,

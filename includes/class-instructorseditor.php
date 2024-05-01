@@ -76,14 +76,24 @@ class InstructorsEditor extends SignUpsBase {
 		}
 
 		if ( isset( $post['instructors_remove'] ) ) {
-			foreach( $post['instructors_remove'] as $badge ) {
+			foreach( $post['instructors_remove'] as $inst_id ) {
 				$wpdb->get_results(
 					$wpdb->prepare(
 						'DELETE
 						FROM %1s
-						WHERE instructors_badge = %s && instructors_class_id = %d',
+						WHERE instructors_id = %d',
 						self::INSTRUCTORS_TABLE,
-						$badge,
+						$inst_id
+					)
+				);
+
+				$wpdb->query(
+					$wpdb->prepare(
+						'DELETE
+						FROM %1s
+						WHERE si_instructor_id = %d && si_signup_id = %d',
+						self::SESSION_INSTRUCTORS_TABLE,
+						$inst_id,
 						$post['selected_class']
 					)
 				);
@@ -138,29 +148,17 @@ class InstructorsEditor extends SignUpsBase {
 							<?php
 						} else {
 							?>
-							<option value="<?php echo esc_html( $signup->signup_id ); ?>"><?php echo esc_html( $signup->signup_name ); ?> ></option>
+							<option value="<?php echo esc_html( $signup->signup_id ); ?>"><?php echo esc_html( $signup->signup_name ); ?></option>
 							<?php
 						}
 					}
 					?>
 				</select>
 			</div>
-			<table id="lookup-member" class="mb-2 mt-4 table table-bordered mr-auto ml-auto selection-font">
-				<tr>
-					<td class="text-right">Enter Badge#</td>
-					<td class="text-left"><input id="badge-input" class="member-badge" type="number" name="badge_number" value="">
-					<input type="button" id="get_member_button" class="btn btn-primary rounded" value='Lookup'></td>
-				</tr>
-				<tr>
-					<td class="text-right"><input id="first-name" class=" member-first-name" type="text" name="firstname" placeholder="First Name" value=""></td>
-					<td  class="text-left"><input id="last-name" class="member-last-name" type="text" name="lastname" placeholder="First Name" value="" ></td>
-				</tr>
-				<tr>
-					<td class="text-right"><input id="phone" class="member-phone" type="text" name="phone" 
-						value="" placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"></td>
-					<td><input id="email" class="member-email" type="email" name="email" value="" placeholder="foo@bar.com"></td>
-				</tr>
-			</table>
+			<?php
+			$this->create_lookup_member_table( true );
+			?>
+			<input id="first-name" class="member-badge" type="hidden" name="firstname" value="">
 			<div class="text-center mt-4">
 				<input type="button" id="add-instructor" class="btn btn-primary rounded" value='Add Instructor To List'>
 			</div>
@@ -178,7 +176,7 @@ class InstructorsEditor extends SignUpsBase {
 					<div><input class="w-99" type="text" name="instructors_email[]" value="<?php echo esc_html( $instructor->instructors_email ); ?>"></div>
 					<div><input class="w-99" type="text" name="instructors_phone[]" value="<?php echo esc_html( $instructor->instructors_phone ); ?>"></div>
 					<div><input class="form-check-input ml-2 remove-chk mt-2" type="checkbox" name="instructors_remove[]" 
-						value="<?php echo esc_html( $instructor->instructors_badge ); ?>"></div>
+						value="<?php echo esc_html( $instructor->instructors_id ); ?>"></div>
 					<input class="w-99" type="hidden" name="instructors_id[]" value="<?php echo esc_html( $instructor->instructors_id ); ?>">
 					<?php
 				}

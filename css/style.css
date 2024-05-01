@@ -23,19 +23,19 @@ button {
 }
 
 .w-125px {
-  width: 125px;
+  width: 125px!important;
 }
 
 .w-250px {
-    width: 250px;
+    width: 250px!important;
 }
 
 .w-300px {
-  width: 300px;
+  width: 300px!important;
 }
 
 .w-75px {
-    width: 75px;
+    width: 75px!important;
 }
 
 .w-90 {
@@ -98,6 +98,20 @@ button {
   display: grid;
   width: 300px;
   grid-template-columns: 155px 249px;
+  align-items: start;
+  justify-content: space-between;
+}
+
+.contact-info {
+  width:80%; 
+  max-width:1000px;
+}
+#search-results {
+  margin-left: 100px;
+  display: grid;
+  width: 80%;
+  max-width: 700px;
+  grid-template-columns: 10% 10% 25% 25% 30%;
   align-items: start;
   justify-content: space-between;
 }

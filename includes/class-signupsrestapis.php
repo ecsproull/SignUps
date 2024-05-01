@@ -178,8 +178,59 @@ class SignUpsRestApis extends SignUpsBase {
 
 		add_action(
 			'rest_api_init',
+			function () {
+				$this->register_route(
+					'scwmembers/v1',
+					'/search',
+					'search_members',
+					$this,
+					array(),
+					WP_REST_Server::READABLE
+				);
+			}
+		);
+
+		add_action(
+			'rest_api_init',
 			array( $this, 'regester_payment_route' )
 		);
+	}
+
+	/**
+	 * Get the attendees for an upcomming class
+	 *
+	 * @param  mixed $data Posted data to search with.
+	 * @return void
+	 */
+	public function search_members( $request ) {
+		global $wpdb;
+		$key      = '9523a157-8ee7-5401-9f91-abccea39fe2f';
+		if ( $request['key'] !== $key || ! current_user_can( 'administrator' ) ) {
+			return new WP_REST_Response( 'Unauthorized.', 401 );;
+		}
+
+		$pattern = '/^[a-zA-Z0-9@\.]{3,}$/ms';
+		if ( preg_match( $pattern, $request['text'] ) ) {
+			$results = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT * FROM %1s
+					WHERE member_badge LIKE %s OR 
+						member_firstname LIKE %s OR
+						member_lastname LIKE %s OR
+						member_email LIKE %s',
+					self::MEMBERS_TABLE,
+					'%' . $wpdb->esc_like( $request['text'] ) . '%',
+					'%' . $wpdb->esc_like( $request['text'] ) . '%',
+					'%' . $wpdb->esc_like( $request['text'] ) . '%',
+					'%' . $wpdb->esc_like( $request['text'] ) . '%'
+				),
+				OBJECT
+			);
+
+			return $results;
+		} 
+
+		return new WP_REST_Response( 'Bad search string.', 409 );
 	}
 
 	/**
@@ -223,7 +274,8 @@ class SignUpsRestApis extends SignUpsBase {
 	 *
 	 * @param  mixed $data Data for the request.
 	 * @return void
-	 */public function get_orientation_list( $data ) {
+	 */
+	public function get_orientation_list( $data ) {
 		global $wpdb;
 		$key      = '8c62a157-7ee8-5401-9f91-930eac39fe2f';
 		$data_obj = json_decode( $data->get_body(), false );
@@ -328,7 +380,7 @@ class SignUpsRestApis extends SignUpsBase {
 				$wpdb->prepare(
 					'SELECT *
 					FROM %1s
-					WHERE template_item_template_id = 1',
+					WHERE template_item_template_id = 4',
 					self::SIGNUP_TEMPLATE_ITEM_TABLE,
 					$signups[0]->signup_rolling_template
 				),

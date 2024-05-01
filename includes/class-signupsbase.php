@@ -414,6 +414,46 @@ class SignUpsBase {
 	}
 
 	/**
+	 * Creates a table that is used to look up a member.
+	 * Relies on the admin JS file.
+	 *
+	 * @return void
+	 */
+	protected function create_lookup_member_table( $center = false, $badge = '', $firstname = '', $lastname = '', $email = '', $phone = '' ) {
+		?>
+		<table id="lookup-member" class="mb-2 mt-4 table table-bordered selection-font <?php echo $center ? 'ml-auto mr-auto' : ''; ?>" style="width:0;">
+			<tr>
+				<td class="text-right">
+					<input id="search-input" class="member-badge" type="text" placeholder="Enter 3+ character string"
+						name="signup_contact_badge" value="<?php echo esc_html( $badge ); ?>" >
+				</td>
+				<td class="text-left"><input type="button" id="search_button" class="btn btn-primary rounded ml-4" value='Search'></td>
+			</tr>
+			<tr>
+				<td class="text-right">
+					<input id="first-name" class=" member-first-name" type="text" placeholder="First Name" readonly
+						name="signup_contact_firstname" value="<?php echo esc_html( $firstname ); ?>" >
+				</td>
+				<td  class="text-left">
+					<input id="last-name" class="member-last-name" type="text" placeholder="Last Name" readonly
+						name="signup_contact_lastname" value="<?php echo esc_html( $lastname ); ?>"></td>
+			</tr>
+			<tr>
+				<td class="text-right">
+					<input id="phone" class="member-phone" type="text" readonly name="signup_contact_phone"
+						value="<?php echo esc_html( $phone ); ?>" placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}">
+				</td>
+				<td>
+					<input id="email" class="member-email" type="email" name="signup_contact_email" placeholder="foo@bar.com"
+					value="<?php echo esc_html( $email ); ?>" readonly>
+				</td>
+			</tr>
+		</table>
+		<div id="search-results" class="ml-auto mr-auto"></div>
+		<?php
+	}
+
+	/**
 	 * Creates a section of HTML for the user to identify themselves.
 	 *
 	 * @param string $user_group The required group for this signup. Normally "member".
