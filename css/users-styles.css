@@ -206,6 +206,10 @@ input[type='radio'] {
 	width:100%
 }
 
+.instructor {
+	color: blue;
+}
+
 .report-form button,
 .email-button {
 	background: none!important;

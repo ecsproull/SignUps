@@ -179,6 +179,7 @@ class SignupsPlugin extends SignUpsBase {
 		$user_pages[] = 'submit-new-signup';
 		$user_pages[] = 'signups';
 		$user_pages[] = 'reports';
+		$user_pages[] = 'reports_old';
 		if ( ! is_page( $user_pages ) ) {
 			return;
 		}

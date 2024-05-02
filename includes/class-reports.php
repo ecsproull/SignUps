@@ -58,7 +58,9 @@ class Reports extends SignUpsBase {
 					wp_scw_attendees.attendee_lastname,
 					wp_scw_attendees.attendee_email,
 					wp_scw_attendees.attendee_phone,
-					wp_scw_sessions.session_start_formatted
+					wp_scw_sessions.session_start_formatted,
+					wp_scw_sessions.session_id,
+					wp_scw_sessions.session_signup_id
 				FROM wp_scw_sessions
 				LEFT JOIN wp_scw_attendees 
 				ON wp_scw_attendees.attendee_session_id = wp_scw_sessions.session_id
@@ -70,12 +72,28 @@ class Reports extends SignUpsBase {
 		);
 
 		$current_session_date = null;
+		$current_session_id   = null;
 		foreach ( $results as $attendee ) {
 			?>
 			<div class="attendees_list">
 				<?php
 				if ( $current_session_date !== $attendee->session_start_formatted ) {
 					$current_session_date = $attendee->session_start_formatted;
+					$current_session_id   = 'class_' . $attendee->session_id;
+					$instructors = $wpdb->get_results(
+						$wpdb->prepare(
+							'SELECT wp_scw_instructors.instructors_name,
+							wp_scw_instructors.instructors_email,
+							wp_scw_instructors.instructors_phone
+						from wp_scw_instructors
+						LEFT JOIN wp_scw_session_instructors
+						ON wp_scw_session_instructors.si_instructor_id =  wp_scw_instructors.instructors_id
+						WHERE wp_scw_session_instructors.si_session_id = %d',
+							$attendee->session_id
+						),
+						OBJECT
+					);
+			
 					?>
 					<div class="mt-2 font-weight-bold bg-lg text-right">
 						Session:
@@ -84,14 +102,28 @@ class Reports extends SignUpsBase {
 						<?php echo esc_html( $attendee->session_start_formatted ); ?>
 					</div>
 					<div class="mt-2 font-weight-bold bg-lg">
+						<button class="email-button instructors-email-class" value="<?php echo esc_html( $current_session_id ); ?>" >Copy Email Addresses</button>
 					</div>
 					<?php
+					foreach ( $instructors as $instructor ) {
+						?>
+						<div class="instructor">
+							<b>Instructor:</b> <?php echo esc_html( $instructor->instructors_name ); ?>
+						</div>
+						<div class="instructor <?php echo esc_html( $current_session_id ); ?>">
+							<?php echo esc_html( $instructor->instructors_email ); ?>
+						</div>
+						<div class="instructor">
+							<?php echo esc_html( $instructor->instructors_phone ); ?>
+						</div >
+						<?php
+					}
 				}
 				?>
 				<div>
 					<?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?>
 				</div>
-				<div>
+				<div class="<?php echo esc_html( $current_session_id ); ?>">
 					<?php echo esc_html( $attendee->attendee_email ); ?>
 				</div>
 				<div>

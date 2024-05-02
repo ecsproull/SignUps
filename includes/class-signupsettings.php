@@ -222,7 +222,7 @@ class SignupSettings extends SignUpsBase {
 			}
 		}
 
-		if ( false !== $affected_row_count ) {
+		if ( false !== $affected_row_count && 0 === $post['signup_rolling_template'] ) {
 			$class_instructors = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT *
@@ -295,7 +295,7 @@ class SignupSettings extends SignUpsBase {
 			}
 		}
 
-		if ( $affected_rows === 0 && $sessions_updated < 0 ) {
+		if ( 0 === $affected_rows && $sessions_updated < 0 ) {
 			$this->update_message( $sessions_updated, $wpdb->last_error, 'Session Instructors Added' );
 		} else {
 			$this->update_message( $affected_row_count, $wpdb->last_error, 'Class' );

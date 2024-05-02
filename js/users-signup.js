@@ -69,6 +69,16 @@ jQuery(document).ready(function($){
 		});
 	});
 
+	$(".instructors-email-class").click( function(e) {
+		var email_elements = $("." + $(document.activeElement).val());
+		var email_list = "";
+		email_elements.each((i, ele) => {
+			email_list += ele.innerText + ";";
+		});
+		navigator.clipboard.writeText(email_list);
+		alert ("Email addresses were copied to the clipboard.");
+	})
+
 	$("#badge-inp").on("blur", (e) => {
 		$("#get_member_button").trigger("click");
 	});
