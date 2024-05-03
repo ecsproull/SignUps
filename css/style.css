@@ -23,27 +23,27 @@ button {
 }
 
 .w-125px {
-  width: 125px!important;
+  width: 125px !important;
 }
 
 .w-250px {
-    width: 250px!important;
+    width: 250px !important;
 }
 
 .w-300px {
-  width: 300px!important;
+  width: 300px !important;
 }
 
 .w-75px {
-    width: 75px!important;
+    width: 75px !important;
 }
 
 .w-90 {
-  width: 90%!important;
+  width: 90% !important;
 }
 
 .w-99 {
-  width: 99%!important;
+  width: 99% !important;
 }
 
 .mt-25px {
@@ -71,11 +71,11 @@ button {
 }
 
 .mb-50px {
-  margin-bottom: 50px!important;
+  margin-bottom: 50px !important;
 }
 
 .mb-100px {
-    margin-bottom: 100px!important;
+    margin-bottom: 100px !important;
 }
 
 .mr-100px {
@@ -88,9 +88,9 @@ button {
 
 .select-lg {
   height: 3rem;
-  font-size: 20px!important;
+  font-size: 20px !important;
   font-weight: bold;
-  border-radius: 12px!important;
+  border-radius: 12px !important;
   border-block-width: 2px;
 }
 
@@ -188,7 +188,7 @@ tr > td > div.bg-danger {
 }
 
 .addChk {
-  background-color: lightgreen!important;
+  background-color: lightgreen !important;
 }
 
 .popup {

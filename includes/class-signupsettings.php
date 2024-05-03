@@ -159,6 +159,7 @@ class SignupSettings extends SignUpsBase {
 		$post['signup_cost']                 = (int) $post['signup_cost'];
 		$post['signup_default_slots']        = (int) $post['signup_default_slots'];
 		$post['signup_rolling_template']     = (int) $post['signup_rolling_template'];
+		$post['signup_preclass_email']       = (int) $post['signup_preclass_email'];
 		$post['signup_group']                = 'member' === $post['signup_group'] ? '' : $post['signup_group'];
 		$post['signup_default_contact_name'] = $post['signup_contact_firstname'] . ' ' . $post['signup_contact_lastname'];
 
@@ -267,6 +268,17 @@ class SignupSettings extends SignUpsBase {
 				);
 
 				foreach ( $sessions as $session ) {
+					$preclass_email_days = $post['signup_preclass_email'];
+					$data                = array();
+					$where               = array( 'session_id' => $session->session_id );
+
+					if ( $preclass_email_days > 0 ) {
+						$start_date = new DateTime( $session->session_start_formatted );
+						$start_date->sub( date_interval_create_from_date_string( $preclass_email_days . ' days' ) );
+						$data['session_preclass_email_date'] = $start_date->format( self::DATE_FORMAT2 );
+						$wpdb->update( self::SESSIONS_TABLE, $data, $where );
+					}
+
 					$session_instructors = $wpdb->get_results(
 						$wpdb->prepare(
 							'SELECT *
@@ -311,7 +323,7 @@ class SignupSettings extends SignUpsBase {
 		global $wpdb;
 		$signup = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT signup_id, signup_default_price_id, signup_contact_badge
+				'SELECT signup_id, signup_default_price_id, signup_contact_badge, signup_preclass_email
 				FROM %1s
 				WHERE signup_id = %s',
 				self::SIGNUPS_TABLE,
@@ -367,8 +379,9 @@ class SignupSettings extends SignUpsBase {
 		unset( $post['instructors_email'] );
 		unset( $post['instructors_phone'] );
 
-		$add_to_calendar    = isset( $post['add_to_calendar'] );
-		$total_rows_updated = 0;
+		$preclass_email_days = (int) $signup[0]->signup_preclass_email;
+		$add_to_calendar     = isset( $post['add_to_calendar'] );
+		$total_rows_updated  = 0;
 		unset( $post['add_to_calendar'] );
 		array_map(
 			function( $start, $end, $keys ) use (
@@ -376,6 +389,7 @@ class SignupSettings extends SignUpsBase {
 				$signup,
 				$add_to_calendar,
 				$default_instructor_id,
+				$preclass_email_days,
 				&$total_rows_updated ) {
 				global $wpdb;
 				if ( $start && $end ) {
@@ -392,9 +406,15 @@ class SignupSettings extends SignUpsBase {
 					unset( $session['session_add_slots_count'] );
 					unset( $session['signup_name'] );
 					unset( $session['session_end_repeat'] );
-					$rows_updated                       = 0;
-					$start_date                         = new DateTime( $start, $this->date_time_zone );
-					$end_date                           = new DateTime( $end, $this->date_time_zone );
+					$rows_updated = 0;
+					$start_date   = new DateTime( $start, $this->date_time_zone );
+					$end_date     = new DateTime( $end, $this->date_time_zone );
+					if ( $preclass_email_days > 0 ) {
+						$premail_date = new DateTime( $start, $this->date_time_zone );
+						$premail_date->sub( date_interval_create_from_date_string( $preclass_email_days . ' days' ) );
+						$session['session_preclass_email_date'] = $premail_date->format( self::DATE_FORMAT2 );
+					}
+
 					$session['session_start_time']      = $start_date->format( 'U' );
 					$session['session_start_formatted'] = $start_date->format( self::DATETIME_FORMAT );
 					$session['session_end_formatted']   = $end_date->format( self::DATETIME_FORMAT );
@@ -549,6 +569,16 @@ class SignupSettings extends SignUpsBase {
 		foreach ( $sessions as $session ) {
 			$this->delete_session( $session, false );
 		}
+
+		$wpdb->query(
+			$wpdb->prepare(
+				'DELETE
+				FROM %1s
+				WHERE instructors_class_id = %s',
+				self::INSTRUCTORS_TABLE,
+				$post['confirm_delete_class']
+			)
+		);
 
 		$where = array( 'signup_id' => $post['confirm_delete_class'] );
 		$wpdb->delete( self::SIGNUPS_TABLE, $where );
@@ -1651,15 +1681,15 @@ class SignupSettings extends SignUpsBase {
 					<label class="label-margin-top mr-2" for="description_preclass_mail">Pre-class Email:</label>
 				</div>
 				<div class="text-left pt-2">
-					<input type="number" id="description_preclass_mail" class="w-125px" 
-						value="1" name="signup_preclass_email" required disabled>
+					<input type="number" id="description_preclass_mail" class="w-75px" 
+						value="<?php echo esc_html( $data->signup_preclass_email ); ?>" name="signup_preclass_email" required >
 				</div>
 
 				<div class="text-right mr-2">
-					<label>Admin Approved:</label>
+					<label>Approved:</label>
 				</div>
-				<div class="mb-2"><input class="w-75px" type="checkbox" name="signup_admin_approved" value="" 
-					<?php echo esc_html( $data->signup_admin_approved ) == '1' ? 'checked ' : ''; ?> /> </div>
+				<div class="mb-2"><input type="checkbox" name="signup_admin_approved" value="" 
+					<?php echo esc_html( $data->signup_admin_approved ) === '1' ? 'checked ' : ''; ?> /> </div>
 
 				<div class="text-right mr-2">
 					<input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back">
@@ -2118,6 +2148,16 @@ class SignupSettings extends SignUpsBase {
 		$affected_row_count = $wpdb->insert( self::SIGNUPS_TABLE, $new_signup );
 		if ( 1 === $affected_row_count ) {
 			$signup_id = $wpdb->insert_id;
+
+			$instructor_data = array();
+			$instructor_data['instructors_badge']      = $post['signup_contact_badge'];
+			$instructor_data['instructors_name']       = $post['signup_contact_firstname'] . ' ' . $post['signup_contact_lastname'];
+			$instructor_data['instructors_phone']      = $post['signup_contact_phone'];
+			$instructor_data['instructors_email']      = $post['signup_contact_email'];
+			$instructor_data['instructors_class_id']   = $signup_id;
+			$instructor_data['instructors_class_title'] = $post['description_title'];
+			$wpdb->insert( self::INSTRUCTORS_TABLE, $instructor_data );
+
 			$data      = null;
 			if ( $new_signup['signup_cost'] > 0 ) {
 				$stripe        = new StripePayments();

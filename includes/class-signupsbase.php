@@ -188,6 +188,13 @@ class SignUpsBase {
 	 *
 	 * @var mixed
 	 */
+	protected const DATE_FORMAT2 = 'm-d-Y';
+
+	/**
+	 * Format Date as 2020-08-13.
+	 *
+	 * @var mixed
+	 */
 	protected const TIME_FORMAT = 'g:iA';
 
 	/**
@@ -421,7 +428,7 @@ class SignUpsBase {
 	 */
 	protected function create_lookup_member_table( $center = false, $badge = '', $firstname = '', $lastname = '', $email = '', $phone = '' ) {
 		?>
-		<table id="lookup-member" class="mb-2 mt-4 table table-bordered selection-font <?php echo $center ? 'ml-auto mr-auto' : ''; ?>" style="width:0;">
+		<table id="lookup-member" class="mb-2 mt-4 table table-bordered <?php echo $center ? 'ml-auto mr-auto' : ''; ?>" style="width:0;">
 			<tr>
 				<td class="text-right">
 					<input id="search-input" class="member-badge" type="text" placeholder="Enter 3+ character string"
@@ -1469,17 +1476,17 @@ class SignUpsBase {
 				</ul>
 				<div id="html-signup-description">
 				<textarea id="description_long"
-					name='description_html'><?php echo $description_object ? html_entity_decode( $description_object->description_html ) : 'Add description here.'; ?>
+					name='description_html'><?php echo $description_object ? html_entity_decode( $description_object->description_html ) : ''; ?>
 				</textarea>
 				</div>
 				<div id="html-signup-description-short" style="display: none;">
 					<textarea id="description_short" 
-						name='description_html_short'><?php echo $description_object ? html_entity_decode( $description_object->description_html_short ) : 'Add description here.'; ?>
+						name='description_html_short'><?php echo $description_object ? html_entity_decode( $description_object->description_html_short ) : ''; ?>
 					</textarea>
 				</div>
 				<div id="html-signup-instructions" style="display: none;">
 					<textarea id="description_instructions" 
-						name='description_instructions'><?php echo $description_object ? html_entity_decode( $description_object->description_instructions ) : 'Add description here.'; ?>
+						name='description_instructions'><?php echo $description_object ? html_entity_decode( $description_object->description_instructions ) : ''; ?>
 					</textarea>
 				</div>
 			<div>
