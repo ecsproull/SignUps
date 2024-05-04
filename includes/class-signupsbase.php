@@ -432,17 +432,17 @@ class SignUpsBase {
 			<tr>
 				<td class="text-right">
 					<input id="search-input" class="member-badge" type="text" placeholder="Enter 3+ character string"
-						name="signup_contact_badge" value="<?php echo esc_html( $badge ); ?>" >
+						name="signup_contact_badge" value="<?php echo esc_html( $badge ); ?>" required>
 				</td>
 				<td class="text-left"><input type="button" id="search_button" class="btn btn-primary rounded ml-4" value='Search'></td>
 			</tr>
 			<tr>
 				<td class="text-right">
 					<input id="first-name" class=" member-first-name" type="text" placeholder="First Name" readonly
-						name="signup_contact_firstname" value="<?php echo esc_html( $firstname ); ?>" >
+						name="signup_contact_firstname" value="<?php echo esc_html( $firstname ); ?>" required>
 				</td>
 				<td  class="text-left">
-					<input id="last-name" class="member-last-name" type="text" placeholder="Last Name" readonly
+					<input id="last-name" class="member-last-name" type="text" placeholder="Last Name" readonly required
 						name="signup_contact_lastname" value="<?php echo esc_html( $lastname ); ?>"></td>
 			</tr>
 			<tr>

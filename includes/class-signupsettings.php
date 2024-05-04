@@ -323,7 +323,12 @@ class SignupSettings extends SignUpsBase {
 		global $wpdb;
 		$signup = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT signup_id, signup_default_price_id, signup_contact_badge, signup_preclass_email
+				'SELECT signup_id,
+					signup_default_price_id,
+					signup_contact_badge,
+					signup_preclass_email,
+					signup_default_slots,
+					signup_admin_approved
 				FROM %1s
 				WHERE signup_id = %s',
 				self::SIGNUPS_TABLE,
@@ -380,9 +385,8 @@ class SignupSettings extends SignUpsBase {
 		unset( $post['instructors_phone'] );
 
 		$preclass_email_days = (int) $signup[0]->signup_preclass_email;
-		$add_to_calendar     = isset( $post['add_to_calendar'] );
+		$add_to_calendar     = $signup[0]->signup_admin_approved;
 		$total_rows_updated  = 0;
-		unset( $post['add_to_calendar'] );
 		array_map(
 			function( $start, $end, $keys ) use (
 				$post,
@@ -540,7 +544,7 @@ class SignupSettings extends SignUpsBase {
 			<form method="POST">
 				<div class="mt-2">
 					<input class="btn btn-danger" style="cursor:pointer;" type="button" onclick="window.history.go( -0 );" value="Cancel">
-					<button class="btn btn-success" type="submit" name="confirm_delete_class" value=<?php echo esc_html( $post['delete_class'] ); ?>>Confirm</button>
+					<button class="btn btn-success mt-2" type="submit" name="confirm_delete_class" value=<?php echo esc_html( $post['delete_class'] ); ?>>Confirm</button>
 				</div>
 				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 			</form>
@@ -1576,20 +1580,7 @@ class SignupSettings extends SignUpsBase {
 				);
 				?>
 				</div>
-				<!-- <div class="text-right mr-2">
-					<label>Contact Email:</label>
-				</div>
-				<div class="mb-2">
-					<input class="w-250px" type="email" name="signup_contact_email" value="<?php echo esc_html( $data->signup_contact_email ); ?>" />
-				</div>
 
-				<div class="text-right mr-2">
-					<label>Contact Name:</label>
-				</div>
-				<div class="mb-2">
-					<input class="w-250px" type="text" name="signup_default_contact_name" value="<?php echo esc_html( $data->signup_default_contact_name ); ?>" />
-				</div>
- -->
 				<div class="text-right mr-2">
 					<label>Location:</label>
 				</div>
@@ -1617,55 +1608,17 @@ class SignupSettings extends SignUpsBase {
 				</div>
 
 				<div class="text-right mr-2">
-					<label>Default Slots:</label>
+					<label>Slots:</label>
 				</div>
 				<div class="mb-2"><input class="w-75px" type="number" name="signup_default_slots" 
 					value="<?php echo esc_html( $data->signup_default_slots ); ?>" />
 				</div>
 
 				<div class="text-right mr-2">
-					<label>Default Minimum:</label>
+					<label>Minimum:</label>
 				</div>
 				<div class="mb-2"><input class="w-75px" type="number" name="signup_default_minimum" 
 					value="<?php echo esc_html( $data->signup_default_minimum ); ?>" />
-				</div>
-
-				<div class="text-right mr-2">
-					<label>Default Start Time of Day:</label>
-				</div>
-				<div class="mb-2"><input class="w-125px" type="time" name="signup_default_start_time" placeholder="12:00 AM" 
-					value="<?php echo esc_html( $data->signup_default_start_time ); ?>" />
-				</div>
-
-				<div class="text-right mr-2">
-					<label>Default Class Duration:</label>
-				</div>
-				<div class="mb-2"><input id="signup_duration" class="w-125px" type="text" name="signup_default_duration" 
-					value="<?php echo esc_html( substr( $data->signup_default_duration, 0, 5 ) ); ?>"
-					placeholder="--:--" pattern="[0-9]{1,2}:[0-9]{2}" />
-				</div>
-
-				<div class="text-right mr-2">
-					<label>Default Days Between Classes:</label>
-				</div>
-				<div class="mb-2"><input class="w-75px" type="number" name="signup_default_days_between_sessions" 
-					value="<?php echo esc_html( $data->signup_default_days_between_sessions ); ?>" />
-				</div>
-
-				<div class="text-right mr-2">
-					<label>Default Day of Month:</label>
-				</div>
-				<div class="mb-2">
-					<input class="w-250px" type="text" name="signup_default_day_of_month" 
-						value="<?php echo esc_html( $data->signup_default_day_of_month ); ?>" />
-				</div>
-
-				<div class="text-right mr-2">
-					<label>Schedule Description:</label>
-				</div>
-				<div class="mb-2"><input class="w-250px" type="text" name="signup_schedule_desc"
-					value="<?php echo esc_html( $data->signup_schedule_desc ); ?>"
-					placeholder="Leave Blank unless the class doesn't meet regularly" />
 				</div>
 
 				<div class="text-right mr-2">
@@ -1698,6 +1651,10 @@ class SignupSettings extends SignUpsBase {
 					<input class="btn bt-md btn-primary mr-auto ml-auto mt-2" type="submit" value="Submit" name="submit_class">
 				</div>
 			</div>
+			<input id="signup_Repeat" class="mt-2 h-2rem" name="signup_default_days_between_sessions" type="hidden"
+					value="<?php echo esc_html( $data->signup_default_days_between_sessions ); ?>" >
+			<input class="w-250px" type="hidden" name="signup_default_day_of_month" 
+						value="<?php echo esc_html( $data->signup_default_day_of_month ); ?>" />
 			<input type="hidden" name="id" value="<?php echo esc_html( $data->signup_id ); ?>">
 			<input type="hidden" name="original_cost" value="<?php echo esc_html( $data->signup_cost ); ?>">
 			<input type="hidden" name="signup_default_price_id" value="<?php echo esc_html( $data->signup_default_price_id ); ?>">
@@ -1725,68 +1682,52 @@ class SignupSettings extends SignUpsBase {
 		<form method="POST">
 			<table id="session-table" class="table table-striped mr-auto ml-auto">
 				<tr>
-					<td class="text-right mr-2"><label>Contact Name:</label></td>
-					<td><input class="w-250px" type="text" name="session_contact_name" 
-						value="<?php echo esc_html( $data->session_contact_name ); ?>" /> </td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>Contact Email:</label></td>
-					<td><input class="w-250px" type="email" name="session_contact_email" 
-						value="<?php echo esc_html( $data->session_contact_email ); ?>" /> </td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>Location:</label></td>
-					<td><input class="w-250px" type="text" name="session_location" 
-						value="<?php echo esc_html( $data->session_location ); ?>" /> </td>
-				</tr>
-				<tr>
-					<td class="text-right mr-2"><label>Session Item:</label></td>
-					<td><input class="w-250px" type="text" name="session_item" 
-						value="<?php echo esc_html( $data->session_item ); ?>" /> </td>
-				</tr>
-				<tr>
 					<td class="text-right mr-2"><label>Slots:</label></td>
 					<td><input class="w-250px" type="number" name="session_slots" 
 						value="<?php echo esc_html( $data->session_slots ); ?>" /> </td>
 				</tr>
-				<tr <?php echo $data->session_id ? 'hidden' : ''; ?>>
+				<tr >
 					<td class="text-right mr-2"><label>Start Time: </label></td>
 					<td><input id="default-minutes" class="w-250px" type="time" name="session_time_of_day" 
 						value="<?php echo esc_html( $data->session_time_of_day ); ?>" 
 						<?php echo $data->session_id ? 'disabled' : ''; ?> /> </td>
 				</tr>
-				<tr <?php echo $data->session_id ? 'hidden' : ''; ?>>
+				<tr >
 					<td class="text-right mr-2"><label>Duration: </label></td>
 					<td><input id="default-minutes" class="w-250px without_ampm" type="time" name="session_duration" 
 						value="<?php echo esc_html( $data->session_duration ); ?>" 
 						<?php echo $data->session_id ? 'disabled' : ''; ?> /> </td>
 				</tr>
-				<tr <?php echo $data->session_id ? 'hidden' : ''; ?>>
-					<td class="text-right mr-2"><label>Days Between Classes:</label></td>
-					<td><input class="w-250px" type="number" name="session_days_between_sessions" 
-						value="<?php echo esc_html( $data->session_days_between_sessions ); ?>"
-						<?php echo $data->session_id ? 'disabled' : ''; ?> /> </td>
+
+				<tr>
+					<td class="text-right mr-2">
+						<label class="label-margin-top mr-2" for="signup_Repeat">Repeat:</label>
+					</td>
+					<td>
+						<select id="signup_Repeat" class="h-2rem" name="session_days_between_sessions">
+							<option value="7"  <?php echo '7' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Weekly</option>
+							<option value="14" <?php echo '14' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Two Weeks</option>
+							<option value="21" <?php echo '21' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Three Weeks</option>
+							<option value="0" <?php echo '0' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Monthly</option>
+						</select>
+					</td>
 				</tr>
-				<tr <?php echo $data->session_id ? 'hidden' : ''; ?>>
+				<tr >
 					<td class="text-right mr-2"><label>Day of Month:</label></td>
 					<td><input class="w-250px" type="text" name="session_day_of_month" 
 						value="<?php echo esc_html( $data->session_day_of_month ); ?>" 
 						<?php echo $data->session_id ? 'disabled' : ''; ?> /> </td>
 				</tr>
-				<tr <?php echo $data->session_id ? 'hidden' : ''; ?>>
+				<tr >
 					<td class="text-right mr-2"><label>End Repeat Date:</label>
 					<td><input type="date" class="w-250px" name="session_end_repeat"
 						value="<?php echo esc_html( $data->session_end_repeat ); ?>"></td>
-				</tr>
-				<tr <?php echo $data->session_id ? 'hidden' : ''; ?>>
-					<td class="text-right mr-2"><label>Add to Calendar:</label></td>
-					<td><input class="w-250px mb-2" type="checkbox" name="add_to_calendar" /></td>
 				</tr>
 				<?php
 				$data_items_count = count( $data->session_start_formatted );
 				for ( $i = 0; $i < $data_items_count; $i++ ) {
 					?>
-					<tr>
+					<tr class="mt-2">
 						<td class="text-right mr-2"><label>Start Time:</label></td>
 						<td><input id="start-time" class="w-250px start-time" type="datetime-local" name="session_start_formatted[]" 
 							value="<?php echo esc_html( $data->session_start_formatted[ $i ] ); ?>" /> </td>
@@ -1835,28 +1776,26 @@ class SignupSettings extends SignUpsBase {
 			}
 			?>
 			<table class="mr-auto ml-auto">
-				<tr <?php echo $data->session_id ? 'hidden' : ''; ?>>
-					<td class="text-center"><button class="btn btn-primary" name="session_add_slots" type="submit" value="1"><b><i>Update Sessions</i></b></button></td>
-					<td class="text-right mr-2"><label class="ml-3">Session Count:</label>
-						<input class="w-75px" type="number" name="session_add_slots_count" value="1" />
-					</td>
-				</tr>
-				<tr>
-					<td>___________________________________</td>
-					<td>___________________________________</td>
-					<td>___________________________________</td>
-				</tr>
-				<tr>
-					<td colspan='3' class="text-center"><h2>When everthing above apears correct, then submit to the database.</h2></td>
-					<td></td>
+				<tr >	
+					<td colspan='2' class="text-center"><button class="btn btn-primary" name="session_add_slots" type="submit" value="1"><b><i>Update Sessions</i></b></button></td>
 					<td></td>
 				</tr>
 				<tr>
-					<td class="text-right"><button class="btn bt-md btn-danger mt-2 mr-5" style="cursor:pointer;" type="submit" name="edit_sessions_signup_id"
+					<td>_____________________________________________________________</td>
+					<td>_____________________________________________________________</td>
+
+				</tr>
+				<tr>
+					<td colspan='2' class="text-center"><h2>When everthing above apears correct, then submit to the database.</h2></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td class="text-center"><button class="btn bt-md btn-danger mt-2 mr-5" style="cursor:pointer;" type="submit" name="edit_sessions_signup_id"
 					value="<?php echo esc_html( $data->session_signup_id ); ?>">Back</button></td>
 					<td class="text-left"><input class="btn bt-md btn-success mr-auto ml-auto ml-2" type="submit" value="Submit Session" name="submit_session"></td>
 				</tr>
 			</table>
+			<input class="w-75px" type="hidden" name="session_add_slots_count" value="1" />
 			<input type="hidden" name="session_signup_id" value="<?php echo esc_html( $data->session_signup_id ); ?>">
 			<input type="hidden" name="session_calendar_id" value="<?php echo esc_html( $data->session_calendar_id ); ?>">
 			<input type="hidden" name="id" value="<?php echo esc_html( $data->session_id ); ?>">
@@ -1986,8 +1925,7 @@ class SignupSettings extends SignUpsBase {
 					<option value="7">Weekly</option>
 					<option value="14">Two Weeks</option>
 					<option value="21">Three Weeks</option>
-					<option value="31">Monthly</option>
-					<option value="0">TBD</option>
+					<option value="0" selected>Monthly</option>
 				</select>
 			</div>
 
@@ -2104,11 +2042,12 @@ class SignupSettings extends SignUpsBase {
 		$new_signup['signup_contact_badge']        = $post['signup_contact_badge'];
 		$new_signup['signup_contact_email']        = $post['signup_contact_email'];
 		$new_signup['signup_contact_phone']        = $post['signup_contact_phone'];
+		$new_signup['signup_preclass_email']       = $post['signup_preclass_email'];
 
 		$start_date                              = new DateTime( $post['description_start'], $this->date_time_zone );
 		$new_signup['signup_default_start_time'] = date_format( $start_date, 'H:i' );
 
-		if ( '31' !== $post['description_repeat'] ) {
+		if ( '0' !== $post['description_repeat'] ) {
 			$new_signup['signup_default_days_between_sessions'] = $post['description_repeat'];
 		} else {
 			$new_signup['signup_default_days_between_sessions'] = 0;
