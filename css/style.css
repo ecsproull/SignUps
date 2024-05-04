@@ -102,10 +102,19 @@ button {
   justify-content: space-between;
 }
 
+.session-box {
+  display: grid;
+  width: 300px;
+  grid-template-columns: 155px 249px;
+  align-items: start;
+  justify-content: space-between;
+  row-gap: 7px;
+}
 .contact-info {
   width:80%; 
   max-width:1000px;
 }
+
 #search-results {
   margin-left: 100px;
   display: grid;

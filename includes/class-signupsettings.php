@@ -1680,67 +1680,58 @@ class SignupSettings extends SignUpsBase {
 			<h1><?php echo esc_html( $signup_name ); ?></h1>
 		</div>
 		<form method="POST">
-			<table id="session-table" class="table table-striped mr-auto ml-auto">
-				<tr>
-					<td class="text-right mr-2"><label>Slots:</label></td>
-					<td><input class="w-250px" type="number" name="session_slots" 
-						value="<?php echo esc_html( $data->session_slots ); ?>" /> </td>
-				</tr>
-				<tr >
-					<td class="text-right mr-2"><label>Start Time: </label></td>
-					<td><input id="default-minutes" class="w-250px" type="time" name="session_time_of_day" 
-						value="<?php echo esc_html( $data->session_time_of_day ); ?>" 
-						<?php echo $data->session_id ? 'disabled' : ''; ?> /> </td>
-				</tr>
-				<tr >
-					<td class="text-right mr-2"><label>Duration: </label></td>
-					<td><input id="default-minutes" class="w-250px without_ampm" type="time" name="session_duration" 
-						value="<?php echo esc_html( $data->session_duration ); ?>" 
-						<?php echo $data->session_id ? 'disabled' : ''; ?> /> </td>
-				</tr>
+			<div id="session-table" class="session-box mr-auto ml-auto" <?php echo $data->session_id ? 'hidden' : ''; ?> >
+				<div class="text-right mr-2"><label>Slots:</label></div>
+				<div><input class="w-250px" type="number" name="session_slots" 
+					value="<?php echo esc_html( $data->session_slots ); ?>" /> </div>
 
-				<tr>
-					<td class="text-right mr-2">
-						<label class="label-margin-top mr-2" for="signup_Repeat">Repeat:</label>
-					</td>
-					<td>
-						<select id="signup_Repeat" class="h-2rem" name="session_days_between_sessions">
-							<option value="7"  <?php echo '7' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Weekly</option>
-							<option value="14" <?php echo '14' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Two Weeks</option>
-							<option value="21" <?php echo '21' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Three Weeks</option>
-							<option value="0" <?php echo '0' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Monthly</option>
-						</select>
-					</td>
-				</tr>
-				<tr >
-					<td class="text-right mr-2"><label>Day of Month:</label></td>
-					<td><input class="w-250px" type="text" name="session_day_of_month" 
-						value="<?php echo esc_html( $data->session_day_of_month ); ?>" 
-						<?php echo $data->session_id ? 'disabled' : ''; ?> /> </td>
-				</tr>
-				<tr >
-					<td class="text-right mr-2"><label>End Repeat Date:</label>
-					<td><input type="date" class="w-250px" name="session_end_repeat"
-						value="<?php echo esc_html( $data->session_end_repeat ); ?>"></td>
-				</tr>
+				<div class="text-right mr-2"><label>Start Time: </label></div>
+				<div><input id="default-minutes" class="w-250px" type="time" name="session_time_of_day" 
+					value="<?php echo esc_html( $data->session_time_of_day ); ?>" 
+					<?php echo $data->session_id ? 'disabled' : ''; ?> /> </div>
+
+				<div class="text-right mr-2"><label>Duration: </label></div>
+				<div><input id="default-minutes" class="w-250px without_ampm" type="time" name="session_duration" 
+					value="<?php echo esc_html( $data->session_duration ); ?>" 
+					<?php echo $data->session_id ? 'disabled' : ''; ?> /> </div>
+
+				<div class="text-right mr-2">
+					<label class="label-margin-top mr-2" for="signup_Repeat">Repeat:</label>
+				</div>
+				<div>
+					<select id="signup_Repeat" class="h-2rem" name="session_days_between_sessions">
+						<option value="7"  <?php echo '7' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Weekly</option>
+						<option value="14" <?php echo '14' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Two Weeks</option>
+						<option value="21" <?php echo '21' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Three Weeks</option>
+						<option value="0" <?php echo '0' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Monthly</option>
+					</select>
+				</div>
+
+				<div class="text-right mr-2"><label>Day of Month:</label></div>
+				<div><input class="w-250px" type="text" name="session_day_of_month" 
+					value="<?php echo esc_html( $data->session_day_of_month ); ?>" 
+					<?php echo $data->session_id ? 'disabled' : ''; ?> /> </div>
+
+				<div class="text-right mr-2"><label>End Repeat Date:</label></div>
+				<div><input type="date" class="w-250px" name="session_end_repeat"
+					value="<?php echo esc_html( $data->session_end_repeat ); ?>"></div>
+			</div>
+			<div id="session-table" class="session-box mr-auto ml-auto mt-3">
 				<?php
 				$data_items_count = count( $data->session_start_formatted );
 				for ( $i = 0; $i < $data_items_count; $i++ ) {
 					?>
-					<tr class="mt-2">
-						<td class="text-right mr-2"><label>Start Time:</label></td>
-						<td><input id="start-time" class="w-250px start-time" type="datetime-local" name="session_start_formatted[]" 
-							value="<?php echo esc_html( $data->session_start_formatted[ $i ] ); ?>" /> </td>
-					</tr>
-					<tr>
-						<td class="text-right mr-2"><label>End Time:</label></td>
-						<td><input id="end-time" class="w-250px" type="datetime-local" name="session_end_formatted[]" 
-							value="<?php echo esc_html( $data->session_end_formatted[ $i ] ); ?>" /></td>
-					</tr>
+					<div class="text-right mr-2"><label>Start Time:</label></div>
+					<div><input id="start-time" class="w-250px start-time" type="datetime-local" name="session_start_formatted[]" 
+						value="<?php echo esc_html( $data->session_start_formatted[ $i ] ); ?>" /> </div>
+
+					<div class="text-right mr-2"><label>End Time:</label></div>
+					<div><input id="end-time" class="w-250px" type="datetime-local" name="session_end_formatted[]" 
+						value="<?php echo esc_html( $data->session_end_formatted[ $i ] ); ?>" /></div>
 					<?php
 				}
 				?>
-			</table>
+			</div>
 			<?php
 			if ( $data->session_id && $class_instructors ) {
 				?>
@@ -1777,7 +1768,8 @@ class SignupSettings extends SignUpsBase {
 			?>
 			<table class="mr-auto ml-auto">
 				<tr >	
-					<td colspan='2' class="text-center"><button class="btn btn-primary" name="session_add_slots" type="submit" value="1"><b><i>Update Sessions</i></b></button></td>
+					<td colspan='2' class="text-center">
+						<button class="btn btn-primary" name="session_add_slots" type="submit" value="1" <?php echo $data->session_id ? 'hidden' : ''; ?> ><b><i>Update Sessions</i></b></button></td>
 					<td></td>
 				</tr>
 				<tr>
@@ -1853,22 +1845,6 @@ class SignupSettings extends SignUpsBase {
 		<h2 class="text-center">----------------------------------------------------------------</h2>
 		</div>
 		<div class="class-description-box">
-		<!--	<div class="text-right">
-				<label class="label-margin-top mr-2" for="description_contact_name">*Contact Name:</label>
-			</div>
-			<div class="text-left">
-				<input type="text" id="description_contact_name" class="mt-2 w-100" 
-					value="" placeholder="Contact Names" name="description_contact_name" required>
-			</div>
-
-			<div class="text-right">
-				<label class="label-margin-top mr-2" for="description_contact_email">*Contact Email:</label>
-			</div>
-			<div class="text-left">
-				<input type="text" id="description_contact_email" class="mt-2 w-100" 
-					value="" placeholder="Contact Email" name="description_contact_email" required>
-			</div>
-				-->
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_location">*Location:</label>
 			</div>
