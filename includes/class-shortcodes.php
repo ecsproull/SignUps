@@ -1016,7 +1016,7 @@ class ShortCodes extends SignUpsBase {
 					<div>
 						<button type="submit" class="btn btn-md bg-primary mr-2" value="-1" name="home">Cancel</button>
 					</div>
-					<div>
+					<div class="text-left">
 						<button id='accept_conditions' class="btn btn-primary" type='submit' value="<?php echo esc_html( $signup_id ); ?>" name="continue_signup">Continue</button>
 					</div>
 				</div>

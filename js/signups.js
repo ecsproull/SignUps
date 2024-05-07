@@ -435,9 +435,9 @@ jQuery( document ).ready( function($){
 			let from_slot = evt.originalEvent.dataTransfer.getData( "session_id" );
 			let to_slot = evt.currentTarget.dataset['sessionId'];
 			let selector2 = "#move_to" + from_slot;
-			let move_to = $( selector2 );
-			if ( !move_to.length ) {
-				move_to = $( '#move_to' );
+			let move_to = $(selector2);
+			if (!move_to.length) {
+				move_to = $('#move_to');
 			}
 			move_to.val( to_slot );
 
@@ -450,7 +450,19 @@ jQuery( document ).ready( function($){
 			move_butt.trigger('click');
 		}
 
-	})
+	});
+
+	$("#signup_Repeat").on('change', function(e){
+		if($("#signup_Repeat").val() != 0) {
+			$("#day-of-month").val("");
+		}
+	});
+
+	$("#day-of-month").on('change', function(e) {
+		if($("#day-of-month").val()) {
+			$("#signup_Repeat").val("0");
+		}
+	});
 
 	$("#copy-signup-link").click( function(e) {
 		var copyText = $("#signup-url").text();

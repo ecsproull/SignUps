@@ -649,8 +649,8 @@ class SignupSettings extends SignUpsBase {
 		$interval       = new DateInterval( 'PT' . $duration_parts[0] . 'H' . $duration_parts[1] . 'M' );
 		$end->add( $interval );
 
-		$start_time = array();
-		$end_time   = array();
+		$start_time   = array();
+		$end_time     = array();
 		$start_time[] = $start->format( self::DATETIME_FORMAT_INPUT );
 		$end_time[]   = $end->format( self::DATETIME_FORMAT_INPUT );
 
@@ -694,6 +694,11 @@ class SignupSettings extends SignUpsBase {
 
 		if ( $session_item->session_end_repeat ) {
 			$session_item->session_add_slots_count = 25;
+		}
+
+		if ( '0' === $session_item->session_days_between_sessions ) {
+			$start_date                         = new DateTime( $session_item->session_start_formatted[0], $this->date_time_zone );
+			$session_item->session_day_of_month = $this->get_day_of_month( $start_date );
 		}
 
 		if ( $session_item->session_day_of_month ) {
@@ -747,7 +752,8 @@ class SignupSettings extends SignUpsBase {
 			}
 		} else {
 			$start_date = new DateTime( $session_item->session_start_formatted[0] );
-			$end_date   = new DateTime( $session_item->session_end_formatted[0] );
+			$end_date   = new DateTime( $session_item->session_start_formatted[0] );
+			$end_date->add( $interval );
 
 			for ( $i = 0; $i < $session_item->session_add_slots_count; $i++ ) {
 				$start = clone $start_date;
@@ -1700,6 +1706,7 @@ class SignupSettings extends SignUpsBase {
 				</div>
 				<div>
 					<select id="signup_Repeat" class="h-2rem" name="session_days_between_sessions">
+					<option value="1" <?php echo '1' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Daily</option>
 						<option value="7"  <?php echo '7' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Weekly</option>
 						<option value="14" <?php echo '14' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Two Weeks</option>
 						<option value="21" <?php echo '21' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Three Weeks</option>
@@ -1708,15 +1715,20 @@ class SignupSettings extends SignUpsBase {
 				</div>
 
 				<div class="text-right mr-2"><label>Day of Month:</label></div>
-				<div><input class="w-250px" type="text" name="session_day_of_month" 
+				<div><input id="day-of-month" class="w-250px" type="text" name="session_day_of_month" 
 					value="<?php echo esc_html( $data->session_day_of_month ); ?>" 
-					<?php echo $data->session_id ? 'disabled' : ''; ?> /> </div>
+					<?php echo $data->session_id ? 'disabled' : ''; ?> 
+					pattern="\b(First|Second|Third|Fourth|Last)\b \b(Monday|Tuesday|Wednesday|Thrusday|Friday|Saturday|Sunday)\b" 
+					title="Only First, Second, Third Fourth or Last plus the day of the week. Both MUST be capitolized" /> </div>
 
 				<div class="text-right mr-2"><label>End Repeat Date:</label></div>
 				<div><input type="date" class="w-250px" name="session_end_repeat"
 					value="<?php echo esc_html( $data->session_end_repeat ); ?>"></div>
 			</div>
-			<div id="session-table" class="session-box mr-auto ml-auto mt-3">
+			<div class="text-center">
+				<button class="btn btn-primary mt-3 mb-3 ml-5" name="session_add_slots" type="submit" value="1" <?php echo $data->session_id ? 'hidden' : ''; ?> ><b><i>Update Sessions</i></b></button>
+			</div>
+			<div id="session-table" class="session-box mr-auto ml-auto">
 				<?php
 				$data_items_count = count( $data->session_start_formatted );
 				for ( $i = 0; $i < $data_items_count; $i++ ) {
@@ -1767,11 +1779,6 @@ class SignupSettings extends SignUpsBase {
 			}
 			?>
 			<table class="mr-auto ml-auto">
-				<tr >	
-					<td colspan='2' class="text-center">
-						<button class="btn btn-primary" name="session_add_slots" type="submit" value="1" <?php echo $data->session_id ? 'hidden' : ''; ?> ><b><i>Update Sessions</i></b></button></td>
-					<td></td>
-				</tr>
 				<tr>
 					<td>_____________________________________________________________</td>
 					<td>_____________________________________________________________</td>
@@ -1878,11 +1885,11 @@ class SignupSettings extends SignUpsBase {
 			</div>
 
 			<div class="text-right">
-				<label class="label-margin-top mr-2" for="description_cost">*Cost:</label>
+				<label class="label-margin-top mr-2" for="session_end_repeat">*End Repeat:</label>
 			</div>
 			<div class="text-left">
-				<input type="number" id="description_cost" class="mt-2 w-100 h-2rem" 
-					value="0" name="description_cost" required>
+				<input type="date" id="session_end_repeat" class="mt-2 w-100 h-2rem" 
+					value="" placeholder="" name="session_end_repeat" required>
 			</div>
 
 			<div class="text-right">
@@ -1898,6 +1905,7 @@ class SignupSettings extends SignUpsBase {
 			</div>
 			<div class="text-left">
 				<select id="signup_Repeat" class="mt-2 w-100 h-2rem" name="description_repeat">
+					<option value="1">Daily</option>
 					<option value="7">Weekly</option>
 					<option value="14">Two Weeks</option>
 					<option value="21">Three Weeks</option>
@@ -1918,19 +1926,13 @@ class SignupSettings extends SignUpsBase {
 			</div>
 
 			<div class="text-right">
-				<label class="label-margin-top mr-2" for="session_end_repeat">End Repeat:</label>
+				<label class="label-margin-top mr-2" for="description_cost">*Cost:</label>
 			</div>
 			<div class="text-left">
-				<input type="date" id="session_end_repeat" class="mt-2 w-100 h-2rem" 
-					value="" placeholder="" name="session_end_repeat">
+				<input type="number" id="description_cost" class="mt-2 w-100 h-2rem" 
+					value="0" name="description_cost" required>
 			</div>
-			<div class="text-right">
-				<label class="label-margin-top mr-2" for="session_add_slots_count">Repeat Count:</label>
-			</div>
-			<div class="text-left">
-				<input type="number" id="session_add_slots_count" class="mt-2 w-100" 
-					value="1" name="session_add_slots_count" required>
-			</div>
+
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="signup_admin_approved">Approved:</label>
 			</div>
@@ -1938,7 +1940,7 @@ class SignupSettings extends SignUpsBase {
 				name="signup_admin_approved" /> 
 			</div>
 
-		    <div class="text-right">
+			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_preclass_mail">Pre-class Email:</label>
 			</div>
 			<div class="text-left pt-2">
@@ -1948,20 +1950,13 @@ class SignupSettings extends SignUpsBase {
 		</div>
 
 		<div class="description-box">
-			<div class="text-right">
-				<label class="label-margin-top mr-2" for="description_instructors">Instructors:</label>
-			</div>
-			<div>
-				<input type="text" id="description_instructors" class="mt-2 w-100" 
-					value="" placeholder="Tom, Dick and Harry" name="description_instructors">
-			</div>	
 
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="signup_schedule_desc">Schedule:</label>
 			</div>
 			<div>
 				<input type="text" id="signup_schedule_desc" class="mt-2 w-100" 
-					value="" placeholder="Leave blank unless the schedule is TBD" name="signup_schedule_desc">
+					value="" placeholder="Leave blank unless the schedule is custom" name="signup_schedule_desc">
 			</div>
 
 			<div class="text-right">
@@ -1969,7 +1964,7 @@ class SignupSettings extends SignUpsBase {
 			</div>
 			<div>
 				<textarea type="text" id="description_prerequisite" class="mt-2 w-100" 
-					value="" placeholder="Prerequisites or none" name="description_prerequisite"></textarea>
+					value="" placeholder="Prerequisites or none" name="description_prerequisite">None</textarea>
 			</div>
 
 			<div class="text-right">
@@ -1977,7 +1972,7 @@ class SignupSettings extends SignUpsBase {
 			</div>
 			<div>
 				<textarea type="text" id="description_materials" class="mt-2 w-100" 
-					value="" placeholder="Wood, glue, ..." name="description_materials"></textarea>
+					value="" placeholder="Wood, glue, ..." name="description_materials">None</textarea>
 			</div>
 		</div>
 
@@ -1985,8 +1980,9 @@ class SignupSettings extends SignUpsBase {
 				$this->create_description_section( null );
 			?>
 
-			<div><button type="submit" class="btn btn-md bg-primary mr-auto ml-auto" value="-1" name="submit_description">Submit</button></div>
+			<div class="text-center"><button type="submit" class="btn btn-md bg-primary mr-auto ml-auto mt-3" value="-1" name="submit_description">Submit</button></div>
 		</div>
+		<input type="hidden" id="session_add_slots_count" class="mt-2 w-100" value="1" name="session_add_slots_count" required>
 		<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 		</form>
 		<?php
@@ -2027,26 +2023,7 @@ class SignupSettings extends SignUpsBase {
 			$new_signup['signup_default_days_between_sessions'] = $post['description_repeat'];
 		} else {
 			$new_signup['signup_default_days_between_sessions'] = 0;
-			$day  = $start_date->format( 'l' );
-			$date = $start_date->format( 'j' );
-			$week = intdiv( $date, 7 );
-			switch ( $week ) {
-				case 0:
-					$new_signup['signup_default_day_of_month'] = 'First ' . $day;
-					break;
-				case 1:
-					$new_signup['signup_default_day_of_month'] = 'Second ' . $day;
-					break;
-				case 2:
-					$new_signup['signup_default_day_of_month'] = 'Third ' . $day;
-					break;
-				case 3:
-					$new_signup['signup_default_day_of_month'] = 'Fourth ' . $day;
-					break;
-				default:
-					$new_signup['signup_default_day_of_month'] = 'Last ' . $day;
-					break;
-			}
+			$new_signup['signup_default_day_of_month']          = $this->get_day_of_month( $start_date );
 		}
 
 		$duration         = new Datetime( $post['description_duration'], $this->date_time_zone );
@@ -2157,6 +2134,31 @@ class SignupSettings extends SignUpsBase {
 					}
 				}
 			}
+		}
+	}
+
+	/**
+	 * Gets the text description of the day of month.
+	 *
+	 * @param  mixed $start_date The date to analyze.
+	 * @return string The day of month.
+	 */
+	private function get_day_of_month( $start_date ) {
+		$day  = $start_date->format( 'l' );
+		$date = (int) $start_date->format( 'j' ) - 1;
+		$week = intdiv( $date, 7 );
+
+		switch ( $week ) {
+			case 0:
+				return 'First ' . $day;
+			case 1:
+				return 'Second ' . $day;
+			case 2:
+				return 'Third ' . $day;
+			case 3:
+				return 'Fourth ' . $day;
+			default:
+				return 'Last ' . $day;
 		}
 	}
 }

@@ -438,21 +438,21 @@ class SignUpsBase {
 			</tr>
 			<tr>
 				<td class="text-right">
-					<input id="first-name" class=" member-first-name" type="text" placeholder="First Name" readonly
+					<input id="first-name" class=" member-first-name" type="text" placeholder="First Name"
 						name="signup_contact_firstname" value="<?php echo esc_html( $firstname ); ?>" required>
 				</td>
 				<td  class="text-left">
-					<input id="last-name" class="member-last-name" type="text" placeholder="Last Name" readonly required
+					<input id="last-name" class="member-last-name" type="text" placeholder="Last Name" required
 						name="signup_contact_lastname" value="<?php echo esc_html( $lastname ); ?>"></td>
 			</tr>
 			<tr>
 				<td class="text-right">
-					<input id="phone" class="member-phone" type="text" readonly name="signup_contact_phone"
+					<input id="phone" class="member-phone" type="text" required name="signup_contact_phone"
 						value="<?php echo esc_html( $phone ); ?>" placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}">
 				</td>
 				<td>
 					<input id="email" class="member-email" type="email" name="signup_contact_email" placeholder="foo@bar.com"
-					value="<?php echo esc_html( $email ); ?>" readonly>
+					value="<?php echo esc_html( $email ); ?>" required>
 				</td>
 			</tr>
 		</table>
