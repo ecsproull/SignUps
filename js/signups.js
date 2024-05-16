@@ -452,6 +452,10 @@ jQuery( document ).ready( function($){
 
 	});
 
+	$(".session-setting").on('change', function(e) {
+		$(".save-settings").prop( "checked", true );
+	});
+
 	$("#signup_Repeat").on('change', function(e){
 		if($("#signup_Repeat").val() != 0) {
 			$("#day-of-month").val("");

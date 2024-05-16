@@ -58,6 +58,7 @@ class Reports extends SignUpsBase {
 					wp_scw_attendees.attendee_lastname,
 					wp_scw_attendees.attendee_email,
 					wp_scw_attendees.attendee_phone,
+					wp_scw_attendees.attendee_badge,
 					wp_scw_sessions.session_start_formatted,
 					wp_scw_sessions.session_id,
 					wp_scw_sessions.session_signup_id
@@ -84,7 +85,8 @@ class Reports extends SignUpsBase {
 						$wpdb->prepare(
 							'SELECT wp_scw_instructors.instructors_name,
 							wp_scw_instructors.instructors_email,
-							wp_scw_instructors.instructors_phone
+							wp_scw_instructors.instructors_phone,
+							wp_scw_instructors.instructors_badge
 						from wp_scw_instructors
 						LEFT JOIN wp_scw_session_instructors
 						ON wp_scw_session_instructors.si_instructor_id =  wp_scw_instructors.instructors_id
@@ -104,6 +106,9 @@ class Reports extends SignUpsBase {
 					<div class="mt-2 font-weight-bold bg-lg">
 						<button class="email-button instructors-email-class" value="<?php echo esc_html( $current_session_id ); ?>" >Copy Email Addresses</button>
 					</div>
+					<div class="mt-2 font-weight-bold bg-lg">
+						Badge
+					</div>
 					<?php
 					foreach ( $instructors as $instructor ) {
 						?>
@@ -115,6 +120,9 @@ class Reports extends SignUpsBase {
 						</div>
 						<div class="instructor">
 							<?php echo esc_html( $instructor->instructors_phone ); ?>
+						</div >
+						<div class="instructor">
+							<?php echo esc_html( $instructor->instructors_badge ); ?>
 						</div >
 						<?php
 					}
@@ -128,6 +136,9 @@ class Reports extends SignUpsBase {
 				</div>
 				<div>
 					<?php echo esc_html( $attendee->attendee_phone ); ?>
+				</div>
+				<div>
+					<?php echo esc_html( $attendee->attendee_badge ); ?>
 				</div>
 			</div>
 			<?php

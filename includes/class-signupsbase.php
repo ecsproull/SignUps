@@ -451,7 +451,7 @@ class SignUpsBase {
 						value="<?php echo esc_html( $phone ); ?>" placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}">
 				</td>
 				<td>
-					<input id="email" class="member-email" type="email" name="signup_contact_email" placeholder="foo@bar.com"
+					<input id="email" class="member-email" type="email" name="signup_contact_email" placeholder="Your email address."
 					value="<?php echo esc_html( $email ); ?>" required>
 				</td>
 			</tr>
@@ -589,7 +589,7 @@ class SignUpsBase {
 				<td><input id="phone" class="member-phone" type="text" name="phone"
 					value=<?php echo $return_val ? esc_html( $results[0]->member_phone ) : '888-888-8888'; ?> placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required readonly></td>
 				<td><input id="email" class="member-email" type="email" name="email"
-					value=<?php echo $return_val ? esc_html( $results[0]->member_email ) : 'foo@bar.com'; ?> placeholder="foo@bar.com" required readonly></td>
+					value="<?php echo $return_val ? esc_html( $results[0]->member_email ) : ''; ?>" placeholder="foo@bar.com" required readonly></td>
 				<td></td>
 			</tr>
 		</table>

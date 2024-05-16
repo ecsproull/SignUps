@@ -187,7 +187,7 @@ class ShortCodes extends SignUpsBase {
 			</tr>
 			<tr>
 				<td class="text-right font-weight-bold">Email:</td>
-				<td class="text-left"><input type="email" name="email" placeholder="foo@bar.com" required></td>
+				<td class="text-left"><input type="email" name="email" placeholder="Your email address" required></td>
 			</tr>
 			<tr>
 				<td class="text-right font-weight-bold">Street Address 1:</td>

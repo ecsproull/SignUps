@@ -337,6 +337,18 @@ class SignupSettings extends SignUpsBase {
 			OBJECT
 		);
 
+		if ( isset( $post['save_session_settings'] ) ) {
+			$data                                         = array();
+			$data['signup_default_slots']                 = $post['session_slots'];
+			$data['signup_default_start_time']            = $post['session_time_of_day'];
+			$data['signup_default_duration']              = $post['session_duration'];
+			$data['signup_default_day_of_month']          = $post['session_day_of_month'];
+			$data['signup_default_days_between_sessions'] = $post['session_days_between_sessions'];
+			$where                                        = array( 'signup_id' => $post['session_signup_id'] );
+			$rows                                         = $wpdb->update( self::SIGNUPS_TABLE, $data, $where );
+			unset( $post['save_session_settings'] );
+		}
+
 		$default_instructor = $wpdb->get_row(
 			$wpdb->prepare(
 				'SELECT instructors_id
@@ -678,12 +690,24 @@ class SignupSettings extends SignUpsBase {
 	 * @return void
 	 */
 	private function add_session_slots( $session_item, $signup_name ) {
+		global $wpdb;
 		$start_dates      = array();
 		$end_dates        = array();
 		$duration_parts   = explode( ':', $session_item->session_duration );
 		$interval         = new DateInterval( 'PT' . $duration_parts[0] . 'H' . $duration_parts[1] . 'M' );
 		$start_time_parts = explode( ':', $session_item->session_time_of_day );
 		$today            = new DateTime( 'now', $this->date_time_zone );
+
+		if ( property_exists( $session_item, 'save_session_settings') ) {
+			$data                                         = array();
+			$data['signup_default_slots']                 = $session_item->session_slots;
+			$data['signup_default_start_time']            = $session_item->session_time_of_day;
+			$data['signup_default_duration']              = $session_item->session_duration;
+			$data['signup_default_day_of_month']          = $session_item->session_day_of_month;
+			$data['signup_default_days_between_sessions'] = $session_item->session_days_between_sessions;
+			$where                                        = array( 'signup_id' => $session_item->session_signup_id );
+			$rows                                         = $wpdb->update( self::SIGNUPS_TABLE, $data, $where );
+		}
 
 		if ( $session_item->session_start_formatted[0] ) {
 			$today = new DateTime( $session_item->session_start_formatted[0], $this->date_time_zone );
@@ -1688,16 +1712,16 @@ class SignupSettings extends SignUpsBase {
 		<form method="POST">
 			<div id="session-table" class="session-box mr-auto ml-auto" <?php echo $data->session_id ? 'hidden' : ''; ?> >
 				<div class="text-right mr-2"><label>Slots:</label></div>
-				<div><input class="w-250px" type="number" name="session_slots" 
+				<div><input class="w-250px session-setting" type="number" name="session_slots" 
 					value="<?php echo esc_html( $data->session_slots ); ?>" /> </div>
 
 				<div class="text-right mr-2"><label>Start Time: </label></div>
-				<div><input id="default-minutes" class="w-250px" type="time" name="session_time_of_day" 
+				<div><input id="default-minutes" class="w-250px session-setting" type="time" name="session_time_of_day" 
 					value="<?php echo esc_html( $data->session_time_of_day ); ?>" 
 					<?php echo $data->session_id ? 'disabled' : ''; ?> /> </div>
 
 				<div class="text-right mr-2"><label>Duration: </label></div>
-				<div><input id="default-minutes" class="w-250px without_ampm" type="time" name="session_duration" 
+				<div><input id="default-minutes" class="w-250px without_ampm session-setting" type="time" name="session_duration" 
 					value="<?php echo esc_html( $data->session_duration ); ?>" 
 					<?php echo $data->session_id ? 'disabled' : ''; ?> /> </div>
 
@@ -1705,7 +1729,7 @@ class SignupSettings extends SignUpsBase {
 					<label class="label-margin-top mr-2" for="signup_Repeat">Repeat:</label>
 				</div>
 				<div>
-					<select id="signup_Repeat" class="h-2rem" name="session_days_between_sessions">
+					<select id="signup_Repeat" class="h-2rem session-setting" name="session_days_between_sessions">
 					<option value="1" <?php echo '1' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Daily</option>
 						<option value="7"  <?php echo '7' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Weekly</option>
 						<option value="14" <?php echo '14' === $data->session_days_between_sessions ? 'selected' : ''; ?> >Two Weeks</option>
@@ -1715,7 +1739,7 @@ class SignupSettings extends SignUpsBase {
 				</div>
 
 				<div class="text-right mr-2"><label>Day of Month:</label></div>
-				<div><input id="day-of-month" class="w-250px" type="text" name="session_day_of_month" 
+				<div><input id="day-of-month" class="w-250px session-setting" type="text" name="session_day_of_month" 
 					value="<?php echo esc_html( $data->session_day_of_month ); ?>" 
 					<?php echo $data->session_id ? 'disabled' : ''; ?> 
 					pattern="\b(First|Second|Third|Fourth|Last)\b \b(Monday|Tuesday|Wednesday|Thrusday|Friday|Saturday|Sunday)\b" 
@@ -1724,6 +1748,10 @@ class SignupSettings extends SignUpsBase {
 				<div class="text-right mr-2"><label>End Repeat Date:</label></div>
 				<div><input type="date" class="w-250px" name="session_end_repeat"
 					value="<?php echo esc_html( $data->session_end_repeat ); ?>"></div>
+
+				<div class="text-right mr-2"><label>Save Settings:</label></div>
+				<div><input type="checkbox" class="save-settings" name="save_session_settings"
+					value="1"></div>
 			</div>
 			<div class="text-center">
 				<button class="btn btn-primary mt-3 mb-3 ml-5" name="session_add_slots" type="submit" value="1" <?php echo $data->session_id ? 'hidden' : ''; ?> ><b><i>Update Sessions</i></b></button>
