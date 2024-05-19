@@ -77,12 +77,6 @@ class SignupsPlugin extends SignUpsBase {
 	 */
 	private $reports;
 
-	/**
-	 * Version number for statics.
-	 *
-	 * @var $reports
-	 */
-	private $version;
 
 	/**
 	 * __construct
@@ -90,7 +84,6 @@ class SignupsPlugin extends SignUpsBase {
 	 * @return void
 	 */
 	public function __construct() {
-		$this->version = '2.0.0';
 		register_activation_hook( __FILE__, array( new DbSignUpTables(), 'create_db_tables' ) );
 		add_action( 'admin_menu', array( $this, 'signup_plugin_top_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_scripts_and_css' ) );
@@ -158,12 +151,15 @@ class SignupsPlugin extends SignUpsBase {
 
 		wp_register_style( 'signup_bs_style', plugin_dir_url( __FILE__ ) . 'bootstrap/css/bootstrap.min.css', array(), 1 );
 		wp_enqueue_style( 'signup_bs_style' );
-		wp_register_style( 'signup_style', plugin_dir_url( __FILE__ ) . 'css/style.css', array(), $version );
+		$ver_styles = filemtime( plugin_dir_path( __FILE__ ) . 'css/users-styles.css' );
+		wp_register_style( 'signup_style', plugin_dir_url( __FILE__ ) . 'css/style.css', array(), $ver_styles );
 		wp_enqueue_style( 'signup_style' );
-		wp_register_style( 'user_signup_style', plugin_dir_url( __FILE__ ) . 'css/users-styles.css', array(), $version );
+		$ver_user_styles = filemtime( plugin_dir_path( __FILE__ ) . 'css/users-styles.css' );
+		wp_register_style( 'user_signup_style', plugin_dir_url( __FILE__ ) . 'css/users-styles.css', array(), $ver_user_styles );
 		wp_enqueue_style( 'user_signup_style' );
 		wp_enqueue_script( 'jquery' );
-		wp_enqueue_script( 'signup_member_script', plugin_dir_url( __FILE__ ) . 'js/signups.js', __FILE__, array( 'jquery' ), $version, false, true );
+		$ver_js = filemtime( plugin_dir_path( __FILE__ ) . 'js/signups.js' );
+		wp_enqueue_script( 'signup_member_script', plugin_dir_url( __FILE__ ) . 'js/signups.js', __FILE__, array( 'jquery' ), $ver_js, false, true );
 		wp_enqueue_script( 'signup_cookie_script', plugin_dir_url( __FILE__ ) . 'cookie/node_modules/js-cookie/dist/js.cookie.min.js', array( 'jquery' ), '3.0.5', false, true );
 		wp_enqueue_script( 'signup_ckeditor', 'https://cdn.ckeditor.com/ckeditor5/41.2.1/super-build/ckeditor.js', array(), '1.0.0.0', false, true );
 		wp_localize_script(
@@ -179,7 +175,7 @@ class SignupsPlugin extends SignUpsBase {
 	/**
 	 * Adds the CSS that is used to style the users side of the plug-in.
 	 *
-	 * @param string $host Who is calling. Always empty for 
+	 * @param string $host Who is calling.
 	 */
 	public function add_users_scripts_and_css( $host ) {
 		$user_pages   = array();
@@ -194,11 +190,13 @@ class SignupsPlugin extends SignUpsBase {
 
 		wp_register_style( 'signup_bs_style', plugin_dir_url( __FILE__ ) . 'bootstrap/css/bootstrap.min.css', array(), 1 );
 		wp_enqueue_style( 'signup_bs_style' );
-		wp_register_style( 'signup_style', plugin_dir_url( __FILE__ ) . 'css/users-styles.css', array(), $version );
+		$ver_user_styles = filemtime( plugin_dir_path( __FILE__ ) . 'css/users-styles.css' );
+		wp_register_style( 'signup_style', plugin_dir_url( __FILE__ ) . 'css/users-styles.css', array(), $ver_user_styles );
 		wp_enqueue_style( 'signup_style' );
 		wp_enqueue_style( 'wp-jquery-ui-dialog' );
 		wp_enqueue_script( 'signup_cookie_script', plugin_dir_url( __FILE__ ) . 'cookie/node_modules/js-cookie/dist/js.cookie.min.js', array( 'jquery' ), '3.0.5', false, true );
-		wp_enqueue_script( 'signup_member_script', plugin_dir_url( __FILE__ ) . 'js/users-signup.js', array( 'jquery', 'jquery-ui-dialog', 'signup_cookie_script' ), $version, false, true );
+		$ver_users_js = filemtime( plugin_dir_path( __FILE__ ) . 'js/users-signup.js' );
+		wp_enqueue_script( 'signup_member_script', plugin_dir_url( __FILE__ ) . 'js/users-signup.js', array( 'jquery', 'jquery-ui-dialog', 'signup_cookie_script' ), $ver_users_js, false, true );
 		wp_localize_script(
 			'signup_member_script',
 			'wpApiSettings',
