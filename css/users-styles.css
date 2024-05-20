@@ -306,9 +306,6 @@ input[type='radio'] {
 	color: rgb(102,102,102) !important;
 }
 
-.description-box p {
-	color: rgb(0,0,0) !important;
-}
 .new-member-form {
 	width: 80%;
     max-width: 1100px;
