@@ -303,8 +303,12 @@ input[type='radio'] {
 	grid-template-columns: 20% 80%;
 	align-items: start;
 	justify-content: space-between;
+	color: rgb(102,102,102) !important;
 }
 
+.description-box p {
+	color: rgb(0,0,0) !important;
+}
 .new-member-form {
 	width: 80%;
     max-width: 1100px;
