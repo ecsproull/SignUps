@@ -43,6 +43,7 @@ require 'includes/class-testplugin.php';
 require 'includes/class-paymentsreview.php';
 require 'includes/class-rollingslot.php';
 require 'includes/class-instructorseditor.php';
+require 'includes/class_session_email_data.php';
 
 /**
  * Main signups class.
