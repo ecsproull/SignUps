@@ -969,7 +969,7 @@ class SignupSettings extends SignUpsBase {
 				$new_member['new_member_phone']    = $post['phone'];
 				$new_member['new_member_email']    = $post['email'];
 				$new_member['new_member_street']   = $post['new_member_street'];
-	
+
 				$result = $wpdb->insert( self::NEW_MEMBER_TABLE, $new_member );
 				if ( $result && $wpdb->insert_id ) {
 					$insert_id            = $wpdb->insert_id;
@@ -993,13 +993,20 @@ class SignupSettings extends SignUpsBase {
 				'attendee_item'         => $session->session_item,
 			);
 
-			$wpdb->insert( self::ATTENDEES_TABLE, $new_attendee );
+			$rows = $wpdb->insert( self::ATTENDEES_TABLE, $new_attendee );
+			if ( 1 === $rows ) {
+				$body         = '<p>An adminstrator added you to a class.</p>';
+				$body        .= $this->get_session_email_body( (int) $session->session_id );
+				$sgm          = new SendGridMail();
+				$email_status = $sgm->send_mail( $post['email'], 'Woodshop Class Change', $body, true );
+			}
 		}
 
 		$repost = array(
 			'edit_sessions_signup_id' => $post['signup_id'],
 			$post['signup_id']        => $post['signup_name'],
 		);
+
 		$this->load_session_selection( $repost );
 	}
 
@@ -1065,7 +1072,22 @@ class SignupSettings extends SignUpsBase {
 			'edit_sessions_signup_id' => $post['signup_id'],
 		);
 
-		//TODO: Send attendee update email?
+		$attendee = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT attendee_email
+				FROM %1s
+				WHERE attendee_id = %s',
+				self::ATTENDEES_TABLE,
+				$ids[0]
+			),
+			OBJECT
+		);
+
+		$body         = '<p>Your session has been changed by an administrator.</p>';
+		$body        .= $this->get_session_email_body( $post['move_to'] );
+		$sgm          = new SendGridMail();
+		$email_status = $sgm->send_mail( $attendee->attendee_email, 'Your session change.', $body, true );
+
 		$this->load_session_selection( $repost );
 	}
 
@@ -1477,6 +1499,9 @@ class SignupSettings extends SignUpsBase {
 												value="<?php echo esc_html( $email_id ); ?>">Email Session</button> 
 										</span>
 									</div>
+									<div id="<?php echo 'email-session-' . $session->session_id; ?>" class="email-body text-left" hidden>
+										<?php echo $this->get_session_email_body( $session->session_id ); ?>
+									</div>
 								</td>
 							</tr>
 							<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
@@ -1826,6 +1851,7 @@ class SignupSettings extends SignUpsBase {
 			<input type="hidden" name="session_signup_id" value="<?php echo esc_html( $data->session_signup_id ); ?>">
 			<input type="hidden" name="session_calendar_id" value="<?php echo esc_html( $data->session_calendar_id ); ?>">
 			<input type="hidden" name="id" value="<?php echo esc_html( $data->session_id ); ?>">
+			<!-- <input type="hidden" name="session_id" value="<?php echo esc_html( $data->session_id ); ?>"> -->
 			<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
 			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 		</form>

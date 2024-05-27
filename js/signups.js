@@ -513,13 +513,14 @@ jQuery( document ).ready( function($){
 	});
 
 	$(".email-butt").click( function(e) {
-		var emailId = '.' + e.target.value;
+		var emailClass = '.' + e.target.value;
+		var emailId = '#' + e.target.value;
 		var emailAddresses = '';
-		$(emailId).each( function() {
+		$(emailClass).each( function() {
 			emailAddresses += $(this).text() + ';';
 		});
 
-		const htmlContent = $("#instructions").html();
+		const htmlContent = $(emailId).html();
 		const blob = new Blob([htmlContent], { type: "text/html" });
 		const clipboardItem = new ClipboardItem({ "text/html": blob });
 		navigator.clipboard.write([clipboardItem])

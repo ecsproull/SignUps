@@ -222,98 +222,8 @@ class SignUpsRestApis extends SignUpsBase {
 		if ( $request['key'] !== $key ) {
 			return new WP_REST_Response( 'Nice Try.', 401 );
 		}
-		$dt       = new DateTime( 'now', new DateTimeZone( 'America/Phoenix' ) );
-		$today    = $dt->format( self::DATE_FORMAT2 );
-		$sessions = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT session_id, session_signup_id, session_start_formatted, session_location
-				FROM %1s
-				WHERE session_preclass_email_date = %s',
-				self::SESSIONS_TABLE,
-				$today
-			),
-			OBJECT
-		);
 
-		$return_values = array();
-		foreach ( $sessions as $session ) {
-			$data = new SessionEmailData();
-			$signup = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT signup_name, 
-						signup_contact_firstname,
-						signup_contact_email,
-						signup_contact_lastname
-					FROM %1s
-					WHERE signup_id = %d',
-					self::SIGNUPS_TABLE,
-					$session->session_signup_id
-				),
-				OBJECT
-			);
-
-			$signup_instructions = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT description_instructions, description_materials 
-					FROM %1s
-					WHERE description_signup_id = %d',
-					self::DESCRIPTIONS_TABLE,
-					$session->session_signup_id
-				),
-				OBJECT
-			);
-
-			if ( $signup_instructions[0] && $signup_instructions[0]->description_instructions ) {
-				$data->class_instructions = html_entity_decode( $signup_instructions[0]->description_instructions );
-			} else {
-				$data->class_instructions = 'None';
-			}
-
-			if ( $signup_instructions[0] && $signup_instructions[0]->description_materials ) {
-				$data->class_materials = html_entity_decode( $signup_instructions[0]->description_materials );
-			} else {
-				$data->class_materials = 'None';
-			}
-
-			$data->class_title             = $signup[0]->signup_name;
-			$data->class_location          = $session->session_location;
-			$data->date_time_formatted     = $session->session_start_formatted;
-			$data->class_contact_firstname = $signup[0]->signup_contact_firstname;
-			$data->class_contact_lastname  = $signup[0]->signup_contact_lastname;
-			$data->class_contact_email     = $signup[0]->signup_contact_email;
-			$data->instructors             = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT wp_scw_instructors.instructors_name,
-						wp_scw_instructors.instructors_email
-					FROM wp_scw_instructors
-					LEFT JOIN wp_scw_session_instructors
-					ON wp_scw_instructors.instructors_id = wp_scw_session_instructors.si_instructor_id
-					WHERE wp_scw_session_instructors.si_session_id = %d',
-					$session->session_id
-				),
-				OBJECT
-			);
-
-			$attendees = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT attendee_email
-					FROM %1s
-					WHERE attendee_session_id = %d',
-					self::ATTENDEES_TABLE,
-					$session->session_id
-				),
-				OBJECT
-			);
-
-			$data->attendees = array();
-			foreach ( $attendees as $attendee ) {
-				$data->attendees[] = $attendee->attendee_email;
-			}
-
-			$return_values[] = $data;
-		}
-
-		return $return_values;
+		return $this->get_session_email_data();
 	}
 
 	/**
@@ -686,10 +596,10 @@ class SignUpsRestApis extends SignUpsBase {
 				$wpdb->prepare(
 					'SELECT *
 					FROM %1s
-					WHERE permission_badge = %s && permission_machine_id = %d',
+					WHERE permission_badge = %s && permission_machine_name = %d',
 					self::MACHINE_PERMISSIONS_TABLE,
 					$data_obj->permissions[ $i ]->badge,
-					$data_obj->permissions[ $i ]->macine_name
+					$data_obj->permissions[ $i ]->machine_name
 				),
 				OBJECT
 			);

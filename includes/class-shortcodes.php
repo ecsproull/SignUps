@@ -419,6 +419,21 @@ class ShortCodes extends SignUpsBase {
 						?>
 						<h1 class=" mt-3">Successfully moved to session starting at <?php echo esc_html( $parts[0] ); ?></h1>
 						<?php
+						$attendee = $wpdb->get_row(
+							$wpdb->prepare(
+								'SELECT attendee_email
+								FROM %1s
+								WHERE attendee_id = %s',
+								self::ATTENDEES_TABLE,
+								$post['move_me'][0]
+							),
+							OBJECT
+						);
+
+						$body         = '<p>Your session has been changed.</p>';
+						$body        .= $this->get_session_email_body( $new_session_id );
+						$sgm          = new SendGridMail();
+						$email_status = $sgm->send_mail( $attendee->attendee_email, 'Your session change.', $body, true );
 					} else {
 						?>
 						<h1 class=" mt-3">Failed moving session, did you pick another session to move to?</h1>

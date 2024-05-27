@@ -1630,4 +1630,183 @@ class SignUpsBase {
 			$where
 		);
 	}
+
+	/**
+	 * Retrieves the data to create a pre-class email.
+	 *
+	 * @param int $session_id If requested a particular session.
+	 */
+	protected function get_session_email_data( $session_id = null ) {
+		global $wpdb;
+		$sessions = null;
+
+		if ( ! $session_id ) {
+			$dt       = new DateTime( 'now', new DateTimeZone( 'America/Phoenix' ) );
+			$today    = $dt->format( self::DATE_FORMAT2 );
+			$sessions = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT session_id, session_signup_id, session_start_formatted, session_location
+					FROM %1s
+					WHERE session_preclass_email_date = %s',
+					self::SESSIONS_TABLE,
+					$today
+				),
+				OBJECT
+			);
+		} else {
+			$sessions = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT session_id, session_signup_id, session_start_formatted, session_location
+					FROM %1s
+					WHERE session_id = %s',
+					self::SESSIONS_TABLE,
+					$session_id
+				),
+				OBJECT
+			);
+		}
+
+		$return_values = array();
+		foreach ( $sessions as $session ) {
+			$data = new SessionEmailData();
+			$signup = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT signup_name, 
+						signup_contact_firstname,
+						signup_contact_email,
+						signup_contact_lastname
+					FROM %1s
+					WHERE signup_id = %d',
+					self::SIGNUPS_TABLE,
+					$session->session_signup_id
+				),
+				OBJECT
+			);
+
+			$signup_instructions = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT description_instructions, description_materials 
+					FROM %1s
+					WHERE description_signup_id = %d',
+					self::DESCRIPTIONS_TABLE,
+					$session->session_signup_id
+				),
+				OBJECT
+			);
+
+			if ( $signup_instructions[0] && $signup_instructions[0]->description_instructions ) {
+				$data->class_instructions = html_entity_decode( $signup_instructions[0]->description_instructions );
+			} else {
+				$data->class_instructions = 'None';
+			}
+
+			if ( $signup_instructions[0] && $signup_instructions[0]->description_materials ) {
+				$data->class_materials = html_entity_decode( $signup_instructions[0]->description_materials );
+			} else {
+				$data->class_materials = 'None';
+			}
+
+			$data->class_title             = $signup[0]->signup_name;
+			$data->class_location          = $session->session_location;
+			$data->date_time_formatted     = $session->session_start_formatted;
+			$data->class_contact_firstname = $signup[0]->signup_contact_firstname;
+			$data->class_contact_lastname  = $signup[0]->signup_contact_lastname;
+			$data->class_contact_email     = $signup[0]->signup_contact_email;
+			$data->instructors             = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT wp_scw_instructors.instructors_name,
+						wp_scw_instructors.instructors_email
+					FROM wp_scw_instructors
+					LEFT JOIN wp_scw_session_instructors
+					ON wp_scw_instructors.instructors_id = wp_scw_session_instructors.si_instructor_id
+					WHERE wp_scw_session_instructors.si_session_id = %d',
+					$session->session_id
+				),
+				OBJECT
+			);
+
+			$attendees = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT attendee_email
+					FROM %1s
+					WHERE attendee_session_id = %d',
+					self::ATTENDEES_TABLE,
+					$session->session_id
+				),
+				OBJECT
+			);
+
+			$data->attendees = array();
+			foreach ( $attendees as $attendee ) {
+				$data->attendees[] = $attendee->attendee_email;
+			}
+
+			$return_values[] = $data;
+		}
+
+		return $return_values;
+	}
+
+	/**
+	 * Formats the body of a session email to an attendee.
+	 *
+	 * @param  mixed $session_id The id of the session to send.
+	 * @return Body for the email.
+	 */
+	protected function get_session_email_body( $session_id ) {
+		$sessions = $this->get_session_email_data( $session_id );
+		if ( ! $sessions ) {
+			return;
+		}
+
+		$session          = $sessions[0];
+		$body             = '<p>We look forward to seeing you for ' . $session->class_title . ' on ' . $session->date_time_formatted . ' which is scheduled to meet at ' . $session->class_location . '.</p>';
+		$body            .= '<p>The instructor(s) for the class will be ';
+		$index            = 1;
+		$instructor_count = count( $session->instructors );
+		if ( $instructor_count > 0 ) {
+			$add_comma = false;
+			foreach ( $session->instructors as $instructor ) {
+				if ( $add_comma ) {
+					if ( $index === $instructor_count ) {
+						$body .= ' & ' . $instructor->instructors_name;
+					} else {
+						$body .= ', ' . $instructor->instructors_name;
+					}
+				} else {
+					$add_comma = true;
+					$body     .= ' ' . $instructor->instructors_name;
+				}
+
+				$index++;
+			}
+		} else {
+			$body .= ' ' . $session->class_contact_firstname . ' ' . $session->class_contact_lastname;
+		}
+
+		$body .= '</p>';
+		if ( $session->class_materials && 'None' !== substr( $session->class_materials, 0, 4 ) ) {
+			$body .= '<p><b>These are the materials that you need to bring with you.</b><br>';
+			$body .= '<p>' . $session->class_materials . '</p>';
+			$body .= '</p>';
+		} else {
+			$body .= '<p>The materials for this class will be supplied.</p>';
+		}
+
+		if ( $session->class_instructions && 'None' !== substr( $session->class_instructions, 0, 4 ) ) {
+			$body .= '<b>To be prepared for this class please follow these pre-class instructions.</b>';
+			$body .= '<p>' . $session->class_instructions . '</p>';
+			$body .= '</p>';
+		} else {
+			$body .= '<p>There are no pre-class instructions for this class. Just show up ready to learn.</p>';
+		}
+
+		$body .= '<p>If you need to reschedule you may do it yourself on the original signup. ';
+		$body .= 'Sign in with your badge number and select the square checkbox next to your name. ';
+		$body .= 'Then select the session you wish to attend and then use the Submit button to update your selection.</p>';
+		$body .= '<p>For general questions about the class: <a href="mailto:' . $session->class_contact_email . '">' . $session->class_contact_firstname . ' ' . $session->class_contact_lastname . '</a></p>';
+		$body .= '<p>For technical questions about the signup website: <a href=\"mailto:ecsproull765@gmail.com\">Ed Sproull</a></p>';
+
+		return $body;
+	}
 }
