@@ -592,14 +592,16 @@ class SignUpsRestApis extends SignUpsBase {
 
 		$length = count( $data_obj->permissions );
 		for ( $i = 0; $i < $length; $i++ ) {
+			$machine_badge = trim( $data_obj->permissions[ $i ]->badge );
+			$machine_name  = trim( $data_obj->permissions[ $i ]->machine_name );
 			$permission = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT *
 					FROM %1s
-					WHERE permission_badge = %s && permission_machine_name = %d',
+					WHERE permission_badge = %s && permission_machine_name = %s',
 					self::MACHINE_PERMISSIONS_TABLE,
-					$data_obj->permissions[ $i ]->badge,
-					$data_obj->permissions[ $i ]->machine_name
+					$machine_badge,
+					$machine_name
 				),
 				OBJECT
 			);

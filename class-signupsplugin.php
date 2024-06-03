@@ -44,6 +44,7 @@ require 'includes/class-paymentsreview.php';
 require 'includes/class-rollingslot.php';
 require 'includes/class-instructorseditor.php';
 require 'includes/class-sessionemaildata.php';
+require 'includes/class-memberroster.php';
 
 /**
  * Main signups class.
@@ -78,6 +79,13 @@ class SignupsPlugin extends SignUpsBase {
 	 */
 	private $reports;
 
+	/**
+	 * Shortcode object for use in api callback.
+	 *
+	 * @var $roster
+	 */
+	private $roster;
+
 
 	/**
 	 * __construct
@@ -94,11 +102,13 @@ class SignupsPlugin extends SignUpsBase {
 		$this->stripe_payments    = new StripePayments();
 		$this->description_editor = new DescriptionEditor();
 		$this->reports            = new Reports();
+		$this->roster             = new MemberRoster();
 		add_shortcode( 'scw_selectclass', array( $this->short_codes, 'user_signup' ) );
 		add_shortcode( 'scw_payment_success', array( $this->stripe_payments, 'payment_success' ) );
 		add_shortcode( 'scw_payment_failure', array( $this->stripe_payments, 'payment_failure' ) );
 		add_shortcode( 'scw_description_editor', array( $this->description_editor, 'load_description_editor' ) );
 		add_shortcode( 'scw_reports', array( $this->reports, 'class_reports' ) );
+		add_shortcode( 'scw_roster', array( $this->roster, 'member_roster' ) );
 		add_filter( 'query_vars', array( $this, 'wwp_custom_query_vars_filter' ) );
 	}
 
