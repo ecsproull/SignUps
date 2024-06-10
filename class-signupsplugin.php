@@ -124,6 +124,7 @@ class SignupsPlugin extends SignUpsBase {
 		$vars[] .= 'signup_id';
 		$vars[] .= 'secret';
 		$vars[] .= 'unsubscribe';
+		$vars[] .= 'mail_group';
 		return $vars;
 	}
 

@@ -195,6 +195,20 @@ class SignUpsRestApis extends SignUpsBase {
 			function () {
 				$this->register_route(
 					'scwmembers/v1',
+					'/class-status',
+					'get_class_status',
+					$this,
+					array(),
+					WP_REST_Server::CREATABLE
+				);
+			}
+		);
+
+		add_action(
+			'rest_api_init',
+			function () {
+				$this->register_route(
+					'scwmembers/v1',
 					'/search',
 					'search_members',
 					$this,
@@ -208,6 +222,43 @@ class SignUpsRestApis extends SignUpsBase {
 			'rest_api_init',
 			array( $this, 'regester_payment_route' )
 		);
+	}
+
+	/**
+	 * Get the status of a class for an instructor.
+	 *
+	 * @param  mixed $request Request data.
+	 * @return mixed Class contacts and number of students signed up..
+	 */
+	public function get_class_status( $request ) {
+		global $wpdb;
+		$key = '8c62a157-7fe8-4105-9f91-932eac39fe2g';
+		if ( $request['key'] !== $key ) {
+			return new WP_REST_Response( 'Nice Try.', 401 );
+		}
+
+		$dt       = new DateTime( 'now', new DateTimeZone( 'America/Phoenix' ) );
+		$interval = DateInterval::createFromDateString( '2 days' );
+		$dt->add( $interval );
+		$date = $dt->format( self::DATE_FORMAT3 );
+
+		$sessions = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT * FROM %1s
+				WHERE session_start_formatted LIKE %s',
+				self::SESSIONS_TABLE,
+				$wpdb->esc_like( $date ) . '%'
+			),
+			OBJECT
+		);
+
+		$results = array();
+		foreach ( $sessions as $session ) {
+			$session_data = $this->get_session_email_data( $session->session_id );
+			$results[]    = $session_data[0];
+		}
+
+		return $results;
 	}
 
 	/**
@@ -236,7 +287,7 @@ class SignUpsRestApis extends SignUpsBase {
 		global $wpdb;
 		$key      = '9523a157-8ee7-5401-9f91-abccea39fe2f';
 		if ( $request['key'] !== $key || ! current_user_can( 'administrator' ) ) {
-			return new WP_REST_Response( 'Unauthorized.', 401 );;
+			return new WP_REST_Response( 'Unauthorized.', 401 );
 		}
 
 		$pattern = '/^[a-zA-Z0-9@\.]{3,}$/ms';

@@ -67,7 +67,8 @@ class ShortCodes extends SignUpsBase {
 			} elseif ( get_query_var( 'unsubscribe' ) ) {
 				$key   = get_query_var( 'unsubscribe' );
 				$badge = get_query_var( 'badge' );
-				$this->unsubscribe_nag_mailer( $key, $badge );
+				$mail_group = get_query_var( 'mail_group' );
+				$this->unsubscribe_nag_mailer( $key, $badge, $mail_group );
 			} else {
 				$this->create_select_signup( $admin_view );
 			}
@@ -108,7 +109,7 @@ class ShortCodes extends SignUpsBase {
 	 * @param  mixed $badge The member's badge number.
 	 * @return void
 	 */
-	protected function unsubscribe_nag_mailer( $key, $badge ) {
+	protected function unsubscribe_nag_mailer( $key, $badge, $mail_group ) {
 		global $wpdb;
 		$ip_address    = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : 'No Ip Address';
 		$pattern_key   = '/^[0-9a-f]{32}$|^[0-9a-f]{14}\.[0-9]{8}$/ms';
@@ -119,10 +120,11 @@ class ShortCodes extends SignUpsBase {
 			return;
 		}
 
-		$data                         = array();
-		$data['unsubscribe_key']      = $key;
-		$data['unsubscribe_complete'] = false;
-		$data['unsubscribe_badge']    = $badge;
+		$data                           = array();
+		$data['unsubscribe_key']        = $key;
+		$data['unsubscribe_complete']   = false;
+		$data['unsubscribe_badge']      = $badge;
+		$data['unsubscribe_mail_group'] = $mail_group;
 		$member = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
@@ -141,7 +143,7 @@ class ShortCodes extends SignUpsBase {
 				?>
 				<h1 class='ml-auto mr-auto mt-5'>Request queued and should be complete within 8 hours.</h1>
 				<?php
-				$sgm->send_mail( 'ecsproull765@gmail.com', 'Unsubscribe', $key . ' ' . $badge . ' ip : ' . $ip_address );
+				$sgm->send_mail( 'ecsproull765@gmail.com', 'Unsubscribe', $key . ' ' . $badge . ' ip : ' . $ip_address . ' group: ' . $mail_group );
 			} else {
 				?>
 				<div class='ml-auto mr-auto mt-5'>
@@ -672,7 +674,7 @@ class ShortCodes extends SignUpsBase {
 	 */
 	private function create_select_signup_form( $signups, $categories ) {
 		?>
-		<form method="GET">
+		<form method="POST">
 			<div id="usercontent">
 				<div id="signup-select" class="signup-category-list selection-font mb-100px mr-auto ml-auto mt-5">
 					<?php
@@ -1026,7 +1028,7 @@ class ShortCodes extends SignUpsBase {
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Description: </div>
 				<div class="instruct"><?php echo html_entity_decode( $description_object->description_html ); ?></div>
 			</div>
-			<form class="ml-auto mr-auto" method="GET">
+			<form class="ml-auto mr-auto" method="POST">
 				<div class="submit-row-grid mt-4">
 					<div>
 						<button type="submit" class="btn btn-md bg-primary mr-2" value="-1" name="home">Cancel</button>

@@ -163,10 +163,12 @@ class SignupSettings extends SignUpsBase {
 		$post['signup_group']                = 'member' === $post['signup_group'] ? '' : $post['signup_group'];
 		$post['signup_default_contact_name'] = $post['signup_contact_firstname'] . ' ' . $post['signup_contact_lastname'];
 
-		$duration_parts = explode( ':', $post['signup_default_duration'] );
-		if ( $duration_parts[0] > 12 ) {
-			$duration_parts[0]               = $duration_parts[0] - 12;
-			$post['signup_default_duration'] = $duration_parts[0] . ':' . $duration_parts[1] . ':' . $duration_parts[2];
+		if ( isset( $post['signup_default_duration'] ) ) {
+			$duration_parts = explode( ':', $post['signup_default_duration'] );
+			if ( $duration_parts[0] > 12 ) {
+				$duration_parts[0]               = $duration_parts[0] - 12;
+				$post['signup_default_duration'] = $duration_parts[0] . ':' . $duration_parts[1] . ':' . $duration_parts[2];
+			}
 		}
 
 		if ( isset( $post['signup_admin_approved'] ) ) {
@@ -255,7 +257,7 @@ class SignupSettings extends SignUpsBase {
 			}
 
 			if ( $instructor_id ) {
-				$sessions_updated = 0;
+				$instructors_updated = 0;
 				$sessions = $wpdb->get_results(
 					$wpdb->prepare(
 						'SELECT *
@@ -296,7 +298,7 @@ class SignupSettings extends SignUpsBase {
 						$data['si_signup_id']     = $signup_id;
 						$data['si_session_id']    = $session->session_id;
 						$data['si_instructor_id'] = (int) $instructor_id;
-						$sessions_updated += $wpdb->insert( self::SESSION_INSTRUCTORS_TABLE, $data );
+						$instructors_updated += $wpdb->insert( self::SESSION_INSTRUCTORS_TABLE, $data );
 					}
 				}
 			} else {
@@ -307,7 +309,7 @@ class SignupSettings extends SignUpsBase {
 			}
 		}
 
-		if ( 0 === $affected_rows && $sessions_updated < 0 ) {
+		if ( $instructors_updated > 0 ) {
 			$this->update_message( $sessions_updated, $wpdb->last_error, 'Session Instructors Added' );
 		} else {
 			$this->update_message( $affected_row_count, $wpdb->last_error, 'Class' );
@@ -571,6 +573,9 @@ class SignupSettings extends SignUpsBase {
 	 */
 	private function delete_class( $post ) {
 		global $wpdb;
+		$this->load_signup_selection();
+			return;
+		
 		$sessions = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *

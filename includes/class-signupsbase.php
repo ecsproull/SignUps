@@ -178,13 +178,21 @@ class SignUpsBase {
 
 	/**
 	 * Format Date as 2020-08-13.
+	 * Acceptable for HTML Date Input
+	 *
+	 * @var mixed
+	 */
+	protected const DATE_FORMAT3 = 'Y-m-d';
+
+	/**
+	 * Format Date as Mon 08-13-2020.
 	 *
 	 * @var mixed
 	 */
 	protected const DATE_FORMAT = 'D m-d-Y';
 
 	/**
-	 * Format Date as 2020-08-13.
+	 * Format Date as 08-13-2020.
 	 *
 	 * @var mixed
 	 */
@@ -1645,7 +1653,7 @@ class SignUpsBase {
 			$today    = $dt->format( self::DATE_FORMAT2 );
 			$sessions = $wpdb->get_results(
 				$wpdb->prepare(
-					'SELECT session_id, session_signup_id, session_start_formatted, session_location
+					'SELECT session_id, session_signup_id, session_start_formatted, session_location, session_slots
 					FROM %1s
 					WHERE session_preclass_email_date = %s',
 					self::SESSIONS_TABLE,
@@ -1656,7 +1664,7 @@ class SignUpsBase {
 		} else {
 			$sessions = $wpdb->get_results(
 				$wpdb->prepare(
-					'SELECT session_id, session_signup_id, session_start_formatted, session_location
+					'SELECT session_id, session_signup_id, session_start_formatted, session_location, session_slots
 					FROM %1s
 					WHERE session_id = %s',
 					self::SESSIONS_TABLE,
@@ -1674,7 +1682,8 @@ class SignUpsBase {
 					'SELECT signup_name, 
 						signup_contact_firstname,
 						signup_contact_email,
-						signup_contact_lastname
+						signup_contact_lastname,
+						signup_default_minimum
 					FROM %1s
 					WHERE signup_id = %d',
 					self::SIGNUPS_TABLE,
@@ -1709,9 +1718,12 @@ class SignUpsBase {
 			$data->class_title             = $signup[0]->signup_name;
 			$data->class_location          = $session->session_location;
 			$data->date_time_formatted     = $session->session_start_formatted;
+			$data->class_slots             = $session->session_slots;
+			$data->class_signup_id         = $session->session_signup_id;
 			$data->class_contact_firstname = $signup[0]->signup_contact_firstname;
 			$data->class_contact_lastname  = $signup[0]->signup_contact_lastname;
 			$data->class_contact_email     = $signup[0]->signup_contact_email;
+			$data->class_minimum           = $signup[0]->signup_default_minimum;
 			$data->instructors             = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT wp_scw_instructors.instructors_name,

@@ -56,6 +56,27 @@ class SessionEmailData {
 	public $class_contact_email;
 
 	/**
+	 * Minimum number to have the class.
+	 *
+	 * @var mixed
+	 */
+	public $class_minimum;
+
+	/**
+	 * Maximum students per sessions.
+	 *
+	 * @var mixed
+	 */
+	public $class_slots;
+
+	/**
+	 * Class signup id.
+	 *
+	 * @var mixed
+	 */
+	public $class_signup_id;
+
+	/**
 	 * List of the attendees email addresses
 	 *
 	 * @var mixed
