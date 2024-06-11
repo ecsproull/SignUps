@@ -573,9 +573,11 @@ class SignupSettings extends SignUpsBase {
 	 */
 	private function delete_class( $post ) {
 		global $wpdb;
-		$this->load_signup_selection();
-			return;
-		
+		if ( get_site_url() !== 'https://woodclubtest.site' ) {
+			$this->load_signup_selection();
+				return;
+		}
+
 		$sessions = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
@@ -703,7 +705,7 @@ class SignupSettings extends SignUpsBase {
 		$start_time_parts = explode( ':', $session_item->session_time_of_day );
 		$today            = new DateTime( 'now', $this->date_time_zone );
 
-		if ( property_exists( $session_item, 'save_session_settings') ) {
+		if ( property_exists( $session_item, 'save_session_settings' ) ) {
 			$data                                         = array();
 			$data['signup_default_slots']                 = $session_item->session_slots;
 			$data['signup_default_start_time']            = $session_item->session_time_of_day;
@@ -1419,6 +1421,7 @@ class SignupSettings extends SignUpsBase {
 	 * @param  array  $attendees The list of attendees for the class.
 	 * @param  int    $signup_id The ID of the class.
 	 * @param  array  $instructors An array of instructors for each session.
+	 * @param  string $instructions The instructions for this class.
 	 * @return void
 	 */
 	private function create_session_select_form( $signup_name, $sessions, $attendees, $signup_id, $instructors, $instructions ) {
@@ -1504,7 +1507,7 @@ class SignupSettings extends SignUpsBase {
 												value="<?php echo esc_html( $email_id ); ?>">Email Session</button> 
 										</span>
 									</div>
-									<div id="<?php echo 'email-session-' . $session->session_id; ?>" class="email-body text-left" hidden>
+									<div id="<?php echo 'email-session-' . esc_html( $session->session_id ); ?>" class="email-body text-left" hidden>
 										<?php echo $this->get_session_email_body( $session->session_id ); ?>
 									</div>
 								</td>
@@ -1516,7 +1519,7 @@ class SignupSettings extends SignUpsBase {
 							<input  id=<?php echo esc_html( 'move_to' . $session->session_id ); ?> type="hidden" name="move_to" value="0">
 							<?php
 							wp_nonce_field( 'signups', 'mynonce' );
-							
+	
 							foreach ( $attendees[ $session->session_id ] as $attendee ) {
 								?>
 								<tr class="drag-row" draggable="true" data-dragable="<?php $this->session_attendee_string( $attendee->attendee_id, $session->session_id ); ?>" >
@@ -1648,6 +1651,14 @@ class SignupSettings extends SignUpsBase {
 					<input class="w-250px" type="text" name="signup_location" value="<?php echo esc_html( $data->signup_location ); ?>" />
 				</div>
 
+				<div class="text-right">
+					<label class="label-margin-top mr-2" for="signup_schedule_desc">Schedule:</label>
+				</div>
+				<div>
+					<input type="text" id="signup_schedule_desc" class="mt-2 w-100" 
+						value="<?php echo esc_html( $data->signup_schedule_desc ); ?>" placeholder="Leave blank unless the schedule is custom." name="signup_schedule_desc">
+				</div>
+
 				<div class="text-right mr-2">
 					<label>User Group:</label>
 				</div>
@@ -1735,25 +1746,29 @@ class SignupSettings extends SignUpsBase {
 	 * @return void
 	 */
 	private function create_session_form( $data, $signup_name, $class_instructors, $session_instructors ) {
+		$session_id = false;
+		if ( property_exists( $data, 'session_id' ) && $session_id > 0 ) {
+			$session_id = $session_id;
+		}
 		?>
 		<div class="text-center mb-4 mr-100px">
 			<h1><?php echo esc_html( $signup_name ); ?></h1>
 		</div>
 		<form method="POST">
-			<div id="session-table" class="session-box mr-auto ml-auto" <?php echo $data->session_id ? 'hidden' : ''; ?> >
+			<div id="session-table" class="session-box mr-auto ml-auto" <?php echo $session_id ? 'hidden' : ''; ?> >
 				<div class="text-right mr-2"><label>Slots:</label></div>
 				<div><input class="w-250px session-setting" type="number" name="session_slots" 
-					value="<?php echo esc_html( $data->session_slots ); ?>" /> </div>
+					value="<?php echo esc_html( $session_id ); ?>" /> </div>
 
 				<div class="text-right mr-2"><label>Start Time: </label></div>
 				<div><input id="default-minutes" class="w-250px session-setting" type="time" name="session_time_of_day" 
 					value="<?php echo esc_html( $data->session_time_of_day ); ?>" 
-					<?php echo $data->session_id ? 'disabled' : ''; ?> /> </div>
+					<?php echo $session_id ? 'disabled' : ''; ?> /> </div>
 
 				<div class="text-right mr-2"><label>Duration: </label></div>
 				<div><input id="default-minutes" class="w-250px without_ampm session-setting" type="time" name="session_duration" 
 					value="<?php echo esc_html( $data->session_duration ); ?>" 
-					<?php echo $data->session_id ? 'disabled' : ''; ?> /> </div>
+					<?php echo $session_id ? 'disabled' : ''; ?> /> </div>
 
 				<div class="text-right mr-2">
 					<label class="label-margin-top mr-2" for="signup_Repeat">Repeat:</label>
@@ -1771,9 +1786,9 @@ class SignupSettings extends SignUpsBase {
 				<div class="text-right mr-2"><label>Day of Month:</label></div>
 				<div><input id="day-of-month" class="w-250px session-setting" type="text" name="session_day_of_month" 
 					value="<?php echo esc_html( $data->session_day_of_month ); ?>" 
-					<?php echo $data->session_id ? 'disabled' : ''; ?> 
-					pattern="\b(First|Second|Third|Fourth|Last)\b \b(Monday|Tuesday|Wednesday|Thrusday|Friday|Saturday|Sunday)\b" 
-					title="Only First, Second, Third Fourth or Last plus the day of the week. Both MUST be capitolized" /> </div>
+					<?php echo $session_id ? 'disabled' : ''; ?> 
+					pattern="\b(First|Second|Third|Fourth|Last)\b \b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b" 
+					title="Only First, Second, Third, Fourth or Last plus the day of the week. Both MUST be capitolized" /> </div>
 
 				<div class="text-right mr-2"><label>End Repeat Date:</label></div>
 				<div><input type="date" class="w-250px" name="session_end_repeat"
@@ -1784,7 +1799,7 @@ class SignupSettings extends SignUpsBase {
 					value="1"></div>
 			</div>
 			<div class="text-center">
-				<button class="btn btn-primary mt-3 mb-3 ml-5" name="session_add_slots" type="submit" value="1" <?php echo $data->session_id ? 'hidden' : ''; ?> ><b><i>Update Sessions</i></b></button>
+				<button class="btn btn-primary mt-3 mb-3 ml-5" name="session_add_slots" type="submit" value="1" <?php echo $session_id ? 'hidden' : ''; ?> ><b><i>Update Sessions</i></b></button>
 			</div>
 			<div id="session-table" class="session-box mr-auto ml-auto">
 				<?php
@@ -1803,7 +1818,7 @@ class SignupSettings extends SignUpsBase {
 				?>
 			</div>
 			<?php
-			if ( $data->session_id && $class_instructors ) {
+			if ( $session_id && $class_instructors ) {
 				?>
 				<div id="inst-list" class="instructor-list mt-3 ml-auto mr-auto">
 				<div>Badge</div>
@@ -1855,8 +1870,7 @@ class SignupSettings extends SignUpsBase {
 			<input class="w-75px" type="hidden" name="session_add_slots_count" value="1" />
 			<input type="hidden" name="session_signup_id" value="<?php echo esc_html( $data->session_signup_id ); ?>">
 			<input type="hidden" name="session_calendar_id" value="<?php echo esc_html( $data->session_calendar_id ); ?>">
-			<input type="hidden" name="id" value="<?php echo esc_html( $data->session_id ); ?>">
-			<!-- <input type="hidden" name="session_id" value="<?php echo esc_html( $data->session_id ); ?>"> -->
+			<input type="hidden" name="id" value="<?php echo esc_html( $session_id ); ?>">
 			<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
 			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 		</form>
@@ -1882,7 +1896,7 @@ class SignupSettings extends SignUpsBase {
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_title">Category:</label>
 			</div>
-				<div><select class="mt-2" name="signup_category">
+				<div><select class="mt-2" name="signup_category" title="Select a Category for the Class">
 					<?php
 					global $wpdb;
 					$categories = $wpdb->get_results(
@@ -1896,9 +1910,7 @@ class SignupSettings extends SignUpsBase {
 
 					foreach ( $categories as $category ) {
 						?>
-						<option value=<?php	echo esc_html( $category->category_id ); ?> 
-							<?php echo $category->category_id === $data->signup_category ? 'selected' : ''; ?>
-							><?php echo esc_html( $category->category_title ); ?></option>
+						<option value=<?php	echo esc_html( $category->category_id ); ?> ><?php echo esc_html( $category->category_title ); ?></option>
 						<?php
 					}
 					?>
@@ -2057,7 +2069,6 @@ class SignupSettings extends SignUpsBase {
 		global $wpdb;
 		$new_signup                                = array();
 		$new_signup['signup_name']                 = $post['description_title'];
-		$new_signup['signup_contact_email']        = $post['description_contact_email'];
 		$new_signup['signup_default_contact_name'] = $post['signup_contact_firstname'] . ' ' . $post['signup_contact_lastname'];
 		$new_signup['signup_location']             = $post['description_location'];
 		$new_signup['signup_cost']                 = $post['description_cost'];
@@ -2141,8 +2152,7 @@ class SignupSettings extends SignUpsBase {
 				'description_html_short'   => htmlentities( $post['description_html_short'] ),
 				'description_materials'    => $post['description_materials'],
 				'description_prerequisite' => $post['description_prerequisite'],
-				'description_instructions' => $post['description_instructions'],
-				'description_instructors'  => $post['description_instructors'],
+				'description_instructions' => $post['description_instructions']
 			);
 
 			$affected_row_count = $wpdb->insert( self::DESCRIPTIONS_TABLE, $new_description );
@@ -2156,8 +2166,8 @@ class SignupSettings extends SignUpsBase {
 				$start_date->modify( '+' . $duration_total_minutes . ' minutes' );
 				$new_session['session_end_time']              = $start_date->format( 'U' );
 				$new_session['session_end_formatted']         = $start_date->format( self::DATETIME_FORMAT );
-				$new_session['session_contact_email']         = $post['description_contact_email'];
-				$new_session['session_contact_name']          = $post['description_contact_name'];
+				$new_session['session_contact_email']         = $post['signup_contact_email'];
+				$new_session['session_contact_name']          = $post['signup_contact_firstname'] . ' ' . $post['signup_contact_lastname'];
 				$new_session['session_duration']              = date_format( $duration, 'H:i' );
 				$new_session['session_slots']                 = $post['description_slots'];
 				$new_session['session_item']                  = 'attendee';

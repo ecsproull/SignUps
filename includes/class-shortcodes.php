@@ -65,8 +65,8 @@ class ShortCodes extends SignUpsBase {
 					$this->create_description_form( get_query_var( 'signup_id' ) );
 				}
 			} elseif ( get_query_var( 'unsubscribe' ) ) {
-				$key   = get_query_var( 'unsubscribe' );
-				$badge = get_query_var( 'badge' );
+				$key        = get_query_var( 'unsubscribe' );
+				$badge      = get_query_var( 'badge' );
 				$mail_group = get_query_var( 'mail_group' );
 				$this->unsubscribe_nag_mailer( $key, $badge, $mail_group );
 			} else {
@@ -82,8 +82,8 @@ class ShortCodes extends SignUpsBase {
 	 * @return void
 	 */
 	protected function send_email( $post ) {
-		$sgm = new SendGridMail();
-		$email_status = $sgm->send_mail( $post['contact_email'], $post['subject'], 'Reply To: ' . $post['email'] . '<br><br>' . $post['body'] );
+		$sgm          = new SendGridMail();
+		$email_status = $sgm->send_mail( $post['contact_email'], $post['subject'], 'Reply To: ' . $post['email'] . '<br><br>' . $post['body'], false, $post['email'] );
 		?>
 		<form class="email_form" method="POST">
 			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
@@ -107,6 +107,7 @@ class ShortCodes extends SignUpsBase {
 	 *
 	 * @param  mixed $key The key that identifies the member.
 	 * @param  mixed $badge The member's badge number.
+	 * @param  mixed $mail_group The email group. Monitor or Class but could be expanded in the future.
 	 * @return void
 	 */
 	protected function unsubscribe_nag_mailer( $key, $badge, $mail_group ) {
@@ -125,7 +126,7 @@ class ShortCodes extends SignUpsBase {
 		$data['unsubscribe_complete']   = false;
 		$data['unsubscribe_badge']      = $badge;
 		$data['unsubscribe_mail_group'] = $mail_group;
-		$member = $wpdb->get_results(
+		$member                         = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
 				FROM %1s
@@ -221,6 +222,8 @@ class ShortCodes extends SignUpsBase {
 	 * Retrieves the available signups  and
 	 * creates a form for the user to select a signup to add himself to.
 	 *
+	 * @param boolean $admin_view Set to true when this  is displayed from the administrator view.
+	 *
 	 * @return void
 	 */
 	private function create_select_signup( $admin_view = false ) {
@@ -269,6 +272,7 @@ class ShortCodes extends SignUpsBase {
 	 * Creates the form to sign up.
 	 *
 	 * @param string $signup_id The id of the signup to create a form for.
+	 * @param string $secret A members secret key used to indentify the member.
 	 * @return void
 	 */
 	private function create_signup_form( $signup_id, $secret = null ) {
@@ -574,7 +578,7 @@ class ShortCodes extends SignUpsBase {
 						if ( ! $insert_return_value ) {
 							$wp_last_error = $wpdb->last_error;
 						}
-						$last_id             = $wpdb->insert_id;
+						$last_id = $wpdb->insert_id;
 					}
 				}
 				$wpdb->query( 'UNLOCK TABLES' );
@@ -701,7 +705,7 @@ class ShortCodes extends SignUpsBase {
 						$count++;
 					}
 
-					if ( $count % 4 > 0) {
+					if ( $count % 4 > 0 ) {
 						$remainder = 4 - ( $count % 4 );
 						for ( $i = 0; $i < $remainder; $i++ ) {
 							?>
@@ -729,6 +733,8 @@ class ShortCodes extends SignUpsBase {
 	 * @param  int    $cost The cost of the signup in dollars.
 	 * @param  string $signup_id The signup id.
 	 * @param  string $user_group The group that defines who can signup.  CNC, Member...etc.
+	 * @param string $signup_email The email for the contact person for this signup.
+	 * @param string $signup_contact_name The name for the contact person for this signup.
 	 * @return void
 	 */
 	private function create_session_select_form(
@@ -890,7 +896,8 @@ class ShortCodes extends SignUpsBase {
 	/**
 	 * Creates a signup description block
 	 *
-	 * @param  mixed $signup_id Id of the signup.
+	 * @param  mixed  $signup_id Id of the signup.
+	 * @param  string $secret Members secret used to indenitfy the mamber.
 	 * @return void
 	 */
 	private function create_description_form( $signup_id, $secret = null ) {
@@ -982,15 +989,6 @@ class ShortCodes extends SignUpsBase {
 			<div class="description-box description-block">
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Cost: </div>
 				<div><?php echo '$' . esc_html( $signup->signup_cost ) . '.00'; ?></div>
-
-				<?php
-				if ( $description_object->description_instructors ) {
-					?>
-					<div class="text-right pr-2 font-weight-bold text-dark mb-2">Instructors: </div>
-					<div><?php echo esc_html( $description_object->description_instructors ); ?></div>
-					<?php
-				}
-				?>
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Contact:</div>
 				<div>
 					<form method="POST">
@@ -1064,7 +1062,8 @@ class ShortCodes extends SignUpsBase {
 	/**
 	 * Create the form for sending the admin an email.
 	 *
-	 * @param mixed $post Data from the calling form.
+	 * @param mixed   $post  Data from the calling form.
+	 * @param boolean $admin Set to true if this is called from the administrator side.
 	 * @return void
 	 */
 	private function create_email_form( $post, $admin = true ) {

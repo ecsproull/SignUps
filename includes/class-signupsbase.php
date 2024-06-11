@@ -286,7 +286,7 @@ class SignUpsBase {
 	 * @param  string $method POST, GET....etc.
 	 * @return void
 	 */
-	protected function register_route( $namespace, $route, $func, $class_inst, $args, $method ) {		
+	protected function register_route( $namespace, $route, $func, $class_inst, $args, $method ) {
 		$basic_args = array(
 			'methods'             => $method,
 			'callback'            => array( $class_inst, $func ),
@@ -331,8 +331,8 @@ class SignUpsBase {
 	/**
 	 * Is this a rolling signup
 	 *
-	 * @param  mixed $signup_id
-	 * @return boolean True for rolling, else false
+	 * @param  mixed $signup_id The ID of the signup.
+	 * @return boolean True for rolling, else false.
 	 */
 	private function is_rolling_signup( $signup_id ) {
 		global $wpdb;
@@ -349,7 +349,7 @@ class SignUpsBase {
 
 		return $signup[0]->signup_rolling_template > '0';
 	}
-	
+
 	/**
 	 * Creates a form for new users to apply for membership
 	 *
@@ -429,9 +429,14 @@ class SignUpsBase {
 	}
 
 	/**
-	 * Creates a table that is used to look up a member.
-	 * Relies on the admin JS file.
+	 * Create a member search box.
 	 *
+	 * @param  mixed $center Should the control be centered.
+	 * @param  mixed $badge Badge number.
+	 * @param  mixed $firstname First name.
+	 * @param  mixed $lastname Last name.
+	 * @param  mixed $email Members email.
+	 * @param  mixed $phone Members phone.
 	 * @return void
 	 */
 	protected function create_lookup_member_table( $center = false, $badge = '', $firstname = '', $lastname = '', $email = '', $phone = '' ) {
@@ -616,6 +621,8 @@ class SignUpsBase {
 	 * @param  mixed  $rolling_signup_id The id for the signup.
 	 * @param  string $secret A secret key used to indentify a user.
 	 * @param  mixed  $admin Set to true if an admin is using this function.
+	 * @param  int    $rolling_days The number of rolling days to create.
+	 *
 	 * @return void
 	 */
 	protected function create_rolling_session( $rolling_signup_id, $secret, $admin = false, $rolling_days = null ) {
@@ -684,8 +691,7 @@ class SignUpsBase {
 			),
 			OBJECT
 		);
-		
-		////************To be removed */
+
 		$template2 = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
@@ -714,7 +720,7 @@ class SignUpsBase {
 			),
 			OBJECT
 		);
-		////************************ */
+
 		$description_html = null;
 		$description = $this->get_signup_html( $rolling_signup_id );
 		if ( $description ) {
@@ -731,7 +737,6 @@ class SignUpsBase {
 			$admin,
 			$secret,
 			$description_html,
-			$template2,
 			$template_items2,
 			$rolling_days
 		);
@@ -792,8 +797,8 @@ class SignUpsBase {
 				FROM %1s
 				WHERE exc_start >= %s AND exc_start <= %s',
 				self::ROLLING_EXCEPTIONS_TABLE,
-				$start_date->format('Y-m-d'),
-				$end_date->format('Y-m-d')
+				$start_date->format( 'Y-m-d' ),
+				$end_date->format( 'Y-m-d' )
 			),
 			OBJECT
 		);
@@ -821,6 +826,10 @@ class SignUpsBase {
 	 * @param  array  $template_items Each one describe a signup for that day.
 	 * @param  string $user_group The group that is allowed to sign up.
 	 * @param  bool   $admin This being accessed by an administrator.
+	 * @param  string $secret Unique id for a member.
+	 * @param  string $description Description of the signup.
+	 * @param  mixed  $template_items2 The template items for tempate2. Used when a template is changed at a predetermined date.
+	 * @param  mixed  $rolling_days Overrides the standard number of rolling days.
 	 * @return void
 	 */
 	protected function create_rolling_session_select_form2(
@@ -833,7 +842,6 @@ class SignUpsBase {
 		$admin,
 		$secret,
 		$description,
-		$template2,
 		$template_items2,
 		$rolling_days = null
 	) {
@@ -894,8 +902,7 @@ class SignUpsBase {
 							$comment_row_id = 'comment-row-';
 							while ( $start_date <= $end_date ) {
 								$datetime = new DateTime( '04/29/2024 12:00 AM' );
-								if ( $start_date > $datetime && $signup_id === '1') {
-									//$template       = $template2;
+								if ( $start_date > $datetime && '1' === $signup_id ) {
 									$template_items = $template_items2;
 								}
 
@@ -1054,11 +1061,11 @@ class SignUpsBase {
 												$skip_time_slot = false;
 												$reason         = '';
 												foreach ( $time_exceptions as $exception ) {
-													if ( $start_date >= $exception->begin && 
-														$start_date < $exception->end  &&
-														($exception->template === $template ||
-														$exception->template === '0')) {
-														$reason = $exception->reason;
+													if ( $start_date >= $exception->begin &&
+														$start_date < $exception->end &&
+														( $exception->template === $template ||
+														'0' === $exception->template ) ) {
+														$reason         = $exception->reason;
 														$skip_time_slot = true;
 														break;
 													}
@@ -1153,7 +1160,6 @@ class SignUpsBase {
 		$sd  = clone $start_date;
 		$now = date_create( 'now' );
 		date_sub( $sd, date_interval_create_from_date_string( $template->template_days_to_cancel . 'days' ) );
-		//$ret_val = $user_badge === $attendee->attendee_badge && $attendee->attendee_secret === $secret && $now < $sd;
 		$ret_val = $user_badge === $attendee->attendee_badge && $now < $sd;
 		return $ret_val;
 	}
@@ -1364,7 +1370,7 @@ class SignUpsBase {
 				<a href="<?php echo esc_html( get_site_url() ); ?>/signups/?signup_id=<?php echo esc_html( $post['add_attendee_session'] ); ?>&secret=<?php echo esc_html( $post['user_secret'] ); ?>" >Change Signup</a><br>
 				<br>
 				<!--<p>Your key to edit this signup is: &emsp; &emsp; <?php echo esc_html( $post['user_secret'] ); ?> </p> -->
-				<p>ALSO: An email has been sent to <b><i><?php echo esc_html( $post['email'] ) ?></i></b> with a link to edit this signup.<p>
+				<p>ALSO: An email has been sent to <b><i><?php echo esc_html( $post['email'] ); ?></i></b> with a link to edit this signup.<p>
 			</div>
 			
 		</div>
@@ -1374,7 +1380,6 @@ class SignUpsBase {
 			$url   = get_site_url();
 			$link  = "<a href='$url/signups/?signup_id=" . $post['add_attendee_session'] . '&secret=' . $post['user_secret'] . "'>Edit Signup</a>";
 			$body .= '<br><br>' . $link . '<br>';
-			//$body .= '<p>Your key to edit this signup is: &emsp; &emsp;' . $post['user_secret'] . '</p>';
 			$sgm->send_mail( $post['email'], 'Woodshop Signup', $body );
 		}
 
@@ -1386,6 +1391,7 @@ class SignUpsBase {
 	 *
 	 * @param  int     $template_id The id of the selected template.
 	 * @param  boolean $add_new Adds an option to add a new template.
+	 * @param  string  $template_id_name The name of the template.
 	 * @param  string  $select_id The name of the selected template.
 	 * @param  boolean $default_title Default title.
 	 * @return void
@@ -1460,10 +1466,11 @@ class SignUpsBase {
 			$wpdb->update( self::SESSIONS_TABLE, $data, $where );
 		}
 	}
-	
+
 	/**
 	 * Creates the description, short description and instructions input block.
 	 *
+	 * @param mixed $description_object Object that holds the description, instructions and calendar description.
 	 * @return void
 	 */
 	protected function create_description_section( $description_object ) {
@@ -1617,7 +1624,7 @@ class SignUpsBase {
 			if ( isset( $post['session_calendar_id'] ) && $post['session_calendar_id'] > 0 ) {
 				$where = array( 'id' => $post['session_calendar_id'] );
 				$rows  = $wpdb->update( self::SPIDER_CALENDAR_EVENT_TABLE, $data, $where );
-				if ( $rows === false ) {
+				if ( false === $rows ) {
 					echo '<h1>Failed to update Calendar id: </h1)' . esc_html( $post['session_calendar_id'] . ' with error : ' . $wpdb->last_error );
 				}
 				return;

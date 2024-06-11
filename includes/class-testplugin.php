@@ -1,5 +1,7 @@
 <?php
-/*
+/**
+ * Test page.
+ *
  * @package     SignUps
  * @author      Edward Sproull
  * @copyright   You have the right to copy

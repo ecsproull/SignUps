@@ -27,7 +27,7 @@ class SendGridMail extends SignUpsBase {
 	 * @param  mixed $message Message body for the email.
 	 * @return True on success, false on failure.
 	 */
-	public function send_mail( $email_address, $subject, $message, $class_email = false ) {
+	public function send_mail( $email_address, $subject, $message, $class_email = false, $reply_to = null ) {
 		$email = new Mail();
 
 		if ( $class_email ) {
@@ -37,9 +37,13 @@ class SendGridMail extends SignUpsBase {
 			);
 		} else {
 			$email->setFrom(
-				'scwwoodclubmonitors@outlook.com',
+				'monitors@scwwoodshop.com',
 				'SCW WoodClub Signups'
 			);
+		}
+
+		if ( $reply_to ) {
+			$email->setReplyTo( $reply_to );
 		}
 
 		$email->setSubject( $subject );
