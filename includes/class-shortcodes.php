@@ -82,8 +82,13 @@ class ShortCodes extends SignUpsBase {
 	 * @return void
 	 */
 	protected function send_email( $post ) {
-		$sgm          = new SendGridMail();
-		$email_status = $sgm->send_mail( $post['contact_email'], $post['subject'], 'Reply To: ' . $post['email'] . '<br><br>' . $post['body'], false, $post['email'] );
+		$sgm         = new SendGridMail();
+		$class_email = false;
+		if ( isset( $post['class_email'] ) && $post['class_email'] ) {
+			$class_email = true;
+		}
+
+		$email_status = $sgm->send_mail( $post['contact_email'], $post['subject'], 'Reply To: ' . $post['email'] . '<br><br>' . $post['body'], $class_email, $post['email'] );
 		?>
 		<form class="email_form" method="POST">
 			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
@@ -1069,9 +1074,11 @@ class ShortCodes extends SignUpsBase {
 	private function create_email_form( $post, $admin = true ) {
 		$contact_email = $post['contact_email'];
 		$contact_name  = $post['contact_name'];
+		$class_email   = false;
 		if ( ! $admin ) {
 			$contact_email = $post['session_email'];
 			$contact_name  = $post['session_name'];
+			$class_email   = true;
 		}
 		?>
 		<form class="email_form" method="POST">
@@ -1126,6 +1133,7 @@ class ShortCodes extends SignUpsBase {
 				</div>
 			</div>
 			<input type="hidden" name="contact_email" value="<?php echo esc_html( $contact_email ); ?>" >
+			<input type="hidden" name="class_email" value="<?php echo esc_html( $class_email ); ?>" >
 			<?php
 			if ( isset( $post['add_attendee_session'] ) ) {
 				?>
