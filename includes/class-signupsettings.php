@@ -340,30 +340,29 @@ class SignupSettings extends SignUpsBase {
 		);
 
 		if ( isset( $post['save_session_settings'] ) ) {
-			$data                                         = array();
-			$data['signup_default_slots']                 = $post['session_slots'];
-			$data['signup_default_start_time']            = $post['session_time_of_day'];
-			$data['signup_default_duration']              = $post['session_duration'];
-			$data['signup_default_day_of_month']          = $post['session_day_of_month'];
-			$data['signup_default_days_between_sessions'] = $post['session_days_between_sessions'];
-			$where                                        = array( 'signup_id' => $post['session_signup_id'] );
-			$rows                                         = $wpdb->update( self::SIGNUPS_TABLE, $data, $where );
+			$data                         = array();
+			$data['signup_default_slots'] = $post['session_slots'];
+
+			if ( isset( $post['session_time_of_day'] ) ) {
+				$data['signup_default_start_time'] = $post['session_time_of_day'];
+			}
+
+			if ( isset( $post['session_duration'] ) ) {
+				$data['signup_default_duration'] = $post['session_duration'];
+			}
+
+			if ( isset( $post['session_day_of_month'] ) ) {
+				$data['signup_default_day_of_month'] = $post['session_day_of_month'];
+			}
+
+			if ( isset ( $post['session_days_between_sessions'] ) ) {
+				$data['signup_default_days_between_sessions'] = $post['session_days_between_sessions'];
+			}
+
+			$where = array( 'signup_id' => $post['session_signup_id'] );
+			$rows  = $wpdb->update( self::SIGNUPS_TABLE, $data, $where );
 			unset( $post['save_session_settings'] );
 		}
-
-		$default_instructor = $wpdb->get_row(
-			$wpdb->prepare(
-				'SELECT instructors_id
-				FROM %1s
-				WHERE instructors_class_id = %s && instructors_badge = %s',
-				self::INSTRUCTORS_TABLE,
-				$post['session_signup_id'],
-				$signup[0]->signup_contact_badge
-			),
-			OBJECT
-		);
-
-		$default_instructor_id = $default_instructor->instructors_id;
 
 		$wpdb->get_results(
 			$wpdb->prepare(
@@ -406,7 +405,6 @@ class SignupSettings extends SignUpsBase {
 				$post,
 				$signup,
 				$add_to_calendar,
-				$default_instructor_id,
 				$preclass_email_days,
 				&$total_rows_updated ) {
 				global $wpdb;
@@ -473,7 +471,6 @@ class SignupSettings extends SignUpsBase {
 							$data                     = array();
 							$data['si_signup_id']     = $signup[0]->signup_id;
 							$data['si_session_id']    = $session_id;
-							$data['si_instructor_id'] = (int) $default_instructor_id;
 							$wpdb->insert( self::SESSION_INSTRUCTORS_TABLE, $data );
 						}
 					}
@@ -675,7 +672,7 @@ class SignupSettings extends SignUpsBase {
 
 		$session_item                                = new SessionItem( $post['add_new_session'] );
 		$session_item->session_slots                 = $results[0]->signup_default_slots;
-		$session_item->session_duration              = $results[0]->signup_default_duration;
+		$session_item->session_duration              = $results[0]->signup_default_duration ? substr( $results[0]->signup_default_duration, 0, 5 ) : '';
 		$session_item->session_days_between_sessions = $results[0]->signup_default_days_between_sessions;
 		$session_item->session_day_of_month          = $results[0]->signup_default_day_of_month;
 		$session_item->session_contact_name          = $results[0]->signup_default_contact_name;
@@ -698,19 +695,20 @@ class SignupSettings extends SignUpsBase {
 	 */
 	private function add_session_slots( $session_item, $signup_name ) {
 		global $wpdb;
-		$start_dates      = array();
-		$end_dates        = array();
-		$duration_parts   = explode( ':', $session_item->session_duration );
-		$interval         = new DateInterval( 'PT' . $duration_parts[0] . 'H' . $duration_parts[1] . 'M' );
-		$start_time_parts = explode( ':', $session_item->session_time_of_day );
-		$today            = new DateTime( 'now', $this->date_time_zone );
+		$start_dates                    = array();
+		$end_dates                      = array();
+		$session_item->session_duration = substr( $session_item->session_duration, 0, 5 );
+		$duration_parts                 = explode( ':', $session_item->session_duration );
+		$interval                       = new DateInterval( 'PT' . $duration_parts[0] . 'H' . $duration_parts[1] . 'M' );
+		$start_time_parts               = explode( ':', $session_item->session_time_of_day );
+		$today                          = new DateTime( 'now', $this->date_time_zone );
 
 		if ( property_exists( $session_item, 'save_session_settings' ) ) {
 			$data                                         = array();
 			$data['signup_default_slots']                 = $session_item->session_slots;
 			$data['signup_default_start_time']            = $session_item->session_time_of_day;
 			$data['signup_default_duration']              = $session_item->session_duration;
-			$data['signup_default_day_of_month']          = $session_item->session_day_of_month;
+			$data['signup_default_day_of_month']          = property_exists( $session_item, 'session_day_of_month' ) ? $session_item->session_day_of_month : '';
 			$data['signup_default_days_between_sessions'] = $session_item->session_days_between_sessions;
 			$where                                        = array( 'signup_id' => $session_item->session_signup_id );
 			$rows                                         = $wpdb->update( self::SIGNUPS_TABLE, $data, $where );
@@ -722,6 +720,7 @@ class SignupSettings extends SignUpsBase {
 
 		$now             = new DateTime( 'now', $this->date_time_zone );
 		$end_repeat_date = $session_item->session_end_repeat ? new DateTime( $session_item->session_end_repeat ) : null;
+		$end_repeat_date->setTime( 23, 59 );
 
 		if ( $session_item->session_end_repeat ) {
 			$session_item->session_add_slots_count = 25;
@@ -732,7 +731,7 @@ class SignupSettings extends SignUpsBase {
 			$session_item->session_day_of_month = $this->get_day_of_month( $start_date );
 		}
 
-		if ( $session_item->session_day_of_month ) {
+		if ( property_exists( $session_item, 'session_day_of_month' ) && $session_item->session_day_of_month ) {
 			for ( $i = 0; $i < $session_item->session_add_slots_count; $i++ ) {
 				$start_date_string = sprintf(
 					'%s of %s %s',
@@ -773,7 +772,7 @@ class SignupSettings extends SignUpsBase {
 				$start->setTime( $start_time_parts[0], $start_time_parts[1] );
 				$end->add( $interval );
 
-				if ( $session_item->session_end_repeat && ( $end_repeat_date < $start ) ) {
+				if ( $session_item->session_end_repeat && ( $end_repeat_date <= $start ) ) {
 					break;
 				}
 
@@ -867,6 +866,7 @@ class SignupSettings extends SignUpsBase {
 		$dt_end                            = new DateTime( $results[0]->session_end_formatted );
 		$end_date[]                        = $dt_end->format( self::DATETIME_FORMAT_INPUT );
 		$results[0]->session_end_formatted = $end_date;
+		$results[0]->session_duration      = substr( $results[0]->session_duration, 0, 5 );
 
 		$this->create_session_form( $results[0], $post['signup_name'], $class_instructors, $session_instructors );
 	}
@@ -1747,26 +1747,29 @@ class SignupSettings extends SignUpsBase {
 	 */
 	private function create_session_form( $data, $signup_name, $class_instructors, $session_instructors ) {
 		$session_id = false;
-		if ( property_exists( $data, 'session_id' ) && $session_id > 0 ) {
-			$session_id = $session_id;
+		if ( property_exists( $data, 'session_id' ) && $data->session_id > 0 ) {
+			$session_id = $data->session_id;
 		}
 		?>
 		<div class="text-center mb-4 mr-100px">
 			<h1><?php echo esc_html( $signup_name ); ?></h1>
 		</div>
 		<form method="POST">
-			<div id="session-table" class="session-box mr-auto ml-auto" <?php echo $session_id ? 'hidden' : ''; ?> >
+			<div class="session-box mr-auto ml-auto mb-1">
 				<div class="text-right mr-2"><label>Slots:</label></div>
-				<div><input class="w-250px session-setting" type="number" name="session_slots" 
-					value="<?php echo esc_html( $session_id ); ?>" /> </div>
-
+				<div><input class="w-125px session-setting" type="number" name="session_slots" 
+					value="<?php echo esc_html( $data->session_slots ); ?>" />
+				</div>
+			</div>
+			<div id="session-table" class="session-box mr-auto ml-auto" <?php echo $session_id ? 'hidden' : ''; ?> >
 				<div class="text-right mr-2"><label>Start Time: </label></div>
-				<div><input id="default-minutes" class="w-250px session-setting" type="time" name="session_time_of_day" 
+				<div><input id="default-time-of-day" class="w-250px session-setting" type="time" name="session_time_of_day" 
 					value="<?php echo esc_html( $data->session_time_of_day ); ?>" 
 					<?php echo $session_id ? 'disabled' : ''; ?> /> </div>
 
 				<div class="text-right mr-2"><label>Duration: </label></div>
-				<div><input id="default-minutes" class="w-250px without_ampm session-setting" type="time" name="session_duration" 
+				<div><input id="default-minutes" class="w-250px without_ampm session-setting" type="text" 
+					name="session_duration" placeholder="--:--" pattern="[0-9]{2}:[0-9]{2}"
 					value="<?php echo esc_html( $data->session_duration ); ?>" 
 					<?php echo $session_id ? 'disabled' : ''; ?> /> </div>
 
@@ -1785,10 +1788,15 @@ class SignupSettings extends SignUpsBase {
 
 				<div class="text-right mr-2"><label>Day of Month:</label></div>
 				<div><input id="day-of-month" class="w-250px session-setting" type="text" name="session_day_of_month" 
-					value="<?php echo esc_html( $data->session_day_of_month ); ?>" 
+					value="<?php echo '0' === $data->session_days_between_sessions ? esc_html( $data->session_day_of_month ) : ''; ?>" 
 					<?php echo $session_id ? 'disabled' : ''; ?> 
 					pattern="\b(First|Second|Third|Fourth|Last)\b \b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b" 
-					title="Only First, Second, Third, Fourth or Last plus the day of the week. Both MUST be capitolized" /> </div>
+					title="Only First, Second, Third, Fourth or Last plus the day of the week. Both MUST be capitolized"
+					<?php echo '0' !== $data->session_days_between_sessions ? 'disabled' : ''; ?> /> </div>
+
+					<div class="text-right mr-2"><label>Start Time:</label></div>
+					<div><input id="start-time" class="w-250px start-time" type="datetime-local" name="session_start_formatted[]" 
+						value="<?php echo esc_html( $data->session_start_formatted[0] ); ?>" /> </div>
 
 				<div class="text-right mr-2"><label>End Repeat Date:</label></div>
 				<div><input type="date" class="w-250px" name="session_end_repeat"
@@ -1807,11 +1815,11 @@ class SignupSettings extends SignUpsBase {
 				for ( $i = 0; $i < $data_items_count; $i++ ) {
 					?>
 					<div class="text-right mr-2"><label>Start Time:</label></div>
-					<div><input id="start-time" class="w-250px start-time" type="datetime-local" name="session_start_formatted[]" 
+					<div><input id="start-time-<?php echo $i; ?>" class="w-250px start-time" type="datetime-local" name="session_start_formatted[]" 
 						value="<?php echo esc_html( $data->session_start_formatted[ $i ] ); ?>" /> </div>
 
 					<div class="text-right mr-2"><label>End Time:</label></div>
-					<div><input id="end-time" class="w-250px" type="datetime-local" name="session_end_formatted[]" 
+					<div><input id="end-time-<?php echo $i; ?>" class="w-250px" type="datetime-local" name="session_end_formatted[]" 
 						value="<?php echo esc_html( $data->session_end_formatted[ $i ] ); ?>" /></div>
 					<?php
 				}

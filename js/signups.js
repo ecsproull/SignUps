@@ -640,4 +640,21 @@ jQuery( document ).ready( function($){
 		time = time.substring(0, len -2) + "00"
 		$(".datetime-picker-end[key=" + key + "]").val(time);
 	})
+
+	$("#signup_Repeat").on("change", function(e) {
+		if ($(e.target).val() !== '0') {
+			$("#day-of-month").val('');
+			$("#day-of-month").prop('disabled', true);
+		} else {
+			$("#day-of-month").prop('disabled', false);
+		}
+	});
+
+	$("#start-time").on("change", function(e) {
+		$("#start-time-0").val($("#start-time").val());
+	});
+	
+	$("#start-time-0").on("change", function(e) {
+		$("#start-time").val($("#start-time-0").val());
+	});
 });
