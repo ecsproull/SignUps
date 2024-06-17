@@ -1746,6 +1746,7 @@ class SignupSettings extends SignUpsBase {
 	 * @return void
 	 */
 	private function create_session_form( $data, $signup_name, $class_instructors, $session_instructors ) {
+		$temp_start = $data->session_start_formatted[0];
 		$session_id = false;
 		if ( property_exists( $data, 'session_id' ) && $data->session_id > 0 ) {
 			$session_id = $data->session_id;
@@ -1795,7 +1796,7 @@ class SignupSettings extends SignUpsBase {
 					<?php echo '0' !== $data->session_days_between_sessions ? 'disabled' : ''; ?> /> </div>
 
 					<div class="text-right mr-2"><label>Start Time:</label></div>
-					<div><input id="start-time" class="w-250px start-time" type="datetime-local" name="session_start_formatted[]" 
+					<div><input id="start-time" class="w-250px start-time" type="datetime-local" 
 						value="<?php echo esc_html( $data->session_start_formatted[0] ); ?>" /> </div>
 
 				<div class="text-right mr-2"><label>End Repeat Date:</label></div>

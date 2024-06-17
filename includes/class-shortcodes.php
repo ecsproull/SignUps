@@ -970,7 +970,16 @@ class ShortCodes extends SignUpsBase {
 			if ( $signup->signup_default_day_of_month ) {
 				$schedule .= ', The ' . $signup->signup_default_day_of_month . ' of the month';
 			} elseif ( $signup->signup_default_days_between_sessions ) {
-				$schedule .= ', Every ' . $signup->signup_default_days_between_sessions . ' days';
+				if ( (int) $signup->signup_default_days_between_sessions % 7 === 0 ) {
+					$weeks = (int) $signup->signup_default_days_between_sessions / 7;
+					if ( $weeks === 1 ) {
+						$schedule .= ', Every week';
+					} else {
+						$schedule .= ', Every ' . $weeks . ' weeks';
+					}
+				} else {
+					$schedule .= ', Every ' . $signup->signup_default_days_between_sessions . ' days';
+				}
 			}
 		}
 

@@ -1,11 +1,17 @@
 
 .instruct ol,
 .instruct ul {
-	margin-bottom: 10px
+	margin-bottom: 10px;
+}
+
+.instruct ul {
+	list-style-type: disc;
+    color: black;
 }
 
 .instruct p {
 	margin: 0 0 5px;
+	font-size: 16px;
 }
 
 .mb-50px {

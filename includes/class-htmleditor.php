@@ -188,7 +188,8 @@ class HtmlEditor extends SignUpsBase {
 			$wpdb->prepare(
 				'SELECT signup_id,
 				signup_name
-				FROM %1s',
+				FROM %1s
+				ORDER BY signup_name',
 				self::SIGNUPS_TABLE
 			),
 			OBJECT

@@ -1,6 +1,11 @@
 /*
 Version: 2.0.0
 */
+.ck-content ul {
+  margin-left: 30px;
+  color: black;
+}
+
 h2 {
   font-size: 20px;
 }
