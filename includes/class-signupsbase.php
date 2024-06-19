@@ -1257,11 +1257,7 @@ class SignUpsBase {
 			OBJECT
 		);
 
-		if ( ! $results ||
-			$results[0]->member_firstname !== $post['firstname'] ||
-			$results[0]->member_lastname !== $post['lastname'] ||
-			$results[0]->member_email !== $post['email'] ||
-			$results[0]->member_phone !== $post['phone'] ) {
+		if ( ! $results ) {
 			?>
 			<h2>Data verification failed. Error:0x80421</h2>
 			<?php
@@ -1660,9 +1656,14 @@ class SignUpsBase {
 			$today    = $dt->format( self::DATE_FORMAT2 );
 			$sessions = $wpdb->get_results(
 				$wpdb->prepare(
-					'SELECT session_id, session_signup_id, session_start_formatted, session_location, session_slots
+					'SELECT wp_scw_sessions.session_id,
+						wp_scw_sessions.session_signup_id,
+						wp_scw_sessions.session_start_formatted,
+						wp_scw_sessions.session_location,
+						wp_scw_sessions.session_slots
 					FROM %1s
-					WHERE session_preclass_email_date = %s',
+					LEFT JOIN wp_scw_signups ON wp_scw_signups.signup_id = wp_scw_sessions.session_signup_id
+					WHERE wp_scw_sessions.session_preclass_email_date = %s AND wp_scw_signups.signup_admin_approved = 1',
 					self::SESSIONS_TABLE,
 					$today
 				),
@@ -1671,9 +1672,14 @@ class SignUpsBase {
 		} else {
 			$sessions = $wpdb->get_results(
 				$wpdb->prepare(
-					'SELECT session_id, session_signup_id, session_start_formatted, session_location, session_slots
+					'SELECT wp_scw_sessions.session_id,
+						wp_scw_sessions.session_signup_id,
+						wp_scw_sessions.session_start_formatted,
+						wp_scw_sessions.session_location,
+						wp_scw_sessions.session_slots
 					FROM %1s
-					WHERE session_id = %s',
+					LEFT JOIN wp_scw_signups ON wp_scw_signups.signup_id = wp_scw_sessions.session_signup_id
+					WHERE wp_scw_sessions.session_id = %s AND wp_scw_signups.signup_admin_approved = 1',
 					self::SESSIONS_TABLE,
 					$session_id
 				),

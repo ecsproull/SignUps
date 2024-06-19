@@ -36,6 +36,7 @@ class User {
 	 */
 	public $last;
 }
+
 /**
  * Create the database tables on activation.
  */
