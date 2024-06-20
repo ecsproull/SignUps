@@ -204,6 +204,11 @@ table#signup-select > tbody > tr > td {
 	box-shadow: 2px 2px 2px, -2px -2px 2px, -2px 2px 2px, 2px -2px 2px!important;
 }
 
+.remove-chk {
+	outline: 2px solid #ff0000!important;
+	box-shadow: 2px 2px 2px, -2px -2px 2px, -2px 2px 2px, 2px -2px 2px!important;
+}
+
 input[type='radio'] { 
 	transform: scale(2); 
 }

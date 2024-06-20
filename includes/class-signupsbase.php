@@ -490,6 +490,17 @@ class SignUpsBase {
 
 		$rolling_signup = $this->is_rolling_signup( $signup_id );
 
+		$signup = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT signup_guests_allowed
+				FROM %1s
+				WHERE signup_id = %s',
+				self::SIGNUPS_TABLE,
+				$signup_id
+			),
+			OBJECT
+		);
+
 		if ( $secret ) {
 			$attendees_rolling = $wpdb->get_results(
 				$wpdb->prepare(
@@ -605,6 +616,17 @@ class SignUpsBase {
 					value="<?php echo $return_val ? esc_html( $results[0]->member_email ) : ''; ?>" placeholder="foo@bar.com" required readonly></td>
 				<td></td>
 			</tr>
+			<?php
+			if ( $signup->signup_guests_allowed ) {
+				?>
+				<tr>
+					<td colspan=3><h1 style="color:red;">Will you bring a Guest
+						<input id="guest" class="remember-me-chk ml-2" type="checkbox" name="attendee_plus_guest" value=""></h1>
+					</td>
+				</tr>
+				<?php
+			}
+			?>
 		</table>
 		<div id="email"></div>
 		<input id="user_groups" type="hidden" name="user_groups" value="<?php echo esc_html( $user_group ); ?>">

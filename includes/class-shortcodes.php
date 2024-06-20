@@ -472,6 +472,22 @@ class ShortCodes extends SignUpsBase {
 	private function add_attendee_class( $post ) {
 		global $wpdb;
 
+		if ( isset( $post['remove_me'] ) ) {
+			$member_removed = false;
+			foreach ( $post['remove_me'] as $attendee_id ) {
+				$data                = array();
+				$data['attendee_id'] = $attendee_id;
+				$member_removed = $wpdb->delete( self::ATTENDEES_TABLE, $data );
+			}
+
+			if ( $member_removed ) {
+				?>
+				<h2>Member removed</h2>
+				<?php
+				return;
+			}
+		}
+
 		if ( isset( $post['new_member_rec_card'] ) ) {
 			$new_member                        = array();
 			$new_member['new_member_rec_card'] = $post['new_member_rec_card'];
@@ -513,6 +529,7 @@ class ShortCodes extends SignUpsBase {
 		$new_attendee['attendee_item']          = $post['signup_name'];
 		$new_attendee['attendee_badge']         = $post['badge_number'];
 		$new_attendee['attendee_payment_start'] = $now->format( self::DATETIME_FORMAT );
+		$new_attendee['attendee_plus_guest']    = isset( $post['attendee_plus_guest'] );
 		?>
 		<form method="POST">
 			<table class="mb-100px mr-auto ml-auto">
@@ -683,7 +700,7 @@ class ShortCodes extends SignUpsBase {
 	 */
 	private function create_select_signup_form( $signups, $categories ) {
 		?>
-		<form method="POST">
+		<form method="GET">
 			<div id="usercontent">
 				<div id="signup-select" class="signup-category-list selection-font mb-100px mr-auto ml-auto mt-5">
 					<?php
@@ -847,12 +864,26 @@ class ShortCodes extends SignUpsBase {
 											<?php
 											if ( '0' === $attendee->attendee_balance_owed ) {
 												$can_move = $attendee->attendee_badge === $user_badge;
+												$paid     = '1' === $attendee->attendee_plus_guest ? 'Paid + Guest' : 'Paid';
+												$action   = '0' === $cost ? 'Remove' : 'Move';
 												?>
-												<td class="move <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? '' : 'hidden'; ?> ><?php echo esc_html( 'Move' ); ?>
-												<input class="move_me add-chk position-relative ml-1" 
-													type="checkbox" name="move_me[]" value='<?php echo esc_html( $attendee->attendee_id ); ?>' ></td>
+												<td class="move <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? '' : 'hidden'; ?> ><?php echo esc_html( $action ); ?>
+													<?php
+													if ( '0' === $cost ) {
+														?>
+														<input class="remove-chk position-relative ml-1" 
+															type="checkbox" name="remove_me[]" value='<?php echo esc_html( $attendee->attendee_id ); ?>' >
+														<?php
+													} else {
+														?>
+															<input class="move_me add-chk position-relative ml-1" 
+																type="checkbox" name="move_me[]" value='<?php echo esc_html( $attendee->attendee_id ); ?>' >
+														<?php
+													}
+													?>
+												</td>
 
-												<td class="paid <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? 'hidden' : ''; ?> ><?php echo esc_html( 'Paid' ); ?></td>
+												<td class="paid <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? 'hidden' : ''; ?> ><?php echo esc_html( $paid ); ?></td>
 												<?php
 											} else {
 												?>
@@ -981,18 +1012,18 @@ class ShortCodes extends SignUpsBase {
 					$schedule .= ', Every ' . $signup->signup_default_days_between_sessions . ' days';
 				}
 			}
-		}
 
-		if ( $signup->signup_default_slots ) {
-			$schedule .= '. Max ' . $signup->signup_default_slots . ' students';
-		} else {
-			$schedule .= '.';
-		}
+			if ( $signup->signup_default_slots ) {
+				$schedule .= '. Max ' . $signup->signup_default_slots . ' students';
+			} else {
+				$schedule .= '.';
+			}
 
-		if ( $signup->signup_default_minimum ) {
-			$schedule .= '. Min ' . $signup->signup_default_minimum . ' students.';
-		} else {
-			$schedule .= '.';
+			if ( $signup->signup_default_minimum ) {
+				$schedule .= '. Min ' . $signup->signup_default_minimum . ' students.';
+			} else {
+				$schedule .= '.';
+			}
 		}
 
 		if ( ! $description_object || $signup->signup_rolling_template ) {
@@ -1040,7 +1071,7 @@ class ShortCodes extends SignUpsBase {
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Description: </div>
 				<div class="instruct"><?php echo html_entity_decode( $description_object->description_html ); ?></div>
 			</div>
-			<form class="ml-auto mr-auto" method="POST">
+			<form class="ml-auto mr-auto" method="GET">
 				<div class="submit-row-grid mt-4">
 					<div>
 						<button type="submit" class="btn btn-md bg-primary mr-2" value="-1" name="home">Cancel</button>

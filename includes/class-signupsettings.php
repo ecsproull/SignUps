@@ -162,6 +162,7 @@ class SignupSettings extends SignUpsBase {
 		$post['signup_preclass_email']       = (int) $post['signup_preclass_email'];
 		$post['signup_group']                = 'member' === $post['signup_group'] ? '' : $post['signup_group'];
 		$post['signup_default_contact_name'] = $post['signup_contact_firstname'] . ' ' . $post['signup_contact_lastname'];
+		$post['signup_guests_allowed']       = isset( $post['signup_guests_allowed'] );
 
 		if ( isset( $post['signup_default_duration'] ) ) {
 			$duration_parts = explode( ':', $post['signup_default_duration'] );
@@ -310,7 +311,7 @@ class SignupSettings extends SignUpsBase {
 		}
 
 		if ( $instructors_updated > 0 ) {
-			$this->update_message( $sessions_updated, $wpdb->last_error, 'Session Instructors Added' );
+			$this->update_message( $instructors_updated, $wpdb->last_error, 'Session Instructors Added' );
 		} else {
 			$this->update_message( $affected_row_count, $wpdb->last_error, 'Class' );
 		}
@@ -902,7 +903,7 @@ class SignupSettings extends SignUpsBase {
 					WHERE si_session_id = %d AND si_signup_id = %d',
 					self::SESSION_INSTRUCTORS_TABLE,
 					$post['session_id'],
-					$post['signup_id']
+					$post['session_signup_id']
 				),
 				OBJECT
 			);
@@ -1710,10 +1711,19 @@ class SignupSettings extends SignUpsBase {
 				</div>
 
 				<div class="text-right mr-2">
+					<label class="label-margin-top mr-2" for="description_preclass_mail">Guests Allowed:</label>
+				</div>
+				<div class="text-left pt-2 mt-1">
+					<input type="checkbox" id="description_guests_allowed" title="Are members allowed to bring a guest."
+						value="" <?php echo esc_html( $data->signup_guests_allowed ) === '1' ? 'checked' : ''; ?> name="signup_guests_allowed">
+				</div>
+
+				<div class="text-right mr-2">
 					<label>Approved:</label>
 				</div>
-				<div class="mb-2"><input type="checkbox" name="signup_admin_approved" value="" 
-					<?php echo esc_html( $data->signup_admin_approved ) === '1' ? 'checked ' : ''; ?> /> </div>
+				<div class="mb-2">
+					<input type="checkbox" name="signup_admin_approved" value="" 
+						<?php echo esc_html( $data->signup_admin_approved ) === '1' ? 'checked ' : ''; ?> /> </div>
 
 				<div class="text-right mr-2">
 					<input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="   window.history.go( -0 );" value="Back">
@@ -2016,16 +2026,23 @@ class SignupSettings extends SignUpsBase {
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="signup_admin_approved">Approved:</label>
 			</div>
-			<div class="text-left ml-2 pt-2"><input type="checkbox" id="signup_admin_approved" class="mt-2"  
-				name="signup_admin_approved" /> 
+			<div class="text-left ml-2 pt-2">
+				<input type="checkbox" id="signup_admin_approved" class="mt-2" name="signup_admin_approved" /> 
 			</div>
 
 			<div class="text-right">
 				<label class="label-margin-top mr-2" for="description_preclass_mail">Pre-class Email:</label>
 			</div>
 			<div class="text-left pt-2">
-			<input type="number" id="description_preclass_mail" class="w-100" title="Days B4 lass to send reminder"
+				<input type="number" id="description_preclass_mail" class="w-100" title="Days B4 lass to send reminder"
 					value="1" name="signup_preclass_email" required>
+			</div>
+			<div class="text-right">
+				<label class="label-margin-top mr-2" for="description_preclass_mail">Guests Allowed:</label>
+			</div>
+			<div class="text-left ml-2 pt-3">
+				<input type="checkbox" id="description_guests_allowed" title="Are members allowed to bring a guest."
+					value="0" name="signup_guests_allowed">
 			</div>
 		</div>
 
@@ -2094,6 +2111,7 @@ class SignupSettings extends SignUpsBase {
 		$new_signup['signup_contact_email']        = $post['signup_contact_email'];
 		$new_signup['signup_contact_phone']        = $post['signup_contact_phone'];
 		$new_signup['signup_preclass_email']       = $post['signup_preclass_email'];
+		$new_signup['signup_guests_allowed']      = isset( $post['signup_guests_allowed'] );
 
 		$start_date                              = new DateTime( $post['description_start'], $this->date_time_zone );
 		$new_signup['signup_default_start_time'] = date_format( $start_date, 'H:i' );
@@ -2180,8 +2198,8 @@ class SignupSettings extends SignUpsBase {
 				$new_session['session_duration']              = date_format( $duration, 'H:i' );
 				$new_session['session_slots']                 = $post['description_slots'];
 				$new_session['session_item']                  = 'attendee';
-				$new_session['session_days_between_sessions'] = $new_signup['signup_default_days_between_sessions'];
-				$new_session['session_day_of_month']          = $new_signup['signup_default_day_of_month'];
+				$new_session['session_days_between_sessions'] = isset( $new_signup['signup_default_days_between_sessions'] ) ? $new_signup['signup_default_days_between_sessions'] : 0;
+				$new_session['session_day_of_month']          = isset( $new_signup['signup_default_day_of_month'] ) ? $new_signup['signup_default_day_of_month'] : '';
 				$new_session['session_time_of_day']           = $new_signup['signup_default_start_time'];
 				$new_session['session_signup_id']             = $signup_id;
 				$new_session['session_location']              = $post['description_location'];
