@@ -74,15 +74,6 @@ class HtmlEditor extends SignUpsBase {
 				?>
 				<div class="description-box mt-3">
 					<div class="text-right">
-						<label class="label-margin-top mr-2" for="description_instructors">Instructors:</label>
-					</div>
-					<div>
-						<input type="text" id="description_instructors" class="mt-2 w-100" 
-							value="<?php echo esc_html( $description_object ? $description_object->description_instructors : '' ); ?>" 
-							placeholder="Tom, Dick and Harry" name="description_instructors">
-					</div>
-
-					<div class="text-right">
 						<label class="label-margin-top mr-2" for="description_prerequisite">Prerequisite:</label>
 					</div>
 					<div>
@@ -197,7 +188,8 @@ class HtmlEditor extends SignUpsBase {
 			$wpdb->prepare(
 				'SELECT signup_id,
 				signup_name
-				FROM %1s',
+				FROM %1s
+				ORDER BY signup_name',
 				self::SIGNUPS_TABLE
 			),
 			OBJECT

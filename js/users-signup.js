@@ -177,6 +177,11 @@ jQuery(document).ready(function($){
 			return;
 		}
 
+		if ($('.remove-chk:checkbox:checked').length > 0 ) {
+			form.submit();
+			return;
+		}
+
 		if ($("#update-butt").attr("clicked")) {
 			$("#update-butt").removeAttr("clicked")
 			$("<input />").attr("type", "hidden")

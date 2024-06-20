@@ -36,6 +36,7 @@ class User {
 	 */
 	public $last;
 }
+
 /**
  * Create the database tables on activation.
  */
@@ -181,6 +182,34 @@ class SignUpsRestApis extends SignUpsBase {
 			function () {
 				$this->register_route(
 					'scwmembers/v1',
+					'/reminders',
+					'get_class_reminder_email_data',
+					$this,
+					array(),
+					WP_REST_Server::CREATABLE
+				);
+			}
+		);
+
+		add_action(
+			'rest_api_init',
+			function () {
+				$this->register_route(
+					'scwmembers/v1',
+					'/class-status',
+					'get_class_status',
+					$this,
+					array(),
+					WP_REST_Server::CREATABLE
+				);
+			}
+		);
+
+		add_action(
+			'rest_api_init',
+			function () {
+				$this->register_route(
+					'scwmembers/v1',
 					'/search',
 					'search_members',
 					$this,
@@ -197,16 +226,69 @@ class SignUpsRestApis extends SignUpsBase {
 	}
 
 	/**
+	 * Get the status of a class for an instructor.
+	 *
+	 * @param  mixed $request Request data.
+	 * @return mixed Class contacts and number of students signed up..
+	 */
+	public function get_class_status( $request ) {
+		global $wpdb;
+		$key = '8c62a157-7fe8-4105-9f91-932eac39fe2g';
+		if ( $request['key'] !== $key ) {
+			return new WP_REST_Response( 'Nice Try.', 401 );
+		}
+
+		$dt       = new DateTime( 'now', new DateTimeZone( 'America/Phoenix' ) );
+		$interval = DateInterval::createFromDateString( '2 days' );
+		$dt->add( $interval );
+		$date = $dt->format( self::DATE_FORMAT3 );
+
+		$sessions = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT * FROM %1s
+				WHERE session_start_formatted LIKE %s',
+				self::SESSIONS_TABLE,
+				$wpdb->esc_like( $date ) . '%'
+			),
+			OBJECT
+		);
+
+		$results = array();
+		foreach ( $sessions as $session ) {
+			$session_data = $this->get_session_email_data( $session->session_id );
+			$results[]    = $session_data[0];
+		}
+
+		return $results;
+	}
+
+	/**
+	 * Get data to send reminder emails.
+	 *
+	 * @param  mixed $request Request data.
+	 * @return mixed All the data for each session that should be notified.
+	 */
+	public function get_class_reminder_email_data( $request ) {
+		global $wpdb;
+		$key = '8c62a157-7fe8-4105-9f91-932eac39fe2g';
+		if ( $request['key'] !== $key ) {
+			return new WP_REST_Response( 'Nice Try.', 401 );
+		}
+
+		return $this->get_session_email_data();
+	}
+
+	/**
 	 * Get the attendees for an upcomming class
 	 *
-	 * @param  mixed $data Posted data to search with.
-	 * @return void
+	 * @param  mixed $request Posted data to search with.
+	 * @return WP_REST_Response.
 	 */
 	public function search_members( $request ) {
 		global $wpdb;
 		$key      = '9523a157-8ee7-5401-9f91-abccea39fe2f';
 		if ( $request['key'] !== $key || ! current_user_can( 'administrator' ) ) {
-			return new WP_REST_Response( 'Unauthorized.', 401 );;
+			return new WP_REST_Response( 'Unauthorized.', 401 );
 		}
 
 		$pattern = '/^[a-zA-Z0-9@\.]{3,}$/ms';
@@ -228,7 +310,7 @@ class SignUpsRestApis extends SignUpsBase {
 			);
 
 			return $results;
-		} 
+		}
 
 		return new WP_REST_Response( 'Bad search string.', 409 );
 	}
@@ -562,14 +644,16 @@ class SignUpsRestApis extends SignUpsBase {
 
 		$length = count( $data_obj->permissions );
 		for ( $i = 0; $i < $length; $i++ ) {
+			$machine_badge = trim( $data_obj->permissions[ $i ]->badge );
+			$machine_name  = trim( $data_obj->permissions[ $i ]->machine_name );
 			$permission = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT *
 					FROM %1s
-					WHERE permission_badge = %s && permission_machine_id = %d',
+					WHERE permission_badge = %s && permission_machine_name = %s',
 					self::MACHINE_PERMISSIONS_TABLE,
-					$data_obj->permissions[ $i ]->badge,
-					$data_obj->permissions[ $i ]->macine_name
+					$machine_badge,
+					$machine_name
 				),
 				OBJECT
 			);

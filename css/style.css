@@ -1,3 +1,10 @@
+/*
+Version: 2.0.0
+*/
+.ck-content ul {
+  margin-left: 30px;
+  color: black;
+}
 
 h2 {
   font-size: 20px;
@@ -269,4 +276,12 @@ tr > td > div.bg-danger {
   .html-textarea {
     width: 80%;
     height:70vh;
+  }
+
+  .email-body {
+    font-size: 16px;
+    max-width: 400px;
+  }
+  .email-body p {
+    font-size: 16px;
   }

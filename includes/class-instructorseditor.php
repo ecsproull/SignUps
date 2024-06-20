@@ -114,7 +114,8 @@ class InstructorsEditor extends SignUpsBase {
 			$wpdb->prepare(
 				"SELECT signup_id, signup_name
 				FROM %1s
-				WHERE signup_rolling_template = '0'",
+				WHERE signup_rolling_template = '0'
+				ORDER BY signup_name",
 				self::SIGNUPS_TABLE
 			),
 			OBJECT

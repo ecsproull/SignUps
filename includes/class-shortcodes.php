@@ -65,9 +65,10 @@ class ShortCodes extends SignUpsBase {
 					$this->create_description_form( get_query_var( 'signup_id' ) );
 				}
 			} elseif ( get_query_var( 'unsubscribe' ) ) {
-				$key   = get_query_var( 'unsubscribe' );
-				$badge = get_query_var( 'badge' );
-				$this->unsubscribe_nag_mailer( $key, $badge );
+				$key        = get_query_var( 'unsubscribe' );
+				$badge      = get_query_var( 'badge' );
+				$mail_group = get_query_var( 'mail_group' );
+				$this->unsubscribe_nag_mailer( $key, $badge, $mail_group );
 			} else {
 				$this->create_select_signup( $admin_view );
 			}
@@ -81,8 +82,13 @@ class ShortCodes extends SignUpsBase {
 	 * @return void
 	 */
 	protected function send_email( $post ) {
-		$sgm = new SendGridMail();
-		$email_status = $sgm->send_mail( $post['contact_email'], $post['subject'], 'Reply To: ' . $post['email'] . '<br><br>' . $post['body'] );
+		$sgm         = new SendGridMail();
+		$class_email = false;
+		if ( isset( $post['class_email'] ) && $post['class_email'] ) {
+			$class_email = true;
+		}
+
+		$email_status = $sgm->send_mail( $post['contact_email'], $post['subject'], 'Reply To: ' . $post['email'] . '<br><br>' . $post['body'], $class_email, $post['email'] );
 		?>
 		<form class="email_form" method="POST">
 			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
@@ -106,9 +112,10 @@ class ShortCodes extends SignUpsBase {
 	 *
 	 * @param  mixed $key The key that identifies the member.
 	 * @param  mixed $badge The member's badge number.
+	 * @param  mixed $mail_group The email group. Monitor or Class but could be expanded in the future.
 	 * @return void
 	 */
-	protected function unsubscribe_nag_mailer( $key, $badge ) {
+	protected function unsubscribe_nag_mailer( $key, $badge, $mail_group ) {
 		global $wpdb;
 		$ip_address    = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : 'No Ip Address';
 		$pattern_key   = '/^[0-9a-f]{32}$|^[0-9a-f]{14}\.[0-9]{8}$/ms';
@@ -119,11 +126,12 @@ class ShortCodes extends SignUpsBase {
 			return;
 		}
 
-		$data                         = array();
-		$data['unsubscribe_key']      = $key;
-		$data['unsubscribe_complete'] = false;
-		$data['unsubscribe_badge']    = $badge;
-		$member = $wpdb->get_results(
+		$data                           = array();
+		$data['unsubscribe_key']        = $key;
+		$data['unsubscribe_complete']   = false;
+		$data['unsubscribe_badge']      = $badge;
+		$data['unsubscribe_mail_group'] = $mail_group;
+		$member                         = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
 				FROM %1s
@@ -141,7 +149,7 @@ class ShortCodes extends SignUpsBase {
 				?>
 				<h1 class='ml-auto mr-auto mt-5'>Request queued and should be complete within 8 hours.</h1>
 				<?php
-				$sgm->send_mail( 'ecsproull765@gmail.com', 'Unsubscribe', $key . ' ' . $badge . ' ip : ' . $ip_address );
+				$sgm->send_mail( 'ecsproull765@gmail.com', 'Unsubscribe', $key . ' ' . $badge . ' ip : ' . $ip_address . ' group: ' . $mail_group );
 			} else {
 				?>
 				<div class='ml-auto mr-auto mt-5'>
@@ -187,7 +195,7 @@ class ShortCodes extends SignUpsBase {
 			</tr>
 			<tr>
 				<td class="text-right font-weight-bold">Email:</td>
-				<td class="text-left"><input type="email" name="email" placeholder="foo@bar.com" required></td>
+				<td class="text-left"><input type="email" name="email" placeholder="Your email address" required></td>
 			</tr>
 			<tr>
 				<td class="text-right font-weight-bold">Street Address 1:</td>
@@ -218,6 +226,8 @@ class ShortCodes extends SignUpsBase {
 	/**
 	 * Retrieves the available signups  and
 	 * creates a form for the user to select a signup to add himself to.
+	 *
+	 * @param boolean $admin_view Set to true when this  is displayed from the administrator view.
 	 *
 	 * @return void
 	 */
@@ -267,6 +277,7 @@ class ShortCodes extends SignUpsBase {
 	 * Creates the form to sign up.
 	 *
 	 * @param string $signup_id The id of the signup to create a form for.
+	 * @param string $secret A members secret key used to indentify the member.
 	 * @return void
 	 */
 	private function create_signup_form( $signup_id, $secret = null ) {
@@ -419,6 +430,21 @@ class ShortCodes extends SignUpsBase {
 						?>
 						<h1 class=" mt-3">Successfully moved to session starting at <?php echo esc_html( $parts[0] ); ?></h1>
 						<?php
+						$attendee = $wpdb->get_row(
+							$wpdb->prepare(
+								'SELECT attendee_email
+								FROM %1s
+								WHERE attendee_id = %s',
+								self::ATTENDEES_TABLE,
+								$post['move_me'][0]
+							),
+							OBJECT
+						);
+
+						$body         = '<p>Your session has been changed.</p>';
+						$body        .= $this->get_session_email_body( $new_session_id );
+						$sgm          = new SendGridMail();
+						$email_status = $sgm->send_mail( $attendee->attendee_email, 'Your session change.', $body, true );
 					} else {
 						?>
 						<h1 class=" mt-3">Failed moving session, did you pick another session to move to?</h1>
@@ -445,6 +471,22 @@ class ShortCodes extends SignUpsBase {
 	 */
 	private function add_attendee_class( $post ) {
 		global $wpdb;
+
+		if ( isset( $post['remove_me'] ) ) {
+			$member_removed = false;
+			foreach ( $post['remove_me'] as $attendee_id ) {
+				$data                = array();
+				$data['attendee_id'] = $attendee_id;
+				$member_removed = $wpdb->delete( self::ATTENDEES_TABLE, $data );
+			}
+
+			if ( $member_removed ) {
+				?>
+				<h2>Member removed</h2>
+				<?php
+				return;
+			}
+		}
 
 		if ( isset( $post['new_member_rec_card'] ) ) {
 			$new_member                        = array();
@@ -487,6 +529,7 @@ class ShortCodes extends SignUpsBase {
 		$new_attendee['attendee_item']          = $post['signup_name'];
 		$new_attendee['attendee_badge']         = $post['badge_number'];
 		$new_attendee['attendee_payment_start'] = $now->format( self::DATETIME_FORMAT );
+		$new_attendee['attendee_plus_guest']    = isset( $post['attendee_plus_guest'] );
 		?>
 		<form method="POST">
 			<table class="mb-100px mr-auto ml-auto">
@@ -557,7 +600,7 @@ class ShortCodes extends SignUpsBase {
 						if ( ! $insert_return_value ) {
 							$wp_last_error = $wpdb->last_error;
 						}
-						$last_id             = $wpdb->insert_id;
+						$last_id = $wpdb->insert_id;
 					}
 				}
 				$wpdb->query( 'UNLOCK TABLES' );
@@ -684,7 +727,7 @@ class ShortCodes extends SignUpsBase {
 						$count++;
 					}
 
-					if ( $count % 4 > 0) {
+					if ( $count % 4 > 0 ) {
 						$remainder = 4 - ( $count % 4 );
 						for ( $i = 0; $i < $remainder; $i++ ) {
 							?>
@@ -712,6 +755,8 @@ class ShortCodes extends SignUpsBase {
 	 * @param  int    $cost The cost of the signup in dollars.
 	 * @param  string $signup_id The signup id.
 	 * @param  string $user_group The group that defines who can signup.  CNC, Member...etc.
+	 * @param string $signup_email The email for the contact person for this signup.
+	 * @param string $signup_contact_name The name for the contact person for this signup.
 	 * @return void
 	 */
 	private function create_session_select_form(
@@ -819,12 +864,26 @@ class ShortCodes extends SignUpsBase {
 											<?php
 											if ( '0' === $attendee->attendee_balance_owed ) {
 												$can_move = $attendee->attendee_badge === $user_badge;
+												$paid     = '1' === $attendee->attendee_plus_guest ? 'Paid + Guest' : 'Paid';
+												$action   = '0' === $cost ? 'Remove' : 'Move';
 												?>
-												<td class="move <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? '' : 'hidden'; ?> ><?php echo esc_html( 'Move' ); ?>
-												<input class="move_me add-chk position-relative ml-1" 
-													type="checkbox" name="move_me[]" value='<?php echo esc_html( $attendee->attendee_id ); ?>' ></td>
+												<td class="move <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? '' : 'hidden'; ?> ><?php echo esc_html( $action ); ?>
+													<?php
+													if ( '0' === $cost ) {
+														?>
+														<input class="remove-chk position-relative ml-1" 
+															type="checkbox" name="remove_me[]" value='<?php echo esc_html( $attendee->attendee_id ); ?>' >
+														<?php
+													} else {
+														?>
+															<input class="move_me add-chk position-relative ml-1" 
+																type="checkbox" name="move_me[]" value='<?php echo esc_html( $attendee->attendee_id ); ?>' >
+														<?php
+													}
+													?>
+												</td>
 
-												<td class="paid <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? 'hidden' : ''; ?> ><?php echo esc_html( 'Paid' ); ?></td>
+												<td class="paid <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? 'hidden' : ''; ?> ><?php echo esc_html( $paid ); ?></td>
 												<?php
 											} else {
 												?>
@@ -873,7 +932,8 @@ class ShortCodes extends SignUpsBase {
 	/**
 	 * Creates a signup description block
 	 *
-	 * @param  mixed $signup_id Id of the signup.
+	 * @param  mixed  $signup_id Id of the signup.
+	 * @param  string $secret Members secret used to indenitfy the mamber.
 	 * @return void
 	 */
 	private function create_description_form( $signup_id, $secret = null ) {
@@ -941,20 +1001,29 @@ class ShortCodes extends SignUpsBase {
 			if ( $signup->signup_default_day_of_month ) {
 				$schedule .= ', The ' . $signup->signup_default_day_of_month . ' of the month';
 			} elseif ( $signup->signup_default_days_between_sessions ) {
-				$schedule .= ', Every ' . $signup->signup_default_days_between_sessions . ' days';
+				if ( (int) $signup->signup_default_days_between_sessions % 7 === 0 ) {
+					$weeks = (int) $signup->signup_default_days_between_sessions / 7;
+					if ( $weeks === 1 ) {
+						$schedule .= ', Every week';
+					} else {
+						$schedule .= ', Every ' . $weeks . ' weeks';
+					}
+				} else {
+					$schedule .= ', Every ' . $signup->signup_default_days_between_sessions . ' days';
+				}
 			}
-		}
 
-		if ( $signup->signup_default_slots ) {
-			$schedule .= '. Max ' . $signup->signup_default_slots . ' students';
-		} else {
-			$schedule .= '.';
-		}
+			if ( $signup->signup_default_slots ) {
+				$schedule .= '. Max ' . $signup->signup_default_slots . ' students';
+			} else {
+				$schedule .= '.';
+			}
 
-		if ( $signup->signup_default_minimum ) {
-			$schedule .= '. Min ' . $signup->signup_default_minimum . ' students.';
-		} else {
-			$schedule .= '.';
+			if ( $signup->signup_default_minimum ) {
+				$schedule .= '. Min ' . $signup->signup_default_minimum . ' students.';
+			} else {
+				$schedule .= '.';
+			}
 		}
 
 		if ( ! $description_object || $signup->signup_rolling_template ) {
@@ -965,15 +1034,6 @@ class ShortCodes extends SignUpsBase {
 			<div class="description-box description-block">
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Cost: </div>
 				<div><?php echo '$' . esc_html( $signup->signup_cost ) . '.00'; ?></div>
-
-				<?php
-				if ( $description_object->description_instructors ) {
-					?>
-					<div class="text-right pr-2 font-weight-bold text-dark mb-2">Instructors: </div>
-					<div><?php echo esc_html( $description_object->description_instructors ); ?></div>
-					<?php
-				}
-				?>
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Contact:</div>
 				<div>
 					<form method="POST">
@@ -1047,15 +1107,18 @@ class ShortCodes extends SignUpsBase {
 	/**
 	 * Create the form for sending the admin an email.
 	 *
-	 * @param mixed $post Data from the calling form.
+	 * @param mixed   $post  Data from the calling form.
+	 * @param boolean $admin Set to true if this is called from the administrator side.
 	 * @return void
 	 */
 	private function create_email_form( $post, $admin = true ) {
 		$contact_email = $post['contact_email'];
 		$contact_name  = $post['contact_name'];
+		$class_email   = false;
 		if ( ! $admin ) {
 			$contact_email = $post['session_email'];
 			$contact_name  = $post['session_name'];
+			$class_email   = true;
 		}
 		?>
 		<form class="email_form" method="POST">
@@ -1110,6 +1173,7 @@ class ShortCodes extends SignUpsBase {
 				</div>
 			</div>
 			<input type="hidden" name="contact_email" value="<?php echo esc_html( $contact_email ); ?>" >
+			<input type="hidden" name="class_email" value="<?php echo esc_html( $class_email ); ?>" >
 			<?php
 			if ( isset( $post['add_attendee_session'] ) ) {
 				?>

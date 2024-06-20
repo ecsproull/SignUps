@@ -1,11 +1,17 @@
 
 .instruct ol,
 .instruct ul {
-	margin-bottom: 10px
+	margin-bottom: 10px;
+}
+
+.instruct ul {
+	list-style-type: disc;
+    color: black;
 }
 
 .instruct p {
 	margin: 0 0 5px;
+	font-size: 16px;
 }
 
 .mb-50px {
@@ -198,6 +204,11 @@ table#signup-select > tbody > tr > td {
 	box-shadow: 2px 2px 2px, -2px -2px 2px, -2px 2px 2px, 2px -2px 2px!important;
 }
 
+.remove-chk {
+	outline: 2px solid #ff0000!important;
+	box-shadow: 2px 2px 2px, -2px -2px 2px, -2px 2px 2px, 2px -2px 2px!important;
+}
+
 input[type='radio'] { 
 	transform: scale(2); 
 }
@@ -232,7 +243,7 @@ input[type='radio'] {
 
 .attendees_list {
 	display: grid;
-	grid-template-columns:   33% 33% 34%;
+	grid-template-columns:   30% 30% 33% 7%;
 	text-align: left;
 	font-size: large;
 }
@@ -303,6 +314,7 @@ input[type='radio'] {
 	grid-template-columns: 20% 80%;
 	align-items: start;
 	justify-content: space-between;
+	color: rgb(102,102,102) !important;
 }
 
 .new-member-form {

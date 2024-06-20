@@ -26,7 +26,7 @@ class PaymentsReview extends SignUpsBase {
 			$wpdb->prepare(
 				'SELECT *
 				FROM %1s
-				ORDER BY payments_attendee_badge',
+				ORDER BY payments_start_time DESC',
 				self::PAYMENTS_TABLE
 			),
 			OBJECT

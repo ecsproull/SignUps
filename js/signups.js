@@ -452,6 +452,10 @@ jQuery( document ).ready( function($){
 
 	});
 
+	$(".session-setting").on('change', function(e) {
+		$(".save-settings").prop( "checked", true );
+	});
+
 	$("#signup_Repeat").on('change', function(e){
 		if($("#signup_Repeat").val() != 0) {
 			$("#day-of-month").val("");
@@ -509,13 +513,14 @@ jQuery( document ).ready( function($){
 	});
 
 	$(".email-butt").click( function(e) {
-		var emailId = '.' + e.target.value;
+		var emailClass = '.' + e.target.value;
+		var emailId = '#' + e.target.value;
 		var emailAddresses = '';
-		$(emailId).each( function() {
+		$(emailClass).each( function() {
 			emailAddresses += $(this).text() + ';';
 		});
 
-		const htmlContent = $("#instructions").html();
+		const htmlContent = $(emailId).html();
 		const blob = new Blob([htmlContent], { type: "text/html" });
 		const clipboardItem = new ClipboardItem({ "text/html": blob });
 		navigator.clipboard.write([clipboardItem])
@@ -635,4 +640,21 @@ jQuery( document ).ready( function($){
 		time = time.substring(0, len -2) + "00"
 		$(".datetime-picker-end[key=" + key + "]").val(time);
 	})
+
+	$("#signup_Repeat").on("change", function(e) {
+		if ($(e.target).val() !== '0') {
+			$("#day-of-month").val('');
+			$("#day-of-month").prop('disabled', true);
+		} else {
+			$("#day-of-month").prop('disabled', false);
+		}
+	});
+
+	$("#start-time").on("change", function(e) {
+		$("#start-time-0").val($("#start-time").val());
+	});
+	
+	$("#start-time-0").on("change", function(e) {
+		$("#start-time").val($("#start-time-0").val());
+	});
 });

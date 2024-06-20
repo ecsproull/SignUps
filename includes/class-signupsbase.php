@@ -178,13 +178,21 @@ class SignUpsBase {
 
 	/**
 	 * Format Date as 2020-08-13.
+	 * Acceptable for HTML Date Input
+	 *
+	 * @var mixed
+	 */
+	protected const DATE_FORMAT3 = 'Y-m-d';
+
+	/**
+	 * Format Date as Mon 08-13-2020.
 	 *
 	 * @var mixed
 	 */
 	protected const DATE_FORMAT = 'D m-d-Y';
 
 	/**
-	 * Format Date as 2020-08-13.
+	 * Format Date as 08-13-2020.
 	 *
 	 * @var mixed
 	 */
@@ -278,7 +286,7 @@ class SignUpsBase {
 	 * @param  string $method POST, GET....etc.
 	 * @return void
 	 */
-	protected function register_route( $namespace, $route, $func, $class_inst, $args, $method ) {		
+	protected function register_route( $namespace, $route, $func, $class_inst, $args, $method ) {
 		$basic_args = array(
 			'methods'             => $method,
 			'callback'            => array( $class_inst, $func ),
@@ -323,8 +331,8 @@ class SignUpsBase {
 	/**
 	 * Is this a rolling signup
 	 *
-	 * @param  mixed $signup_id
-	 * @return boolean True for rolling, else false
+	 * @param  mixed $signup_id The ID of the signup.
+	 * @return boolean True for rolling, else false.
 	 */
 	private function is_rolling_signup( $signup_id ) {
 		global $wpdb;
@@ -341,7 +349,7 @@ class SignUpsBase {
 
 		return $signup[0]->signup_rolling_template > '0';
 	}
-	
+
 	/**
 	 * Creates a form for new users to apply for membership
 	 *
@@ -421,9 +429,14 @@ class SignUpsBase {
 	}
 
 	/**
-	 * Creates a table that is used to look up a member.
-	 * Relies on the admin JS file.
+	 * Create a member search box.
 	 *
+	 * @param  mixed $center Should the control be centered.
+	 * @param  mixed $badge Badge number.
+	 * @param  mixed $firstname First name.
+	 * @param  mixed $lastname Last name.
+	 * @param  mixed $email Members email.
+	 * @param  mixed $phone Members phone.
 	 * @return void
 	 */
 	protected function create_lookup_member_table( $center = false, $badge = '', $firstname = '', $lastname = '', $email = '', $phone = '' ) {
@@ -451,7 +464,7 @@ class SignUpsBase {
 						value="<?php echo esc_html( $phone ); ?>" placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}">
 				</td>
 				<td>
-					<input id="email" class="member-email" type="email" name="signup_contact_email" placeholder="foo@bar.com"
+					<input id="email" class="member-email" type="email" name="signup_contact_email" placeholder="Your email address."
 					value="<?php echo esc_html( $email ); ?>" required>
 				</td>
 			</tr>
@@ -476,6 +489,17 @@ class SignUpsBase {
 		$user_secret = null;
 
 		$rolling_signup = $this->is_rolling_signup( $signup_id );
+
+		$signup = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT signup_guests_allowed
+				FROM %1s
+				WHERE signup_id = %s',
+				self::SIGNUPS_TABLE,
+				$signup_id
+			),
+			OBJECT
+		);
 
 		if ( $secret ) {
 			$attendees_rolling = $wpdb->get_results(
@@ -589,9 +613,20 @@ class SignUpsBase {
 				<td><input id="phone" class="member-phone" type="text" name="phone"
 					value=<?php echo $return_val ? esc_html( $results[0]->member_phone ) : '888-888-8888'; ?> placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required readonly></td>
 				<td><input id="email" class="member-email" type="email" name="email"
-					value=<?php echo $return_val ? esc_html( $results[0]->member_email ) : 'foo@bar.com'; ?> placeholder="foo@bar.com" required readonly></td>
+					value="<?php echo $return_val ? esc_html( $results[0]->member_email ) : ''; ?>" placeholder="foo@bar.com" required readonly></td>
 				<td></td>
 			</tr>
+			<?php
+			if ( $signup->signup_guests_allowed ) {
+				?>
+				<tr>
+					<td colspan=3><h1 style="color:red;">Will you bring a Guest
+						<input id="guest" class="remember-me-chk ml-2" type="checkbox" name="attendee_plus_guest" value=""></h1>
+					</td>
+				</tr>
+				<?php
+			}
+			?>
 		</table>
 		<div id="email"></div>
 		<input id="user_groups" type="hidden" name="user_groups" value="<?php echo esc_html( $user_group ); ?>">
@@ -608,6 +643,8 @@ class SignUpsBase {
 	 * @param  mixed  $rolling_signup_id The id for the signup.
 	 * @param  string $secret A secret key used to indentify a user.
 	 * @param  mixed  $admin Set to true if an admin is using this function.
+	 * @param  int    $rolling_days The number of rolling days to create.
+	 *
 	 * @return void
 	 */
 	protected function create_rolling_session( $rolling_signup_id, $secret, $admin = false, $rolling_days = null ) {
@@ -676,8 +713,7 @@ class SignUpsBase {
 			),
 			OBJECT
 		);
-		
-		////************To be removed */
+
 		$template2 = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
@@ -706,7 +742,7 @@ class SignUpsBase {
 			),
 			OBJECT
 		);
-		////************************ */
+
 		$description_html = null;
 		$description = $this->get_signup_html( $rolling_signup_id );
 		if ( $description ) {
@@ -723,7 +759,6 @@ class SignUpsBase {
 			$admin,
 			$secret,
 			$description_html,
-			$template2,
 			$template_items2,
 			$rolling_days
 		);
@@ -784,8 +819,8 @@ class SignUpsBase {
 				FROM %1s
 				WHERE exc_start >= %s AND exc_start <= %s',
 				self::ROLLING_EXCEPTIONS_TABLE,
-				$start_date->format('Y-m-d'),
-				$end_date->format('Y-m-d')
+				$start_date->format( 'Y-m-d' ),
+				$end_date->format( 'Y-m-d' )
 			),
 			OBJECT
 		);
@@ -813,6 +848,10 @@ class SignUpsBase {
 	 * @param  array  $template_items Each one describe a signup for that day.
 	 * @param  string $user_group The group that is allowed to sign up.
 	 * @param  bool   $admin This being accessed by an administrator.
+	 * @param  string $secret Unique id for a member.
+	 * @param  string $description Description of the signup.
+	 * @param  mixed  $template_items2 The template items for tempate2. Used when a template is changed at a predetermined date.
+	 * @param  mixed  $rolling_days Overrides the standard number of rolling days.
 	 * @return void
 	 */
 	protected function create_rolling_session_select_form2(
@@ -825,7 +864,6 @@ class SignUpsBase {
 		$admin,
 		$secret,
 		$description,
-		$template2,
 		$template_items2,
 		$rolling_days = null
 	) {
@@ -886,8 +924,7 @@ class SignUpsBase {
 							$comment_row_id = 'comment-row-';
 							while ( $start_date <= $end_date ) {
 								$datetime = new DateTime( '04/29/2024 12:00 AM' );
-								if ( $start_date > $datetime && $signup_id === '1') {
-									//$template       = $template2;
+								if ( $start_date > $datetime && '1' === $signup_id ) {
 									$template_items = $template_items2;
 								}
 
@@ -1046,11 +1083,11 @@ class SignUpsBase {
 												$skip_time_slot = false;
 												$reason         = '';
 												foreach ( $time_exceptions as $exception ) {
-													if ( $start_date >= $exception->begin && 
-														$start_date < $exception->end  &&
-														($exception->template === $template ||
-														$exception->template === '0')) {
-														$reason = $exception->reason;
+													if ( $start_date >= $exception->begin &&
+														$start_date < $exception->end &&
+														( $exception->template === $template ||
+														'0' === $exception->template ) ) {
+														$reason         = $exception->reason;
 														$skip_time_slot = true;
 														break;
 													}
@@ -1145,7 +1182,6 @@ class SignUpsBase {
 		$sd  = clone $start_date;
 		$now = date_create( 'now' );
 		date_sub( $sd, date_interval_create_from_date_string( $template->template_days_to_cancel . 'days' ) );
-		//$ret_val = $user_badge === $attendee->attendee_badge && $attendee->attendee_secret === $secret && $now < $sd;
 		$ret_val = $user_badge === $attendee->attendee_badge && $now < $sd;
 		return $ret_val;
 	}
@@ -1243,11 +1279,7 @@ class SignUpsBase {
 			OBJECT
 		);
 
-		if ( ! $results ||
-			$results[0]->member_firstname !== $post['firstname'] ||
-			$results[0]->member_lastname !== $post['lastname'] ||
-			$results[0]->member_email !== $post['email'] ||
-			$results[0]->member_phone !== $post['phone'] ) {
+		if ( ! $results ) {
 			?>
 			<h2>Data verification failed. Error:0x80421</h2>
 			<?php
@@ -1356,7 +1388,7 @@ class SignUpsBase {
 				<a href="<?php echo esc_html( get_site_url() ); ?>/signups/?signup_id=<?php echo esc_html( $post['add_attendee_session'] ); ?>&secret=<?php echo esc_html( $post['user_secret'] ); ?>" >Change Signup</a><br>
 				<br>
 				<!--<p>Your key to edit this signup is: &emsp; &emsp; <?php echo esc_html( $post['user_secret'] ); ?> </p> -->
-				<p>ALSO: An email has been sent to <b><i><?php echo esc_html( $post['email'] ) ?></i></b> with a link to edit this signup.<p>
+				<p>ALSO: An email has been sent to <b><i><?php echo esc_html( $post['email'] ); ?></i></b> with a link to edit this signup.<p>
 			</div>
 			
 		</div>
@@ -1366,7 +1398,6 @@ class SignUpsBase {
 			$url   = get_site_url();
 			$link  = "<a href='$url/signups/?signup_id=" . $post['add_attendee_session'] . '&secret=' . $post['user_secret'] . "'>Edit Signup</a>";
 			$body .= '<br><br>' . $link . '<br>';
-			//$body .= '<p>Your key to edit this signup is: &emsp; &emsp;' . $post['user_secret'] . '</p>';
 			$sgm->send_mail( $post['email'], 'Woodshop Signup', $body );
 		}
 
@@ -1378,6 +1409,7 @@ class SignUpsBase {
 	 *
 	 * @param  int     $template_id The id of the selected template.
 	 * @param  boolean $add_new Adds an option to add a new template.
+	 * @param  string  $template_id_name The name of the template.
 	 * @param  string  $select_id The name of the selected template.
 	 * @param  boolean $default_title Default title.
 	 * @return void
@@ -1452,10 +1484,11 @@ class SignUpsBase {
 			$wpdb->update( self::SESSIONS_TABLE, $data, $where );
 		}
 	}
-	
+
 	/**
 	 * Creates the description, short description and instructions input block.
 	 *
+	 * @param mixed $description_object Object that holds the description, instructions and calendar description.
 	 * @return void
 	 */
 	protected function create_description_section( $description_object ) {
@@ -1609,7 +1642,7 @@ class SignUpsBase {
 			if ( isset( $post['session_calendar_id'] ) && $post['session_calendar_id'] > 0 ) {
 				$where = array( 'id' => $post['session_calendar_id'] );
 				$rows  = $wpdb->update( self::SPIDER_CALENDAR_EVENT_TABLE, $data, $where );
-				if ( $rows === false ) {
+				if ( false === $rows ) {
 					echo '<h1>Failed to update Calendar id: </h1)' . esc_html( $post['session_calendar_id'] . ' with error : ' . $wpdb->last_error );
 				}
 				return;
@@ -1629,5 +1662,198 @@ class SignUpsBase {
 			$update,
 			$where
 		);
+	}
+
+	/**
+	 * Retrieves the data to create a pre-class email.
+	 *
+	 * @param int $session_id If requested a particular session.
+	 */
+	protected function get_session_email_data( $session_id = null ) {
+		global $wpdb;
+		$sessions = null;
+
+		if ( ! $session_id ) {
+			$dt       = new DateTime( 'now', new DateTimeZone( 'America/Phoenix' ) );
+			$today    = $dt->format( self::DATE_FORMAT2 );
+			$sessions = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT wp_scw_sessions.session_id,
+						wp_scw_sessions.session_signup_id,
+						wp_scw_sessions.session_start_formatted,
+						wp_scw_sessions.session_location,
+						wp_scw_sessions.session_slots
+					FROM %1s
+					LEFT JOIN wp_scw_signups ON wp_scw_signups.signup_id = wp_scw_sessions.session_signup_id
+					WHERE wp_scw_sessions.session_preclass_email_date = %s AND wp_scw_signups.signup_admin_approved = 1',
+					self::SESSIONS_TABLE,
+					$today
+				),
+				OBJECT
+			);
+		} else {
+			$sessions = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT wp_scw_sessions.session_id,
+						wp_scw_sessions.session_signup_id,
+						wp_scw_sessions.session_start_formatted,
+						wp_scw_sessions.session_location,
+						wp_scw_sessions.session_slots
+					FROM %1s
+					LEFT JOIN wp_scw_signups ON wp_scw_signups.signup_id = wp_scw_sessions.session_signup_id
+					WHERE wp_scw_sessions.session_id = %s AND wp_scw_signups.signup_admin_approved = 1',
+					self::SESSIONS_TABLE,
+					$session_id
+				),
+				OBJECT
+			);
+		}
+
+		$return_values = array();
+		foreach ( $sessions as $session ) {
+			$data = new SessionEmailData();
+			$signup = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT signup_name, 
+						signup_contact_firstname,
+						signup_contact_email,
+						signup_contact_lastname,
+						signup_default_minimum
+					FROM %1s
+					WHERE signup_id = %d',
+					self::SIGNUPS_TABLE,
+					$session->session_signup_id
+				),
+				OBJECT
+			);
+
+			$signup_instructions = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT description_instructions, description_materials 
+					FROM %1s
+					WHERE description_signup_id = %d',
+					self::DESCRIPTIONS_TABLE,
+					$session->session_signup_id
+				),
+				OBJECT
+			);
+
+			if ( $signup_instructions[0] && $signup_instructions[0]->description_instructions ) {
+				$data->class_instructions = html_entity_decode( $signup_instructions[0]->description_instructions );
+			} else {
+				$data->class_instructions = 'None';
+			}
+
+			if ( $signup_instructions[0] && $signup_instructions[0]->description_materials ) {
+				$data->class_materials = html_entity_decode( $signup_instructions[0]->description_materials );
+			} else {
+				$data->class_materials = 'None';
+			}
+
+			$data->class_title             = $signup[0]->signup_name;
+			$data->class_location          = $session->session_location;
+			$data->date_time_formatted     = $session->session_start_formatted;
+			$data->class_slots             = $session->session_slots;
+			$data->class_signup_id         = $session->session_signup_id;
+			$data->class_contact_firstname = $signup[0]->signup_contact_firstname;
+			$data->class_contact_lastname  = $signup[0]->signup_contact_lastname;
+			$data->class_contact_email     = $signup[0]->signup_contact_email;
+			$data->class_minimum           = $signup[0]->signup_default_minimum;
+			$data->instructors             = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT wp_scw_instructors.instructors_name,
+						wp_scw_instructors.instructors_email
+					FROM wp_scw_instructors
+					LEFT JOIN wp_scw_session_instructors
+					ON wp_scw_instructors.instructors_id = wp_scw_session_instructors.si_instructor_id
+					WHERE wp_scw_session_instructors.si_session_id = %d',
+					$session->session_id
+				),
+				OBJECT
+			);
+
+			$attendees = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT attendee_email
+					FROM %1s
+					WHERE attendee_session_id = %d',
+					self::ATTENDEES_TABLE,
+					$session->session_id
+				),
+				OBJECT
+			);
+
+			$data->attendees = array();
+			foreach ( $attendees as $attendee ) {
+				$data->attendees[] = $attendee->attendee_email;
+			}
+
+			$return_values[] = $data;
+		}
+
+		return $return_values;
+	}
+
+	/**
+	 * Formats the body of a session email to an attendee.
+	 *
+	 * @param  mixed $session_id The id of the session to send.
+	 * @return Body for the email.
+	 */
+	protected function get_session_email_body( $session_id ) {
+		$sessions = $this->get_session_email_data( $session_id );
+		if ( ! $sessions ) {
+			return;
+		}
+
+		$session          = $sessions[0];
+		$body             = '<p>We look forward to seeing you for ' . $session->class_title . ' on ' . $session->date_time_formatted . ' which is scheduled to meet at ' . $session->class_location . '.</p>';
+		$body            .= '<p>The instructor(s) for the class will be ';
+		$index            = 1;
+		$instructor_count = count( $session->instructors );
+		if ( $instructor_count > 0 ) {
+			$add_comma = false;
+			foreach ( $session->instructors as $instructor ) {
+				if ( $add_comma ) {
+					if ( $index === $instructor_count ) {
+						$body .= ' & ' . $instructor->instructors_name;
+					} else {
+						$body .= ', ' . $instructor->instructors_name;
+					}
+				} else {
+					$add_comma = true;
+					$body     .= ' ' . $instructor->instructors_name;
+				}
+
+				$index++;
+			}
+		} else {
+			$body .= ' ' . $session->class_contact_firstname . ' ' . $session->class_contact_lastname;
+		}
+
+		$body .= '</p>';
+		if ( $session->class_materials && 'None' !== substr( $session->class_materials, 0, 4 ) ) {
+			$body .= '<p><b>These are the materials that you need to bring with you.</b><br>';
+			$body .= '<p>' . $session->class_materials . '</p>';
+			$body .= '</p>';
+		} else {
+			$body .= '<p>The materials for this class will be supplied.</p>';
+		}
+
+		if ( $session->class_instructions && 'None' !== substr( $session->class_instructions, 0, 4 ) ) {
+			$body .= '<b>To be prepared for this class please follow these pre-class instructions.</b>';
+			$body .= '<p>' . $session->class_instructions . '</p>';
+			$body .= '</p>';
+		} else {
+			$body .= '<p>There are no pre-class instructions for this class. Just show up ready to learn.</p>';
+		}
+
+		$body .= '<p>If you need to reschedule you may do it yourself on the original signup. ';
+		$body .= 'Sign in with your badge number and select the square checkbox next to your name. ';
+		$body .= 'Then select the session you wish to attend and then use the Submit button to update your selection.</p>';
+		$body .= '<p>For general questions about the class: <a href="mailto:' . $session->class_contact_email . '">' . $session->class_contact_firstname . ' ' . $session->class_contact_lastname . '</a></p>';
+		$body .= '<p>For technical questions about the signup website: <a href=\"mailto:ecsproull765@gmail.com\">Ed Sproull</a></p>';
+
+		return $body;
 	}
 }

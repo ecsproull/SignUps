@@ -1,5 +1,7 @@
 <?php
-/*
+/**
+ * Test page.
+ *
  * @package     SignUps
  * @author      Edward Sproull
  * @copyright   You have the right to copy
@@ -7,7 +9,7 @@
  */
 
 /**
- * Manages the map settings including adding places to the map.
+ * Used for testing scwwoodshop signups.
  */
 class TestPlugin extends SignUpsBase {
 
@@ -20,7 +22,7 @@ class TestPlugin extends SignUpsBase {
 	}
 
 	/**
-	 * Load the exceptions editor
+	 * Load the test page.
 	 *
 	 * @return void
 	 */
