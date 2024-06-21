@@ -233,7 +233,8 @@ class ShortCodes extends SignUpsBase {
 	 */
 	private function create_select_signup( $admin_view = false ) {
 		global $wpdb;
-		$signups = null;
+		$admin_view = current_user_can( 'administrator' );
+		$signups    = null;
 		if ( $admin_view ) {
 			$signups = $wpdb->get_results(
 				$wpdb->prepare(

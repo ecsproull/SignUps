@@ -1616,7 +1616,11 @@ class SignUpsBase {
 
 			$text_for_date;
 			if ( $description ) {
-				$text_for_date = html_entity_decode( $description[0]->description_html_short );
+				if ( $description[0]->description_html_short ) {
+					$text_for_date = html_entity_decode( $description[0]->description_html_short );
+				} else {
+					$text_for_date = html_entity_decode( $description[0]->description_html );
+				}
 			}
 			$text_for_date .= '<br><br><a href=' . $signup_url . " target='_blank' rel='noopener' >More Info</a>.";
 

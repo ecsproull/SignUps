@@ -119,7 +119,11 @@ class HtmlEditor extends SignUpsBase {
 	 */
 	private function submit_html( $post ) {
 		global $wpdb;
-		$short_description                = $post['description_html'];
+		$short_description = $post['description_html_short'];
+		if ( ! $short_description ) {
+			$short_description = $post['description_html'];
+		}
+
 		$post['description_html']         = htmlentities( $post['description_html'] );
 		$post['description_html_short']   = htmlentities( $post['description_html_short'] );
 		$post['description_instructions'] = htmlentities( $post['description_instructions'] );
