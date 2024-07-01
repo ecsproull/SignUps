@@ -163,7 +163,7 @@ class SignupsPlugin extends SignUpsBase {
 
 		wp_register_style( 'signup_bs_style', plugin_dir_url( __FILE__ ) . 'bootstrap/css/bootstrap.min.css', array(), 1 );
 		wp_enqueue_style( 'signup_bs_style' );
-		$ver_styles = filemtime( plugin_dir_path( __FILE__ ) . 'css/users-styles.css' );
+		$ver_styles = filemtime( plugin_dir_path( __FILE__ ) . 'css/style.css' );
 		wp_register_style( 'signup_style', plugin_dir_url( __FILE__ ) . 'css/style.css', array(), $ver_styles );
 		wp_enqueue_style( 'signup_style' );
 		$ver_user_styles = filemtime( plugin_dir_path( __FILE__ ) . 'css/users-styles.css' );

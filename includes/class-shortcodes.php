@@ -32,7 +32,9 @@ class ShortCodes extends SignUpsBase {
 			$post = wp_unslash( $_GET );
 		}
 		if ( isset( $post['mynonce'] ) && wp_verify_nonce( $post['mynonce'], 'signups' ) ) {
-			if ( isset( $post['continue_signup'] ) ) {
+			if ( isset( $post['signup_home'] ) ) {
+				$this->create_select_signup( $admin_view );
+			} elseif ( isset( $post['continue_signup'] ) ) {
 				$this->create_signup_form( $post['continue_signup'], $post['secret'] );
 			} elseif ( isset( $post['email_admin'] ) ) {
 				$this->create_email_form( $post );
@@ -99,7 +101,7 @@ class ShortCodes extends SignUpsBase {
 						value="<?php echo esc_html( $post['signup_id'] ); ?>">Continue Signup</button>
 				</div>
 				<div>
-				<button class="btn btn-danger" type="submit" name="home" value="-1">Cancel</button>
+				<button class="btn btn-danger" type="submit" name="signup_home" value="-1">Cancel</button>
 				</div>
 			</div>
 		</form>
@@ -916,12 +918,26 @@ class ShortCodes extends SignUpsBase {
 
 							if ( 0 === $sessions_displayed ) {
 								?>
-								<h1>"There are currently no future sessions scheduled for this class."</h1>
+								<h2>There are currently no future sessions scheduled for this class.</h2>
+								<h3>To suggest or request a session time contact <?php $this->create_session_email_link( $signup_email, $signup_contact_name, $signup_name ); ?></h3>
+								<button type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary" value="-1" name="signup_home" formnovalidate>Cancel</button>
+								<?php
+							} else {
+								?>
+								<tr class="footer-row">
+									<td><button type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary" value="-1" name="signup_home" formnovalidate>Cancel</button></td>
+									<?php
+									for ( $i = 1; $i < 3; $i++ ) {
+										?>
+										<td></td>
+										<?php
+									}
+									?>
+								</tr>
 								<?php
 							}
-
-							$this->create_table_footer();
 							?>
+							<div id="cancel"></div>
 						</table>
 					</div>
 				</form>
@@ -1002,9 +1018,9 @@ class ShortCodes extends SignUpsBase {
 			if ( $signup->signup_default_day_of_month ) {
 				$schedule .= ', The ' . $signup->signup_default_day_of_month . ' of the month';
 			} elseif ( $signup->signup_default_days_between_sessions ) {
-				if ( (int) $signup->signup_default_days_between_sessions % 7 === 0 ) {
+				if ( 0 === (int) $signup->signup_default_days_between_sessions % 7 ) {
 					$weeks = (int) $signup->signup_default_days_between_sessions / 7;
-					if ( $weeks === 1 ) {
+					if ( 1 === $weeks ) {
 						$schedule .= ', Every week';
 					} else {
 						$schedule .= ', Every ' . $weeks . ' weeks';
@@ -1075,7 +1091,7 @@ class ShortCodes extends SignUpsBase {
 			<form class="ml-auto mr-auto" method="GET">
 				<div class="submit-row-grid mt-4">
 					<div>
-						<button type="submit" class="btn btn-md bg-primary mr-2" value="-1" name="home">Cancel</button>
+						<button type="submit" class="btn btn-md bg-primary mr-2" value="-1" name="signup_home">Cancel</button>
 					</div>
 					<div class="text-left">
 						<button id='accept_conditions' class="btn btn-primary" type='submit' value="<?php echo esc_html( $signup_id ); ?>" name="continue_signup">Continue</button>
@@ -1206,27 +1222,6 @@ class ShortCodes extends SignUpsBase {
 		<input class="member-last-name" type="hidden" name="lastname">
 		<input class="member-phone" type="hidden" name="phone">
 		<input class="member-email" type="hidden" name="email">
-		<?php
-	}
-
-	/**
-	 * Create footer for a table with a Cancel button.
-	 *
-	 * @param int $column_count The number of columns to generate in the row.
-	 * @return void
-	 */
-	private function create_table_footer( $column_count = 3 ) {
-		?>
-		<tr class="footer-row">
-			<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="home">Cancel</button></td>
-			<?php
-			for ( $i = 1; $i < $column_count; $i++ ) {
-				?>
-				<td></td>
-				<?php
-			}
-			?>
-		</tr>
 		<?php
 	}
 }

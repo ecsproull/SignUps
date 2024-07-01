@@ -148,6 +148,7 @@ class SignupSettings extends SignUpsBase {
 	 */
 	private function submit_class( $post ) {
 		global $wpdb;
+		$instructors_updated     = 0;
 		$signup_id               = (int) $post['id'];
 		$original_cost           = $post['original_cost'];
 		$signup_default_price_id = $post['signup_default_price_id'];

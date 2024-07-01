@@ -172,6 +172,12 @@ jQuery(document).ready(function($){
 			return;
 		}
 
+		if (document.activeElement.getAttribute('name') == 'signup_home') {
+			$("#cancel").append('<input type="hidden" name="signup_home" value="1" />');
+			form.submit();
+			return;
+		}
+
 		if ($("#rolling-days-id").val()) {
 			form.submit();
 			return;
