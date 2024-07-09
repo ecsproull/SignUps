@@ -22,9 +22,11 @@ class SendGridMail extends SignUpsBase {
 	/**
 	 * Used to send an email.
 	 *
-	 * @param  mixed $email_address Email address of the receipient.
-	 * @param  mixed $subject subject for the email.
-	 * @param  mixed $message Message body for the email.
+	 * @param  mixed   $email_address Email address of the receipient.
+	 * @param  mixed   $subject subject for the email.
+	 * @param  mixed   $message Message body for the email.
+	 * @param  boolean $class_email Used to get the correct From email address.
+	 * @param  mixed   $reply_to Used to set the reply to field.
 	 * @return True on success, false on failure.
 	 */
 	public function send_mail( $email_address, $subject, $message, $class_email = false, $reply_to = null ) {

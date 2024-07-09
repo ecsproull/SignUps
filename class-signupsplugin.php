@@ -139,7 +139,7 @@ class SignupsPlugin extends SignUpsBase {
 		add_submenu_page( 'sign_ups', 'Rolling Exceptions Editor', 'Exceptions', 'manage_options', 'exceptions_editor', array( new RollingExceptionsEditor(), 'load_exceptions_editor' ) );
 		add_submenu_page( 'sign_ups', 'Payments Report', 'Payments Report', 'manage_options', 'payments_report', array( new PaymentsReview(), 'review_payments' ) );
 		add_submenu_page( 'sign_ups', 'Instructors', 'Instructors', 'manage_options', 'instructors_editor', array( new InstructorsEditor(), 'instructors_editor' ) );
-		add_submenu_page( 'sign_ups', 'Test Page', 'Test Drive', 'manage_options', 'test_page', array( new TestPlugin(), 'load_test_page' ) );
+		//add_submenu_page( 'sign_ups', 'Test Page', 'Test Drive', 'manage_options', 'test_page', array( new TestPlugin(), 'load_test_page' ) );
 	}
 
 	/**

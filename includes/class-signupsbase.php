@@ -1416,7 +1416,7 @@ class SignUpsBase {
 	 */
 	protected function load_template_selection(
 		$template_id,
-		$add_new = false,
+		$add_new,
 		$template_id_name,
 		$select_id = 'template-select',
 		$default_title = 'None'

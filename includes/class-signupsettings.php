@@ -722,7 +722,9 @@ class SignupSettings extends SignUpsBase {
 
 		$now             = new DateTime( 'now', $this->date_time_zone );
 		$end_repeat_date = $session_item->session_end_repeat ? new DateTime( $session_item->session_end_repeat ) : null;
-		$end_repeat_date->setTime( 23, 59 );
+		if ( null !== $end_repeat_date ) {
+			$end_repeat_date->setTime( 23, 59 );
+		}
 
 		if ( $session_item->session_end_repeat ) {
 			$session_item->session_add_slots_count = 25;

@@ -313,7 +313,6 @@ input[type='radio'] {
 	display: grid;
 	grid-template-columns: auto 80%;
 	align-items: start;
-	justify-content: space-between;
 	color: rgb(102,102,102) !important;
 }
 

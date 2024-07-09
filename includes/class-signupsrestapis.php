@@ -463,8 +463,7 @@ class SignUpsRestApis extends SignUpsBase {
 					'SELECT *
 					FROM %1s
 					WHERE template_item_template_id = 4',
-					self::SIGNUP_TEMPLATE_ITEM_TABLE,
-					$signups[0]->signup_rolling_template
+					self::SIGNUP_TEMPLATE_ITEM_TABLE
 				),
 				OBJECT
 			);
