@@ -285,3 +285,16 @@ tr > td > div.bg-danger {
   .email-body p {
     font-size: 16px;
   }
+
+  .template-delete {
+    width: 55px;
+  }
+
+  .template-delete-check {
+    width:20px !important;
+  }
+
+  #toplevel_page_sign_ups > ul > li.wp-first-item,
+  #toplevel_page_sign_ups > ul > li.wp-first-item.current {
+    height:0px;
+  }

@@ -62,7 +62,7 @@ jQuery(document).ready(function($){
 			if (response.status == 400) {
 				alert("Error: " + response.status + " Badge Number Not Found.");
 			} else if (response.status == 401) {
-				alert("Error: " + response.status + " Machine Permission Denied.");
+				alert("Error: " + response.status + " Permission Denied.");
 			} else {
 				alert("Error: " + response.status + " Unknown Error.");
 			}

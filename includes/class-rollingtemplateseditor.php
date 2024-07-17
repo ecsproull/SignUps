@@ -10,7 +10,8 @@
  */
 
 /**
- * Manages the map settings including adding places to the map.
+ * RollingTemplatesEditor is used to edit the Rolling Templates
+ * It accessed via the submenu item name Rolling Templates.
  */
 class RollingTemplatesEditor extends SignUpsBase {
 
@@ -210,7 +211,7 @@ class RollingTemplatesEditor extends SignUpsBase {
 					<td><input class="w-75px" type='number' name="template_item_shifts[]" value=<?php echo $item->template_item_shifts; ?> required ></td>
 					<td><input class="w-75px" type='number' name="template_item_column[]" value=<?php echo $item->template_item_column; ?> required ></td>
 					<td><input class="w-75px" type='text' name="template_item_group[]" value=<?php echo $item->template_item_group; ?> required ></td>
-					<td><div class="bg-danger"><input class="w-75px ml-3" type='checkbox' name="template_item_delete[]" value=<?php echo $item->template_item_id; ?> ></div></td>
+					<td><div class="bg-danger template-delete"><input class="w-75px ml-3 template-delete-check" type='checkbox' name="template_item_delete[]" value=<?php echo $item->template_item_id; ?> ></div></td>
 					<input class="w-75px" type='hidden' name="template_item_id[]" value=<?php echo $item->template_item_id; ?>  >
 				</tr>
 			<?php

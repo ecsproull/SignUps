@@ -9,8 +9,10 @@
  * @license     GPL-2.0+
  */
 
+
 /**
- * Manages the map settings including adding places to the map.
+ * RollingExceptionsEditor is used to edit the Rolling Exceptions
+ * It is accessd via the submenu item named Exceptions.
  */
 class RollingExceptionsEditor extends SignUpsBase {
 

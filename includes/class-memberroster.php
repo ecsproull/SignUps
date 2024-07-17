@@ -3,7 +3,7 @@
  * Summary
  * MemberRoster class.
  *
- * @package signups
+ * @package SignUps
  */
 
 /**

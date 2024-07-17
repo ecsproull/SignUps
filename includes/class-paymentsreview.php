@@ -3,15 +3,14 @@
  * Summary
  * Payments review class.
  *
- * @package signups
+ * @package SignUps
  */
 
 ob_start();
 
 /**
- * A place to review payments made via stripe.com
- *
- * @package SignUps
+ * PaymentsReview generates a list of Stripe Payments. 
+ * This can be accessed via the submenu item named Payments.
  */
 class PaymentsReview extends SignUpsBase {
 

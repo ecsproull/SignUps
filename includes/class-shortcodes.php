@@ -3,18 +3,15 @@
  * Summary
  * Shortcode class.
  *
- * @package signups
+ * @package SignUps
  */
 
 ob_start();
 
-/**
- * Mirror of the database Session object.
- * Used for creating new sessions to be added to the DB.
- *
- * @package SignUps
- */
-class ShortCodes extends SignUpsBase {
+ /**
+  * ShortCodes is the main class for generating the user forms and pages that the user can see.
+  */
+ class ShortCodes extends SignUpsBase {
 
 	/**
 	 * Add the select class shortcode.
@@ -777,7 +774,7 @@ class ShortCodes extends SignUpsBase {
 		<div id="session_select" class="text-center mw-800px">
 			<h1 class="mb-2"><?php echo esc_html( $signup_name ); ?></h1>
 			<div>
-				<form class="signup_form" method="POST">
+				<form class="signup_form" method="GET">
 					<div id="usercontent">
 						<?php
 						if ( 'none' === $user_group || 'residents' === $user_group ) {

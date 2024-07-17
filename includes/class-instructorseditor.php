@@ -10,7 +10,8 @@
  */
 
 /**
- * Manages the map settings including adding places to the map.
+ * InstructorsEditor is used to manage the sest of instructors for each class.
+ * It is accessed via the submenu item named Instructors.
  */
 class InstructorsEditor extends SignUpsBase {
 

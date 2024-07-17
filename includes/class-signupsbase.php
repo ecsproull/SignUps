@@ -3,14 +3,17 @@
  * Summary
  * Map settings.
  *
- * @package     Signups
+ * @package     SignUps
  * @author      Edward Sproull
  * @copyright   You have the right to copy
  * @license     GPL-2.0+
  */
 
+
 /**
- * Manages the map settings including adding places to the map.
+ * SignUpsBase is the base class for most other classes. It contains the strings
+ * for accessing the databaase plus code that is used in multiple places. It is used on
+ * both the user and admin side of the code.
  */
 class SignUpsBase {
 

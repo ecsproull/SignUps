@@ -1,9 +1,9 @@
 <?php
 /**
  * Summary
- * Map settings.
+ * Signup Settings.
  *
- * @package     Signups
+ * @package     SignUps
  * @author      Edward Sproull
  * @copyright   You have the right to copy
  * @license     GPL-2.0+
@@ -539,7 +539,8 @@ class SignupSettings extends SignUpsBase {
 		);
 
 		?>
-		<div class="container ml-3 mt-3">
+		<div class="container ml-3 mt-3 text-center">
+			<h1 style="color:red;">DANGER ARE YOU SURE YOU WANT TO DELETE THIS CLASS AND ALL ASSOCIATED DATA?</h1>
 			<h1>Delete:  <?php echo esc_html( $class[0]->signup_name ); ?></h1>
 			<h2>These sessions will also be deleted.</h2>
 			<table class="mb-100px mt-4 table table-striped mr-auto ml-auto">
@@ -1672,6 +1673,7 @@ class SignupSettings extends SignUpsBase {
 						<option value="residents" <?php echo 'residents' === $data->signup_group ? 'selected' : ''; ?> >Residents</option>
 						<option value="cnc" <?php echo 'cnc' === $data->signup_group ? 'selected' : ''; ?> >Cnc Users</option>
 						<option value="laser" <?php echo 'laser' === $data->signup_group ? 'selected' : ''; ?> >Laser Users</option>
+						<option value="lbc" <?php echo 'lbc' === $data->signup_group ? 'selected' : ''; ?> >Lathe Boot Camp</option>
 					</select>
 				</div>
 
@@ -2015,6 +2017,7 @@ class SignupSettings extends SignUpsBase {
 					<option value="residents">Residents</option>
 					<option value="cnc">Cnc Users</option>
 					<option value="laser">Laser Users</option>
+					<option value="lbc">Lathe Boot Camp</option>
 				</select>
 			</div>
 

@@ -3,10 +3,17 @@
  * Summary
  * Database class.
  *
- * @package     signups
+ * @package     SignUps
  * @author      Edward Sproull
  * @copyright   You have the right to copy
  * @license     GPL-2.0+
+ * 
+ * @toc
+ *
+ * @id my-section
+ * My section title
+ *
+ * This is the content of my section.
  */
 
 /**
@@ -52,37 +59,38 @@ require 'includes/class-memberroster.php';
 class SignupsPlugin extends SignUpsBase {
 
 	/**
-	 * Shortcode object for use in api callback.
+	 * Reference to the ShortCode object.
 	 *
-	 * @var $short_codes
+	 * @var mixed
 	 */
 	private $short_codes;
 
 	/**
-	 * Shortcode description editor.
+	 * Reference to the DescriptionEditor object.
 	 *
-	 * @var $short_codes
+	 * @var mixeds
 	 */
 	private $description_editor;
 
 	/**
-	 * Shortcode object for use in api callback.
+	 * Reference to the StripePayments object.
 	 *
-	 * @var $stripe_payments
+	 * @var mixed
 	 */
 	private $stripe_payments;
 
 	/**
-	 * Shortcode object for use in api callback.
+	 * Reference to the Reports object.
 	 *
-	 * @var $reports
+	 * @var mixed
 	 */
 	private $reports;
 
+		
 	/**
-	 * Shortcode object for use in api callback.
+	 * Reference to the MemberRoster object.
 	 *
-	 * @var $roster
+	 * @var mixed
 	 */
 	private $roster;
 
@@ -116,7 +124,7 @@ class SignupsPlugin extends SignUpsBase {
 	 * Adds the query vars used by this plugin.
 	 *
 	 * @param mixed $vars Array of vars to add to.
-	 * @return $vars
+	 * @return array The altered vars array.
 	 */
 	public function wwp_custom_query_vars_filter( $vars ) {
 		$vars[] .= 'attendee_id';
@@ -130,10 +138,11 @@ class SignupsPlugin extends SignUpsBase {
 
 
 	/**
-	 * Adds the one and only menu item for the plugin.
+	 * Adds the main menu item and set of submenu items for the plugin.
 	 */
 	public function signup_plugin_top_menu() {
 		add_menu_page( '', 'SignUps', 'manage_options', 'sign_ups', array( new SignupSettings(), 'signup_settings_page' ), plugin_dir_url( __FILE__ ) . 'img/frenchie.bmp' );
+		add_submenu_page( 'sign_ups', '', '', 'manage_options', 'sign_ups', '' );
 		add_submenu_page( 'sign_ups', 'Html Editor', 'Descriptions', 'manage_options', 'html_editor', array( new HtmlEditor(), 'load_html_editor' ) );
 		add_submenu_page( 'sign_ups', 'Rolling Templates Editor', 'Rolling Templates', 'manage_options', 'template_editor', array( new RollingTemplatesEditor(), 'load_templates_editor' ) );
 		add_submenu_page( 'sign_ups', 'Rolling Exceptions Editor', 'Exceptions', 'manage_options', 'exceptions_editor', array( new RollingExceptionsEditor(), 'load_exceptions_editor' ) );

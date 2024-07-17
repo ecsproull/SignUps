@@ -45,7 +45,7 @@ class SignUpsRestApis extends SignUpsBase {
 	/**
 	 * Shortcode object for use in api callback.
 	 *
-	 * @var $stripe_payments
+	 * @var object
 	 */
 	private $stripe_payments;
 
@@ -282,7 +282,7 @@ class SignUpsRestApis extends SignUpsBase {
 	 * Get the attendees for an upcomming class
 	 *
 	 * @param  mixed $request Posted data to search with.
-	 * @return WP_REST_Response.
+	 * @return object
 	 */
 	public function search_members( $request ) {
 		global $wpdb;

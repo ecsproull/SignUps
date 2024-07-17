@@ -15,63 +15,63 @@ class ClassItem {
 	/**
 	 * The primary key.
 	 *
-	 * @var signup_id.
+	 * @var int
 	 */
 	public $signup_id;
 
 	/**
 	 * The name or title of the class.
 	 *
-	 * @var signup_name.
+	 * @var string
 	 */
 	public $signup_name;
 
 	/**
 	 * Contact email.
 	 *
-	 * @var signup_contact_email.
+	 * @var string
 	 */
 	public $signup_contact_email;
 
 	/**
 	 * Class location.
 	 *
-	 * @var signup_location.
+	 * @var string
 	 */
 	public $signup_location;
 
 	/**
-	 * Contact email..
+	 * Url for the description.
 	 *
-	 * @var signup_description_url.
+	 * @var string
 	 */
 	public $signup_description_url;
 
 	/**
-	 * Contact email..
+	 * Thumbnail location.
 	 *
-	 * @var signup_contact_email.
+	 * @var string
 	 */
 	public $signup_thumbnail_url;
 
 	/**
 	 * Class cost.
 	 *
-	 * @var signup_cost.
+	 * @var int
 	 */
 	public $signup_cost;
 
 	/**
 	 * Class size. Number of slots available.
 	 *
-	 * @var signup_default_slots.
+	 * @var int
 	 */
 	public $signup_default_slots;
 
 	/**
-	 * Class is a continuing signup.
+	 * Rolling template id or zero if not a rolling class.
 	 *
-	 * @var signup_rolling_template.
+	 * @var int
 	 */
 	public $signup_rolling_template;
 }

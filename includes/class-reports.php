@@ -3,18 +3,16 @@
  * Summary
  * Reportscode class.
  *
- * @package signups
- */
-
-/**
- * Used for creating class reports.
- *
  * @package SignUps
  */
-class Reports extends SignUpsBase {
+
+ /**
+  * Reports generates reports such as cnc signup histor
+  */
+ class Reports extends SignUpsBase {
 
 	/**
-	 * All usage qyery.
+	 * All usage query.
 	 *
 	 * @var mixed
 	 */

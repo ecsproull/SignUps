@@ -1,7 +1,7 @@
 <?php
 /**
  * Summary
- * Database class.
+ * HtmlEditor class.
  *
  * @package     SignUps
  * @author      Edward Sproull
@@ -9,8 +9,10 @@
  * @license     GPL-2.0+
  */
 
+
 /**
- * Manages the map settings including adding places to the map.
+ * HtmlEditor is used for editing the Description, Instructions and Calendar Description.
+ * It is access via the admin menu item named Descriptions.
  */
 class HtmlEditor extends SignUpsBase {
 

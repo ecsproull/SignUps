@@ -3,7 +3,7 @@
  * Summary
  * Data to send out notificiation about an upcomming class.
  *
- * @package signups
+ * @package SignUps
  */
 
 /**
