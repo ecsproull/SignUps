@@ -2,5 +2,5 @@ vendor/
 vendor/wp-coding-standards/
 vendor/squizlabs
 .vscode/
-docs/
+docs/cache/
 
