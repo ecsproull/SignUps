@@ -64,6 +64,7 @@
             
     <section class="phpdocumentor-sidebar__category -reports">
         <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
+                <h3 class="phpdocumentor-sidebar__root-package"><a href="graphs/classes.html">Class Diagram</a></h3>
                 <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
@@ -83,7 +84,7 @@
 
     <article class="phpdocumentor-element -class">
         <h2 class="phpdocumentor-content__title">
-    SignupsPlugin
+    SignUpsPlugin
 
         <span class="phpdocumentor-element__extends">
         extends <a href="classes/SignUpsBase.html"><abbr title="\SignUpsBase">SignUpsBase</abbr></a>
@@ -107,13 +108,15 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="class-signupsplugin.php"><a href="files/class-signupsplugin.html">class-signupsplugin.php</a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">59</span>
+    <span class="phpdocumentor-element-found-in__line">55</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">Main signups class.</p>
+            <p class="phpdocumentor-summary">Main SignUps class. This is the entry point for the plugin.</p>
 
 
+    <section class="phpdocumentor-description"><p>Several other classes are required in this file and all are instantiated here.</p>
+</section>
 
 
 
@@ -123,7 +126,7 @@
 
 <h3 id="toc">
     Table of Contents
-    <a href="classes/SignupsPlugin.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/SignUpsPlugin.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -135,7 +138,7 @@
 
 <h4 id="toc-constants">
     Constants
-    <a href="classes/SignupsPlugin.html#toc-constants" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/SignUpsPlugin.html#toc-constants" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
@@ -333,7 +336,7 @@
 
 <h4 id="toc-properties">
     Properties
-    <a href="classes/SignupsPlugin.html#toc-properties" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/SignUpsPlugin.html#toc-properties" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
@@ -345,35 +348,35 @@
 <dd>Date timezone.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -private">
-    <a class="" href="classes/SignupsPlugin.html#property_description_editor">$description_editor</a>
+    <a class="" href="classes/SignUpsPlugin.html#property_description_editor">$description_editor</a>
     <span>
-                        &nbsp;: <abbr title="\mixeds">mixeds</abbr>            </span>
+                        &nbsp;: mixed            </span>
 </dt>
 <dd>Reference to the DescriptionEditor object.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -private">
-    <a class="" href="classes/SignupsPlugin.html#property_reports">$reports</a>
+    <a class="" href="classes/SignUpsPlugin.html#property_reports">$reports</a>
     <span>
                         &nbsp;: mixed            </span>
 </dt>
 <dd>Reference to the Reports object.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -private">
-    <a class="" href="classes/SignupsPlugin.html#property_roster">$roster</a>
+    <a class="" href="classes/SignUpsPlugin.html#property_roster">$roster</a>
     <span>
                         &nbsp;: mixed            </span>
 </dt>
 <dd>Reference to the MemberRoster object.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -private">
-    <a class="" href="classes/SignupsPlugin.html#property_short_codes">$short_codes</a>
+    <a class="" href="classes/SignUpsPlugin.html#property_short_codes">$short_codes</a>
     <span>
                         &nbsp;: mixed            </span>
 </dt>
 <dd>Reference to the ShortCode object.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -private">
-    <a class="" href="classes/SignupsPlugin.html#property_stripe_payments">$stripe_payments</a>
+    <a class="" href="classes/SignUpsPlugin.html#property_stripe_payments">$stripe_payments</a>
     <span>
                         &nbsp;: mixed            </span>
 </dt>
@@ -383,30 +386,31 @@
 
 <h4 id="toc-methods">
     Methods
-    <a href="classes/SignupsPlugin.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/SignUpsPlugin.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/SignupsPlugin.html#method___construct">__construct()</a>
+    <a class="" href="classes/SignUpsPlugin.html#method___construct">__construct()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>__construct</dd>
+<dd>The constructor does a lot of work by instantiated several objects that
+are required for various ShortCodes. The ShortCodes are also registered here.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/SignupsPlugin.html#method_add_scripts_and_css">add_scripts_and_css()</a>
+    <a class="" href="classes/SignUpsPlugin.html#method_add_scripts_and_css">add_scripts_and_css()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>Adds the CSS that is used to style the admin side plug-in.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/SignupsPlugin.html#method_add_users_scripts_and_css">add_users_scripts_and_css()</a>
+    <a class="" href="classes/SignUpsPlugin.html#method_add_users_scripts_and_css">add_users_scripts_and_css()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
-<dd>Adds the CSS that is used to style the users side of the plug-in.</dd>
+<dd>Adds the JS adn CSS that is used to style the users side of the plug-in.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/SignUpsBase.html#method_create_meeting_exceptions">create_meeting_exceptions()</a>
@@ -416,14 +420,14 @@
 <dd>Create_meeting_exceptions</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/SignupsPlugin.html#method_signup_plugin_top_menu">signup_plugin_top_menu()</a>
+    <a class="" href="classes/SignUpsPlugin.html#method_signup_plugin_top_menu">signup_plugin_top_menu()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>Adds the main menu item and set of submenu items for the plugin.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/SignupsPlugin.html#method_wwp_custom_query_vars_filter">wwp_custom_query_vars_filter()</a>
+    <a class="" href="classes/SignUpsPlugin.html#method_wwp_custom_query_vars_filter">wwp_custom_query_vars_filter()</a>
     <span>
                                 &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
@@ -605,7 +609,7 @@
     <section class="phpdocumentor-constants">
         <h3 class="phpdocumentor-elements__header" id="constants">
             Constants
-            <a href="classes/SignupsPlugin.html#constants" class="headerlink"><i class="fas fa-link"></i></a>
+            <a href="classes/SignUpsPlugin.html#constants" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
                     <article class="phpdocumentor-element -constant -protected ">
@@ -1482,7 +1486,7 @@
     <section class="phpdocumentor-properties">
         <h3 class="phpdocumentor-elements__header" id="properties">
             Properties
-            <a href="classes/SignupsPlugin.html#properties" class="headerlink"><i class="fas fa-link"></i></a>
+            <a href="classes/SignUpsPlugin.html#properties" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
                     <article
@@ -1531,7 +1535,7 @@
 >
     <h4 class="phpdocumentor-element__name" id="property_description_editor">
         $description_editor
-        <a href="classes/SignupsPlugin.html#property_description_editor" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/SignUpsPlugin.html#property_description_editor" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
                                 </span>
@@ -1539,7 +1543,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="class-signupsplugin.php"><a href="files/class-signupsplugin.html">class-signupsplugin.php</a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">73</span>
+    <span class="phpdocumentor-element-found-in__line">69</span>
 
     </aside>
 
@@ -1548,7 +1552,7 @@
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-        <span class="phpdocumentor-signature__type"><abbr title="\mixeds">mixeds</abbr></span>
+        <span class="phpdocumentor-signature__type">mixed</span>
     <span class="phpdocumentor-signature__name">$description_editor</span>
     </code>
 
@@ -1568,7 +1572,7 @@
 >
     <h4 class="phpdocumentor-element__name" id="property_reports">
         $reports
-        <a href="classes/SignupsPlugin.html#property_reports" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/SignUpsPlugin.html#property_reports" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
                                 </span>
@@ -1576,7 +1580,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="class-signupsplugin.php"><a href="files/class-signupsplugin.html">class-signupsplugin.php</a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">87</span>
+    <span class="phpdocumentor-element-found-in__line">83</span>
 
     </aside>
 
@@ -1605,7 +1609,7 @@
 >
     <h4 class="phpdocumentor-element__name" id="property_roster">
         $roster
-        <a href="classes/SignupsPlugin.html#property_roster" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/SignUpsPlugin.html#property_roster" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
                                 </span>
@@ -1613,7 +1617,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="class-signupsplugin.php"><a href="files/class-signupsplugin.html">class-signupsplugin.php</a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">95</span>
+    <span class="phpdocumentor-element-found-in__line">91</span>
 
     </aside>
 
@@ -1642,7 +1646,7 @@
 >
     <h4 class="phpdocumentor-element__name" id="property_short_codes">
         $short_codes
-        <a href="classes/SignupsPlugin.html#property_short_codes" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/SignUpsPlugin.html#property_short_codes" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
                                 </span>
@@ -1650,7 +1654,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="class-signupsplugin.php"><a href="files/class-signupsplugin.html">class-signupsplugin.php</a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">66</span>
+    <span class="phpdocumentor-element-found-in__line">62</span>
 
     </aside>
 
@@ -1679,7 +1683,7 @@
 >
     <h4 class="phpdocumentor-element__name" id="property_stripe_payments">
         $stripe_payments
-        <a href="classes/SignupsPlugin.html#property_stripe_payments" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/SignUpsPlugin.html#property_stripe_payments" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
                                 </span>
@@ -1687,7 +1691,7 @@
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="class-signupsplugin.php"><a href="files/class-signupsplugin.html">class-signupsplugin.php</a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">80</span>
+    <span class="phpdocumentor-element-found-in__line">76</span>
 
     </aside>
 
@@ -1712,7 +1716,7 @@
             <section class="phpdocumentor-methods">
         <h3 class="phpdocumentor-elements__header" id="methods">
             Methods
-            <a href="classes/SignupsPlugin.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+            <a href="classes/SignUpsPlugin.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
                     <article
@@ -1723,17 +1727,18 @@
 >
     <h4 class="phpdocumentor-element__name" id="method___construct">
         __construct()
-        <a href="classes/SignupsPlugin.html#method___construct" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/SignUpsPlugin.html#method___construct" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="class-signupsplugin.php"><a href="files/class-signupsplugin.html">class-signupsplugin.php</a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">103</span>
+    <span class="phpdocumentor-element-found-in__line">104</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">__construct</p>
+        <p class="phpdocumentor-summary">The constructor does a lot of work by instantiated several objects that
+are required for various ShortCodes. The ShortCodes are also registered here.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -1742,7 +1747,11 @@
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>It is important to understand that this plugin is one big ShortCode. The ShortCodes
+class in the root of the public user interface. SignupSettings class is the root of the
+administration interface.</p>
+</section>
+
     
     
 
@@ -1758,13 +1767,13 @@
 >
     <h4 class="phpdocumentor-element__name" id="method_add_scripts_and_css">
         add_scripts_and_css()
-        <a href="classes/SignupsPlugin.html#method_add_scripts_and_css" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/SignUpsPlugin.html#method_add_scripts_and_css" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="class-signupsplugin.php"><a href="files/class-signupsplugin.html">class-signupsplugin.php</a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">159</span>
+    <span class="phpdocumentor-element-found-in__line">168</span>
 
     </aside>
 
@@ -1777,7 +1786,13 @@
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>Note that the user styles are also available on the admin pages.
+Each side, admin and user, have their own JS file.
+The use of the filemtime function is to break caching when the css and js files are changed.
+The $host parameter is used to verify that this is being called from our internal pages.
+The call to wp_localize_scripts is used to enhance security between ajax calls to the RESTful apis.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -1805,17 +1820,17 @@
 >
     <h4 class="phpdocumentor-element__name" id="method_add_users_scripts_and_css">
         add_users_scripts_and_css()
-        <a href="classes/SignupsPlugin.html#method_add_users_scripts_and_css" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/SignUpsPlugin.html#method_add_users_scripts_and_css" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="class-signupsplugin.php"><a href="files/class-signupsplugin.html">class-signupsplugin.php</a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">201</span>
+    <span class="phpdocumentor-element-found-in__line">214</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Adds the CSS that is used to style the users side of the plug-in.</p>
+        <p class="phpdocumentor-summary">Adds the JS adn CSS that is used to style the users side of the plug-in.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -1824,7 +1839,11 @@
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>The use of the filemtime function is to break caching when the css and js files are changed.
+The $host parameter is used to verify that this is being called from our internal pages.
+The call to wp_localize_scripts is used to enhance security between ajax calls to the RESTful apis.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -1912,13 +1931,13 @@
 >
     <h4 class="phpdocumentor-element__name" id="method_signup_plugin_top_menu">
         signup_plugin_top_menu()
-        <a href="classes/SignupsPlugin.html#method_signup_plugin_top_menu" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/SignUpsPlugin.html#method_signup_plugin_top_menu" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="class-signupsplugin.php"><a href="files/class-signupsplugin.html">class-signupsplugin.php</a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">143</span>
+    <span class="phpdocumentor-element-found-in__line">147</span>
 
     </aside>
 
@@ -1931,7 +1950,9 @@
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>This menu is available only to the administrators.</p>
+</section>
+
     
     
 
@@ -1947,13 +1968,13 @@
 >
     <h4 class="phpdocumentor-element__name" id="method_wwp_custom_query_vars_filter">
         wwp_custom_query_vars_filter()
-        <a href="classes/SignupsPlugin.html#method_wwp_custom_query_vars_filter" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/SignUpsPlugin.html#method_wwp_custom_query_vars_filter" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="class-signupsplugin.php"><a href="files/class-signupsplugin.html">class-signupsplugin.php</a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">129</span>
+    <span class="phpdocumentor-element-found-in__line">132</span>
 
     </aside>
 
@@ -1966,7 +1987,10 @@
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>Query vars are items allowed to be passed in the url of our pages.
+Example: https://scwwoodshop.com/signups?signup_id=5</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -3648,9 +3672,9 @@
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                        <li><a href="classes/SignupsPlugin.html#toc-constants">Constants</a></li>
-                                                            <li><a href="classes/SignupsPlugin.html#toc-properties">Properties</a></li>
-                                                            <li><a href="classes/SignupsPlugin.html#toc-methods">Methods</a></li>
+                                        <li><a href="classes/SignUpsPlugin.html#toc-constants">Constants</a></li>
+                                                            <li><a href="classes/SignUpsPlugin.html#toc-properties">Properties</a></li>
+                                                            <li><a href="classes/SignUpsPlugin.html#toc-methods">Methods</a></li>
                                     </ul>
             </li>
                             <li class="phpdocumentor-on-this-page-section__title">Constants</li>
@@ -3690,23 +3714,23 @@
                 <li>
                     <ul class="phpdocumentor-list -clean">
                                                     <li class=""><a href="classes/SignUpsBase.html#property_date_time_zone">$date_time_zone</li>
-                                                    <li class=""><a href="classes/SignupsPlugin.html#property_description_editor">$description_editor</li>
-                                                    <li class=""><a href="classes/SignupsPlugin.html#property_reports">$reports</li>
-                                                    <li class=""><a href="classes/SignupsPlugin.html#property_roster">$roster</li>
-                                                    <li class=""><a href="classes/SignupsPlugin.html#property_short_codes">$short_codes</li>
-                                                    <li class=""><a href="classes/SignupsPlugin.html#property_stripe_payments">$stripe_payments</li>
+                                                    <li class=""><a href="classes/SignUpsPlugin.html#property_description_editor">$description_editor</li>
+                                                    <li class=""><a href="classes/SignUpsPlugin.html#property_reports">$reports</li>
+                                                    <li class=""><a href="classes/SignUpsPlugin.html#property_roster">$roster</li>
+                                                    <li class=""><a href="classes/SignUpsPlugin.html#property_short_codes">$short_codes</li>
+                                                    <li class=""><a href="classes/SignUpsPlugin.html#property_stripe_payments">$stripe_payments</li>
                                             </ul>
                 </li>
             
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li class=""><a href="classes/SignupsPlugin.html#method___construct">__construct()</a></li>
-                                            <li class=""><a href="classes/SignupsPlugin.html#method_add_scripts_and_css">add_scripts_and_css()</a></li>
-                                            <li class=""><a href="classes/SignupsPlugin.html#method_add_users_scripts_and_css">add_users_scripts_and_css()</a></li>
+                                            <li class=""><a href="classes/SignUpsPlugin.html#method___construct">__construct()</a></li>
+                                            <li class=""><a href="classes/SignUpsPlugin.html#method_add_scripts_and_css">add_scripts_and_css()</a></li>
+                                            <li class=""><a href="classes/SignUpsPlugin.html#method_add_users_scripts_and_css">add_users_scripts_and_css()</a></li>
                                             <li class=""><a href="classes/SignUpsBase.html#method_create_meeting_exceptions">create_meeting_exceptions()</a></li>
-                                            <li class=""><a href="classes/SignupsPlugin.html#method_signup_plugin_top_menu">signup_plugin_top_menu()</a></li>
-                                            <li class=""><a href="classes/SignupsPlugin.html#method_wwp_custom_query_vars_filter">wwp_custom_query_vars_filter()</a></li>
+                                            <li class=""><a href="classes/SignUpsPlugin.html#method_signup_plugin_top_menu">signup_plugin_top_menu()</a></li>
+                                            <li class=""><a href="classes/SignUpsPlugin.html#method_wwp_custom_query_vars_filter">wwp_custom_query_vars_filter()</a></li>
                                             <li class=""><a href="classes/SignUpsBase.html#method_add_attendee_rolling">add_attendee_rolling()</a></li>
                                             <li class=""><a href="classes/SignUpsBase.html#method_add_remove_from_calendar">add_remove_from_calendar()</a></li>
                                             <li class=""><a href="classes/SignUpsBase.html#method_create_description_section">create_description_section()</a></li>
@@ -3750,7 +3774,7 @@
     </section>
 </section>
         </div>
-        <a href="classes/SignupsPlugin.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="classes/SignUpsPlugin.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 

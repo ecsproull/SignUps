@@ -1,60 +1,60 @@
 Search.appendIndex(
     [
                 {
-            "fqsen": "\\SignupsPlugin",
-            "name": "SignupsPlugin",
-            "summary": "Main\u0020signups\u0020class.",
-            "url": "classes/SignupsPlugin.html"
+            "fqsen": "\\SignUpsPlugin",
+            "name": "SignUpsPlugin",
+            "summary": "Main\u0020SignUps\u0020class.\u0020This\u0020is\u0020the\u0020entry\u0020point\u0020for\u0020the\u0020plugin.",
+            "url": "classes/SignUpsPlugin.html"
         },                {
-            "fqsen": "\\SignupsPlugin\u003A\u003A__construct\u0028\u0029",
+            "fqsen": "\\SignUpsPlugin\u003A\u003A__construct\u0028\u0029",
             "name": "__construct",
-            "summary": "__construct",
-            "url": "classes/SignupsPlugin.html#method___construct"
+            "summary": "The\u0020constructor\u0020does\u0020a\u0020lot\u0020of\u0020work\u0020by\u0020instantiated\u0020several\u0020objects\u0020that\nare\u0020required\u0020for\u0020various\u0020ShortCodes.\u0020The\u0020ShortCodes\u0020are\u0020also\u0020registered\u0020here.",
+            "url": "classes/SignUpsPlugin.html#method___construct"
         },                {
-            "fqsen": "\\SignupsPlugin\u003A\u003Awwp_custom_query_vars_filter\u0028\u0029",
+            "fqsen": "\\SignUpsPlugin\u003A\u003Awwp_custom_query_vars_filter\u0028\u0029",
             "name": "wwp_custom_query_vars_filter",
             "summary": "Adds\u0020the\u0020query\u0020vars\u0020used\u0020by\u0020this\u0020plugin.",
-            "url": "classes/SignupsPlugin.html#method_wwp_custom_query_vars_filter"
+            "url": "classes/SignUpsPlugin.html#method_wwp_custom_query_vars_filter"
         },                {
-            "fqsen": "\\SignupsPlugin\u003A\u003Asignup_plugin_top_menu\u0028\u0029",
+            "fqsen": "\\SignUpsPlugin\u003A\u003Asignup_plugin_top_menu\u0028\u0029",
             "name": "signup_plugin_top_menu",
             "summary": "Adds\u0020the\u0020main\u0020menu\u0020item\u0020and\u0020set\u0020of\u0020submenu\u0020items\u0020for\u0020the\u0020plugin.",
-            "url": "classes/SignupsPlugin.html#method_signup_plugin_top_menu"
+            "url": "classes/SignUpsPlugin.html#method_signup_plugin_top_menu"
         },                {
-            "fqsen": "\\SignupsPlugin\u003A\u003Aadd_scripts_and_css\u0028\u0029",
+            "fqsen": "\\SignUpsPlugin\u003A\u003Aadd_scripts_and_css\u0028\u0029",
             "name": "add_scripts_and_css",
             "summary": "Adds\u0020the\u0020CSS\u0020that\u0020is\u0020used\u0020to\u0020style\u0020the\u0020admin\u0020side\u0020plug\u002Din.",
-            "url": "classes/SignupsPlugin.html#method_add_scripts_and_css"
+            "url": "classes/SignUpsPlugin.html#method_add_scripts_and_css"
         },                {
-            "fqsen": "\\SignupsPlugin\u003A\u003Aadd_users_scripts_and_css\u0028\u0029",
+            "fqsen": "\\SignUpsPlugin\u003A\u003Aadd_users_scripts_and_css\u0028\u0029",
             "name": "add_users_scripts_and_css",
-            "summary": "Adds\u0020the\u0020CSS\u0020that\u0020is\u0020used\u0020to\u0020style\u0020the\u0020users\u0020side\u0020of\u0020the\u0020plug\u002Din.",
-            "url": "classes/SignupsPlugin.html#method_add_users_scripts_and_css"
+            "summary": "Adds\u0020the\u0020JS\u0020adn\u0020CSS\u0020that\u0020is\u0020used\u0020to\u0020style\u0020the\u0020users\u0020side\u0020of\u0020the\u0020plug\u002Din.",
+            "url": "classes/SignUpsPlugin.html#method_add_users_scripts_and_css"
         },                {
-            "fqsen": "\\SignupsPlugin\u003A\u003A\u0024short_codes",
+            "fqsen": "\\SignUpsPlugin\u003A\u003A\u0024short_codes",
             "name": "short_codes",
             "summary": "Reference\u0020to\u0020the\u0020ShortCode\u0020object.",
-            "url": "classes/SignupsPlugin.html#property_short_codes"
+            "url": "classes/SignUpsPlugin.html#property_short_codes"
         },                {
-            "fqsen": "\\SignupsPlugin\u003A\u003A\u0024description_editor",
+            "fqsen": "\\SignUpsPlugin\u003A\u003A\u0024description_editor",
             "name": "description_editor",
             "summary": "Reference\u0020to\u0020the\u0020DescriptionEditor\u0020object.",
-            "url": "classes/SignupsPlugin.html#property_description_editor"
+            "url": "classes/SignUpsPlugin.html#property_description_editor"
         },                {
-            "fqsen": "\\SignupsPlugin\u003A\u003A\u0024stripe_payments",
+            "fqsen": "\\SignUpsPlugin\u003A\u003A\u0024stripe_payments",
             "name": "stripe_payments",
             "summary": "Reference\u0020to\u0020the\u0020StripePayments\u0020object.",
-            "url": "classes/SignupsPlugin.html#property_stripe_payments"
+            "url": "classes/SignUpsPlugin.html#property_stripe_payments"
         },                {
-            "fqsen": "\\SignupsPlugin\u003A\u003A\u0024reports",
+            "fqsen": "\\SignUpsPlugin\u003A\u003A\u0024reports",
             "name": "reports",
             "summary": "Reference\u0020to\u0020the\u0020Reports\u0020object.",
-            "url": "classes/SignupsPlugin.html#property_reports"
+            "url": "classes/SignUpsPlugin.html#property_reports"
         },                {
-            "fqsen": "\\SignupsPlugin\u003A\u003A\u0024roster",
+            "fqsen": "\\SignUpsPlugin\u003A\u003A\u0024roster",
             "name": "roster",
             "summary": "Reference\u0020to\u0020the\u0020MemberRoster\u0020object.",
-            "url": "classes/SignupsPlugin.html#property_roster"
+            "url": "classes/SignUpsPlugin.html#property_roster"
         },                {
             "fqsen": "\\AttendeeItem",
             "name": "AttendeeItem",
@@ -933,7 +933,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignupSettings",
             "name": "SignupSettings",
-            "summary": "Summary\nAdmin\u0020page\u0020for\u0020the\u0020signups\u0020plubin.\u0020Containes\u0020the\u0020functions\u0020for\u0020editing\u0020the\u0020signups.",
+            "summary": "Summary\nAdmin\u0020page\u0020for\u0020the\u0020signups\u0020plugin.\u0020Contains\u0020the\u0020functions\u0020for\u0020editing\u0020the\u0020signups.",
             "url": "classes/SignupSettings.html"
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Asignup_settings_page\u0028\u0029",
@@ -948,7 +948,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Asubmit_class\u0028\u0029",
             "name": "submit_class",
-            "summary": "Submit\u0020class\u0020to\u0020databse.",
+            "summary": "Submit\u0020class\u0020to\u0020database.",
             "url": "classes/SignupSettings.html#method_submit_class"
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Asubmit_session\u0028\u0029",
@@ -1043,7 +1043,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Acreate_signup_form\u0028\u0029",
             "name": "create_signup_form",
-            "summary": "Creates\u0020a\u0020form\u0020used\u0020to\u0020create\u0020a\u0020class.",
+            "summary": "Creates\u0020a\u0020form\u0020used\u0020to\u0020edit\u0020a\u0020class.",
             "url": "classes/SignupSettings.html#method_create_signup_form"
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Acreate_session_form\u0028\u0029",
@@ -1051,15 +1051,15 @@ Search.appendIndex(
             "summary": "Creates\u0020a\u0020form\u0020used\u0020to\u0020create\u0020a\u0020class\u0020session.",
             "url": "classes/SignupSettings.html#method_create_session_form"
         },                {
-            "fqsen": "\\SignupSettings\u003A\u003Aload_description_form\u0028\u0029",
-            "name": "load_description_form",
+            "fqsen": "\\SignupSettings\u003A\u003Aload_create_class_form\u0028\u0029",
+            "name": "load_create_class_form",
             "summary": "Load\u0020the\u0020form\u0020to\u0020create\u0020class\u0020descriptions.",
-            "url": "classes/SignupSettings.html#method_load_description_form"
+            "url": "classes/SignupSettings.html#method_load_create_class_form"
         },                {
-            "fqsen": "\\SignupSettings\u003A\u003Asubmit_description\u0028\u0029",
-            "name": "submit_description",
+            "fqsen": "\\SignupSettings\u003A\u003Asubmit_new_class\u0028\u0029",
+            "name": "submit_new_class",
             "summary": "Submit\u0020the\u0020description\u0020to\u0020the\u0020database.",
-            "url": "classes/SignupSettings.html#method_submit_description"
+            "url": "classes/SignupSettings.html#method_submit_new_class"
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Aget_day_of_month\u0028\u0029",
             "name": "get_day_of_month",
