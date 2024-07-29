@@ -8,18 +8,13 @@
  * @copyright   You have the right to copy
  * @license     GPL-2.0+
  * 
- * @toc
- *
- * @id my-section
- * My section title
- *
  * This is the content of my section.
  */
 
 /**
- * Plugin Name: signups
+ * Plugin Name: SignUps
  * Plugin URI:
- * Description: Signups administration tools for the Sun City West Woodshop.
+ * Description: SignUps administration tools for the Sun City West WoodShop.
  * Version: 1.0
  * Author: Ed Sproull
  * Author URI:
@@ -54,9 +49,10 @@ require 'includes/class-sessionemaildata.php';
 require 'includes/class-memberroster.php';
 
 /**
- * Main signups class.
+ * Main SignUps class. This is the entry point for the plugin.
+ * Several other classes are required in this file and all are instantiated here. 
  */
-class SignupsPlugin extends SignUpsBase {
+class SignUpsPlugin extends SignUpsBase {
 
 	/**
 	 * Reference to the ShortCode object.
@@ -68,7 +64,7 @@ class SignupsPlugin extends SignUpsBase {
 	/**
 	 * Reference to the DescriptionEditor object.
 	 *
-	 * @var mixeds
+	 * @var mixed
 	 */
 	private $description_editor;
 
@@ -96,15 +92,22 @@ class SignupsPlugin extends SignUpsBase {
 
 
 	/**
-	 * __construct
+	 * The constructor does a lot of work by instantiated several objects that 
+	 * are required for various ShortCodes. The ShortCodes are also registered here.
+	 * 
+	 * It is important to understand that this plugin is one big ShortCode. The ShortCodes
+	 * class in the root of the public user interface. SignupSettings class is the root of the 
+	 * administration interface.
 	 *
 	 * @return void
 	 */
 	public function __construct() {
+		setcookie( 'signups_scw_cache', 'ignore', time()+3600 );
 		register_activation_hook( __FILE__, array( new DbSignUpTables(), 'create_db_tables' ) );
 		add_action( 'admin_menu', array( $this, 'signup_plugin_top_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_scripts_and_css' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'add_users_scripts_and_css' ) );
+		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );
 		new SignUpsRestApis();
 		$this->short_codes        = new ShortCodes();
 		$this->stripe_payments    = new StripePayments();
@@ -119,9 +122,36 @@ class SignupsPlugin extends SignUpsBase {
 		add_shortcode( 'scw_roster', array( $this->roster, 'member_roster' ) );
 		add_filter( 'query_vars', array( $this, 'wwp_custom_query_vars_filter' ) );
 	}
+	
+	/**
+	 * Called when all of the WordPress plugins have been loaded
+	 * This the only time that the WP-Optimize object is available to clear the cache.
+	 *
+	 * @return void
+	 */
+	public function plugins_loaded() {
+		global $wpdb;
+		// The stripe table is now being used for settings.
+		$stripe_row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT *
+				FROM %1s
+				WHERE stripe_api_key = 'cache'",
+				self::STRIPE_TABLE,
+			),
+			OBJECT
+		);
+		
+		if ( $stripe_row->stripe_api_secret === '1' ) {
+			WP_Optimize()->get_page_cache()->purge();
+			$this->set_clear_cache( '0' );
+		}
+	}
 
 	/**
 	 * Adds the query vars used by this plugin.
+	 * Query vars are items allowed to be passed in the url of our pages.
+	 * Example: https://scwwoodshop.com/signups?signup_id=5
 	 *
 	 * @param mixed $vars Array of vars to add to.
 	 * @return array The altered vars array.
@@ -139,6 +169,7 @@ class SignupsPlugin extends SignUpsBase {
 
 	/**
 	 * Adds the main menu item and set of submenu items for the plugin.
+	 * This menu is available only to the administrators.
 	 */
 	public function signup_plugin_top_menu() {
 		add_menu_page( '', 'SignUps', 'manage_options', 'sign_ups', array( new SignupSettings(), 'signup_settings_page' ), plugin_dir_url( __FILE__ ) . 'img/frenchie.bmp' );
@@ -153,6 +184,11 @@ class SignupsPlugin extends SignUpsBase {
 
 	/**
 	 * Adds the CSS that is used to style the admin side plug-in.
+	 * Note that the user styles are also available on the admin pages.
+	 * Each side, admin and user, have their own JS file.
+	 * The use of the filemtime function is to break caching when the css and js files are changed.
+	 * The $host parameter is used to verify that this is being called from our internal pages.
+	 * The call to wp_localize_scripts is used to enhance security between ajax calls to the RESTful apis.
 	 *
 	 * @param string $host Who is calling.
 	 */
@@ -194,7 +230,11 @@ class SignupsPlugin extends SignUpsBase {
 	}
 
 	/**
-	 * Adds the CSS that is used to style the users side of the plug-in.
+	 * Adds the JS adn CSS that is used to style the users side of the plug-in.
+	 * 
+	 * The use of the filemtime function is to break caching when the css and js files are changed.
+	 * The $host parameter is used to verify that this is being called from our internal pages.
+	 * The call to wp_localize_scripts is used to enhance security between ajax calls to the RESTful apis.
 	 *
 	 * @param string $host Who is calling.
 	 */
@@ -229,4 +269,4 @@ class SignupsPlugin extends SignUpsBase {
 	}
 }
 
-$signups = new SignupsPlugin();
+$signups = new SignUpsPlugin();

@@ -11,7 +11,7 @@
 
 /**
  * Summary
- * Admin page for the signups plubin. Containes the functions for editing the signups.
+ * Admin page for the signups plugin. Contains the functions for editing the signups.
  *
  * @package SignUps
  */
@@ -68,10 +68,10 @@ class SignupSettings extends SignUpsBase {
 				$this->delete_class( $post );
 			} elseif ( isset( $post['session_add_slots'] ) ) {
 				$this->add_session_slots( (object) $post, $post['signup_name'] );
-			} elseif ( isset( $post['submit_description'] ) ) {
-				$this->submit_description( $post );
-			} elseif ( isset( $post['load_description_form'] ) ) {
-				$this->load_description_form();
+			} elseif ( isset( $post['submit_new_class'] ) ) {
+				$this->submit_new_class( $post );
+			} elseif ( isset( $post['load_create_class_form'] ) ) {
+				$this->load_create_class_form();
 			} else {
 				$this->load_signup_selection();
 			}
@@ -82,6 +82,7 @@ class SignupSettings extends SignUpsBase {
 
 	/**
 	 * Moves the order of an item up or down in the listing view.
+	 * By adjusting this you can order the items on the user landing page.
 	 *
 	 * @param array  $post The posted data from the form.
 	 * @param string $direction The direction to move the item.
@@ -142,7 +143,8 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
-	 * Submit class to databse.
+	 * Submit class to database.
+	 * 
 	 *
 	 * @param int $post The posted data from the form.
 	 */
@@ -316,6 +318,8 @@ class SignupSettings extends SignUpsBase {
 		} else {
 			$this->update_message( $affected_row_count, $wpdb->last_error, 'Class' );
 		}
+		
+		$this->set_clear_cache( '1' );
 	}
 
 	/**
@@ -1338,7 +1342,7 @@ class SignupSettings extends SignUpsBase {
 						<td></td>
 						<td></td>
 						<td></td>
-						<td> <input class="submitbutton addItem" type="submit" name="load_description_form" value=""></td>
+						<td> <input class="submitbutton addItem" type="submit" name="load_create_class_form" value=""></td>
 					</tr>
 					<?php
 					$category_counts = array();
@@ -1577,7 +1581,8 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
-	 * Creates a form used to create a class.
+	 * Creates a form used to edit a class.
+	 * Originally it was used to create a class but that work as now been moved
 	 *
 	 * @param  class $data Raw data retrieved from the data base or an empty class if a new class is being created.
 	 * @return void
@@ -1906,7 +1911,7 @@ class SignupSettings extends SignUpsBase {
 	 *
 	 * @return void
 	 */
-	private function load_description_form() {
+	private function load_create_class_form() {
 		?>
 		<form method="POST" name="template_form" >
 		<div class="title-category-box mt-4">
@@ -2083,7 +2088,7 @@ class SignupSettings extends SignUpsBase {
 				$this->create_description_section( null );
 			?>
 
-			<div class="text-center"><button type="submit" class="btn btn-md bg-primary mr-auto ml-auto mt-3" value="-1" name="submit_description">Submit</button></div>
+			<div class="text-center"><button type="submit" class="btn btn-md bg-primary mr-auto ml-auto mt-3" value="-1" name="submit_new_class">Submit</button></div>
 		</div>
 		<input type="hidden" id="session_add_slots_count" class="mt-2 w-100" value="1" name="session_add_slots_count" required>
 		<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
@@ -2097,7 +2102,7 @@ class SignupSettings extends SignUpsBase {
 	 * @param  mixed $post Data posted from the create form.
 	 * @return void
 	 */
-	private function submit_description( $post ) {
+	private function submit_new_class( $post ) {
 		global $wpdb;
 		$new_signup                                = array();
 		$new_signup['signup_name']                 = $post['description_title'];
@@ -2142,6 +2147,7 @@ class SignupSettings extends SignUpsBase {
 		$new_signup['signup_default_duration'] = date_format( $duration, 'H:i' );
 		$affected_row_count = $wpdb->insert( self::SIGNUPS_TABLE, $new_signup );
 		if ( 1 === $affected_row_count ) {
+			$this->set_clear_cache( '1' );
 			$signup_id = $wpdb->insert_id;
 
 			$instructor_data = array();

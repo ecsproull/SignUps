@@ -211,7 +211,7 @@ class SignUpsBase {
 	/**
 	 * Date timezone.
 	 *
-	 * @var undefined
+	 * @var object
 	 */
 	protected $date_time_zone;
 
@@ -276,6 +276,13 @@ class SignUpsBase {
 	protected function format_date_only( $formatted_time ) {
 		$dt = new DateTime( $formatted_time );
 		return $dt->format( 'Y-m-d' );
+	}
+
+	protected function set_clear_cache( $value ) {
+		global $wpdb;
+		$where = array( 'stripe_api_key' => 'cache');
+		$data  = array( 'stripe_api_secret' => $value );
+		$wpdb->update( self::STRIPE_TABLE, $data, $where );
 	}
 
 	/**
@@ -723,7 +730,7 @@ class SignUpsBase {
 				FROM %1s
 				WHERE template_id = %s',
 				self::SIGNUP_TEMPLATE_TABLE,
-				'4'
+				'1'
 			),
 			OBJECT
 		);
@@ -926,7 +933,7 @@ class SignUpsBase {
 							$comment_name   = 'comment-';
 							$comment_row_id = 'comment-row-';
 							while ( $start_date <= $end_date ) {
-								$datetime = new DateTime( '04/29/2024 12:00 AM' );
+								$datetime = new DateTime( '09/23/2024 12:00 AM' );
 								if ( $start_date > $datetime && '1' === $signup_id ) {
 									$template_items = $template_items2;
 								}
@@ -944,7 +951,12 @@ class SignUpsBase {
 									function ( $a, $b ) {
 										$st_time1 = strtotime( $a->template_item_start_time );
 										$st_time2 = strtotime( $b->template_item_start_time );
-										return $st_time1 < $st_time2;
+										if ( $st_time1 < $st_time2 ) {
+											return 1;
+										} else {
+											return 0;
+										}
+										//return $st_time1 < $st_time2;
 									}
 								);
 
@@ -962,7 +974,12 @@ class SignUpsBase {
 								usort(
 									$group_items,
 									function ( $a, $b ) {
-										return $a[0]->template_item_start_time > $b[0]->template_item_start_time;
+										if ( $a[0]->template_item_start_time > $b[0]->template_item_start_time ) {
+											return 1;
+										} else {
+											return 0;
+										}
+										//return $a[0]->template_item_start_time > $b[0]->template_item_start_time;
 									}
 								);
 
