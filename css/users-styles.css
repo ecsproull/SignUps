@@ -336,9 +336,8 @@ input[type='radio'] {
 .payment-items {
 	display: grid;
 	width: 80%;
-	grid-template-columns: 25% 20% 35% 5% 3% 10%;
+	grid-template-columns: 10% 12% 6% 15% auto 5% 5%;
 	align-items: start;
-	justify-content: space-between;
 }
 
 .custom-alert {

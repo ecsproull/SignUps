@@ -385,6 +385,7 @@ class StripePayments extends SignUpsBase {
 
 	/**
 	 * Update the price for a signup.
+	 * The price is registered with Stipe.Com.
 	 *
 	 * @param  mixed $price_id Original price id.
 	 * @param  mixed $product_id Product Id.
@@ -414,11 +415,12 @@ class StripePayments extends SignUpsBase {
 	}
 
 	/**
-	 * Update the price for a signup.
+	 * Create the product id and price id for a signup.
+	 * These registered with Stipe.Com and updated via their API.
 	 *
 	 * @param string $name Name of the signup.
 	 * @param int    $cost The cost of the signup.
-	 * @return The new product and price id as a comma seperated string.
+	 * @return The new product and price id as a comma separated string.
 	 */
 	public function create_product( $name, $cost ) {
 
