@@ -11,6 +11,11 @@ Search.appendIndex(
             "summary": "The\u0020constructor\u0020does\u0020a\u0020lot\u0020of\u0020work\u0020by\u0020instantiated\u0020several\u0020objects\u0020that\nare\u0020required\u0020for\u0020various\u0020ShortCodes.\u0020The\u0020ShortCodes\u0020are\u0020also\u0020registered\u0020here.",
             "url": "classes/SignUpsPlugin.html#method___construct"
         },                {
+            "fqsen": "\\SignUpsPlugin\u003A\u003Aplugins_loaded\u0028\u0029",
+            "name": "plugins_loaded",
+            "summary": "Called\u0020when\u0020all\u0020of\u0020the\u0020WordPress\u0020plugins\u0020have\u0020been\u0020loaded\nThis\u0020the\u0020only\u0020time\u0020that\u0020the\u0020WP\u002DOptimize\u0020object\u0020is\u0020available\u0020to\u0020clear\u0020the\u0020cache.",
+            "url": "classes/SignUpsPlugin.html#method_plugins_loaded"
+        },                {
             "fqsen": "\\SignUpsPlugin\u003A\u003Awwp_custom_query_vars_filter\u0028\u0029",
             "name": "wwp_custom_query_vars_filter",
             "summary": "Adds\u0020the\u0020query\u0020vars\u0020used\u0020by\u0020this\u0020plugin.",
@@ -283,7 +288,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\PaymentsReview\u003A\u003Areview_payments\u0028\u0029",
             "name": "review_payments",
-            "summary": "Revivew\u0020recent\u0020payments.",
+            "summary": "Review\u0020recent\u0020payments.",
             "url": "classes/PaymentsReview.html#method_review_payments"
         },                {
             "fqsen": "\\Reports",
@@ -583,22 +588,22 @@ Search.appendIndex(
         },                {
             "fqsen": "\\ShortCodes",
             "name": "ShortCodes",
-            "summary": "ShortCodes\u0020is\u0020the\u0020main\u0020class\u0020for\u0020generating\u0020the\u0020user\u0020forms\u0020and\u0020pages\u0020that\u0020the\u0020user\u0020can\u0020see.",
+            "summary": "The\u0020ShortCodes\u0020class\u0020is\u0020the\u0020main\u0020class\u0020for\u0020generating\u0020the\u0020web\u0020pages\u0020that\u0020the\u0020user\u0020can\u0020see.",
             "url": "classes/ShortCodes.html"
         },                {
             "fqsen": "\\ShortCodes\u003A\u003Auser_signup\u0028\u0029",
             "name": "user_signup",
-            "summary": "Add\u0020the\u0020select\u0020class\u0020shortcode.",
+            "summary": "This\u0020is\u0020the\u0020entry\u0020function\u0020for\u0020the\u0020user\u0020side\u0020of\u0020the\u0020SignUp\u0020plugin.",
             "url": "classes/ShortCodes.html#method_user_signup"
         },                {
             "fqsen": "\\ShortCodes\u003A\u003Asend_email\u0028\u0029",
             "name": "send_email",
-            "summary": "Send\u0020the\u0020email.",
+            "summary": "The\u0020information\u0020to\u0020be\u0020sent\u0020in\u0020an\u0020email\u0020is\u0020collected\u0020on\u0020a\u0020Form.\u0020That\u0020Form\nis\u0020created\u0020in\u0020the\u0020create_email_form\u0020function.\u0020Once\u0020the\u0020users\u0020fills\u0020out\u0020the\u0020Form\nand\u0020clicks\u0020the\u0020Send\u0020Email\u0020button,\u0020this\u0020function\u0020is\u0020called\u0020to\u0020send\u0020the\u0020email.",
             "url": "classes/ShortCodes.html#method_send_email"
         },                {
             "fqsen": "\\ShortCodes\u003A\u003Aunsubscribe_nag_mailer\u0028\u0029",
             "name": "unsubscribe_nag_mailer",
-            "summary": "Unsubscribe\u0020from\u0020the\u0020monitor\u0020nag\u0020mailer.\u0020This\u0020adds\u0020the\u0020key\u0020to\u0020be\nunsubscribed\u0020to\u0020the\u0020database\u0020for\u0020retrieval\u0020by\u0020the\u0020nag\u0020mailer.",
+            "summary": "Called\u0020in\u0020response\u0020to\u0020a\u0020click\u0020on\u0020the\u0020Unsubscribe\u0020link\u0020in\u0020a\u0020generated\u0020monitor\u0020or\u0020class\u0020email.",
             "url": "classes/ShortCodes.html#method_unsubscribe_nag_mailer"
         },                {
             "fqsen": "\\ShortCodes\u003A\u003Acreate_new_user_table\u0028\u0029",
@@ -608,57 +613,52 @@ Search.appendIndex(
         },                {
             "fqsen": "\\ShortCodes\u003A\u003Acreate_select_signup\u0028\u0029",
             "name": "create_select_signup",
-            "summary": "Retrieves\u0020the\u0020available\u0020signups\u0020\u0020and\ncreates\u0020a\u0020form\u0020for\u0020the\u0020user\u0020to\u0020select\u0020a\u0020signup\u0020to\u0020add\u0020himself\u0020to.",
+            "summary": "Retrieves\u0020the\u0020the\u0020data\u0020required\u0020for\u0020the\u0020create_select_signup_form\u0020function\u0020to\u0020populate\nthe\u0020SignUps\u0020landing\u0020page.",
             "url": "classes/ShortCodes.html#method_create_select_signup"
         },                {
             "fqsen": "\\ShortCodes\u003A\u003Acreate_signup_form\u0028\u0029",
             "name": "create_signup_form",
-            "summary": "Creates\u0020the\u0020form\u0020to\u0020sign\u0020up.",
+            "summary": "Creates\u0020the\u0020signup\u0020form\u0020for\u0020an\u0020individual\u0020event\u0020or\u0020class.",
             "url": "classes/ShortCodes.html#method_create_signup_form"
         },                {
             "fqsen": "\\ShortCodes\u003A\u003Amove_attendee_class\u0028\u0029",
             "name": "move_attendee_class",
-            "summary": "Move\u0020a\u0020paid\u0020attendee\u0020to\u0020another\u0020class",
+            "summary": "Move\u0020a\u0020paid\u0020attendee\u0020to\u0020another\u0020session\u0020for\u0020the\u0020class.",
             "url": "classes/ShortCodes.html#method_move_attendee_class"
         },                {
             "fqsen": "\\ShortCodes\u003A\u003Aadd_attendee_class\u0028\u0029",
             "name": "add_attendee_class",
-            "summary": "Add\u0020attendee\u0020to\u0020a\u0020class",
+            "summary": "Add\u0020attendee\u0020to\u0020a\u0020session\u0020of\u0020a\u0020class\u0020in\u0020response\u0020to\u0020the\u0020member\u0020selecting\u0020the\u0020session\u0020to\u0020attend.",
             "url": "classes/ShortCodes.html#method_add_attendee_class"
         },                {
             "fqsen": "\\ShortCodes\u003A\u003Acreate_select_signup_form\u0028\u0029",
             "name": "create_select_signup_form",
-            "summary": "Creates\u0020the\u0020form\u0020for\u0020selecting\u0020a\u0020signup\u0020to\u0020add\u0020to.",
+            "summary": "Creates\u0020the\u0020form\u0020for\u0020selecting\u0020a\u0020signup.\u0020This\u0020is\u0020the\u0020landing\u0020page\u0020for\u0020members.",
             "url": "classes/ShortCodes.html#method_create_select_signup_form"
         },                {
             "fqsen": "\\ShortCodes\u003A\u003Acreate_session_select_form\u0028\u0029",
             "name": "create_session_select_form",
-            "summary": "Creates\u0020a\u0020form\u0020that\u0020displays\u0020the\u0020sessions\u0020along\u0020with\u0020their\u0020attendees",
+            "summary": "Creates\u0020a\u0020form\u0020that\u0020displays\u0020the\u0020sessions\u0020along\u0020with\u0020their\u0020attendees.",
             "url": "classes/ShortCodes.html#method_create_session_select_form"
         },                {
             "fqsen": "\\ShortCodes\u003A\u003Acreate_description_form\u0028\u0029",
             "name": "create_description_form",
-            "summary": "Creates\u0020a\u0020signup\u0020description\u0020block",
+            "summary": "Creates\u0020a\u0020signup\u0020description\u0020block.",
             "url": "classes/ShortCodes.html#method_create_description_form"
         },                {
             "fqsen": "\\ShortCodes\u003A\u003Acreate_session_email_link\u0028\u0029",
             "name": "create_session_email_link",
-            "summary": "Create\u0020an\u0020email\u0020link\u0020that\u0020opens\u0020the\u0020email\u0020form\u0020with\u0020the\u0020proper\u0020parameters.",
+            "summary": "Creates\u0020an\u0020email\u0020link\u0020that\u0020opens\u0020the\u0020email\u0020form\u0020with\u0020the\u0020proper\u0020parameters.",
             "url": "classes/ShortCodes.html#method_create_session_email_link"
         },                {
             "fqsen": "\\ShortCodes\u003A\u003Acreate_email_form\u0028\u0029",
             "name": "create_email_form",
-            "summary": "Create\u0020the\u0020form\u0020for\u0020sending\u0020the\u0020admin\u0020an\u0020email.",
+            "summary": "Creates\u0020the\u0020form\u0020for\u0020sending\u0020the\u0020an\u0020email.",
             "url": "classes/ShortCodes.html#method_create_email_form"
-        },                {
-            "fqsen": "\\ShortCodes\u003A\u003Acreate_hidden_user\u0028\u0029",
-            "name": "create_hidden_user",
-            "summary": "Create\u0020hidden\u0020fields\u0020for\u0020the\u0020user\u0020info.",
-            "url": "classes/ShortCodes.html#method_create_hidden_user"
         },                {
             "fqsen": "\\SignUpsBase",
             "name": "SignUpsBase",
-            "summary": "SignUpsBase\u0020is\u0020the\u0020base\u0020class\u0020for\u0020most\u0020other\u0020classes.\u0020It\u0020contains\u0020the\u0020strings\nfor\u0020accessing\u0020the\u0020databaase\u0020plus\u0020code\u0020that\u0020is\u0020used\u0020in\u0020multiple\u0020places.\u0020It\u0020is\u0020used\u0020on\nboth\u0020the\u0020user\u0020and\u0020admin\u0020side\u0020of\u0020the\u0020code.",
+            "summary": "SignUpsBase\u0020is\u0020the\u0020base\u0020class\u0020for\u0020most\u0020other\u0020classes.\u0020It\u0020contains\u0020the\u0020strings\nfor\u0020accessing\u0020the\u0020database\u0020plus\u0020code\u0020that\u0020is\u0020used\u0020in\u0020multiple\u0020places.\u0020It\u0020is\u0020used\u0020on\nboth\u0020the\u0020user\u0020and\u0020admin\u0020side\u0020of\u0020the\u0020code.",
             "url": "classes/SignUpsBase.html"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003A__construct\u0028\u0029",
@@ -668,7 +668,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003Awrite_log\u0028\u0029",
             "name": "write_log",
-            "summary": "Write_log.",
+            "summary": "Writes\u0020a\u0020string\u0020to\u0020the\u0020log\u0020table\u0020in\u0020the\u0020database.",
             "url": "classes/SignUpsBase.html#method_write_log"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003Asession_attendee_string\u0028\u0029",
@@ -688,37 +688,42 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003Aformat_date_only\u0028\u0029",
             "name": "format_date_only",
-            "summary": "Format\u0020a\u0020date",
+            "summary": "Format\u0020a\u0020date\u0020string\u0020from\u0020a\u0020DateTime\u0020object.",
             "url": "classes/SignUpsBase.html#method_format_date_only"
+        },                {
+            "fqsen": "\\SignUpsBase\u003A\u003Aset_clear_cache\u0028\u0029",
+            "name": "set_clear_cache",
+            "summary": "When\u0020an\u0020administrator\u0020makes\u0020changes\u0020to\u0020a\u0020signup\u0020the\u0020change\u0020will\nnot\u0020appear\u0020immediately\u0020unless\u0020you\u0020clear\u0020the\u0020cache.\u0020That\u0020is,\u0020the\u0020cache\nholds\u0020on\u0020to\u0020the\u0020old\u0020data.\u0020You\u0020can\u0020only\u0020clear\u0020the\u0020cache\u0020at\u0020plugin\u0020load\/reload.",
+            "url": "classes/SignUpsBase.html#method_set_clear_cache"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003Aregister_route\u0028\u0029",
             "name": "register_route",
-            "summary": "Helper\u0020function\u0020for\u0020registering\u0020routes.",
+            "summary": "Helper\u0020function\u0020for\u0020registering\u0020RestFul\u0020API\u0020routes.",
             "url": "classes/SignUpsBase.html#method_register_route"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003Aget_signup_html\u0028\u0029",
             "name": "get_signup_html",
-            "summary": "Return\u0020html\u0020description\u0020for\u0020a\u0020signup.",
+            "summary": "Returns\u0020the\u0020HTML\u0020description\u0020for\u0020a\u0020signup.",
             "url": "classes/SignUpsBase.html#method_get_signup_html"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003Ais_rolling_signup\u0028\u0029",
             "name": "is_rolling_signup",
-            "summary": "Is\u0020this\u0020a\u0020rolling\u0020signup",
+            "summary": "Is\u0020this\u0020a\u0020rolling\u0020signup\u0020is\u0020the\u0020question\u0020this\u0020function\u0020answers.",
             "url": "classes/SignUpsBase.html#method_is_rolling_signup"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003Acreate_new_member_form\u0028\u0029",
             "name": "create_new_member_form",
-            "summary": "Creates\u0020a\u0020form\u0020for\u0020new\u0020users\u0020to\u0020apply\u0020for\u0020membership",
+            "summary": "Creates\u0020a\u0020form\u0020for\u0020new\u0020users\u0020to\u0020apply\u0020for\u0020membership.",
             "url": "classes/SignUpsBase.html#method_create_new_member_form"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003Acreate_lookup_member_table\u0028\u0029",
             "name": "create_lookup_member_table",
-            "summary": "Create\u0020a\u0020member\u0020search\u0020box.",
+            "summary": "Create\u0020a\u0020member\u0020search\u0020box\u0020used\u0020in\u0020administrative\u0020pages.",
             "url": "classes/SignUpsBase.html#method_create_lookup_member_table"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003Acreate_user_table\u0028\u0029",
             "name": "create_user_table",
-            "summary": "Creates\u0020a\u0020section\u0020of\u0020HTML\u0020for\u0020the\u0020user\u0020to\u0020identify\u0020themselves.",
+            "summary": "Creates\u0020a\u0020section\u0020of\u0020HTML\u0020for\u0020the\u0020user\u0020to\u0020identify\u0020themselves\u0020using\u0020their\u0020badge\u0020number.",
             "url": "classes/SignUpsBase.html#method_create_user_table"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003Acreate_rolling_session\u0028\u0029",
@@ -738,22 +743,22 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003Acreate_meeting_exceptions\u0028\u0029",
             "name": "create_meeting_exceptions",
-            "summary": "Create_meeting_exceptions",
+            "summary": "Retrieves\u0020a\u0020list\u0020of\u0020meeting\u0020exceptions\u0020between\u0020a\u0020start\u0020and\u0020end\u0020date.",
             "url": "classes/SignUpsBase.html#method_create_meeting_exceptions"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003Acreate_rolling_session_select_form2\u0028\u0029",
             "name": "create_rolling_session_select_form2",
-            "summary": "Creates\u0020a\u0020form\u0020that\u0020displays\u0020the\u0020rolling\u0020sessions\u0020along\u0020with\u0020their\u0020attenees",
+            "summary": "Creates\u0020a\u0020form\u0020that\u0020displays\u0020the\u0020rolling\u0020sessions\u0020along\u0020with\u0020their\u0020attendees.",
             "url": "classes/SignUpsBase.html#method_create_rolling_session_select_form2"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003Aadd_remove_chk\u0028\u0029",
             "name": "add_remove_chk",
-            "summary": "Determins\u0020if\u0020the\u0020remove\u0020checkbox\u0020should\u0020be\u0020added.",
+            "summary": "Determines\u0020if\u0020the\u0020remove\u0020checkbox\u0020should\u0020be\u0020added.",
             "url": "classes/SignUpsBase.html#method_add_remove_chk"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003Aadd_attendee_rolling\u0028\u0029",
             "name": "add_attendee_rolling",
-            "summary": "Add\u0020attendee\u0020for\u0020the\u0020selected\u0020spots",
+            "summary": "Add\u0020attendee\u0020for\u0020the\u0020selected\u0020spots.",
             "url": "classes/SignUpsBase.html#method_add_attendee_rolling"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003Aload_template_selection\u0028\u0029",
@@ -773,7 +778,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003Aadd_remove_from_calendar\u0028\u0029",
             "name": "add_remove_from_calendar",
-            "summary": "Removes\u0020items\u0020from\u0020the\u0020calendar\u0020in\u0020respose\u0020to\u0020removing\u0020Admin\u0020Approved",
+            "summary": "Removes\u0020items\u0020from\u0020the\u0020calendar\u0020in\u0020response\u0020to\u0020removing\u0020admin\u0020approval\u0020from\u0020a\u0020signup.",
             "url": "classes/SignUpsBase.html#method_add_remove_from_calendar"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003Aupdate_calendar\u0028\u0029",
@@ -798,7 +803,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003ASIGNUPS_TABLE",
             "name": "SIGNUPS_TABLE",
-            "summary": "Database\u0020classes\u0020table.",
+            "summary": "Database\u0020signups\u0020table.",
             "url": "classes/SignUpsBase.html#constant_SIGNUPS_TABLE"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003ASESSIONS_TABLE",
@@ -818,7 +823,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003AROLLING_EXCEPTIONS_TABLE",
             "name": "ROLLING_EXCEPTIONS_TABLE",
-            "summary": "Date\u0020and\u0020time\u0020exception\u0020for\u0020rolling\u0020signups.\u0020Shop\u0020closures.",
+            "summary": "Date\u0020and\u0020time\u0020exception\u0020for\u0020rolling\u0020signups.\u0020e.g.\u0020Shop\u0020closures.",
             "url": "classes/SignUpsBase.html#constant_ROLLING_EXCEPTIONS_TABLE"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003APAYMENTS_TABLE",
@@ -828,7 +833,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003ASTRIPE_TABLE",
             "name": "STRIPE_TABLE",
-            "summary": "Stripe\u0020table.",
+            "summary": "Stripe\u0020settings\u0020table.",
             "url": "classes/SignUpsBase.html#constant_STRIPE_TABLE"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003ADESCRIPTIONS_TABLE",
@@ -838,12 +843,12 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003ASIGNUP_TEMPLATE_TABLE",
             "name": "SIGNUP_TEMPLATE_TABLE",
-            "summary": "Signup\u0020template\u0020table.",
+            "summary": "Rolling\u0020signup\u0020template\u0020table.",
             "url": "classes/SignUpsBase.html#constant_SIGNUP_TEMPLATE_TABLE"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003ASIGNUP_TEMPLATE_ITEM_TABLE",
             "name": "SIGNUP_TEMPLATE_ITEM_TABLE",
-            "summary": "Signup\u0020template\u0020item\u0020table.",
+            "summary": "Rolling\u0020signup\u0020template\u0020item\u0020table.",
             "url": "classes/SignUpsBase.html#constant_SIGNUP_TEMPLATE_ITEM_TABLE"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003ASIGNUP_CATEGORY_TABLE",
@@ -858,12 +863,12 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003ATEXT_TABLE",
             "name": "TEXT_TABLE",
-            "summary": "Spider\u0020Calendar\u0020Event\u0020table.",
+            "summary": "Data\u0020about\u0020received\u0020text\u0020messages.",
             "url": "classes/SignUpsBase.html#constant_TEXT_TABLE"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003AMEMBERS_TABLE",
             "name": "MEMBERS_TABLE",
-            "summary": "Machine\u0020permissions\u0020table.",
+            "summary": "Members\u0020table.",
             "url": "classes/SignUpsBase.html#constant_MEMBERS_TABLE"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003AMACHINE_PERMISSIONS_TABLE",
@@ -878,17 +883,17 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003AINSTRUCTORS_TABLE",
             "name": "INSTRUCTORS_TABLE",
-            "summary": "Unsubscribe\u0020table.",
+            "summary": "Instructors\u0020table.",
             "url": "classes/SignUpsBase.html#constant_INSTRUCTORS_TABLE"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003ASESSION_INSTRUCTORS_TABLE",
             "name": "SESSION_INSTRUCTORS_TABLE",
-            "summary": "Unsubscribe\u0020table.",
+            "summary": "Session\u0020instructors\u0020table.",
             "url": "classes/SignUpsBase.html#constant_SESSION_INSTRUCTORS_TABLE"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003ANEW_MEMBER_TABLE",
             "name": "NEW_MEMBER_TABLE",
-            "summary": "New\u0020members\u0020are\u0020held\u0020here\u0020until\u0020they\u0020complete\u0020orientation.",
+            "summary": "New\u0020members\u0020table.",
             "url": "classes/SignUpsBase.html#constant_NEW_MEMBER_TABLE"
         },                {
             "fqsen": "\\SignUpsBase\u003A\u003ALOG_TABLE",
@@ -938,7 +943,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Asignup_settings_page\u0028\u0029",
             "name": "signup_settings_page",
-            "summary": "The\u0020main\u0020function\u0020of\u0020the\u0020Plugin.",
+            "summary": "The\u0020main\u0020function\u0020for\u0020the\u0020administration\u0020side\u0020of\u0020the\u0020Plugin.",
             "url": "classes/SignupSettings.html#method_signup_settings_page"
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Aedit_class_move\u0028\u0029",
@@ -953,12 +958,12 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Asubmit_session\u0028\u0029",
             "name": "submit_session",
-            "summary": "Submit\u0020session\u0020to\u0020databse.",
+            "summary": "Submit\u0020session\u0020to\u0020database.",
             "url": "classes/SignupSettings.html#method_submit_session"
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Aedit_class\u0028\u0029",
             "name": "edit_class",
-            "summary": "Edit\u0020a\u0020class.",
+            "summary": "Aggregates\u0020the\u0020data\u0020needed\u0020to\u0020edit\u0020a\u0020class.",
             "url": "classes/SignupSettings.html#method_edit_class"
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Aconfirm_class_delete\u0028\u0029",
@@ -968,22 +973,22 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Adelete_class\u0028\u0029",
             "name": "delete_class",
-            "summary": "Delete\u0020class\u0020and\u0020sessions.",
+            "summary": "Delete\u0020class\u0020and\u0020it\u0027s\u0020sessions.",
             "url": "classes/SignupSettings.html#method_delete_class"
         },                {
-            "fqsen": "\\SignupSettings\u003A\u003Aadd_new_session_form\u0028\u0029",
-            "name": "add_new_session_form",
-            "summary": "Add\u0020a\u0020new\u0020session\u0020to\u0020a\u0020class.",
-            "url": "classes/SignupSettings.html#method_add_new_session_form"
+            "fqsen": "\\SignupSettings\u003A\u003Aadd_new_session\u0028\u0029",
+            "name": "add_new_session",
+            "summary": "Aggregates\u0020the\u0020data\u0020needed\u0020to\u0020create\u0020the\u0020form\u0020for\u0020adding\u0020a\u0020new\u0020session.",
+            "url": "classes/SignupSettings.html#method_add_new_session"
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Aadd_session_slots\u0028\u0029",
             "name": "add_session_slots",
-            "summary": "Adds\u0020slots\u0020for\u0020a\u0020session",
+            "summary": "Adds\u0020slots\u0020to\u0020the\u0020Create\u0020Session\u0020Form\u0020for\u0020review\u0020before\u0020actually\u0020creating\u0020the\u0020slots.",
             "url": "classes/SignupSettings.html#method_add_session_slots"
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Aedit_session\u0028\u0029",
             "name": "edit_session",
-            "summary": "Edit\u0020a\u0020session\u0020of\u0020a\u0020class.",
+            "summary": "Aggregates\u0020the\u0020data\u0020to\u0020edit\u0020a\u0020single\u0020session.",
             "url": "classes/SignupSettings.html#method_edit_session"
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Adelete_session\u0028\u0029",
@@ -1013,22 +1018,22 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Aload_signup_selection\u0028\u0029",
             "name": "load_signup_selection",
-            "summary": "Load\u0020the\u0020class\u0020selection.",
+            "summary": "This\u0020function\u0020aggregates\u0020the\u0020data\u0020to\u0020create\u0020the\u0020Admin\u0020landing\u0020page.",
             "url": "classes/SignupSettings.html#method_load_signup_selection"
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Aload_session_selection\u0028\u0029",
             "name": "load_session_selection",
-            "summary": "Load\u0020the\u0020session\u0020selection\u0020form.\u0020The\u0020session\u0020belong\u0020to\u0020one\u0020class.",
+            "summary": "Aggregates\u0020the\u0020data\u0020used\u0020to\u0020load\u0020the\u0020session\u0020selection\u0020form.",
             "url": "classes/SignupSettings.html#method_load_session_selection"
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Acreate_attendee_select_form\u0028\u0029",
             "name": "create_attendee_select_form",
-            "summary": "Create_attendee_select_form.",
+            "summary": "Helper\u0020function\u0020to\u0020create\u0020the\u0020attendee\u0020select\u0020form.",
             "url": "classes/SignupSettings.html#method_create_attendee_select_form"
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Aupdate_message\u0028\u0029",
             "name": "update_message",
-            "summary": "Formats\u0020the\u0020message\u0020to\u0020display\u0020after\u0020an\u0020upate\u0020to\u0020the\u0020DB\u0020has\u0020been\u0020made.",
+            "summary": "Formats\u0020the\u0020message\u0020to\u0020display\u0020after\u0020an\u0020update\u0020to\u0020the\u0020DB\u0020has\u0020been\u0020made.",
             "url": "classes/SignupSettings.html#method_update_message"
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Acreate_signup_select_form\u0028\u0029",
@@ -1038,7 +1043,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Acreate_session_select_form\u0028\u0029",
             "name": "create_session_select_form",
-            "summary": "Creates\u0020a\u0020form\u0020that\u0020displays\u0020the\u0020sessions\u0020along\u0020with\u0020their\u0020attenees",
+            "summary": "Creates\u0020a\u0020form\u0020that\u0020displays\u0020the\u0020sessions\u0020along\u0020with\u0020their\u0020attendees.",
             "url": "classes/SignupSettings.html#method_create_session_select_form"
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Acreate_signup_form\u0028\u0029",
@@ -1053,12 +1058,12 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Aload_create_class_form\u0028\u0029",
             "name": "load_create_class_form",
-            "summary": "Load\u0020the\u0020form\u0020to\u0020create\u0020class\u0020descriptions.",
+            "summary": "Load\u0020the\u0020form\u0020to\u0020create\u0020a\u0020class.",
             "url": "classes/SignupSettings.html#method_load_create_class_form"
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Asubmit_new_class\u0028\u0029",
             "name": "submit_new_class",
-            "summary": "Submit\u0020the\u0020description\u0020to\u0020the\u0020database.",
+            "summary": "Submit\u0020the\u0020new\u0020class\u0020to\u0020the\u0020database.",
             "url": "classes/SignupSettings.html#method_submit_new_class"
         },                {
             "fqsen": "\\SignupSettings\u003A\u003Aget_day_of_month\u0028\u0029",
@@ -1218,7 +1223,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\StripePayments\u003A\u003Acreate_product\u0028\u0029",
             "name": "create_product",
-            "summary": "Update\u0020the\u0020price\u0020for\u0020a\u0020signup.",
+            "summary": "Create\u0020the\u0020product\u0020id\u0020and\u0020price\u0020id\u0020for\u0020a\u0020signup.",
             "url": "classes/StripePayments.html#method_create_product"
         },                {
             "fqsen": "\\StripePayments\u003A\u003A\u0024stripe_api_secret",

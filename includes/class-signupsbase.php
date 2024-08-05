@@ -12,153 +12,192 @@
 
 /**
  * SignUpsBase is the base class for most other classes. It contains the strings
- * for accessing the databaase plus code that is used in multiple places. It is used on
+ * for accessing the database plus code that is used in multiple places. It is used on
  * both the user and admin side of the code.
  */
 class SignUpsBase {
 
 	/**
 	 * Database attendees table.
+	 * Attendees belong to a session for a class or event.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const ATTENDEES_TABLE = 'wp_scw_attendees';
 
 	/**
-	 * Database classes table.
+	 * Database signups table. 
+	 * Signups include both rolling signups and class signups.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const SIGNUPS_TABLE = 'wp_scw_signups';
 
 	/**
 	 * Database sessions table.
+	 * Sessions belong to a class or event signup.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const SESSIONS_TABLE = 'wp_scw_sessions';
 
 	/**
 	 * Database rolling attendees table.
+	 * Rolling attendees belong to a rolling signup such as monitors.
+	 * Rolling signups do not have sessions so the attendees are directly 
+	 * associated with a signup slot. A slot is identified by a date and time.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const ATTENDEES_ROLLING_TABLE = 'wp_scw_rolling_attendees';
 
 	/**
 	 * Rolling signup table.
+	 * This is the data used to define a rolling signup.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const ROLLING_TABLE = 'wp_scw_rolling';
 
 	/**
-	 * Date and time exception for rolling signups. Shop closures.
+	 * Date and time exception for rolling signups. e.g. Shop closures.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const ROLLING_EXCEPTIONS_TABLE = 'wp_scw_rolling_exceptions';
 
 	/**
 	 * Payments table.
+	 * This is a record of payments received.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const PAYMENTS_TABLE = 'wp_scw_payments';
 
 	/**
-	 * Stripe table.
-	 *
-	 * @var mixed
+	 * Stripe settings table.
+	 * This table has evolved into a settings table.
+	 * It started as the settings for the Stripe.com api credentials
+	 * but now holds additional data. Should be converted to a key/value pair table.
+	 * 
+	 * @var string
 	 */
 	protected const STRIPE_TABLE = 'wp_scw_stripe';
 
 	/**
 	 * Signup descriptions table.
+	 * Descriptions have three parts. Descriptions, Calendar Description and Instructions.
+	 * All three are held in this table.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const DESCRIPTIONS_TABLE = 'wp_scw_signup_descriptions';
 
 	/**
-	 * Signup template table.
+	 * Rolling signup template table.
+	 * To have a rolling signup such as Monitors requires a template to describe its behavior.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const SIGNUP_TEMPLATE_TABLE = 'wp_scw_template';
 
 	/**
-	 * Signup template item table.
+	 * Rolling signup template item table.
+	 * A template may have many template items and they are held in this table.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const SIGNUP_TEMPLATE_ITEM_TABLE = 'wp_scw_template_item';
 
 	/**
 	 * Signup category table.
+	 * Two examples of categories are Lathe, Ring Bowl and CNC.
+	 * These are the labels that appear on the member landing page
+	 * and each signup is assigned a category.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const SIGNUP_CATEGORY_TABLE = 'wp_scw_signup_categories';
 
 	/**
 	 * Spider Calendar Event table.
+	 * The Signups Plugin uses the Spider Calendar Plugin to help 
+	 * members visualize when signups are scheduled.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const SPIDER_CALENDAR_EVENT_TABLE = 'wp_spidercalendar_event';
 
 	/**
-	 * Spider Calendar Event table.
+	 * Data about received text messages.
+	 * This has nothing to do with signups but a endpoint was needed to record
+	 * text messages that were replies to texts sent via Twillo.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const TEXT_TABLE = 'wp_scw_text_messages';
 
 	/**
-	 * Machine permissions table.
+	 * Members table.
+	 * The list of currently active members of the woodshop.
+	 * It is updated nightly via one of the RestFul APIs. 
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const MEMBERS_TABLE = 'wp_scw_members';
 
 	/**
 	 * Machine permissions table.
+	 * Members can have multiple permissions. This table holds the list
+	 * of permissions for each member.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const MACHINE_PERMISSIONS_TABLE = 'wp_scw_machine_permissions';
 
 	/**
 	 * Unsubscribe table.
+	 * When a member unsubscribes from the classes or monitor emails their
+	 * information goes into this table. During the night the list is retrieved
+	 * via a RestFul API. Then the data is used on the server to update the members
+	 * contact information.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const UNSUBSCRIBE_TABLE = 'wp_scw_unsubscribe';
 
 	/**
-	 * Unsubscribe table.
+	 * Instructors table.
+	 * Instructors can teach multiple classes and classes can have multiple instructors.
+	 * This table holds the list of instructors.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const INSTRUCTORS_TABLE = 'wp_scw_instructors';
 
 	/**
-	 * Unsubscribe table.
+	 * Session instructors table.
+	 * While classes can have multiple instructors, a subset of them are
+	 * selected to teach each individual session. They are held in this table.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const SESSION_INSTRUCTORS_TABLE = 'wp_scw_session_instructors';
 
 	/**
+	 * New members table.
 	 * New members are held here until they complete orientation.
+	 * After orientation they added to the members table on the server.
+	 * They are then pushed to the server. 
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const NEW_MEMBER_TABLE = 'wp_scw_new_member';
 
 	/**
 	 * Log table.
+	 * Although not heavily used, there are a set of logging functions
+	 * that write to this table. This is mostly used for debugging purposes.
 	 *
 	 * @var mixed
 	 */
@@ -167,7 +206,7 @@ class SignUpsBase {
 	/**
 	 * Format DateTime as 2020-08-13 6:00 am.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const DATETIME_FORMAT = 'Y-m-d g:i A';
 
@@ -175,7 +214,7 @@ class SignUpsBase {
 	 * Format DateTime as 2020-08-13T6:00 am.
 	 * Acceptable for HTML Date Input
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const DATETIME_FORMAT_INPUT = 'Y-m-d\TH:i';
 
@@ -183,35 +222,35 @@ class SignUpsBase {
 	 * Format Date as 2020-08-13.
 	 * Acceptable for HTML Date Input
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const DATE_FORMAT3 = 'Y-m-d';
 
 	/**
 	 * Format Date as Mon 08-13-2020.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const DATE_FORMAT = 'D m-d-Y';
 
 	/**
 	 * Format Date as 08-13-2020.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const DATE_FORMAT2 = 'm-d-Y';
 
 	/**
 	 * Format Date as 2020-08-13.
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	protected const TIME_FORMAT = 'g:iA';
 
 	/**
 	 * Date timezone.
 	 *
-	 * @var object
+	 * @var string
 	 */
 	protected $date_time_zone;
 
@@ -225,7 +264,7 @@ class SignUpsBase {
 	}
 
 	/**
-	 * Write_log.
+	 * Writes a string to the log table in the database.
 	 *
 	 * @param  mixed $log_text The string to write to the log.
 	 * @return void
@@ -235,6 +274,7 @@ class SignUpsBase {
 		$log_data['logs_text'] = $log_text;
 		$wpdb->insert( self::LOG_TABLE, $log_data );
 	}
+
 	/**
 	 * Formats a string to be passed back in form data.
 	 *
@@ -268,7 +308,7 @@ class SignUpsBase {
 	}
 
 	/**
-	 * Format a date
+	 * Format a date string from a DateTime object.
 	 *
 	 * @param mixed $formatted_time Formatted as 24 hour time.
 	 * @return string Formatted date only.
@@ -277,7 +317,16 @@ class SignUpsBase {
 		$dt = new DateTime( $formatted_time );
 		return $dt->format( 'Y-m-d' );
 	}
-
+	
+	/**
+	 * When an administrator makes changes to a signup the change will
+	 * not appear immediately unless you clear the cache. That is, the cache
+	 * holds on to the old data. You can only clear the cache at plugin load/reload.
+	 * Upon load the plugin looks at the entry to decide if the cache needs cleared.
+	 * 
+	 * @param  int $value
+	 * @return void
+	 */
 	protected function set_clear_cache( $value ) {
 		global $wpdb;
 		$where = array( 'stripe_api_key' => 'cache');
@@ -286,7 +335,8 @@ class SignUpsBase {
 	}
 
 	/**
-	 * Helper function for registering routes.
+	 * Helper function for registering RestFul API routes.
+	 * The routes are the URL used to call the API.
 	 *
 	 * @param  string $namespace The namespace.
 	 * @param  string $route End of the route.
@@ -313,7 +363,7 @@ class SignUpsBase {
 	}
 
 	/**
-	 * Return html description for a signup.
+	 * Returns the HTML description for a signup.
 	 *
 	 * @param int $signup_id The signup id.
 	 * @return array
@@ -339,7 +389,9 @@ class SignUpsBase {
 	}
 
 	/**
-	 * Is this a rolling signup
+	 * Is this a rolling signup is the question this function answers.
+	 * The function simply looks to see if a rolling template is assigned
+	 * to the signup.
 	 *
 	 * @param  mixed $signup_id The ID of the signup.
 	 * @return boolean True for rolling, else false.
@@ -361,7 +413,9 @@ class SignUpsBase {
 	}
 
 	/**
-	 * Creates a form for new users to apply for membership
+	 * Creates a form for new users to apply for membership.
+	 * New member don't exist in our database so we need to collect their
+	 * information and this is the form for doing that.
 	 *
 	 * @return void
 	 */
@@ -439,7 +493,10 @@ class SignUpsBase {
 	}
 
 	/**
-	 * Create a member search box.
+	 * Create a member search box used in administrative pages.
+	 * An admin often needs to find a member by name. This form 
+	 * allows for searching on part of a name, email address or phone number.
+	 * 
 	 *
 	 * @param  mixed $center Should the control be centered.
 	 * @param  mixed $badge Badge number.
@@ -484,7 +541,12 @@ class SignUpsBase {
 	}
 
 	/**
-	 * Creates a section of HTML for the user to identify themselves.
+	 * Creates a section of HTML for the user to identify themselves using their badge number.
+	 * A badge number is the only allowed input.
+	 * This is used at the top of all member signups where a member must
+	 * identify themselves before signing up. By retrieving a
+	 * members data from the database we can avoid having member input
+	 * incorrect data about themselves.
 	 *
 	 * @param string $user_group The required group for this signup. Normally "member".
 	 * @param string $signup_id The id for the signup.
@@ -650,9 +712,9 @@ class SignUpsBase {
 	/**
 	 * Creates a rolling signup based on a template
 	 *
-	 * @param  mixed  $rolling_signup_id The id for the signup.
-	 * @param  string $secret A secret key used to indentify a user.
-	 * @param  mixed  $admin Set to true if an admin is using this function.
+	 * @param  int    $rolling_signup_id The id for the signup.
+	 * @param  string $secret A secret key used to identify a user. Obsolete.
+	 * @param  bool   $admin Set to true if an admin is using this function.
 	 * @param  int    $rolling_days The number of rolling days to create.
 	 *
 	 * @return void
@@ -815,7 +877,7 @@ class SignUpsBase {
 	}
 
 	/**
-	 * Create_meeting_exceptions
+	 * Retrieves a list of meeting exceptions between a start and end date.
 	 *
 	 * @param  mixed $start_date Date to start creating from.
 	 * @param  mixed $end_date Date to end creating exceptions.
@@ -849,7 +911,16 @@ class SignUpsBase {
 	}
 
 	/**
-	 * Creates a form that displays the rolling sessions along with their attenees
+	 * Creates a form that displays the rolling sessions along with their attendees.
+	 * This is a long function and studying the code is the only way to fully understand it.
+	 * It allows members to select slots and also remove themselves from a previously selected slot.
+	 * Some of the signups, such as monitors are not allowed to remove themselves within 2 days of their
+	 * duty time. By default the user can see the default number of days that the signup specifies. Usually 
+	 * 30 days. There is a drop down where 60 and 90 days can be selected. The dropdown also allows to see
+	 * the past 30 days to look at the history.
+	 * 
+	 * There is a lot of logic intertwined with the HTML that is being generated which makes this a hard
+	 * function to follow. Good luck.
 	 *
 	 * @param  string $signup_name The class name.
 	 * @param  array  $attendees The list of attendees for the class.
@@ -860,7 +931,7 @@ class SignUpsBase {
 	 * @param  bool   $admin This being accessed by an administrator.
 	 * @param  string $secret Unique id for a member.
 	 * @param  string $description Description of the signup.
-	 * @param  mixed  $template_items2 The template items for tempate2. Used when a template is changed at a predetermined date.
+	 * @param  mixed  $template_items2 The template items for template2. Used when a template is changed at a predetermined date.
 	 * @param  mixed  $rolling_days Overrides the standard number of rolling days.
 	 * @return void
 	 */
@@ -1189,7 +1260,8 @@ class SignUpsBase {
 	}
 
 	/**
-	 * Determins if the remove checkbox should be added.
+	 * Determines if the remove checkbox should be added.
+	 * This is a helper function for creating rolling forms.
 	 *
 	 * @param  mixed $start_date The date of the signup.
 	 * @param  mixed $user_badge The users badge.
@@ -1207,9 +1279,12 @@ class SignUpsBase {
 	}
 
 	/**
-	 * Add attendee for the selected spots
+	 * Add attendee for the selected spots.
+	 * This is a helper function used by members and admins.
+	 * Members can moved themselves and admins often need to move
+	 * a member.
 	 *
-	 * @param  mixed $post Data from the form.
+	 * @param  array|mixed $post Data from the form.
 	 * @return void
 	 */
 	protected function add_attendee_rolling( $post ) {
@@ -1507,6 +1582,8 @@ class SignUpsBase {
 
 	/**
 	 * Creates the description, short description and instructions input block.
+	 * JS is used to convert the textareas to the HTML editor, CKEditor.
+	 * See SignUps.js.
 	 *
 	 * @param mixed $description_object Object that holds the description, instructions and calendar description.
 	 * @return void
@@ -1548,11 +1625,13 @@ class SignUpsBase {
 	}
 
 	/**
-	 * Removes items from the calendar in respose to removing Admin Approved
+	 * Removes items from the calendar in response to removing admin approval from a signup.
+	 * The calendar is another plugin called the Spider Calendar. We are just inputting rows
+	 * into their database.
 	 *
-	 * @param  mixed $signup_id The signup id that owns the sessions.
-	 * @param  mixed $signup_name The sighup name.
-	 * @param  mixed $add To add or remove from the calendar.
+	 * @param  int $signup_id The signup id that owns the sessions.
+	 * @param  string $signup_name The sighup name.
+	 * @param  bool $add To add or remove from the calendar.
 	 * @return void
 	 */
 	protected function add_remove_from_calendar( $signup_id, $signup_name, $add ) {

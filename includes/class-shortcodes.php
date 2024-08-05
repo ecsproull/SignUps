@@ -9,14 +9,26 @@
 ob_start();
 
  /**
-  * ShortCodes is the main class for generating the user forms and pages that the user can see.
+  * The ShortCodes class is the main class for generating the web pages that the user can see.
+  * The default function create_select_signup creates the landing page for the plugin.
   */
  class ShortCodes extends SignUpsBase {
 
 	/**
-	 * Add the select class shortcode.
+	 * This is the entry function for the user side of the SignUp plugin.
+	 * This function is also called in response to a Form's submit button. The Submit button 
+	 * for each form dictates which helper function is called to process the data that is input
+	 * on a Form. For example when a users selects a class from the landing page the item selected
+	 * is a actually a Submit button. That is received here and then passed to the helper function
+	 * called  create_description_form that creates the description page for the class.
+	 * 
+	 * This process of generating a Form, receiving user input and then navigating to the next Form
+	 * to process that input is the basis of how the plugin works.
+	 * 
+	 * An understanding of HTML forms is necessary to understanding this code. While the code is
+	 * written PHP it generates HTML.
 	 *
-	 * @param  mixed $admin_view When true it shows all signups whether they are approved or not.
+	 * @param  bool $admin_view When true it shows all signups whether they are approved or not.
 	 * @return void
 	 */
 	public function user_signup( $admin_view = false ) {
@@ -75,7 +87,11 @@ ob_start();
 	}
 
 	/**
-	 * Send the email.
+	 * The information to be sent in an email is collected on a Form. That Form
+	 * is created in the create_email_form function. Once the users fills out the Form
+	 * and clicks the Send Email button, this function is called to send the email.
+	 * 
+	 * @see ShortCodes::create_email_form()
 	 *
 	 * @param mixed $post Data to use to send the mail.
 	 * @return void
@@ -106,9 +122,12 @@ ob_start();
 	}
 
 	/**
-	 * Unsubscribe from the monitor nag mailer. This adds the key to be
-	 * unsubscribed to the database for retrieval by the nag mailer.
+	 * Called in response to a click on the Unsubscribe link in a generated monitor or class email.
+	 * The request is stored in the unsubscribe table where the server can retrieve it and
+	 * perform the unsubscribe on the server.
 	 *
+	 * @see SignUpsBase::UNSUBSCRIBE_TABLE
+	 * 
 	 * @param  mixed $key The key that identifies the member.
 	 * @param  mixed $badge The member's badge number.
 	 * @param  mixed $mail_group The email group. Monitor or Class but could be expanded in the future.
@@ -169,6 +188,8 @@ ob_start();
 
 	/**
 	 * Creates a section of HTML for a new user to identify themselves.
+	 * A new user, typically a SCW resident signing up to be a member,
+	 * would utilize this form to input their information.
 	 *
 	 * @return void
 	 */
@@ -223,8 +244,10 @@ ob_start();
 	}
 
 	/**
-	 * Retrieves the available signups  and
-	 * creates a form for the user to select a signup to add himself to.
+	 * Retrieves the the data required for the create_select_signup_form function to populate
+	 * the SignUps landing page. 
+	 * 
+	 * @see ShortCodes::create_select_signup_form()
 	 *
 	 * @param boolean $admin_view Set to true when this  is displayed from the administrator view.
 	 *
@@ -274,10 +297,14 @@ ob_start();
 	}
 
 	/**
-	 * Creates the form to sign up.
+	 * Creates the signup form for an individual event or class.
+	 * This function aggregates all of the data needed to display the signup form.
+	 * The create_session_select_form function actually displays the form to sign up.
+	 * 
+	 * @see ShortCodes::create_session_select_form()
 	 *
 	 * @param string $signup_id The id of the signup to create a form for.
-	 * @param string $secret A members secret key used to indentify the member.
+	 * @param string $secret A members secret key used to identify the member. (Obsolete)
 	 * @return void
 	 */
 	private function create_signup_form( $signup_id, $secret = null ) {
@@ -390,9 +417,12 @@ ob_start();
 	}
 
 	/**
-	 * Move a paid attendee to another class
+	 * Move a paid attendee to another session for the class.
+	 * Members can only move themselves with the sessions of a class.
+	 * They cannot move themselves from one class to another class
+	 * because the individual classes, generally, have different prices.
 	 *
-	 * @param  mixed $post Data from the form.
+	 * @param  mixed $post Data from the form where the move is requested.
 	 * @return void
 	 */
 	private function move_attendee_class( $post ) {
@@ -464,7 +494,15 @@ ob_start();
 	}
 
 	/**
-	 * Add attendee to a class
+	 * Add attendee to a session of a class in response to the member selecting the session to attend.
+	 * This function takes care all the bookwork involved, including collecting the money.
+	 * 
+	 * If the $post array contains a remove_me field, that is handled at the top of the 
+	 * function and then the function returns. This is the case where a member removes 
+	 * themselves from a signup. This will only happens when the signup does not involve money.
+	 * 
+	 * @see ShortCodes::create_session_select_form()
+	 * @see StripePayments::collect_money()
 	 *
 	 * @param  mixed $post Data from the form.
 	 * @return void
@@ -692,7 +730,9 @@ ob_start();
 
 
 	/**
-	 * Creates the form for selecting a signup to add to.
+	 * Creates the form for selecting a signup. This is the landing page for members.
+	 * 
+	 * @see ShortCodes::create_select_signup()
 	 *
 	 * @param  mixed $signups The results of a DB query for available classes.
 	 * @param  mixed $categories the list of categories.
@@ -746,7 +786,13 @@ ob_start();
 	}
 
 	/**
-	 * Creates a form that displays the sessions along with their attendees
+	 * Creates a form that displays the sessions along with their attendees.
+	 * This is the form where a member can select a session to attend.
+	 * Once a session has been selected the information from this form
+	 * will be passed to the add_attendee_class function. Although this form
+	 * can be used to sign up for an event, it is usually used to signup for classes.
+	 * 
+	 * @see ShortCodes::add_attendee_class()
 	 *
 	 * @param  string $signup_name The class name.
 	 * @param  array  $sessions The list of sessions for the class.
@@ -755,8 +801,8 @@ ob_start();
 	 * @param  int    $cost The cost of the signup in dollars.
 	 * @param  string $signup_id The signup id.
 	 * @param  string $user_group The group that defines who can signup.  CNC, Member...etc.
-	 * @param string $signup_email The email for the contact person for this signup.
-	 * @param string $signup_contact_name The name for the contact person for this signup.
+	 * @param  string $signup_email The email for the contact person for this signup.
+	 * @param  string $signup_contact_name The name for the contact person for this signup.
 	 * @return void
 	 */
 	private function create_session_select_form(
@@ -944,10 +990,22 @@ ob_start();
 	}
 
 	/**
-	 * Creates a signup description block
+	 * Creates a signup description block.
+	 * Once a user selected a class from the landing page they progress to this
+	 * page where a detailed description is displayed. It is here that the have the option
+	 * continue or cancel the signup process.
+	 * 
+	 * It should be noted that this page is made up of a aggregation of several bits of data.
+	 * Cost, Schedule, Contact and any preclass instructions are all part of this page. The
+	 * Contacts is a link that a user can use to ask questions about the class.
+	 * 
+	 * Clicking Continue transfers the data to the create_signup_form function which
+	 * gets the data together so the session selection page can be shown.
+	 * 
+	 * @see ShortCodes::create_signup_form()  
 	 *
 	 * @param  mixed  $signup_id Id of the signup.
-	 * @param  string $secret Members secret used to indenitfy the mamber.
+	 * @param  string $secret Members secret used to identify the member. (obsolete)
 	 * @return void
 	 */
 	private function create_description_form( $signup_id, $secret = null ) {
@@ -1102,7 +1160,7 @@ ob_start();
 	}
 
 	/**
-	 * Create an email link that opens the email form with the proper parameters.
+	 * Creates an email link that opens the email form with the proper parameters.
 	 *
 	 * @param  mixed $contact_email The person being emailed.
 	 * @param  mixed $contact_name The name of the person being emailed.
@@ -1119,7 +1177,7 @@ ob_start();
 	}
 
 	/**
-	 * Create the form for sending the admin an email.
+	 * Creates the form for sending the an email.
 	 *
 	 * @param mixed   $post  Data from the calling form.
 	 * @param boolean $admin Set to true if this is called from the administrator side.
@@ -1204,21 +1262,6 @@ ob_start();
 			}
 			?>
 		</form>
-		<?php
-	}
-
-	/**
-	 * Create hidden fields for the user info.
-	 *
-	 * @return void
-	 */
-	private function create_hidden_user() {
-		?>
-		<input class="member-badge" type="hidden" name="badge_number">
-		<input class="member-first-name" type="hidden" name="firstname">
-		<input class="member-last-name" type="hidden" name="lastname">
-		<input class="member-phone" type="hidden" name="phone">
-		<input class="member-email" type="hidden" name="email">
 		<?php
 	}
 }

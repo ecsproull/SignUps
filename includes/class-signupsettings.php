@@ -12,16 +12,18 @@
 /**
  * Summary
  * Admin page for the signups plugin. Contains the functions for editing the signups.
+ * IMPORTANT: Everything in this class is called by an administrator and the term
+ * "user" will always be an administrator. 
  *
  * @package SignUps
  */
 class SignupSettings extends SignUpsBase {
 
 	/**
-	 * The main function of the Plugin.
-	 * This delegates all the real work to helper functions.
+	 * The main function for the administration side of the Plugin.
+	 * This delegates to work to helper functions.
 	 * Loading the class selection is the default.
-	 * All others are triggered by a form submission.
+	 * All other functions are triggered by a form submission.
 	 */
 	public function signup_settings_page() {
 		$post = wp_unslash( $_POST );
@@ -43,7 +45,7 @@ class SignupSettings extends SignUpsBase {
 			} elseif ( isset( $post['add_new_class'] ) ) {
 				$this->create_signup_form( new ClassItem( null ) );
 			} elseif ( isset( $post['add_new_session'] ) ) {
-				$this->add_new_session_form( $post );
+				$this->add_new_session( $post );
 			} elseif ( isset( $post['delete_attendees'] ) ) {
 				$this->delete_session_attendees( $post );
 			} elseif ( isset( $post['move_attendees'] ) ) {
@@ -144,9 +146,10 @@ class SignupSettings extends SignUpsBase {
 
 	/**
 	 * Submit class to database.
-	 * 
+	 * The function is only used for updating a signup once it 
+	 * has been edited.
 	 *
-	 * @param int $post The posted data from the form.
+	 * @param array $post The posted data from the edit form.
 	 */
 	private function submit_class( $post ) {
 		global $wpdb;
@@ -323,7 +326,12 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
-	 * Submit session to databse.
+	 * Submit session to database.
+	 * When a session has been edited this is the function that saves
+	 * it to the database.
+	 * 
+	 * When editing a session there is an option select the instructors
+	 * for the session. This function also links the selected instructors to the session.
 	 *
 	 * @param int $post The posted data from the form.
 	 */
@@ -494,7 +502,10 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
-	 * Edit a class.
+	 * Aggregates the data needed to edit a class.
+	 * It calls the create_signup_form with this data to display the edit.
+	 * 
+	 * @see SignupSettings::create_signup_form()
 	 *
 	 * @param int $post The posted data from the form.
 	 */
@@ -516,7 +527,7 @@ class SignupSettings extends SignUpsBase {
 	/**
 	 * Confirm a class deletion.
 	 *
-	 * @param int $post The posted data from the form.
+	 * @param array $post The posted data from the form.
 	 */
 	private function confirm_class_delete( $post ) {
 		global $wpdb;
@@ -571,9 +582,9 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
-	 * Delete class and sessions.
+	 * Delete class and it's sessions.
 	 *
-	 * @param int $post The posted data from the form.
+	 * @param array $post The posted data from the form.
 	 */
 	private function delete_class( $post ) {
 		global $wpdb;
@@ -614,11 +625,14 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
-	 * Add a new session to a class.
+	 * Aggregates the data needed to create the form for adding a new session.
+	 * The function create_session_form displays the form.
+	 * 
+	 * @see SignupSettings::create_session_form()
 	 *
-	 * @param int $post The posted data from the form.
+	 * @param array $post The posted data from the form.
 	 */
-	private function add_new_session_form( $post ) {
+	private function add_new_session( $post ) {
 		global $wpdb;
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
@@ -694,10 +708,15 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
-	 * Adds slots for a session
+	 * Adds slots to the Create Session Form for review before actually creating the slots.
+	 * Returns the users back to the Create Session Form with the newly created sessions.
+	 * 
+	 * TODO: That this could be better named. It isn't creating slots but rather it is creating sessions.
+	 * 
+	 * @see SignupSettings::create_session_form()
 	 *
 	 * @param  mixed $session_item The session being edited.
-	 * @param  mixed $signup_name The name of the signup.
+	 * @param  string $signup_name The name of the signup.
 	 * @return void
 	 */
 	private function add_session_slots( $session_item, $signup_name ) {
@@ -827,7 +846,10 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
-	 * Edit a session of a class.
+	 * Aggregates the data to edit a single session.
+	 * The create_session_form is called to create the form.
+	 * 
+	 * @see SignupSettings::create_session_form()
 	 *
 	 * @param int $post The posted data from the form.
 	 */
@@ -884,7 +906,7 @@ class SignupSettings extends SignUpsBase {
 	 * Delete a session of a class.
 	 *
 	 * @param int $post The posted data from the form.
-	 * @param int $repost This is being reposted.
+	 * @param int $repost This should return to the calling form.
 	 */
 	private function delete_session( $post, $repost = true ) {
 		global $wpdb;
@@ -941,6 +963,9 @@ class SignupSettings extends SignUpsBase {
 
 	/**
 	 * Add attendees to a class session.
+	 * This uses the create_attendee_select_form function to do the actual work.
+	 * 
+	 * @see SignupSettings::create_attendee_select_form()
 	 *
 	 * @param int $post The posted data from the form.
 	 */
@@ -971,7 +996,7 @@ class SignupSettings extends SignUpsBase {
 	/**
 	 * Submit attendees to a class session.
 	 *
-	 * @param int $post The posted data from the form.
+	 * @param array $post The posted data from the form.
 	 */
 	private function submit_session_attendees( $post ) {
 		global $wpdb;
@@ -1029,7 +1054,7 @@ class SignupSettings extends SignUpsBase {
 	/**
 	 * Delete attendees from a class session.
 	 *
-	 * @param int $post The posted data from the form.
+	 * @param array $post The posted data from the form.
 	 */
 	private function delete_session_attendees( $post ) {
 		global $wpdb;
@@ -1108,7 +1133,9 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
-	 * Load the class selection.
+	 * This function aggregates the data to create the Admin landing page.
+	 * 
+	 * @see SignupSettings::create_signup_select_form()
 	 */
 	private function load_signup_selection() {
 		global $wpdb;
@@ -1128,7 +1155,10 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
-	 * Load the session selection form. The session belong to one class.
+	 * Aggregates the data used to load the session selection form.
+	 * The sessions will belong to one class.
+	 * 
+	 * @see SignupSettings::create_session_select_form();
 	 *
 	 * @param int $post The posted data from the form.
 	 */
@@ -1231,10 +1261,13 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
-	 * Create_attendee_select_form.
+	 * Helper function to create the attendee select form.
+	 * Used when adding members to a signup. It can create a form for 
+	 * an existing member or creating a new member. The new member form is
+	 * used when adding person to the orientation class.
 	 *
-	 * @param mixed  $signup_name The name of the signup.
-	 * @param number $signup_id Signup Id.
+	 * @param string $signup_name The name of the signup.
+	 * @param int    $signup_id Signup Id.
 	 * @param array  $sessions An array fo sessions.
 	 * @return void
 	 */
@@ -1280,9 +1313,9 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
-	 * Formats the message to display after an upate to the DB has been made.
+	 * Formats the message to display after an update to the DB has been made.
 	 *
-	 * @param  mixed  $rows_updated How many rows were updated in the database.
+	 * @param  int    $rows_updated How many rows were updated in the database.
 	 * @param  string $last_error The last db error if it exists.
 	 * @param  string $what_was_updated What was updated, class or session.
 	 * @return void
@@ -1317,8 +1350,9 @@ class SignupSettings extends SignUpsBase {
 
 	/**
 	 * Create the form to select a class to update.
+	 * This is the landing page for administrators.
 	 *
-	 * @param  array $results The class results from teh DB to list on the form.
+	 * @param  array $results The class results from the DB to list on the form.
 	 * @return void
 	 */
 	private function create_signup_select_form( $results ) {
@@ -1423,14 +1457,16 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
-	 * Creates a form that displays the sessions along with their attenees
-	 *
+	 * Creates a form that displays the sessions along with their attendees.
+	 * This for allows administrators to perform various edits. Adding sessions
+	 * is one of the options. There is an Options menu for each individual session.
+	 * 
 	 * @param  string $signup_name The class name.
 	 * @param  array  $sessions The list of sessions for the class.
 	 * @param  array  $attendees The list of attendees for the class.
 	 * @param  int    $signup_id The ID of the class.
 	 * @param  array  $instructors An array of instructors for each session.
-	 * @param  string $instructions The instructions for this class.
+	 * @param  string $instructions The instructions for this class. Used to send email to session attendees.
 	 * @return void
 	 */
 	private function create_session_select_form( $signup_name, $sessions, $attendees, $signup_id, $instructors, $instructions ) {
@@ -1757,6 +1793,7 @@ class SignupSettings extends SignUpsBase {
 
 	/**
 	 * Creates a form used to create a class session.
+	 * This form also has the option add additional sessions and review them before submitting.
 	 *
 	 * @param class  $data Either an empty class or the data that represents the session being updated.
 	 * @param string $signup_name The name of the class the session belongs to.
@@ -1887,7 +1924,7 @@ class SignupSettings extends SignUpsBase {
 
 				</tr>
 				<tr>
-					<td colspan='2' class="text-center"><h2>When everthing above apears correct, then submit to the database.</h2></td>
+					<td colspan='2' class="text-center"><h2>When everything above appears correct, then submit to the database.</h2></td>
 					<td></td>
 				</tr>
 				<tr>
@@ -1907,7 +1944,12 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
-	 * Load the form to create class descriptions.
+	 * Load the form to create a class.
+	 * This function is for adding a new class and all the associated
+	 * data to publish the class. When it is done control is transferred to
+	 * the create_session_form to add sessions to the new class.
+	 * 
+	 * @see SignupSettings::create_session_form()
 	 *
 	 * @return void
 	 */
@@ -2097,7 +2139,9 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
-	 * Submit the description to the database.
+	 * Submit the new class to the database.
+	 * This function runs between creating the class and
+	 * adding the sessions. 
 	 *
 	 * @param  mixed $post Data posted from the create form.
 	 * @return void

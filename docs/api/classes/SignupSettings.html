@@ -64,7 +64,6 @@
             
     <section class="phpdocumentor-sidebar__category -reports">
         <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
-                <h3 class="phpdocumentor-sidebar__root-package"><a href="graphs/classes.html">Class Diagram</a></h3>
                 <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
@@ -108,7 +107,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">18</span>
+    <span class="phpdocumentor-element-found-in__line">20</span>
 
     </aside>
 
@@ -116,6 +115,9 @@
 Admin page for the signups plugin. Contains the functions for editing the signups.</p>
 
 
+    <section class="phpdocumentor-description"><p>IMPORTANT: Everything in this class is called by an administrator and the term
+&quot;user&quot; will always be an administrator.</p>
+</section>
 
 
 
@@ -202,7 +204,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
         &nbsp;= &#039;wp_scw_instructors&#039;                            </span>
 </dt>
-<dd>Unsubscribe table.</dd>
+<dd>Instructors table.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -constant -protected">
     <a class="" href="classes/SignUpsBase.html#constant_LOG_TABLE">LOG_TABLE</a>
@@ -223,14 +225,14 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
         &nbsp;= &#039;wp_scw_members&#039;                            </span>
 </dt>
-<dd>Machine permissions table.</dd>
+<dd>Members table.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -constant -protected">
     <a class="" href="classes/SignUpsBase.html#constant_NEW_MEMBER_TABLE">NEW_MEMBER_TABLE</a>
     <span>
         &nbsp;= &#039;wp_scw_new_member&#039;                            </span>
 </dt>
-<dd>New members are held here until they complete orientation.</dd>
+<dd>New members table.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -constant -protected">
     <a class="" href="classes/SignUpsBase.html#constant_PAYMENTS_TABLE">PAYMENTS_TABLE</a>
@@ -244,7 +246,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
         &nbsp;= &#039;wp_scw_rolling_exceptions&#039;                            </span>
 </dt>
-<dd>Date and time exception for rolling signups. Shop closures.</dd>
+<dd>Date and time exception for rolling signups. e.g. Shop closures.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -constant -protected">
     <a class="" href="classes/SignUpsBase.html#constant_ROLLING_TABLE">ROLLING_TABLE</a>
@@ -258,7 +260,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
         &nbsp;= &#039;wp_scw_session_instructors&#039;                            </span>
 </dt>
-<dd>Unsubscribe table.</dd>
+<dd>Session instructors table.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -constant -protected">
     <a class="" href="classes/SignUpsBase.html#constant_SESSIONS_TABLE">SESSIONS_TABLE</a>
@@ -279,21 +281,21 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
         &nbsp;= &#039;wp_scw_template_item&#039;                            </span>
 </dt>
-<dd>Signup template item table.</dd>
+<dd>Rolling signup template item table.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -constant -protected">
     <a class="" href="classes/SignUpsBase.html#constant_SIGNUP_TEMPLATE_TABLE">SIGNUP_TEMPLATE_TABLE</a>
     <span>
         &nbsp;= &#039;wp_scw_template&#039;                            </span>
 </dt>
-<dd>Signup template table.</dd>
+<dd>Rolling signup template table.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -constant -protected">
     <a class="" href="classes/SignUpsBase.html#constant_SIGNUPS_TABLE">SIGNUPS_TABLE</a>
     <span>
         &nbsp;= &#039;wp_scw_signups&#039;                            </span>
 </dt>
-<dd>Database classes table.</dd>
+<dd>Database signups table.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -constant -protected">
     <a class="" href="classes/SignUpsBase.html#constant_SPIDER_CALENDAR_EVENT_TABLE">SPIDER_CALENDAR_EVENT_TABLE</a>
@@ -307,14 +309,14 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
         &nbsp;= &#039;wp_scw_stripe&#039;                            </span>
 </dt>
-<dd>Stripe table.</dd>
+<dd>Stripe settings table.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -constant -protected">
     <a class="" href="classes/SignUpsBase.html#constant_TEXT_TABLE">TEXT_TABLE</a>
     <span>
         &nbsp;= &#039;wp_scw_text_messages&#039;                            </span>
 </dt>
-<dd>Spider Calendar Event table.</dd>
+<dd>Data about received text messages.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -constant -protected">
     <a class="" href="classes/SignUpsBase.html#constant_TIME_FORMAT">TIME_FORMAT</a>
@@ -342,7 +344,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
             <dt class="phpdocumentor-table-of-contents__entry -property -protected">
     <a class="" href="classes/SignUpsBase.html#property_date_time_zone">$date_time_zone</a>
     <span>
-                        &nbsp;: <abbr title="\undefined">undefined</abbr>            </span>
+                        &nbsp;: string            </span>
 </dt>
 <dd>Date timezone.</dd>
 
@@ -366,28 +368,28 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
                                 &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
-<dd>Create_meeting_exceptions</dd>
+<dd>Retrieves a list of meeting exceptions between a start and end date.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/SignupSettings.html#method_signup_settings_page">signup_settings_page()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
-<dd>The main function of the Plugin.</dd>
+<dd>The main function for the administration side of the Plugin.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/SignUpsBase.html#method_add_attendee_rolling">add_attendee_rolling()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Add attendee for the selected spots</dd>
+<dd>Add attendee for the selected spots.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/SignUpsBase.html#method_add_remove_from_calendar">add_remove_from_calendar()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Removes items from the calendar in respose to removing Admin Approved</dd>
+<dd>Removes items from the calendar in response to removing admin approval from a signup.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/SignUpsBase.html#method_create_description_section">create_description_section()</a>
@@ -401,14 +403,14 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Create a member search box.</dd>
+<dd>Create a member search box used in administrative pages.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/SignUpsBase.html#method_create_new_member_form">create_new_member_form()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Creates a form for new users to apply for membership</dd>
+<dd>Creates a form for new users to apply for membership.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/SignUpsBase.html#method_create_rolling_session">create_rolling_session()</a>
@@ -422,14 +424,14 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Creates a form that displays the rolling sessions along with their attenees</dd>
+<dd>Creates a form that displays the rolling sessions along with their attendees.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/SignUpsBase.html#method_create_user_table">create_user_table()</a>
     <span>
                                 &nbsp;: bool    </span>
 </dt>
-<dd>Creates a section of HTML for the user to identify themselves.</dd>
+<dd>Creates a section of HTML for the user to identify themselves using their badge number.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/SignUpsBase.html#method_format_date">format_date()</a>
@@ -443,7 +445,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
                                 &nbsp;: string    </span>
 </dt>
-<dd>Format a date</dd>
+<dd>Format a date string from a DateTime object.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/SignUpsBase.html#method_format_time_only">format_time_only()</a>
@@ -471,7 +473,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
                                 &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
-<dd>Return html description for a signup.</dd>
+<dd>Returns the HTML description for a signup.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/SignUpsBase.html#method_load_template_selection">load_template_selection()</a>
@@ -485,7 +487,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Helper function for registering routes.</dd>
+<dd>Helper function for registering RestFul API routes.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/SignUpsBase.html#method_session_attendee_string">session_attendee_string()</a>
@@ -493,6 +495,15 @@ Admin page for the signups plugin. Contains the functions for editing the signup
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>Formats a string to be passed back in form data.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -protected">
+    <a class="" href="classes/SignUpsBase.html#method_set_clear_cache">set_clear_cache()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>When an administrator makes changes to a signup the change will
+not appear immediately unless you clear the cache. That is, the cache
+holds on to the old data. You can only clear the cache at plugin load/reload.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/SignUpsBase.html#method_update_calendar">update_calendar()</a>
@@ -513,21 +524,21 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Write_log.</dd>
+<dd>Writes a string to the log table in the database.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
-    <a class="" href="classes/SignupSettings.html#method_add_new_session_form">add_new_session_form()</a>
+    <a class="" href="classes/SignupSettings.html#method_add_new_session">add_new_session()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
-<dd>Add a new session to a class.</dd>
+<dd>Aggregates the data needed to create the form for adding a new session.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
     <a class="" href="classes/SignUpsBase.html#method_add_remove_chk">add_remove_chk()</a>
     <span>
                                 &nbsp;: bool    </span>
 </dt>
-<dd>Determins if the remove checkbox should be added.</dd>
+<dd>Determines if the remove checkbox should be added.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
     <a class="" href="classes/SignupSettings.html#method_add_session_attendees">add_session_attendees()</a>
@@ -541,7 +552,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Adds slots for a session</dd>
+<dd>Adds slots to the Create Session Form for review before actually creating the slots.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
     <a class="" href="classes/SignupSettings.html#method_confirm_class_delete">confirm_class_delete()</a>
@@ -555,7 +566,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Create_attendee_select_form.</dd>
+<dd>Helper function to create the attendee select form.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
     <a class="" href="classes/SignupSettings.html#method_create_session_form">create_session_form()</a>
@@ -569,7 +580,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Creates a form that displays the sessions along with their attenees</dd>
+<dd>Creates a form that displays the sessions along with their attendees.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
     <a class="" href="classes/SignupSettings.html#method_create_signup_form">create_signup_form()</a>
@@ -590,7 +601,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
-<dd>Delete class and sessions.</dd>
+<dd>Delete class and it&#039;s sessions.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
     <a class="" href="classes/SignupSettings.html#method_delete_session">delete_session()</a>
@@ -611,7 +622,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
-<dd>Edit a class.</dd>
+<dd>Aggregates the data needed to edit a class.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
     <a class="" href="classes/SignupSettings.html#method_edit_class_move">edit_class_move()</a>
@@ -625,7 +636,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
-<dd>Edit a session of a class.</dd>
+<dd>Aggregates the data to edit a single session.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
     <a class="" href="classes/SignupSettings.html#method_get_day_of_month">get_day_of_month()</a>
@@ -653,28 +664,28 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
                                 &nbsp;: bool    </span>
 </dt>
-<dd>Is this a rolling signup</dd>
+<dd>Is this a rolling signup is the question this function answers.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
     <a class="" href="classes/SignupSettings.html#method_load_create_class_form">load_create_class_form()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Load the form to create class descriptions.</dd>
+<dd>Load the form to create a class.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
     <a class="" href="classes/SignupSettings.html#method_load_session_selection">load_session_selection()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
-<dd>Load the session selection form. The session belong to one class.</dd>
+<dd>Aggregates the data used to load the session selection form.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
     <a class="" href="classes/SignupSettings.html#method_load_signup_selection">load_signup_selection()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
-<dd>Load the class selection.</dd>
+<dd>This function aggregates the data to create the Admin landing page.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
     <a class="" href="classes/SignupSettings.html#method_move_session_attendees">move_session_attendees()</a>
@@ -695,14 +706,14 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Submit the description to the database.</dd>
+<dd>Submit the new class to the database.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
     <a class="" href="classes/SignupSettings.html#method_submit_session">submit_session()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
-<dd>Submit session to databse.</dd>
+<dd>Submit session to database.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -private">
     <a class="" href="classes/SignupSettings.html#method_submit_session_attendees">submit_session_attendees()</a>
@@ -716,7 +727,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Formats the message to display after an upate to the DB has been made.</dd>
+<dd>Formats the message to display after an update to the DB has been made.</dd>
 
     </dl>
 
@@ -739,7 +750,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">46</span>
+    <span class="phpdocumentor-element-found-in__line">52</span>
 
     </aside>
 
@@ -748,13 +759,17 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">ATTENDEES_ROLLING_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_rolling_attendees&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>Rolling attendees belong to a rolling signup such as monitors.
+Rolling signups do not have sessions so the attendees are directly
+associated with a signup slot. A slot is identified by a date and time.</p>
+</section>
+
     
     
 
@@ -771,7 +786,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">25</span>
+    <span class="phpdocumentor-element-found-in__line">26</span>
 
     </aside>
 
@@ -780,13 +795,15 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">ATTENDEES_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_attendees&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>Attendees belong to a session for a class or event.</p>
+</section>
+
     
     
 
@@ -803,7 +820,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">195</span>
+    <span class="phpdocumentor-element-found-in__line">234</span>
 
     </aside>
 
@@ -812,7 +829,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">DATE_FORMAT</span>
     = <span class="phpdocumentor-signature__default-value">&#039;D m-d-Y&#039;</span>
 </code>
@@ -835,7 +852,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">202</span>
+    <span class="phpdocumentor-element-found-in__line">241</span>
 
     </aside>
 
@@ -844,7 +861,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">DATE_FORMAT2</span>
     = <span class="phpdocumentor-signature__default-value">&#039;m-d-Y&#039;</span>
 </code>
@@ -867,7 +884,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">188</span>
+    <span class="phpdocumentor-element-found-in__line">227</span>
 
     </aside>
 
@@ -876,7 +893,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">DATE_FORMAT3</span>
     = <span class="phpdocumentor-signature__default-value">&#039;Y-m-d&#039;</span>
 </code>
@@ -901,7 +918,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">172</span>
+    <span class="phpdocumentor-element-found-in__line">211</span>
 
     </aside>
 
@@ -910,7 +927,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">DATETIME_FORMAT</span>
     = <span class="phpdocumentor-signature__default-value">&#039;Y-m-d g:i A&#039;</span>
 </code>
@@ -933,7 +950,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">180</span>
+    <span class="phpdocumentor-element-found-in__line">219</span>
 
     </aside>
 
@@ -942,7 +959,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">DATETIME_FORMAT_INPUT</span>
     = <span class="phpdocumentor-signature__default-value">&#039;Y-m-d\TH:i&#039;</span>
 </code>
@@ -967,7 +984,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">81</span>
+    <span class="phpdocumentor-element-found-in__line">94</span>
 
     </aside>
 
@@ -976,13 +993,16 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">DESCRIPTIONS_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_signup_descriptions&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>Descriptions have three parts. Descriptions, Calendar Description and Instructions.
+All three are held in this table.</p>
+</section>
+
     
     
 
@@ -999,22 +1019,25 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">144</span>
+    <span class="phpdocumentor-element-found-in__line">176</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Unsubscribe table.</p>
+        <p class="phpdocumentor-summary">Instructors table.</p>
 
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">INSTRUCTORS_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_instructors&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>Instructors can teach multiple classes and classes can have multiple instructors.
+This table holds the list of instructors.</p>
+</section>
+
     
     
 
@@ -1031,7 +1054,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">165</span>
+    <span class="phpdocumentor-element-found-in__line">204</span>
 
     </aside>
 
@@ -1046,7 +1069,10 @@ Admin page for the signups plugin. Contains the functions for editing the signup
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>Although not heavily used, there are a set of logging functions
+that write to this table. This is mostly used for debugging purposes.</p>
+</section>
+
     
     
 
@@ -1063,7 +1089,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">130</span>
+    <span class="phpdocumentor-element-found-in__line">156</span>
 
     </aside>
 
@@ -1072,13 +1098,16 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">MACHINE_PERMISSIONS_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_machine_permissions&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>Members can have multiple permissions. This table holds the list
+of permissions for each member.</p>
+</section>
+
     
     
 
@@ -1095,22 +1124,25 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">123</span>
+    <span class="phpdocumentor-element-found-in__line">147</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Machine permissions table.</p>
+        <p class="phpdocumentor-summary">Members table.</p>
 
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">MEMBERS_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_members&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>The list of currently active members of the woodshop.
+It is updated nightly via one of the RestFul APIs.</p>
+</section>
+
     
     
 
@@ -1127,22 +1159,26 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">158</span>
+    <span class="phpdocumentor-element-found-in__line">195</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">New members are held here until they complete orientation.</p>
+        <p class="phpdocumentor-summary">New members table.</p>
 
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">NEW_MEMBER_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_new_member&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>New members are held here until they complete orientation.
+After orientation they added to the members table on the server.
+They are then pushed to the server.</p>
+</section>
+
     
     
 
@@ -1159,7 +1195,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">67</span>
+    <span class="phpdocumentor-element-found-in__line">75</span>
 
     </aside>
 
@@ -1168,13 +1204,15 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">PAYMENTS_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_payments&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>This is a record of payments received.</p>
+</section>
+
     
     
 
@@ -1191,16 +1229,16 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">60</span>
+    <span class="phpdocumentor-element-found-in__line">67</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Date and time exception for rolling signups. Shop closures.</p>
+        <p class="phpdocumentor-summary">Date and time exception for rolling signups. e.g. Shop closures.</p>
 
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">ROLLING_EXCEPTIONS_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_rolling_exceptions&#039;</span>
 </code>
@@ -1223,7 +1261,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">53</span>
+    <span class="phpdocumentor-element-found-in__line">60</span>
 
     </aside>
 
@@ -1232,13 +1270,15 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">ROLLING_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_rolling&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>This is the data used to define a rolling signup.</p>
+</section>
+
     
     
 
@@ -1255,22 +1295,25 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">151</span>
+    <span class="phpdocumentor-element-found-in__line">185</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Unsubscribe table.</p>
+        <p class="phpdocumentor-summary">Session instructors table.</p>
 
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">SESSION_INSTRUCTORS_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_session_instructors&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>While classes can have multiple instructors, a subset of them are
+selected to teach each individual session. They are held in this table.</p>
+</section>
+
     
     
 
@@ -1287,7 +1330,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">39</span>
+    <span class="phpdocumentor-element-found-in__line">42</span>
 
     </aside>
 
@@ -1296,13 +1339,15 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">SESSIONS_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_sessions&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>Sessions belong to a class or event signup.</p>
+</section>
+
     
     
 
@@ -1319,7 +1364,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">102</span>
+    <span class="phpdocumentor-element-found-in__line">120</span>
 
     </aside>
 
@@ -1328,13 +1373,17 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">SIGNUP_CATEGORY_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_signup_categories&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>Two examples of categories are Lathe, Ring Bowl and CNC.
+These are the labels that appear on the member landing page
+and each signup is assigned a category.</p>
+</section>
+
     
     
 
@@ -1351,22 +1400,24 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">95</span>
+    <span class="phpdocumentor-element-found-in__line">110</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Signup template item table.</p>
+        <p class="phpdocumentor-summary">Rolling signup template item table.</p>
 
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">SIGNUP_TEMPLATE_ITEM_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_template_item&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>A template may have many template items and they are held in this table.</p>
+</section>
+
     
     
 
@@ -1383,22 +1434,24 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">88</span>
+    <span class="phpdocumentor-element-found-in__line">102</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Signup template table.</p>
+        <p class="phpdocumentor-summary">Rolling signup template table.</p>
 
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">SIGNUP_TEMPLATE_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_template&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>To have a rolling signup such as Monitors requires a template to describe its behavior.</p>
+</section>
+
     
     
 
@@ -1415,22 +1468,24 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">32</span>
+    <span class="phpdocumentor-element-found-in__line">34</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Database classes table.</p>
+        <p class="phpdocumentor-summary">Database signups table.</p>
 
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">SIGNUPS_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_signups&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>Signups include both rolling signups and class signups.</p>
+</section>
+
     
     
 
@@ -1447,7 +1502,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">109</span>
+    <span class="phpdocumentor-element-found-in__line">129</span>
 
     </aside>
 
@@ -1456,13 +1511,16 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">SPIDER_CALENDAR_EVENT_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_spidercalendar_event&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>The Signups Plugin uses the Spider Calendar Plugin to help
+members visualize when signups are scheduled.</p>
+</section>
+
     
     
 
@@ -1479,22 +1537,26 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">74</span>
+    <span class="phpdocumentor-element-found-in__line">85</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Stripe table.</p>
+        <p class="phpdocumentor-summary">Stripe settings table.</p>
 
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">STRIPE_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_stripe&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>This table has evolved into a settings table.
+It started as the settings for the Stripe.com api credentials
+but now holds additional data. Should be converted to a key/value pair table.</p>
+</section>
+
     
     
 
@@ -1511,22 +1573,25 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">116</span>
+    <span class="phpdocumentor-element-found-in__line">138</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Spider Calendar Event table.</p>
+        <p class="phpdocumentor-summary">Data about received text messages.</p>
 
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">TEXT_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_text_messages&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>This has nothing to do with signups but a endpoint was needed to record
+text messages that were replies to texts sent via Twillo.</p>
+</section>
+
     
     
 
@@ -1543,7 +1608,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">209</span>
+    <span class="phpdocumentor-element-found-in__line">248</span>
 
     </aside>
 
@@ -1552,7 +1617,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">TIME_FORMAT</span>
     = <span class="phpdocumentor-signature__default-value">&#039;g:iA&#039;</span>
 </code>
@@ -1575,7 +1640,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">137</span>
+    <span class="phpdocumentor-element-found-in__line">167</span>
 
     </aside>
 
@@ -1584,13 +1649,18 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">UNSUBSCRIBE_TABLE</span>
     = <span class="phpdocumentor-signature__default-value">&#039;wp_scw_unsubscribe&#039;</span>
 </code>
 
 
-    
+        <section class="phpdocumentor-description"><p>When a member unsubscribes from the classes or monitor emails their
+information goes into this table. During the night the list is retrieved
+via a RestFul API. Then the data is used on the server to update the members
+contact information.</p>
+</section>
+
     
     
 
@@ -1623,7 +1693,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">216</span>
+    <span class="phpdocumentor-element-found-in__line">255</span>
 
     </aside>
 
@@ -1632,7 +1702,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-        <span class="phpdocumentor-signature__type"><abbr title="\undefined">undefined</abbr></span>
+        <span class="phpdocumentor-signature__type">string</span>
     <span class="phpdocumentor-signature__name">$date_time_zone</span>
     </code>
 
@@ -1665,7 +1735,7 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">223</span>
+    <span class="phpdocumentor-element-found-in__line">262</span>
 
     </aside>
 
@@ -1700,11 +1770,11 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">817</span>
+    <span class="phpdocumentor-element-found-in__line">886</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Create_meeting_exceptions</p>
+        <p class="phpdocumentor-summary">Retrieves a list of meeting exceptions between a start and end date.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -1760,11 +1830,11 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">26</span>
+    <span class="phpdocumentor-element-found-in__line">28</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">The main function of the Plugin.</p>
+        <p class="phpdocumentor-summary">The main function for the administration side of the Plugin.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -1773,9 +1843,9 @@ Admin page for the signups plugin. Contains the functions for editing the signup
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>This delegates all the real work to helper functions.
+        <section class="phpdocumentor-description"><p>This delegates to work to helper functions.
 Loading the class selection is the default.
-All others are triggered by a form submission.</p>
+All other functions are triggered by a form submission.</p>
 </section>
 
     
@@ -1799,25 +1869,29 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1198</span>
+    <span class="phpdocumentor-element-found-in__line">1290</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Add attendee for the selected spots</p>
+        <p class="phpdocumentor-summary">Add attendee for the selected spots.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-                    <span class="phpdocumentor-signature__name">add_attendee_rolling</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$post</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">add_attendee_rolling</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;|mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$post</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>This is a helper function used by members and admins.
+Members can moved themselves and admins often need to move
+a member.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$post</span>
-                : <span class="phpdocumentor-signature__argument__return-type">mixed</span>
+                : <span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;|mixed</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Data from the form.</p>
@@ -1846,25 +1920,28 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1541</span>
+    <span class="phpdocumentor-element-found-in__line">1637</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Removes items from the calendar in respose to removing Admin Approved</p>
+        <p class="phpdocumentor-summary">Removes items from the calendar in response to removing admin approval from a signup.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-                    <span class="phpdocumentor-signature__name">add_remove_from_calendar</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$signup_id</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$signup_name</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$add</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">add_remove_from_calendar</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$signup_id</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$signup_name</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$add</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>The calendar is another plugin called the Spider Calendar. We are just inputting rows
+into their database.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$signup_id</span>
-                : <span class="phpdocumentor-signature__argument__return-type">mixed</span>
+                : <span class="phpdocumentor-signature__argument__return-type">int</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>The signup id that owns the sessions.</p>
@@ -1873,7 +1950,7 @@ All others are triggered by a form submission.</p>
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$signup_name</span>
-                : <span class="phpdocumentor-signature__argument__return-type">mixed</span>
+                : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>The sighup name.</p>
@@ -1882,7 +1959,7 @@ All others are triggered by a form submission.</p>
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$add</span>
-                : <span class="phpdocumentor-signature__argument__return-type">mixed</span>
+                : <span class="phpdocumentor-signature__argument__return-type">bool</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>To add or remove from the calendar.</p>
@@ -1911,7 +1988,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1497</span>
+    <span class="phpdocumentor-element-found-in__line">1591</span>
 
     </aside>
 
@@ -1924,7 +2001,10 @@ All others are triggered by a form submission.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>JS is used to convert the textareas to the HTML editor, CKEditor.
+See SignUps.js.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -1958,11 +2038,11 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">445</span>
+    <span class="phpdocumentor-element-found-in__line">509</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Create a member search box.</p>
+        <p class="phpdocumentor-summary">Create a member search box used in administrative pages.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
@@ -1971,7 +2051,10 @@ All others are triggered by a form submission.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>An admin often needs to find a member by name. This form
+allows for searching on part of a name, email address or phone number.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -2050,11 +2133,11 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">361</span>
+    <span class="phpdocumentor-element-found-in__line">422</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Creates a form for new users to apply for membership</p>
+        <p class="phpdocumentor-summary">Creates a form for new users to apply for membership.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
@@ -2063,7 +2146,10 @@ All others are triggered by a form submission.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>New member don't exist in our database so we need to collect their
+information and this is the form for doing that.</p>
+</section>
+
     
     
 
@@ -2085,7 +2171,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">653</span>
+    <span class="phpdocumentor-element-found-in__line">722</span>
 
     </aside>
 
@@ -2093,7 +2179,7 @@ All others are triggered by a form submission.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
-                    <span class="phpdocumentor-signature__name">create_rolling_session</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$rolling_signup_id</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$secret</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$admin</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">false</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$rolling_days</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">create_rolling_session</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$rolling_signup_id</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$secret</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__return-type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$admin</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">false</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$rolling_days</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -2103,7 +2189,7 @@ All others are triggered by a form submission.</p>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$rolling_signup_id</span>
-                : <span class="phpdocumentor-signature__argument__return-type">mixed</span>
+                : <span class="phpdocumentor-signature__argument__return-type">int</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>The id for the signup.</p>
@@ -2115,13 +2201,13 @@ All others are triggered by a form submission.</p>
                 : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>A secret key used to indentify a user.</p>
+                    <section class="phpdocumentor-description"><p>A secret key used to identify a user. Obsolete.</p>
 </section>
 
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$admin</span>
-                : <span class="phpdocumentor-signature__argument__return-type">mixed</span>
+                : <span class="phpdocumentor-signature__argument__return-type">bool</span>
                  = <span class="phpdocumentor-signature__argument__default-value">false</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Set to true if an admin is using this function.</p>
@@ -2159,11 +2245,11 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">860</span>
+    <span class="phpdocumentor-element-found-in__line">938</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Creates a form that displays the rolling sessions along with their attenees</p>
+        <p class="phpdocumentor-summary">Creates a form that displays the rolling sessions along with their attendees.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
@@ -2172,7 +2258,16 @@ All others are triggered by a form submission.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>This is a long function and studying the code is the only way to fully understand it.
+It allows members to select slots and also remove themselves from a previously selected slot.
+Some of the signups, such as monitors are not allowed to remove themselves within 2 days of their
+duty time. By default the user can see the default number of days that the signup specifies. Usually
+30 days. There is a drop down where 60 and 90 days can be selected. The dropdown also allows to see
+the past 30 days to look at the history.</p>
+<p>There is a lot of logic intertwined with the HTML that is being generated which makes this a hard
+function to follow. Good luck.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -2261,7 +2356,7 @@ All others are triggered by a form submission.</p>
                 : <span class="phpdocumentor-signature__argument__return-type">mixed</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The template items for tempate2. Used when a template is changed at a predetermined date.</p>
+                    <section class="phpdocumentor-description"><p>The template items for template2. Used when a template is changed at a predetermined date.</p>
 </section>
 
             </dd>
@@ -2296,11 +2391,11 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">487</span>
+    <span class="phpdocumentor-element-found-in__line">556</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Creates a section of HTML for the user to identify themselves.</p>
+        <p class="phpdocumentor-summary">Creates a section of HTML for the user to identify themselves using their badge number.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
@@ -2309,7 +2404,13 @@ All others are triggered by a form submission.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>A badge number is the only allowed input.
+This is used at the top of all member signups where a member must
+identify themselves before signing up. By retrieving a
+members data from the database we can avoid having member input
+incorrect data about themselves.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -2365,7 +2466,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">254</span>
+    <span class="phpdocumentor-element-found-in__line">294</span>
 
     </aside>
 
@@ -2420,11 +2521,11 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">276</span>
+    <span class="phpdocumentor-element-found-in__line">316</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Format a date</p>
+        <p class="phpdocumentor-summary">Format a date string from a DateTime object.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
@@ -2475,7 +2576,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">265</span>
+    <span class="phpdocumentor-element-found-in__line">305</span>
 
     </aside>
 
@@ -2530,7 +2631,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1810</span>
+    <span class="phpdocumentor-element-found-in__line">1906</span>
 
     </aside>
 
@@ -2585,7 +2686,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1679</span>
+    <span class="phpdocumentor-element-found-in__line">1775</span>
 
     </aside>
 
@@ -2632,11 +2733,11 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">314</span>
+    <span class="phpdocumentor-element-found-in__line">371</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Return html description for a signup.</p>
+        <p class="phpdocumentor-summary">Returns the HTML description for a signup.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
@@ -2683,7 +2784,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1420</span>
+    <span class="phpdocumentor-element-found-in__line">1512</span>
 
     </aside>
 
@@ -2766,11 +2867,11 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">292</span>
+    <span class="phpdocumentor-element-found-in__line">349</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Helper function for registering routes.</p>
+        <p class="phpdocumentor-summary">Helper function for registering RestFul API routes.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
@@ -2779,7 +2880,9 @@ All others are triggered by a form submission.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>The routes are the URL used to call the API.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -2858,7 +2961,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">244</span>
+    <span class="phpdocumentor-element-found-in__line">284</span>
 
     </aside>
 
@@ -2906,6 +3009,55 @@ All others are triggered by a form submission.</p>
             -protected
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_set_clear_cache">
+        set_clear_cache()
+        <a href="classes/SignUpsBase.html#method_set_clear_cache" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">330</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">When an administrator makes changes to a signup the change will
+not appear immediately unless you clear the cache. That is, the cache
+holds on to the old data. You can only clear the cache at plugin load/reload.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">protected</span>
+                    <span class="phpdocumentor-signature__name">set_clear_cache</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$value</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Upon load the plugin looks at the entry to decide if the cache needs cleared.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-signature__argument__name">$value</span>
+                : <span class="phpdocumentor-signature__argument__return-type">int</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+    
+
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -protected
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_update_calendar">
         update_calendar()
         <a href="classes/SignUpsBase.html#method_update_calendar" class="headerlink"><i class="fas fa-link"></i></a>
@@ -2914,7 +3066,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1583</span>
+    <span class="phpdocumentor-element-found-in__line">1679</span>
 
     </aside>
 
@@ -2961,7 +3113,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1471</span>
+    <span class="phpdocumentor-element-found-in__line">1563</span>
 
     </aside>
 
@@ -3017,11 +3169,11 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">233</span>
+    <span class="phpdocumentor-element-found-in__line">272</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Write_log.</p>
+        <p class="phpdocumentor-summary">Writes a string to the log table in the database.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">protected</span>
@@ -3056,33 +3208,35 @@ All others are triggered by a form submission.</p>
             -private
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_add_new_session_form">
-        add_new_session_form()
-        <a href="classes/SignupSettings.html#method_add_new_session_form" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_add_new_session">
+        add_new_session()
+        <a href="classes/SignupSettings.html#method_add_new_session" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">619</span>
+    <span class="phpdocumentor-element-found-in__line">635</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Add a new session to a class.</p>
+        <p class="phpdocumentor-summary">Aggregates the data needed to create the form for adding a new session.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-                    <span class="phpdocumentor-signature__name">add_new_session_form</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$post</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">add_new_session</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$post</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>The function create_session_form displays the form.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$post</span>
-                : <span class="phpdocumentor-signature__argument__return-type">int</span>
+                : <span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>The posted data from the form.</p>
@@ -3092,6 +3246,21 @@ All others are triggered by a form submission.</p>
             </dl>
 
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/SignupSettings.html#method_add_new_session#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="classes/SignupSettings.html#method_create_session_form"><abbr title="\SignupSettings::create_session_form()">SignupSettings::create_session_form()</abbr></a></span>
+                                        
+                                             
+                                    </dd>
+                                            </dl>
 
     
 
@@ -3111,11 +3280,11 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1184</span>
+    <span class="phpdocumentor-element-found-in__line">1273</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Determins if the remove checkbox should be added.</p>
+        <p class="phpdocumentor-summary">Determines if the remove checkbox should be added.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
@@ -3124,7 +3293,9 @@ All others are triggered by a form submission.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>This is a helper function for creating rolling forms.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -3202,7 +3373,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">945</span>
+    <span class="phpdocumentor-element-found-in__line">972</span>
 
     </aside>
 
@@ -3215,7 +3386,9 @@ All others are triggered by a form submission.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>This uses the create_attendee_select_form function to do the actual work.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -3230,6 +3403,21 @@ All others are triggered by a form submission.</p>
             </dl>
 
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/SignupSettings.html#method_add_session_attendees#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="classes/SignupSettings.html#method_create_attendee_select_form"><abbr title="\SignupSettings::create_attendee_select_form()">SignupSettings::create_attendee_select_form()</abbr></a></span>
+                                        
+                                             
+                                    </dd>
+                                            </dl>
 
     
 
@@ -3249,20 +3437,23 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">701</span>
+    <span class="phpdocumentor-element-found-in__line">722</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Adds slots for a session</p>
+        <p class="phpdocumentor-summary">Adds slots to the Create Session Form for review before actually creating the slots.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-                    <span class="phpdocumentor-signature__name">add_session_slots</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$session_item</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$signup_name</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">add_session_slots</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$session_item</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$signup_name</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>Returns the users back to the Create Session Form with the newly created sessions.</p>
+<p>TODO: That this could be better named. It isn't creating slots but rather it is creating sessions.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -3276,7 +3467,7 @@ All others are triggered by a form submission.</p>
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$signup_name</span>
-                : <span class="phpdocumentor-signature__argument__return-type">mixed</span>
+                : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>The name of the signup.</p>
@@ -3286,6 +3477,21 @@ All others are triggered by a form submission.</p>
             </dl>
 
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/SignupSettings.html#method_add_session_slots#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="classes/SignupSettings.html#method_create_session_form"><abbr title="\SignupSettings::create_session_form()">SignupSettings::create_session_form()</abbr></a></span>
+                                        
+                                             
+                                    </dd>
+                                            </dl>
 
     
 
@@ -3305,7 +3511,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">519</span>
+    <span class="phpdocumentor-element-found-in__line">532</span>
 
     </aside>
 
@@ -3313,7 +3519,7 @@ All others are triggered by a form submission.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-                    <span class="phpdocumentor-signature__name">confirm_class_delete</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$post</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">confirm_class_delete</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$post</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -3323,7 +3529,7 @@ All others are triggered by a form submission.</p>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$post</span>
-                : <span class="phpdocumentor-signature__argument__return-type">int</span>
+                : <span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>The posted data from the form.</p>
@@ -3352,25 +3558,29 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1239</span>
+    <span class="phpdocumentor-element-found-in__line">1274</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Create_attendee_select_form.</p>
+        <p class="phpdocumentor-summary">Helper function to create the attendee select form.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-                    <span class="phpdocumentor-signature__name">create_attendee_select_form</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$signup_name</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type"><abbr title="\number">number</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$signup_id</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sessions</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">create_attendee_select_form</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$signup_name</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$signup_id</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sessions</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>Used when adding members to a signup. It can create a form for
+an existing member or creating a new member. The new member form is
+used when adding person to the orientation class.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$signup_name</span>
-                : <span class="phpdocumentor-signature__argument__return-type">mixed</span>
+                : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>The name of the signup.</p>
@@ -3379,7 +3589,7 @@ All others are triggered by a form submission.</p>
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$signup_id</span>
-                : <span class="phpdocumentor-signature__argument__return-type"><abbr title="\number">number</abbr></span>
+                : <span class="phpdocumentor-signature__argument__return-type">int</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Signup Id.</p>
@@ -3417,7 +3627,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1766</span>
+    <span class="phpdocumentor-element-found-in__line">1805</span>
 
     </aside>
 
@@ -3430,7 +3640,9 @@ All others are triggered by a form submission.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>This form also has the option add additional sessions and review them before submitting.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -3491,11 +3703,11 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1434</span>
+    <span class="phpdocumentor-element-found-in__line">1472</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Creates a form that displays the sessions along with their attenees</p>
+        <p class="phpdocumentor-summary">Creates a form that displays the sessions along with their attendees.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
@@ -3504,7 +3716,10 @@ All others are triggered by a form submission.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>This for allows administrators to perform various edits. Adding sessions
+is one of the options. There is an Options menu for each individual session.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -3557,7 +3772,7 @@ All others are triggered by a form submission.</p>
                 : <span class="phpdocumentor-signature__argument__return-type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The instructions for this class.</p>
+                    <section class="phpdocumentor-description"><p>The instructions for this class. Used to send email to session attendees.</p>
 </section>
 
             </dd>
@@ -3583,7 +3798,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1588</span>
+    <span class="phpdocumentor-element-found-in__line">1626</span>
 
     </aside>
 
@@ -3632,7 +3847,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1322</span>
+    <span class="phpdocumentor-element-found-in__line">1358</span>
 
     </aside>
 
@@ -3645,7 +3860,9 @@ All others are triggered by a form submission.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>This is the landing page for administrators.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -3653,7 +3870,7 @@ All others are triggered by a form submission.</p>
                 : <span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The class results from teh DB to list on the form.</p>
+                    <section class="phpdocumentor-description"><p>The class results from the DB to list on the form.</p>
 </section>
 
             </dd>
@@ -3679,15 +3896,15 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">576</span>
+    <span class="phpdocumentor-element-found-in__line">589</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Delete class and sessions.</p>
+        <p class="phpdocumentor-summary">Delete class and it&#039;s sessions.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-                    <span class="phpdocumentor-signature__name">delete_class</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$post</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">delete_class</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$post</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -3697,7 +3914,7 @@ All others are triggered by a form submission.</p>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$post</span>
-                : <span class="phpdocumentor-signature__argument__return-type">int</span>
+                : <span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>The posted data from the form.</p>
@@ -3726,7 +3943,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">887</span>
+    <span class="phpdocumentor-element-found-in__line">911</span>
 
     </aside>
 
@@ -3756,7 +3973,7 @@ All others are triggered by a form submission.</p>
                 : <span class="phpdocumentor-signature__argument__return-type">int</span>
                  = <span class="phpdocumentor-signature__argument__default-value">true</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>This is being reposted.</p>
+                    <section class="phpdocumentor-description"><p>This should return to the calling form.</p>
 </section>
 
             </dd>
@@ -3782,7 +3999,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1032</span>
+    <span class="phpdocumentor-element-found-in__line">1059</span>
 
     </aside>
 
@@ -3790,7 +4007,7 @@ All others are triggered by a form submission.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-                    <span class="phpdocumentor-signature__name">delete_session_attendees</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$post</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">delete_session_attendees</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$post</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -3800,7 +4017,7 @@ All others are triggered by a form submission.</p>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$post</span>
-                : <span class="phpdocumentor-signature__argument__return-type">int</span>
+                : <span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>The posted data from the form.</p>
@@ -3829,11 +4046,11 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">499</span>
+    <span class="phpdocumentor-element-found-in__line">512</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Edit a class.</p>
+        <p class="phpdocumentor-summary">Aggregates the data needed to edit a class.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
@@ -3842,7 +4059,9 @@ All others are triggered by a form submission.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>It calls the create_signup_form with this data to display the edit.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -3857,6 +4076,21 @@ All others are triggered by a form submission.</p>
             </dl>
 
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/SignupSettings.html#method_edit_class#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="classes/SignupSettings.html#method_create_signup_form"><abbr title="\SignupSettings::create_signup_form()">SignupSettings::create_signup_form()</abbr></a></span>
+                                        
+                                             
+                                    </dd>
+                                            </dl>
 
     
 
@@ -3876,7 +4110,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">90</span>
+    <span class="phpdocumentor-element-found-in__line">92</span>
 
     </aside>
 
@@ -3934,11 +4168,11 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">832</span>
+    <span class="phpdocumentor-element-found-in__line">856</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Edit a session of a class.</p>
+        <p class="phpdocumentor-summary">Aggregates the data to edit a single session.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
@@ -3947,7 +4181,9 @@ All others are triggered by a form submission.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>The create_session_form is called to create the form.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -3962,6 +4198,21 @@ All others are triggered by a form submission.</p>
             </dl>
 
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/SignupSettings.html#method_edit_session#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="classes/SignupSettings.html#method_create_session_form"><abbr title="\SignupSettings::create_session_form()">SignupSettings::create_session_form()</abbr></a></span>
+                                        
+                                             
+                                    </dd>
+                                            </dl>
 
     
 
@@ -3981,7 +4232,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2251</span>
+    <span class="phpdocumentor-element-found-in__line">2298</span>
 
     </aside>
 
@@ -4036,7 +4287,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">778</span>
+    <span class="phpdocumentor-element-found-in__line">847</span>
 
     </aside>
 
@@ -4105,7 +4356,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">798</span>
+    <span class="phpdocumentor-element-found-in__line">867</span>
 
     </aside>
 
@@ -4174,11 +4425,11 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">340</span>
+    <span class="phpdocumentor-element-found-in__line">399</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Is this a rolling signup</p>
+        <p class="phpdocumentor-summary">Is this a rolling signup is the question this function answers.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
@@ -4187,7 +4438,10 @@ All others are triggered by a form submission.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>The function simply looks to see if a rolling template is assigned
+to the signup.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -4229,11 +4483,11 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1912</span>
+    <span class="phpdocumentor-element-found-in__line">1956</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Load the form to create class descriptions.</p>
+        <p class="phpdocumentor-summary">Load the form to create a class.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
@@ -4242,9 +4496,28 @@ All others are triggered by a form submission.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+        <section class="phpdocumentor-description"><p>This function is for adding a new class and all the associated
+data to publish the class. When it is done control is transferred to
+the create_session_form to add sessions to the new class.</p>
+</section>
+
     
     
-    
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/SignupSettings.html#method_load_create_class_form#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="classes/SignupSettings.html#method_create_session_form"><abbr title="\SignupSettings::create_session_form()">SignupSettings::create_session_form()</abbr></a></span>
+                                        
+                                             
+                                    </dd>
+                                            </dl>
 
     
 
@@ -4264,11 +4537,11 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1133</span>
+    <span class="phpdocumentor-element-found-in__line">1165</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Load the session selection form. The session belong to one class.</p>
+        <p class="phpdocumentor-summary">Aggregates the data used to load the session selection form.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
@@ -4277,7 +4550,9 @@ All others are triggered by a form submission.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>The sessions will belong to one class.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -4292,6 +4567,22 @@ All others are triggered by a form submission.</p>
             </dl>
 
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/SignupSettings.html#method_load_session_selection#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                
+                                                 <section class="phpdocumentor-description"><p>SignupSettings::create_session_select_form();</p>
+</section>
+
+                                    </dd>
+                                            </dl>
 
     
 
@@ -4311,11 +4602,11 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1111</span>
+    <span class="phpdocumentor-element-found-in__line">1140</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Load the class selection.</p>
+        <p class="phpdocumentor-summary">This function aggregates the data to create the Admin landing page.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
@@ -4327,6 +4618,21 @@ All others are triggered by a form submission.</p>
     
     
     
+    <h5 class="phpdocumentor-tag-list__heading" id="tags">
+        Tags
+        <a href="classes/SignupSettings.html#method_load_signup_selection#tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                                    <dt class="phpdocumentor-tag-list__entry">
+                    <span class="phpdocumentor-tag__name">see</span>
+                </dt>
+                <dd class="phpdocumentor-tag-list__definition">
+                                                                                    <span class="phpdocumentor-tag-link"><a href="classes/SignupSettings.html#method_create_signup_select_form"><abbr title="\SignupSettings::create_signup_select_form()">SignupSettings::create_signup_select_form()</abbr></a></span>
+                                        
+                                             
+                                    </dd>
+                                            </dl>
 
     
 
@@ -4346,7 +4652,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1078</span>
+    <span class="phpdocumentor-element-found-in__line">1105</span>
 
     </aside>
 
@@ -4393,7 +4699,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">151</span>
+    <span class="phpdocumentor-element-found-in__line">154</span>
 
     </aside>
 
@@ -4401,20 +4707,23 @@ All others are triggered by a form submission.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-                    <span class="phpdocumentor-signature__name">submit_class</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$post</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">submit_class</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$post</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>The function is only used for updating a signup once it
+has been edited.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$post</span>
-                : <span class="phpdocumentor-signature__argument__return-type">int</span>
+                : <span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The posted data from the form.</p>
+                    <section class="phpdocumentor-description"><p>The posted data from the edit form.</p>
 </section>
 
             </dd>
@@ -4440,11 +4749,11 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2103</span>
+    <span class="phpdocumentor-element-found-in__line">2149</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Submit the description to the database.</p>
+        <p class="phpdocumentor-summary">Submit the new class to the database.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
@@ -4453,7 +4762,10 @@ All others are triggered by a form submission.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>This function runs between creating the class and
+adding the sessions.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -4487,11 +4799,11 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">328</span>
+    <span class="phpdocumentor-element-found-in__line">338</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Submit session to databse.</p>
+        <p class="phpdocumentor-summary">Submit session to database.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
@@ -4500,7 +4812,12 @@ All others are triggered by a form submission.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>When a session has been edited this is the function that saves
+it to the database.</p>
+<p>When editing a session there is an option select the instructors
+for the session. This function also links the selected instructors to the session.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -4534,7 +4851,7 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">974</span>
+    <span class="phpdocumentor-element-found-in__line">1001</span>
 
     </aside>
 
@@ -4542,7 +4859,7 @@ All others are triggered by a form submission.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-                    <span class="phpdocumentor-signature__name">submit_session_attendees</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$post</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">submit_session_attendees</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$post</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -4552,7 +4869,7 @@ All others are triggered by a form submission.</p>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$post</span>
-                : <span class="phpdocumentor-signature__argument__return-type">int</span>
+                : <span class="phpdocumentor-signature__argument__return-type">array&lt;string|int, mixed&gt;</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>The posted data from the form.</p>
@@ -4581,15 +4898,15 @@ All others are triggered by a form submission.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsettings.php"><a href="files/includes-class-signupsettings.html"><abbr title="includes/class-signupsettings.php">class-signupsettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1288</span>
+    <span class="phpdocumentor-element-found-in__line">1323</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Formats the message to display after an upate to the DB has been made.</p>
+        <p class="phpdocumentor-summary">Formats the message to display after an update to the DB has been made.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">private</span>
-                    <span class="phpdocumentor-signature__name">update_message</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$rows_updated</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$last_error</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$what_was_updated</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">&#039;Rows Updated&#039;</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">update_message</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$rows_updated</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$last_error</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__return-type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$what_was_updated</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">&#039;Rows Updated&#039;</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -4599,7 +4916,7 @@ All others are triggered by a form submission.</p>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-signature__argument__name">$rows_updated</span>
-                : <span class="phpdocumentor-signature__argument__return-type">mixed</span>
+                : <span class="phpdocumentor-signature__argument__return-type">int</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>How many rows were updated in the database.</p>
@@ -4778,7 +5095,7 @@ All others are triggered by a form submission.</p>
                             <li class="phpdocumentor-on-this-page-section__title">Properties</li>
                 <li>
                     <ul class="phpdocumentor-list -clean">
-                                                    <li class=""><a href="classes/SignUpsBase.html#property_date_time_zone">$date_time_zone</li>
+                                                    <li class=""><a href="classes/SignUpsBase.html#property_date_time_zone">$date_time_zone</a></li>
                                             </ul>
                 </li>
             
@@ -4805,10 +5122,11 @@ All others are triggered by a form submission.</p>
                                             <li class=""><a href="classes/SignUpsBase.html#method_load_template_selection">load_template_selection()</a></li>
                                             <li class=""><a href="classes/SignUpsBase.html#method_register_route">register_route()</a></li>
                                             <li class=""><a href="classes/SignUpsBase.html#method_session_attendee_string">session_attendee_string()</a></li>
+                                            <li class=""><a href="classes/SignUpsBase.html#method_set_clear_cache">set_clear_cache()</a></li>
                                             <li class=""><a href="classes/SignUpsBase.html#method_update_calendar">update_calendar()</a></li>
                                             <li class=""><a href="classes/SignUpsBase.html#method_update_sessions_price_id">update_sessions_price_id()</a></li>
                                             <li class=""><a href="classes/SignUpsBase.html#method_write_log">write_log()</a></li>
-                                            <li class=""><a href="classes/SignupSettings.html#method_add_new_session_form">add_new_session_form()</a></li>
+                                            <li class=""><a href="classes/SignupSettings.html#method_add_new_session">add_new_session()</a></li>
                                             <li class=""><a href="classes/SignUpsBase.html#method_add_remove_chk">add_remove_chk()</a></li>
                                             <li class=""><a href="classes/SignupSettings.html#method_add_session_attendees">add_session_attendees()</a></li>
                                             <li class=""><a href="classes/SignupSettings.html#method_add_session_slots">add_session_slots()</a></li>
