@@ -1352,6 +1352,13 @@ class SignUpsBase {
 			?>
 			</table>
 			<?php
+			$current_user = wp_get_current_user();
+			$sgm          = new SendGridMail();
+			$ip_address   = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : 'No Ip Address';
+			$url          = get_site_url();
+			$link         = "<a href='$url/signups/?signup_id=" . $post['add_attendee_session'] . '&secret=' . $post['user_secret'] . "'>Edit Signup</a>";
+			$body        .= '<br><br> IP Address: ' . $ip_address . '<br>' . $link . '<br>' . esc_html( $current_user->user_login ) . '<br>' . esc_html( $current_user->user_email ) . '<br>';
+			$sgm->send_mail( 'ecsproull765@gmail.com', 'ADMIN Woodshop Signup', $body );
 			return;
 		}
 

@@ -349,7 +349,7 @@
     <span>
                         &nbsp;: object            </span>
 </dt>
-<dd>Shortcode object for use in api callback.</dd>
+<dd>Stripe payments object.</dd>
 
     </dl>
 
@@ -364,7 +364,8 @@
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>__construct</dd>
+<dd>__construct
+All of routes for the RestFul APIs supported in this class are registered here.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/SignUpsBase.html#method_create_meeting_exceptions">create_meeting_exceptions()</a>
@@ -378,7 +379,7 @@
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Get the attendees for an upcomming class</dd>
+<dd>Get the attendees for an upcoming class.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/SignUpsRestApis.html#method_get_class_reminder_email_data">get_class_reminder_email_data()</a>
@@ -399,7 +400,7 @@
     <span>
                                 &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
-<dd>The actual function that does the work of retrieving the points.</dd>
+<dd>Returns a member&#039;s data. Called from JS to populate the member lookup table.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/SignUpsRestApis.html#method_get_monitors">get_monitors()</a>
@@ -413,7 +414,7 @@
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Get&#039;s the next orientation attendee list</dd>
+<dd>Get&#039;s the next orientation attendee list.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/SignUpsRestApis.html#method_permissions_check">permissions_check()</a>
@@ -423,21 +424,21 @@
 <dd>No permissions needed.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/SignUpsRestApis.html#method_recieve_members">recieve_members()</a>
+    <a class="" href="classes/SignUpsRestApis.html#method_receive_members">receive_members()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Endpoint to recieve the member list needed for signups.</dd>
+<dd>Endpoint to receive the current member list.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/SignUpsRestApis.html#method_recieve_text">recieve_text()</a>
+    <a class="" href="classes/SignUpsRestApis.html#method_receive_text">receive_text()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
 <dd>Endpoint for twilio to post a text message.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/SignUpsRestApis.html#method_regester_payment_route">regester_payment_route()</a>
+    <a class="" href="classes/SignUpsRestApis.html#method_register_payment_route">register_payment_route()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
@@ -448,32 +449,35 @@
     <span>
                                 &nbsp;: object    </span>
 </dt>
-<dd>Get the attendees for an upcomming class</dd>
+<dd>Search the member database table for a member.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/SignUpsRestApis.html#method_set_member_cookie">set_member_cookie()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
-<dd>Set a members badge as a cookie.</dd>
+<dd>Set a members badge as a cookie on the server.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/SignUpsRestApis.html#method_unsubscribe_list">unsubscribe_list()</a>
     <span>
-                                &nbsp;: mixed    </span>
+                                &nbsp;: void    </span>
 </dt>
+<dd>Get the list of members wishing to unsubscribe from the nag mailer.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/SignUpsRestApis.html#method_verify_member_data">verify_member_data()</a>
     <span>
-                                &nbsp;: mixed    </span>
+                                &nbsp;: void    </span>
 </dt>
+<dd>A validation callback that always returns true.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/SignUpsRestApis.html#method_verify_phone_number">verify_phone_number()</a>
     <span>
-                                &nbsp;: mixed    </span>
+                                &nbsp;: void    </span>
 </dt>
+<dd>A validation endpoint that always returns true.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -protected">
     <a class="" href="classes/SignUpsBase.html#method_add_attendee_rolling">add_attendee_rolling()</a>
@@ -1657,7 +1661,7 @@ contact information.</p>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Shortcode object for use in api callback.</p>
+        <p class="phpdocumentor-summary">Stripe payments object.</p>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
@@ -1695,11 +1699,12 @@ contact information.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsrestapis.php"><a href="files/includes-class-signupsrestapis.html"><abbr title="includes/class-signupsrestapis.php">class-signupsrestapis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">57</span>
+    <span class="phpdocumentor-element-found-in__line">58</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">__construct</p>
+        <p class="phpdocumentor-summary">__construct
+All of routes for the RestFul APIs supported in this class are registered here.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -1790,11 +1795,11 @@ contact information.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsrestapis.php"><a href="files/includes-class-signupsrestapis.html"><abbr title="includes/class-signupsrestapis.php">class-signupsrestapis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">324</span>
+    <span class="phpdocumentor-element-found-in__line">325</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Get the attendees for an upcomming class</p>
+        <p class="phpdocumentor-summary">Get the attendees for an upcoming class.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -1837,7 +1842,7 @@ contact information.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsrestapis.php"><a href="files/includes-class-signupsrestapis.html"><abbr title="includes/class-signupsrestapis.php">class-signupsrestapis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">271</span>
+    <span class="phpdocumentor-element-found-in__line">272</span>
 
     </aside>
 
@@ -1892,7 +1897,7 @@ contact information.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsrestapis.php"><a href="files/includes-class-signupsrestapis.html"><abbr title="includes/class-signupsrestapis.php">class-signupsrestapis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">234</span>
+    <span class="phpdocumentor-element-found-in__line">235</span>
 
     </aside>
 
@@ -1927,7 +1932,7 @@ contact information.</p>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type">mixed</span>
                     &mdash;
-                <section class="phpdocumentor-description"><p>Class contacts and number of students signed up..</p>
+                <section class="phpdocumentor-description"><p>Class contacts and number of students signed up.</p>
 </section>
 
             </section>
@@ -1947,11 +1952,11 @@ contact information.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsrestapis.php"><a href="files/includes-class-signupsrestapis.html"><abbr title="includes/class-signupsrestapis.php">class-signupsrestapis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">741</span>
+    <span class="phpdocumentor-element-found-in__line">771</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">The actual function that does the work of retrieving the points.</p>
+        <p class="phpdocumentor-summary">Returns a member&#039;s data. Called from JS to populate the member lookup table.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -1960,7 +1965,11 @@ contact information.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>This has two error codes. 401 is returned if a member tries to sign up for
+something that he doesn't have permission to do. 400 is returned if the member
+isn't found in the database.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -2002,7 +2011,7 @@ contact information.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsrestapis.php"><a href="files/includes-class-signupsrestapis.html"><abbr title="includes/class-signupsrestapis.php">class-signupsrestapis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">454</span>
+    <span class="phpdocumentor-element-found-in__line">462</span>
 
     </aside>
 
@@ -2023,7 +2032,7 @@ contact information.</p>
                 : <span class="phpdocumentor-signature__argument__return-type">mixed</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Request from an AJAX call.</p>
+                    <section class="phpdocumentor-description"><p>The request data that contains the date of interest.</p>
 </section>
 
             </dd>
@@ -2057,11 +2066,11 @@ contact information.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsrestapis.php"><a href="files/includes-class-signupsrestapis.html"><abbr title="includes/class-signupsrestapis.php">class-signupsrestapis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">360</span>
+    <span class="phpdocumentor-element-found-in__line">361</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Get&#039;s the next orientation attendee list</p>
+        <p class="phpdocumentor-summary">Get&#039;s the next orientation attendee list.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -2104,7 +2113,7 @@ contact information.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsrestapis.php"><a href="files/includes-class-signupsrestapis.html"><abbr title="includes/class-signupsrestapis.php">class-signupsrestapis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">796</span>
+    <span class="phpdocumentor-element-found-in__line">826</span>
 
     </aside>
 
@@ -2139,28 +2148,32 @@ contact information.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_recieve_members">
-        recieve_members()
-        <a href="classes/SignUpsRestApis.html#method_recieve_members" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_receive_members">
+        receive_members()
+        <a href="classes/SignUpsRestApis.html#method_receive_members" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsrestapis.php"><a href="files/includes-class-signupsrestapis.html"><abbr title="includes/class-signupsrestapis.php">class-signupsrestapis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">575</span>
+    <span class="phpdocumentor-element-found-in__line">586</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Endpoint to recieve the member list needed for signups.</p>
+        <p class="phpdocumentor-summary">Endpoint to receive the current member list.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">recieve_members</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$data</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">receive_members</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$data</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>Once a day this is called to first clear all members
+and then add the current list back. This assures that anyone
+removed from the server database is removed from the website list.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -2186,15 +2199,15 @@ contact information.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_recieve_text">
-        recieve_text()
-        <a href="classes/SignUpsRestApis.html#method_recieve_text" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_receive_text">
+        receive_text()
+        <a href="classes/SignUpsRestApis.html#method_receive_text" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsrestapis.php"><a href="files/includes-class-signupsrestapis.html"><abbr title="includes/class-signupsrestapis.php">class-signupsrestapis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">689</span>
+    <span class="phpdocumentor-element-found-in__line">709</span>
 
     </aside>
 
@@ -2202,12 +2215,15 @@ contact information.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">recieve_text</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$request</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">receive_text</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$request</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>The text message is recorded in the database as well
+as forwarding the text to a selected phone number.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -2233,15 +2249,15 @@ contact information.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_regester_payment_route">
-        regester_payment_route()
-        <a href="classes/SignUpsRestApis.html#method_regester_payment_route" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_register_payment_route">
+        register_payment_route()
+        <a href="classes/SignUpsRestApis.html#method_register_payment_route" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsrestapis.php"><a href="files/includes-class-signupsrestapis.html"><abbr title="includes/class-signupsrestapis.php">class-signupsrestapis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">397</span>
+    <span class="phpdocumentor-element-found-in__line">398</span>
 
     </aside>
 
@@ -2249,7 +2265,7 @@ contact information.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">regester_payment_route</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">register_payment_route</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -2276,11 +2292,11 @@ contact information.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsrestapis.php"><a href="files/includes-class-signupsrestapis.html"><abbr title="includes/class-signupsrestapis.php">class-signupsrestapis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">287</span>
+    <span class="phpdocumentor-element-found-in__line">288</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Get the attendees for an upcomming class</p>
+        <p class="phpdocumentor-summary">Search the member database table for a member.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -2327,11 +2343,11 @@ contact information.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsrestapis.php"><a href="files/includes-class-signupsrestapis.html"><abbr title="includes/class-signupsrestapis.php">class-signupsrestapis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">556</span>
+    <span class="phpdocumentor-element-found-in__line">564</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Set a members badge as a cookie.</p>
+        <p class="phpdocumentor-summary">Set a members badge as a cookie on the server.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -2374,19 +2390,22 @@ contact information.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsrestapis.php"><a href="files/includes-class-signupsrestapis.html"><abbr title="includes/class-signupsrestapis.php">class-signupsrestapis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">409</span>
+    <span class="phpdocumentor-element-found-in__line">417</span>
 
     </aside>
 
-    
+        <p class="phpdocumentor-summary">Get the list of members wishing to unsubscribe from the nag mailer.</p>
+
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">unsubscribe_list</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$data</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">unsubscribe_list</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$data</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>This function is also used to clear the list after they have been unsubscribed.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -2418,19 +2437,22 @@ contact information.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsrestapis.php"><a href="files/includes-class-signupsrestapis.html"><abbr title="includes/class-signupsrestapis.php">class-signupsrestapis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">679</span>
+    <span class="phpdocumentor-element-found-in__line">697</span>
 
     </aside>
 
-    
+        <p class="phpdocumentor-summary">A validation callback that always returns true.</p>
+
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">verify_member_data</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$data</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">verify_member_data</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$data</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>Validation is done elsewhere.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -2462,19 +2484,22 @@ contact information.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsrestapis.php"><a href="files/includes-class-signupsrestapis.html"><abbr title="includes/class-signupsrestapis.php">class-signupsrestapis.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">731</span>
+    <span class="phpdocumentor-element-found-in__line">758</span>
 
     </aside>
 
-    
+        <p class="phpdocumentor-summary">A validation endpoint that always returns true.</p>
+
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">verify_phone_number</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$data</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">verify_phone_number</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$data</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>Validation is done elsewhere.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -2557,7 +2582,7 @@ a member.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1637</span>
+    <span class="phpdocumentor-element-found-in__line">1644</span>
 
     </aside>
 
@@ -2625,7 +2650,7 @@ into their database.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1591</span>
+    <span class="phpdocumentor-element-found-in__line">1598</span>
 
     </aside>
 
@@ -3268,7 +3293,7 @@ incorrect data about themselves.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1906</span>
+    <span class="phpdocumentor-element-found-in__line">1913</span>
 
     </aside>
 
@@ -3323,7 +3348,7 @@ incorrect data about themselves.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1775</span>
+    <span class="phpdocumentor-element-found-in__line">1782</span>
 
     </aside>
 
@@ -3421,7 +3446,7 @@ incorrect data about themselves.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1512</span>
+    <span class="phpdocumentor-element-found-in__line">1519</span>
 
     </aside>
 
@@ -3703,7 +3728,7 @@ holds on to the old data. You can only clear the cache at plugin load/reload.</p
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1679</span>
+    <span class="phpdocumentor-element-found-in__line">1686</span>
 
     </aside>
 
@@ -3750,7 +3775,7 @@ holds on to the old data. You can only clear the cache at plugin load/reload.</p
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="includes/class-signupsbase.php"><a href="files/includes-class-signupsbase.html"><abbr title="includes/class-signupsbase.php">class-signupsbase.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1563</span>
+    <span class="phpdocumentor-element-found-in__line">1570</span>
 
     </aside>
 
@@ -4291,9 +4316,9 @@ to the signup.</p>
                                             <li class=""><a href="classes/SignUpsRestApis.html#method_get_monitors">get_monitors()</a></li>
                                             <li class=""><a href="classes/SignUpsRestApis.html#method_get_orientation_list">get_orientation_list()</a></li>
                                             <li class=""><a href="classes/SignUpsRestApis.html#method_permissions_check">permissions_check()</a></li>
-                                            <li class=""><a href="classes/SignUpsRestApis.html#method_recieve_members">recieve_members()</a></li>
-                                            <li class=""><a href="classes/SignUpsRestApis.html#method_recieve_text">recieve_text()</a></li>
-                                            <li class=""><a href="classes/SignUpsRestApis.html#method_regester_payment_route">regester_payment_route()</a></li>
+                                            <li class=""><a href="classes/SignUpsRestApis.html#method_receive_members">receive_members()</a></li>
+                                            <li class=""><a href="classes/SignUpsRestApis.html#method_receive_text">receive_text()</a></li>
+                                            <li class=""><a href="classes/SignUpsRestApis.html#method_register_payment_route">register_payment_route()</a></li>
                                             <li class=""><a href="classes/SignUpsRestApis.html#method_search_members">search_members()</a></li>
                                             <li class=""><a href="classes/SignUpsRestApis.html#method_set_member_cookie">set_member_cookie()</a></li>
                                             <li class=""><a href="classes/SignUpsRestApis.html#method_unsubscribe_list">unsubscribe_list()</a></li>

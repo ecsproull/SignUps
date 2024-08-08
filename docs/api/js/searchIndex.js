@@ -1098,7 +1098,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignUpsRestApis\u003A\u003A__construct\u0028\u0029",
             "name": "__construct",
-            "summary": "__construct",
+            "summary": "__construct\nAll\u0020of\u0020routes\u0020for\u0020the\u0020RestFul\u0020APIs\u0020supported\u0020in\u0020this\u0020class\u0020are\u0020registered\u0020here.",
             "url": "classes/SignUpsRestApis.html#method___construct"
         },                {
             "fqsen": "\\SignUpsRestApis\u003A\u003Aget_class_status\u0028\u0029",
@@ -1113,27 +1113,27 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignUpsRestApis\u003A\u003Asearch_members\u0028\u0029",
             "name": "search_members",
-            "summary": "Get\u0020the\u0020attendees\u0020for\u0020an\u0020upcomming\u0020class",
+            "summary": "Search\u0020the\u0020member\u0020database\u0020table\u0020for\u0020a\u0020member.",
             "url": "classes/SignUpsRestApis.html#method_search_members"
         },                {
             "fqsen": "\\SignUpsRestApis\u003A\u003Aget_attendee_list\u0028\u0029",
             "name": "get_attendee_list",
-            "summary": "Get\u0020the\u0020attendees\u0020for\u0020an\u0020upcomming\u0020class",
+            "summary": "Get\u0020the\u0020attendees\u0020for\u0020an\u0020upcoming\u0020class.",
             "url": "classes/SignUpsRestApis.html#method_get_attendee_list"
         },                {
             "fqsen": "\\SignUpsRestApis\u003A\u003Aget_orientation_list\u0028\u0029",
             "name": "get_orientation_list",
-            "summary": "Get\u0027s\u0020the\u0020next\u0020orientation\u0020attendee\u0020list",
+            "summary": "Get\u0027s\u0020the\u0020next\u0020orientation\u0020attendee\u0020list.",
             "url": "classes/SignUpsRestApis.html#method_get_orientation_list"
         },                {
-            "fqsen": "\\SignUpsRestApis\u003A\u003Aregester_payment_route\u0028\u0029",
-            "name": "regester_payment_route",
+            "fqsen": "\\SignUpsRestApis\u003A\u003Aregister_payment_route\u0028\u0029",
+            "name": "register_payment_route",
             "summary": "Route\u0020used\u0020for\u0020Stripe.com\u0020callback.",
-            "url": "classes/SignUpsRestApis.html#method_regester_payment_route"
+            "url": "classes/SignUpsRestApis.html#method_register_payment_route"
         },                {
             "fqsen": "\\SignUpsRestApis\u003A\u003Aunsubscribe_list\u0028\u0029",
             "name": "unsubscribe_list",
-            "summary": "",
+            "summary": "Get\u0020the\u0020list\u0020of\u0020members\u0020wishing\u0020to\u0020unsubscribe\u0020from\u0020the\u0020nag\u0020mailer.",
             "url": "classes/SignUpsRestApis.html#method_unsubscribe_list"
         },                {
             "fqsen": "\\SignUpsRestApis\u003A\u003Aget_monitors\u0028\u0029",
@@ -1143,32 +1143,32 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignUpsRestApis\u003A\u003Aset_member_cookie\u0028\u0029",
             "name": "set_member_cookie",
-            "summary": "Set\u0020a\u0020members\u0020badge\u0020as\u0020a\u0020cookie.",
+            "summary": "Set\u0020a\u0020members\u0020badge\u0020as\u0020a\u0020cookie\u0020on\u0020the\u0020server.",
             "url": "classes/SignUpsRestApis.html#method_set_member_cookie"
         },                {
-            "fqsen": "\\SignUpsRestApis\u003A\u003Arecieve_members\u0028\u0029",
-            "name": "recieve_members",
-            "summary": "Endpoint\u0020to\u0020recieve\u0020the\u0020member\u0020list\u0020needed\u0020for\u0020signups.",
-            "url": "classes/SignUpsRestApis.html#method_recieve_members"
+            "fqsen": "\\SignUpsRestApis\u003A\u003Areceive_members\u0028\u0029",
+            "name": "receive_members",
+            "summary": "Endpoint\u0020to\u0020receive\u0020the\u0020current\u0020member\u0020list.",
+            "url": "classes/SignUpsRestApis.html#method_receive_members"
         },                {
             "fqsen": "\\SignUpsRestApis\u003A\u003Averify_member_data\u0028\u0029",
             "name": "verify_member_data",
-            "summary": "",
+            "summary": "A\u0020validation\u0020callback\u0020that\u0020always\u0020returns\u0020true.",
             "url": "classes/SignUpsRestApis.html#method_verify_member_data"
         },                {
-            "fqsen": "\\SignUpsRestApis\u003A\u003Arecieve_text\u0028\u0029",
-            "name": "recieve_text",
+            "fqsen": "\\SignUpsRestApis\u003A\u003Areceive_text\u0028\u0029",
+            "name": "receive_text",
             "summary": "Endpoint\u0020for\u0020twilio\u0020to\u0020post\u0020a\u0020text\u0020message.",
-            "url": "classes/SignUpsRestApis.html#method_recieve_text"
+            "url": "classes/SignUpsRestApis.html#method_receive_text"
         },                {
             "fqsen": "\\SignUpsRestApis\u003A\u003Averify_phone_number\u0028\u0029",
             "name": "verify_phone_number",
-            "summary": "",
+            "summary": "A\u0020validation\u0020endpoint\u0020that\u0020always\u0020returns\u0020true.",
             "url": "classes/SignUpsRestApis.html#method_verify_phone_number"
         },                {
             "fqsen": "\\SignUpsRestApis\u003A\u003Aget_member\u0028\u0029",
             "name": "get_member",
-            "summary": "The\u0020actual\u0020function\u0020that\u0020does\u0020the\u0020work\u0020of\u0020retrieving\u0020the\u0020points.",
+            "summary": "Returns\u0020a\u0020member\u0027s\u0020data.\u0020Called\u0020from\u0020JS\u0020to\u0020populate\u0020the\u0020member\u0020lookup\u0020table.",
             "url": "classes/SignUpsRestApis.html#method_get_member"
         },                {
             "fqsen": "\\SignUpsRestApis\u003A\u003Apermissions_check\u0028\u0029",
@@ -1178,7 +1178,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\SignUpsRestApis\u003A\u003A\u0024stripe_payments",
             "name": "stripe_payments",
-            "summary": "Shortcode\u0020object\u0020for\u0020use\u0020in\u0020api\u0020callback.",
+            "summary": "Stripe\u0020payments\u0020object.",
             "url": "classes/SignUpsRestApis.html#property_stripe_payments"
         },                {
             "fqsen": "\\StripePayments",

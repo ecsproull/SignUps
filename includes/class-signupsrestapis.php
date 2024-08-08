@@ -18,21 +18,21 @@ class User {
 	/**
 	 * Member Badge
 	 *
-	 * @var mixed
+	 * @var string
 	 */
-
 	public $badge;
+	
 	/**
 	 * First Name
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	public $first;
 
 	/**
 	 * Last Name
 	 *
-	 * @var mixed
+	 * @var string
 	 */
 	public $last;
 }
@@ -43,7 +43,7 @@ class User {
 class SignUpsRestApis extends SignUpsBase {
 
 	/**
-	 * Shortcode object for use in api callback.
+	 * Stripe payments object.
 	 *
 	 * @var object
 	 */
@@ -51,6 +51,7 @@ class SignUpsRestApis extends SignUpsBase {
 
 	/**
 	 * __construct
+	 * All of routes for the RestFul APIs supported in this class are registered here.
 	 *
 	 * @return void
 	 */
@@ -90,7 +91,7 @@ class SignUpsRestApis extends SignUpsBase {
 				$this->register_route(
 					'scwmembers/v1',
 					'/text',
-					'recieve_text',
+					'receive_text',
 					$this,
 					array (
 						'description'       => esc_html( 'Endpoint for text messages' ),
@@ -108,7 +109,7 @@ class SignUpsRestApis extends SignUpsBase {
 				$this->register_route(
 					'scwmembers/v1',
 					'/members',
-					'recieve_members',
+					'receive_members',
 					$this,
 					array(
 						'description'       => esc_html( 'Endpoint to update the members database' ),
@@ -221,7 +222,7 @@ class SignUpsRestApis extends SignUpsBase {
 
 		add_action(
 			'rest_api_init',
-			array( $this, 'regester_payment_route' )
+			array( $this, 'register_payment_route' )
 		);
 	}
 
@@ -229,7 +230,7 @@ class SignUpsRestApis extends SignUpsBase {
 	 * Get the status of a class for an instructor.
 	 *
 	 * @param  mixed $request Request data.
-	 * @return mixed Class contacts and number of students signed up..
+	 * @return mixed Class contacts and number of students signed up.
 	 */
 	public function get_class_status( $request ) {
 		global $wpdb;
@@ -279,7 +280,7 @@ class SignUpsRestApis extends SignUpsBase {
 	}
 
 	/**
-	 * Get the attendees for an upcomming class
+	 * Search the member database table for a member.
 	 *
 	 * @param  mixed $request Posted data to search with.
 	 * @return object
@@ -316,7 +317,7 @@ class SignUpsRestApis extends SignUpsBase {
 	}
 
 	/**
-	 * Get the attendees for an upcomming class
+	 * Get the attendees for an upcoming class.
 	 *
 	 * @param  mixed $data Posted data that tells the date for the classes.
 	 * @return void
@@ -352,7 +353,7 @@ class SignUpsRestApis extends SignUpsBase {
 	}
 
 	/**
-	 * Get's the next orientation attendee list
+	 * Get's the next orientation attendee list.
 	 *
 	 * @param  mixed $data Data for the request.
 	 * @return void
@@ -394,7 +395,7 @@ class SignUpsRestApis extends SignUpsBase {
 	 *
 	 * @return void
 	 */
-	public function regester_payment_route() {
+	public function register_payment_route() {
 		register_rest_route(
 			'scwmembers/v1',
 			'/payments',
@@ -405,7 +406,14 @@ class SignUpsRestApis extends SignUpsBase {
 			)
 		);
 	}
-
+	
+	/**
+	 * Get the list of members wishing to unsubscribe from the nag mailer.
+	 * This function is also used to clear the list after they have been unsubscribed.
+	 *
+	 * @param  mixed $data
+	 * @return void
+	 */
 	public function unsubscribe_list( $data ) {
 		global $wpdb;
 		$key      = '8c62a157-7ee8-4104-9f91-930eac39fe2f';
@@ -448,7 +456,7 @@ class SignUpsRestApis extends SignUpsBase {
 	/**
 	 * Gets the monitors for the specified date.
 	 *
-	 * @param  mixed $request Request from an AJAX call.
+	 * @param  mixed $request The request data that contains the date of interest.
 	 * @return mixed $results the results of the query.
 	 */
 	public function get_monitors( $request ) {
@@ -548,7 +556,7 @@ class SignUpsRestApis extends SignUpsBase {
 	}
 
 	/**
-	 * Set a members badge as a cookie.
+	 * Set a members badge as a cookie on the server.
 	 *
 	 * @param  mixed $request Request from an AJAX call.
 	 * @return void
@@ -567,12 +575,15 @@ class SignUpsRestApis extends SignUpsBase {
 
 	/**
 	 *
-	 * Endpoint to recieve the member list needed for signups.
+	 * Endpoint to receive the current member list.
+	 * Once a day this is called to first clear all members
+	 * and then add the current list back. This assures that anyone
+	 * removed from the server database is removed from the website list.
 	 *
 	 * @param  mixed $data json list of members or permissions.
 	 * @return void
 	 */
-	public function recieve_members( $data ) {
+	public function receive_members( $data ) {
 		global $wpdb;
 		$dt_now = new DateTime( 'now', new DateTimeZone( 'America/Phoenix' ) );
 		$this->write_log( 'Begin member update ' . $dt_now->format( self::DATETIME_FORMAT_INPUT ) );
@@ -675,18 +686,27 @@ class SignUpsRestApis extends SignUpsBase {
 
 		$this->write_log( 'Member update complete' );
 	}
-
+	
+	/**
+	 * A validation callback that always returns true.
+	 * Validation is done elsewhere.
+	 *
+	 * @param  mixed $data
+	 * @return void
+	 */
 	public function verify_member_data( $data ) {
 		return true;
 	}
 
 	/**
 	 * Endpoint for twilio to post a text message.
+	 * The text message is recorded in the database as well
+	 * as forwarding the text to a selected phone number.
 	 *
 	 * @param  mixed $request Parameters for the request.
 	 * @return void
 	 */
-	public function recieve_text( $request ) {
+	public function receive_text( $request ) {
 		global $wpdb;
 		$data   = $request->get_params();
 		$sid    = getenv( "TWILIO_ACCOUNT_SID" );
@@ -727,13 +747,23 @@ class SignUpsRestApis extends SignUpsBase {
 			}
 		}
 	}
-
+	
+	/**
+	 * A validation endpoint that always returns true.
+	 * Validation is done elsewhere.
+	 *
+	 * @param  mixed $data
+	 * @return void
+	 */
 	public function verify_phone_number( $data ) {
 		return true;
 	}
 
 	/**
-	 * The actual function that does the work of retrieving the points.
+	 * Returns a member's data. Called from JS to populate the member lookup table.
+	 * This has two error codes. 401 is returned if a member tries to sign up for
+	 * something that he doesn't have permission to do. 400 is returned if the member
+	 * isn't found in the database. 
 	 *
 	 * @param string $request Members badge number.
 	 * @return array The results of the query.
