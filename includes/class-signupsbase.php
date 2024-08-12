@@ -1312,15 +1312,15 @@ class SignUpsBase {
 				$where                = array();
 				$where['attendee_id'] = $slot_id;
 
-				$wpdb->query(
+				/* $wpdb->query(
 					$wpdb->prepare(
 						'LOCK TABLES %1s WRITE',
 						self::ATTENDEES_ROLLING_TABLE
 					)
-				);
+				); */
 
 				$delete_return_value = $wpdb->delete( self::ATTENDEES_ROLLING_TABLE, $where );
-				$wpdb->query( 'UNLOCK TABLES' );
+				//$wpdb->query( 'UNLOCK TABLES' );
 				?>
 				<tr class="attendee-row" style="background-color:#FFCCCB;">
 					<td><?php echo esc_html( $slot_start->format( self::DATE_FORMAT ) ); ?></td>
@@ -1414,12 +1414,12 @@ class SignUpsBase {
 						$comment_name                             = 'comment-' . $slot_parts[3];
 						$slot_count                               = $slot_parts[5];
 
-						$wpdb->query(
+						/* $wpdb->query(
 							$wpdb->prepare(
 								'LOCK TABLES %1s WRITE',
 								self::ATTENDEES_ROLLING_TABLE
 							)
-						);
+						); */
 
 						$dup_rows = $wpdb->get_results(
 							$wpdb->prepare(
@@ -1443,7 +1443,7 @@ class SignUpsBase {
 							<?php
 						}
 
-						$wpdb->query( 'UNLOCK TABLES' );
+						//$wpdb->query( 'UNLOCK TABLES' );
 						?>
 						<tr class="attendee-row">
 							<td><?php echo esc_html( $slot_start->format( self::DATE_FORMAT ) ); ?></td>

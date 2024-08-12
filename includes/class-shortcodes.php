@@ -579,13 +579,13 @@ ob_start();
 					<th>Status</th>
 				</tr>
 				<?php
-				$wpdb->query(
+				/* $wpdb->query(
 					$wpdb->prepare(
 						'LOCK TABLES %1s WRITE, %1s READ',
 						self::ATTENDEES_TABLE,
 						self::SESSIONS_TABLE
 					)
-				);
+				); */
 
 				$current_session_attendees = $wpdb->get_results(
 					$wpdb->prepare(
@@ -641,7 +641,7 @@ ob_start();
 						$last_id = $wpdb->insert_id;
 					}
 				}
-				$wpdb->query( 'UNLOCK TABLES' );
+				//$wpdb->query( 'UNLOCK TABLES' );
 
 				/**
 				 * Four checks before we collect money.

@@ -121,13 +121,13 @@ class StripePayments extends SignUpsBase {
 		switch ( $event->type ) {
 			case 'checkout.session.completed':
 				$payment_intent = $event->data->object;
-				$wpdb->query(
+				/* $wpdb->query(
 					$wpdb->prepare(
 						'LOCK TABLES %1s WRITE, %1s WRITE',
 						self::ATTENDEES_TABLE,
 						self::PAYMENTS_TABLE
 					)
-				);
+				); */
 
 				$payment_row = $wpdb->get_results(
 					$wpdb->prepare(
@@ -167,18 +167,18 @@ class StripePayments extends SignUpsBase {
 					}
 				}
 
-				$wpdb->query( 'UNLOCK TABLES' );
+				//$wpdb->query( 'UNLOCK TABLES' );
 				break;
 
 			case 'payment_intent.succeeded':
 				$payment_intent = $event->data->object;
-				$wpdb->query(
+				/* $wpdb->query(
 					$wpdb->prepare(
 						'LOCK TABLES %1s WRITE, %1s WRITE',
 						self::ATTENDEES_TABLE,
 						self::PAYMENTS_TABLE
 					)
-				);
+				); */
 
 				$payment_row = $wpdb->get_results(
 					$wpdb->prepare(
@@ -225,7 +225,7 @@ class StripePayments extends SignUpsBase {
 					$wpdb->insert( self::PAYMENTS_TABLE, $update );
 				}
 
-				$wpdb->query( 'UNLOCK TABLES' );
+				//$wpdb->query( 'UNLOCK TABLES' );
 				break;
 			case 'payment_method.attached':
 				$payment_method = $event->data->object; // Contains a \Stripe\PaymentMethod.;.
