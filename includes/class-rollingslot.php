@@ -13,49 +13,49 @@ class RollingSlot {
 	/**
 	 * Slot start date and time.
 	 *
-	 * @var mixed
+	 *  mixed
 	 */
 	public $start_time_date;
 
 	/**
 	 * Slot start date and time.
 	 *
-	 * @var mixed
+	 *  mixed
 	 */
 	public $start_time;
 
 	/**
 	 * Slot item title.
 	 *
-	 * @var mixed
+	 *  mixed
 	 */
 	public $item;
 
 	/**
 	 * Badge is the slot is filled
 	 *
-	 * @var mixed
+	 *  mixed
 	 */
 	public $badge;
 
 	/**
 	 * Members first name.
 	 *
-	 * @var mixed
+	 *  mixed
 	 */
 	public $first_name;
 
 	/**
 	 * Members last name.
 	 *
-	 * @var mixed
+	 *  mixed
 	 */
 	public $last_name;
 
 	/**
 	 * Members last name.
 	 *
-	 * @var mixed
+	 *  mixed
 	 */
 	public $email;
 }

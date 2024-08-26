@@ -121,70 +121,6 @@ ob_start();
 		<?php
 	}
 
-	/**
-	 * Called in response to a click on the Unsubscribe link in a generated monitor or class email.
-	 * The request is stored in the unsubscribe table where the server can retrieve it and
-	 * perform the unsubscribe on the server.
-	 *
-	 * @see SignUpsBase::UNSUBSCRIBE_TABLE
-	 * 
-	 * @param  mixed $key The key that identifies the member.
-	 * @param  mixed $badge The member's badge number.
-	 * @param  mixed $mail_group The email group. Monitor or Class but could be expanded in the future.
-	 * @return void
-	 */
-	protected function unsubscribe_nag_mailer( $key, $badge, $mail_group ) {
-		global $wpdb;
-		$ip_address    = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : 'No Ip Address';
-		$pattern_key   = '/^[0-9a-f]{32}$|^[0-9a-f]{14}\.[0-9]{8}$/ms';
-		$pattern_badge = '/^[0-9]{4}$/ms';
-		if ( ! preg_match( $pattern_key, $key ) || ! preg_match( $pattern_badge, $badge ) ) {
-			$sgm = new SendGridMail();
-			$sgm->send_mail( 'ecsproull765@gmail.com', 'Failed Validation', $key . ' ' . $badge . ' ip : ' . $ip_address );
-			return;
-		}
-
-		$data                           = array();
-		$data['unsubscribe_key']        = $key;
-		$data['unsubscribe_complete']   = false;
-		$data['unsubscribe_badge']      = $badge;
-		$data['unsubscribe_mail_group'] = $mail_group;
-		$member                         = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT *
-				FROM %1s
-				where member_email_secret = %s',
-				self::MEMBERS_TABLE,
-				$key
-			),
-			OBJECT
-		);
-
-		$sgm = new SendGridMail();
-		if ( $member && $member[0]->member_badge === $badge ) {
-			$result = $wpdb->insert( self::UNSUBSCRIBE_TABLE, $data );
-			if ( 1 === $result ) {
-				?>
-				<h1 class='ml-auto mr-auto mt-5'>Request queued and should be complete within 8 hours.</h1>
-				<?php
-				$sgm->send_mail( 'ecsproull765@gmail.com', 'Unsubscribe', $key . ' ' . $badge . ' ip : ' . $ip_address . ' group: ' . $mail_group );
-			} else {
-				?>
-				<div class='ml-auto mr-auto mt-5'>
-					<h1>Opps something failed.</h1>
-					<h2><a href="mailto:ecsproull765@gmail.com?subject=Failed Unsubscribe&body=<?php echo esc_html( $key ); ?>">Email Administrator</a><h2>
-				<?php
-				$sgm->send_mail( 'ecsproull765@gmail.com', 'Unsubscribe Failed', $key . ' ' . $badge . ' ip : ' . $ip_address );
-			}
-		} else {
-			?>
-			<div class='ml-auto mr-auto mt-5'>
-				<h1>Sorry, couldn't locate member. Please email the admin to get removed.</h1>
-				<h2><a href="mailto:ecsproull765@gmail.com?subject=Failed Member Not found.&body=<?php echo esc_html( $key ); ?>">Email Administrator</a><h2>
-			<?php
-			$sgm->send_mail( 'ecsproull765@gmail.com', 'Unsubscribe Failed to Locate Member', $key . ' ' . $badge . ' ip : ' . $ip_address );
-		}
-	}
 
 	/**
 	 * Creates a section of HTML for a new user to identify themselves.
@@ -551,6 +487,7 @@ ob_start();
 			}
 		}
 
+		$qty                                    = 1;
 		$now                                    = new DateTime( 'now', $this->date_time_zone );
 		$slot_parts                             = explode( ',', $post['time_slots'][0] );
 		$slot_start                             = new DateTime( $slot_parts[0], $this->date_time_zone );
@@ -568,6 +505,10 @@ ob_start();
 		$new_attendee['attendee_badge']         = $post['badge_number'];
 		$new_attendee['attendee_payment_start'] = $now->format( self::DATETIME_FORMAT );
 		$new_attendee['attendee_plus_guest']    = isset( $post['attendee_plus_guest'] );
+
+		if ( $new_attendee['attendee_plus_guest'] ) {
+			$qty++;
+		}
 		?>
 		<form method="POST">
 			<table class="mb-100px mr-auto ml-auto">
@@ -699,7 +640,7 @@ ob_start();
 						}
 					}
 
-					$payments->collect_money( $description, $post['session_price_id'], $new_attendee['attendee_badge'], $last_id, $cost );
+					$payments->collect_money( $description, $post['session_price_id'], $new_attendee['attendee_badge'], $last_id, $cost, $qty );
 				}
 				?>
 				<tr class="attendee-row">
@@ -727,7 +668,6 @@ ob_start();
 		</form>
 		<?php
 	}
-
 
 	/**
 	 * Creates the form for selecting a signup. This is the landing page for members.
@@ -795,27 +735,17 @@ ob_start();
 	 * @see ShortCodes::add_attendee_class()
 	 *
 	 * @param  string $signup_name The class name.
-	 * @param  array  $sessions The list of sessions for the class.
-	 * @param  array  $attendees The list of attendees for the class.
-	 * @param  array  $instructors The list of instructors for the class.
-	 * @param  int    $cost The cost of the signup in dollars.
-	 * @param  string $signup_id The signup id.
+	 * @param  array $sessions The list of sessions for the class.
+	 * @param  array $attendees The list of attendees for the class.
+	 * @param  array $instructors The list of instructors for the class.
+	 * @param  int $cost The cost of the signup in dollars.
+	 * @param  int $signup_id The signup id.
 	 * @param  string $user_group The group that defines who can signup.  CNC, Member...etc.
 	 * @param  string $signup_email The email for the contact person for this signup.
 	 * @param  string $signup_contact_name The name for the contact person for this signup.
 	 * @return void
 	 */
-	private function create_session_select_form(
-		$signup_name,
-		$sessions,
-		$attendees,
-		$instructors,
-		$cost,
-		$signup_id,
-		$user_group,
-		$signup_email,
-		$signup_contact_name
-		) {
+	private function create_session_select_form( $signup_name, $sessions, $attendees, $instructors,	$cost, $signup_id, $user_group,	$signup_email, $signup_contact_name	) {
 		?>
 		<div id="session_select" class="text-center mw-800px">
 			<h1 class="mb-2"><?php echo esc_html( $signup_name ); ?></h1>
@@ -1032,7 +962,8 @@ ob_start();
 				signup_default_slots,
 				signup_default_minimum,
 				signup_schedule_desc,
-				signup_rolling_template
+				signup_rolling_template,
+				signup_location
 				FROM %1s
 				WHERE signup_id = %s',
 				self::SIGNUPS_TABLE,
@@ -1113,7 +1044,8 @@ ob_start();
 						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 					</form>
 				</div>
-
+				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Location: </div>
+				<div><?php echo esc_html( $signup->signup_location ); ?></div>
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Schedule: </div>
 				<div><?php echo esc_html( $schedule ); ?></div>
 
@@ -1263,5 +1195,68 @@ ob_start();
 			?>
 		</form>
 		<?php
+	}
+
+	/**
+	 * Called in response to a click on the Unsubscribe link in a generated monitor or class email.
+	 * The request is stored in the unsubscribe table where the server can retrieve it and
+	 * perform the unsubscribe on the server.
+	 * 
+	 * @param string $key The key that identifies the member.
+	 * @param string $badge The member's badge number.
+	 * @param string $mail_group The email group.
+	 * @return void
+	 */
+	protected function unsubscribe_nag_mailer( $key, $badge, $mail_group ) {
+		global $wpdb;
+		$ip_address    = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : 'No Ip Address';
+		$pattern_key   = '/^[0-9a-f]{32}$|^[0-9a-f]{14}\.[0-9]{8}$/ms';
+		$pattern_badge = '/^[0-9]{4}$/ms';
+		if ( ! preg_match( $pattern_key, $key ) || ! preg_match( $pattern_badge, $badge ) ) {
+			$sgm = new SendGridMail();
+			$sgm->send_mail( 'ecsproull765@gmail.com', 'Failed Validation', $key . ' ' . $badge . ' ip : ' . $ip_address );
+			return;
+		}
+
+		$data                           = array();
+		$data['unsubscribe_key']        = $key;
+		$data['unsubscribe_complete']   = false;
+		$data['unsubscribe_badge']      = $badge;
+		$data['unsubscribe_mail_group'] = $mail_group;
+		$member                         = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				where member_email_secret = %s',
+				self::MEMBERS_TABLE,
+				$key
+			),
+			OBJECT
+		);
+
+		$sgm = new SendGridMail();
+		if ( $member && $member[0]->member_badge === $badge ) {
+			$result = $wpdb->insert( self::UNSUBSCRIBE_TABLE, $data );
+			if ( 1 === $result ) {
+				?>
+				<h1 class='ml-auto mr-auto mt-5'>Request queued and should be complete within 8 hours.</h1>
+				<?php
+				$sgm->send_mail( 'ecsproull765@gmail.com', 'Unsubscribe', $key . ' ' . $badge . ' ip : ' . $ip_address . ' group: ' . $mail_group );
+			} else {
+				?>
+				<div class='ml-auto mr-auto mt-5'>
+					<h1>Opps something failed.</h1>
+					<h2><a href="mailto:ecsproull765@gmail.com?subject=Failed Unsubscribe&body=<?php echo esc_html( $key ); ?>">Email Administrator</a><h2>
+				<?php
+				$sgm->send_mail( 'ecsproull765@gmail.com', 'Unsubscribe Failed', $key . ' ' . $badge . ' ip : ' . $ip_address );
+			}
+		} else {
+			?>
+			<div class='ml-auto mr-auto mt-5'>
+				<h1>Sorry, couldn't locate member. Please email the admin to get removed.</h1>
+				<h2><a href="mailto:ecsproull765@gmail.com?subject=Failed Member Not found.&body=<?php echo esc_html( $key ); ?>">Email Administrator</a><h2>
+			<?php
+			$sgm->send_mail( 'ecsproull765@gmail.com', 'Unsubscribe Failed to Locate Member', $key . ' ' . $badge . ' ip : ' . $ip_address );
+		}
 	}
 }

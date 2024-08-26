@@ -13,20 +13,20 @@ class TimeException {
 	/**
 	 * Template that it pertains to.
 	 *
-	 * @var mixed
+	 *  mixed
 	 */
 	public $template;
 	/**
 	 * Reason for the exception.
 	 *
-	 * @var mixed
+	 *  mixed
 	 */
 	public $reason;
 
 	/**
 	 * Begin time
 	 *
-	 * @var mixed
+	 *  mixed
 	 */
 
 	public $begin;
@@ -34,14 +34,14 @@ class TimeException {
 	/**
 	 * End time
 	 *
-	 * @var mixed
+	 *  mixed
 	 */
 	public $end;
 
 	/**
 	 * End time
 	 *
-	 * @var mixed
+	 *  mixed
 	 */
 	public $delete;
 }

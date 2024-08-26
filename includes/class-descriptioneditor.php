@@ -6,18 +6,16 @@
  * @package     SignUps
  * @author      Edward Sproull
  * @copyright   You have the right to copy
- * @license     GPL-2.0+
+ * license     GPL-2.0+
  */
 
 /**
- * Manages creating a signup with one session and a description..
+ * Manages creating a signup with one session and a description.
  */
 class DescriptionEditor extends SignUpsBase {
 
 	/**
 	 * __construct
-	 *
-	 * @return void
 	 */
 	public function __construct() {
 	}

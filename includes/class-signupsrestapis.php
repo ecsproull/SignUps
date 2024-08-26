@@ -6,33 +6,33 @@
  * @package     SignUps
  * @author      Edward Sproull
  * @copyright   You have the right to copy
- * @license     GPL-2.0+
+ * license     GPL-2.0+
  */
 
 use Twilio\Rest\Client;
 
 /**
- * User
+ * User Data
  */
 class User {
 	/**
 	 * Member Badge
 	 *
-	 * @var string
+	 *  string
 	 */
 	public $badge;
 	
 	/**
 	 * First Name
 	 *
-	 * @var string
+	 *  string
 	 */
 	public $first;
 
 	/**
 	 * Last Name
 	 *
-	 * @var string
+	 *  string
 	 */
 	public $last;
 }
@@ -45,7 +45,7 @@ class SignUpsRestApis extends SignUpsBase {
 	/**
 	 * Stripe payments object.
 	 *
-	 * @var object
+	 *  object
 	 */
 	private $stripe_payments;
 
@@ -53,7 +53,6 @@ class SignUpsRestApis extends SignUpsBase {
 	 * __construct
 	 * All of routes for the RestFul APIs supported in this class are registered here.
 	 *
-	 * @return void
 	 */
 	public function __construct() {
 		$this->stripe_payments = new StripePayments();

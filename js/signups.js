@@ -657,4 +657,15 @@ jQuery( document ).ready( function($){
 	$("#start-time-0").on("change", function(e) {
 		$("#start-time").val($("#start-time-0").val());
 	});
+
+	$(".expand-button").click( function(event) {
+		var data = $.parseJSON($(this).attr("data-button"));
+		if ($(".expand-button").html() == "Show All") {
+			$("." + data.session_id).prop("hidden", false);
+			$(".expand-button").html("Hide");
+		} else {
+			$("." + data.session_id).prop("hidden", true);
+			$(".expand-button").html("Show All");
+		}
+	});
 });

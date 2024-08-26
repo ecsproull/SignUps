@@ -25,56 +25,56 @@ class SessionItem {
 	/**
 	 * Session id.
 	 *
-	 * @var int
+	 *  int
 	 */
 	public $session_id;
 
 	/**
 	 * Id of the class that this session belongs to.
 	 *
-	 * @var int
+	 *  int
 	 */
 	public $session_signup_id;
 
 	/**
 	 * Contact email for the session.
 	 *
-	 * @var string
+	 *  string
 	 */
 	public $session_contact_email;
 
 	/**
 	 * Name of the person in charge of this session.
 	 *
-	 * @var string
+	 *  string
 	 */
 	public $session_contact_name;
 
 	/**
 	 * Session start time formatted.
 	 *
-	 * @var string
+	 *  string
 	 */
 	public $session_start_formatted;
 
 	/**
-	 * Session end time formatted..
+	 * Session end time formatted.
 	 *
-	 * @var string
+	 *  string
 	 */
 	public $session_end_formatted;
 
 	/**
 	 * Session location.
 	 *
-	 * 	public @var string
+	 * 	public  string
 	 */
 	public $session_location;
 
 	/**
 	 * Deprecated! this was to represent the SignupGenisus id.
 	 *
-	 * @var int
+	 *  int
 	 */
 	public $session_sig_slotitemid;
 
@@ -82,56 +82,56 @@ class SessionItem {
 	 * Number of slots in this session.
 	 * This can vary from the default number of slots for the class.
 	 *
-	 * @var int
+	 *  int
 	 */
 	public $session_slots;
 
 	/**
 	 * Minimum number of required attendees.
 	 *
-	 * @var int
+	 *  int
 	 */
 	public $signup_default_minimum;
 
 	/**
 	 * Session item name
 	 *
-	 * 	public @var string
+	 * 	string
 	 */
 	public $session_item;
 
 	/**
 	 * Default start time specified in the signup
 	 *
-	 * @var public @var string
+	 * string
 	 */
 	public $session_time_of_day;
 
 	/**
 	 * Default duration specified in the signup
 	 *
-	 * @var public @var string
+	 *  public  string
 	 */
 	public $session_duration;
 
 	/**
 	 * Default number of days between a session
 	 *
-	 * @var int
+	 *  int
 	 */
 	public $session_days_between_sessions;
 
 	/**
 	 * Default days of the month. String to be parsed by PHP DateTime.
 	 *
-	 * public @var string
+	 * string
 	 */
 	public $session_day_of_month;
 
 	/**
 	 * Database id for the calendar item.
 	 *
-	 * @var int
+	 *  int
 	 */
 	public $session_calendar_id;
 
@@ -139,7 +139,7 @@ class SessionItem {
 	 * Scheduling descriptions. Overrides the automatically
 	 * generated schedule description.
 	 *
-	 * @var string
+	 *  string
 	 */
 	public $signup_schedule_desc;
 }

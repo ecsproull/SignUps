@@ -6,16 +6,13 @@
  * @package     SignUps
  * @author      Edward Sproull
  * @copyright   You have the right to copy
- * @license     GPL-2.0+
+ * license     GPL-2.0+
  */
 
 /**
- * Summary
  * Admin page for the signups plugin. Contains the functions for editing the signups.
  * IMPORTANT: Everything in this class is called by an administrator and the term
  * "user" will always be an administrator. 
- *
- * @package SignUps
  */
 class SignupSettings extends SignUpsBase {
 

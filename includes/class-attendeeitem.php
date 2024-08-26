@@ -14,71 +14,71 @@ class AttendeeItem {
 
 	/**
 	 * The primary key.
-	 *
-	 * @var number
+	 * 
+	 * int
 	 */
 	public $attendee_id;
 
 	/**
 	 * The session id.
-	 *
-	 * @var number
+	 * 
+	 * int
 	 */
 	public $attendee_session_id;
 
 	/**
 	 * Email.
-	 *
-	 * @var string
+	 * 
+	 * string
 	 */
 	public $attendee_email;
 
 	/**
 	 * Phone Number.
-	 *
-	 * @var string
+	 * 
+	 * string
 	 */
 	public $attendee_phone;
 
 	/**
 	 * Amount Paid.
-	 *
-	 * @var number
+	 * 
+	 * string
 	 */
 	public $attendee_paid_amount;
 
 	/**
 	 * Last name.
-	 *
-	 * @var string
+	 * 
+	 * string
 	 */
 	public $attendee_lastname;
 
 	/**
 	 * First name.
-	 *
-	 * @var string
+	 * 
+	 * string
 	 */
 	public $attendee_firstname;
 
 	/**
 	 * Item.
-	 *
-	 * @var object
+	 * 
+	 * string
 	 */
 	public $attendee_item;
 
 	/**
 	 * Badge.
-	 *
-	 * @var string
+	 * 
+	 * string
 	 */
 	public $attendee_badge;
 
 	/**
 	 * Secret.
-	 *
-	 * @var string
+	 * 
+	 * string
 	 */
 	public $attendee_secret;
 }

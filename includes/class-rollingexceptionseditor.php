@@ -6,7 +6,7 @@
  * @package     SignUps
  * @author      Edward Sproull
  * @copyright   You have the right to copy
- * @license     GPL-2.0+
+ * license     GPL-2.0+
  */
 
 
@@ -19,7 +19,6 @@ class RollingExceptionsEditor extends SignUpsBase {
 	/**
 	 * __construct
 	 *
-	 * @return void
 	 */
 	public function __construct() {
 	}

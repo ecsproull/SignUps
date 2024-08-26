@@ -6,20 +6,19 @@
  * @package     SignUps
  * @author      Edward Sproull
  * @copyright   You have the right to copy
- * @license     GPL-2.0+
+ * license     GPL-2.0+
  */
 
 
 /**
  * HtmlEditor is used for editing the Description, Instructions and Calendar Description.
- * It is access via the admin menu item named Descriptions.
+ * It is accessed via the admin menu item named Descriptions.
  */
 class HtmlEditor extends SignUpsBase {
 
 	/**
 	 * __construct
 	 *
-	 * @return void
 	 */
 	public function __construct() {
 	}

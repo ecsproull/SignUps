@@ -14,7 +14,7 @@
 	/**
 	 * All usage query.
 	 *
-	 * @var mixed
+	 *  mixed
 	 */
 	private $users_report = 'SELECT * from CncSignUpHistory ORDER BY Machine, StartTime';
 

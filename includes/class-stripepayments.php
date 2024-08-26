@@ -6,7 +6,7 @@
  * @package     SignUps
  * @author      Edward Sproull
  * @copyright   You have the right to copy
- * @license     GPL-2.0+
+ * license     GPL-2.0+
  */
 
 /**
@@ -20,28 +20,28 @@ class StripePayments extends SignUpsBase {
 	/**
 	 * Stripe API secret
 	 *
-	 * @var mixed
+	 *  mixed
 	 */
 	private $stripe_api_secret;
 
 	/**
 	 * Stripe API key.
 	 *
-	 * @var mixed
+	 *  mixed
 	 */
 	private $stripe_api_key;
 
 	/**
 	 * Stripe Endpoint Secret.
 	 *
-	 * @var mixed
+	 *  mixed
 	 */
 	private $stripe_endpoint_secret;
 
 	/**
 	 * Stripe root URL.
 	 *
-	 * @var mixed
+	 *  mixed
 	 */
 	private $stripe_root_url;
 
@@ -49,7 +49,6 @@ class StripePayments extends SignUpsBase {
 	/**
 	 * __construct
 	 *
-	 * @return void
 	 */
 	public function __construct() {
 		global $wpdb;
@@ -143,7 +142,7 @@ class StripePayments extends SignUpsBase {
 				$dt_now      = new DateTime( 'now', $this->date_time_zone );
 				$new_payment = array(
 					'payments_attendee_id'        => $payment_intent->metadata['attendee_id'],
-					'payments_amount_charged'     => $payment_intent->metadata['cost'],
+					'payments_amount_charged'     => (string) ( (int) $payment_intent->metadata['cost'] * $payment_intent->metadata['qty'] ),
 					'payments_signup_description' => $payment_intent->metadata['description'],
 					'payments_last_access_time'   => $dt_now->format( 'Y-m-d H:i:s.u' ),
 					'payments_attendee_badge'     => $payment_intent->metadata['badge'],
@@ -246,9 +245,10 @@ class StripePayments extends SignUpsBase {
 	 * @param int    $badge       Attendee's badge number.
 	 * @param int    $attendee_id The id fo the entry in the attendees table.
 	 * @param int    $cost        The dollar cost of the signup.
+	 * @param int    $qty         The quantity being purchased.
 	 * @return void
 	 */
-	public function collect_money( $description, $price_id, $badge, $attendee_id, $cost ) {
+	public function collect_money( $description, $price_id, $badge, $attendee_id, $cost, $qty ) {
 		\Stripe\Stripe::setApiKey( $this->stripe_api_secret );
 		header( 'Content-Type: application/json' );
 		$signup_domain    = $this->stripe_root_url;
@@ -260,11 +260,12 @@ class StripePayments extends SignUpsBase {
 					'cost'        => $cost,
 					'price_id'    => $price_id,
 					'description' => $description,
+					'qty'         => $qty
 				),
 				'line_items'  => array(
 					array(
 						'price'    => $price_id,
-						'quantity' => 1,
+						'quantity' => $qty,
 					),
 				),
 				'mode'        => 'payment',

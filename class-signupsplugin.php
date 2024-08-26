@@ -6,7 +6,7 @@
  * @package     SignUps
  * @author      Edward Sproull
  * @copyright   You have the right to copy
- * @license     GPL-2.0+
+ * license     GPL-2.0+
  * 
  * This is the content of my section.
  */
@@ -41,7 +41,6 @@ require 'includes/class-rollingtemplateseditor.php';
 require 'includes/class-rollingexceptionseditor.php';
 require 'includes/class-sendgridmail.php';
 require 'includes/class-reports.php';
-require 'includes/class-testplugin.php';
 require 'includes/class-paymentsreview.php';
 require 'includes/class-rollingslot.php';
 require 'includes/class-instructorseditor.php';
@@ -56,37 +55,27 @@ class SignUpsPlugin extends SignUpsBase {
 
 	/**
 	 * Reference to the ShortCode object.
-	 *
-	 * @var mixed
 	 */
 	private $short_codes;
 
 	/**
 	 * Reference to the DescriptionEditor object.
-	 *
-	 * @var mixed
 	 */
 	private $description_editor;
 
 	/**
 	 * Reference to the StripePayments object.
-	 *
-	 * @var mixed
 	 */
 	private $stripe_payments;
 
 	/**
 	 * Reference to the Reports object.
-	 *
-	 * @var mixed
 	 */
 	private $reports;
 
 		
 	/**
 	 * Reference to the MemberRoster object.
-	 *
-	 * @var mixed
 	 */
 	private $roster;
 
@@ -99,7 +88,6 @@ class SignUpsPlugin extends SignUpsBase {
 	 * class in the root of the public user interface. SignupSettings class is the root of the 
 	 * administration interface.
 	 *
-	 * @return void
 	 */
 	public function __construct() {
 		setcookie( 'signups_scw_cache', 'ignore', time()+3600 );
@@ -117,7 +105,7 @@ class SignUpsPlugin extends SignUpsBase {
 		add_shortcode( 'scw_selectclass', array( $this->short_codes, 'user_signup' ) );
 		add_shortcode( 'scw_payment_success', array( $this->stripe_payments, 'payment_success' ) );
 		add_shortcode( 'scw_payment_failure', array( $this->stripe_payments, 'payment_failure' ) );
-		add_shortcode( 'scw_description_editor', array( $this->description_editor, 'load_description_editor' ) );
+		//add_shortcode( 'scw_description_editor', array( $this->description_editor, 'load_description_editor' ) );
 		add_shortcode( 'scw_reports', array( $this->reports, 'class_reports' ) );
 		add_shortcode( 'scw_roster', array( $this->roster, 'member_roster' ) );
 		add_filter( 'query_vars', array( $this, 'wwp_custom_query_vars_filter' ) );

@@ -6,7 +6,7 @@
  * @package     SignUps
  * @author      Edward Sproull
  * @copyright   You have the right to copy
- * @license     GPL-2.0+
+ * license     GPL-2.0+
  */
 
 
@@ -14,30 +14,25 @@
  * SignUpsBase is the base class for most other classes. It contains the strings
  * for accessing the database plus code that is used in multiple places. It is used on
  * both the user and admin side of the code.
+ * 
  */
 class SignUpsBase {
 
 	/**
 	 * Database attendees table.
 	 * Attendees belong to a session for a class or event.
-	 *
-	 * @var string
 	 */
 	protected const ATTENDEES_TABLE = 'wp_scw_attendees';
 
 	/**
 	 * Database signups table. 
 	 * Signups include both rolling signups and class signups.
-	 *
-	 * @var string
 	 */
 	protected const SIGNUPS_TABLE = 'wp_scw_signups';
 
 	/**
 	 * Database sessions table.
 	 * Sessions belong to a class or event signup.
-	 *
-	 * @var string
 	 */
 	protected const SESSIONS_TABLE = 'wp_scw_sessions';
 
@@ -46,31 +41,23 @@ class SignUpsBase {
 	 * Rolling attendees belong to a rolling signup such as monitors.
 	 * Rolling signups do not have sessions so the attendees are directly 
 	 * associated with a signup slot. A slot is identified by a date and time.
-	 *
-	 * @var string
 	 */
 	protected const ATTENDEES_ROLLING_TABLE = 'wp_scw_rolling_attendees';
 
 	/**
 	 * Rolling signup table.
 	 * This is the data used to define a rolling signup.
-	 *
-	 * @var string
 	 */
 	protected const ROLLING_TABLE = 'wp_scw_rolling';
 
 	/**
 	 * Date and time exception for rolling signups. e.g. Shop closures.
-	 *
-	 * @var string
 	 */
 	protected const ROLLING_EXCEPTIONS_TABLE = 'wp_scw_rolling_exceptions';
 
 	/**
 	 * Payments table.
 	 * This is a record of payments received.
-	 *
-	 * @var string
 	 */
 	protected const PAYMENTS_TABLE = 'wp_scw_payments';
 
@@ -79,8 +66,6 @@ class SignUpsBase {
 	 * This table has evolved into a settings table.
 	 * It started as the settings for the Stripe.com api credentials
 	 * but now holds additional data. Should be converted to a key/value pair table.
-	 * 
-	 * @var string
 	 */
 	protected const STRIPE_TABLE = 'wp_scw_stripe';
 
@@ -88,24 +73,18 @@ class SignUpsBase {
 	 * Signup descriptions table.
 	 * Descriptions have three parts. Descriptions, Calendar Description and Instructions.
 	 * All three are held in this table.
-	 *
-	 * @var string
 	 */
 	protected const DESCRIPTIONS_TABLE = 'wp_scw_signup_descriptions';
 
 	/**
 	 * Rolling signup template table.
 	 * To have a rolling signup such as Monitors requires a template to describe its behavior.
-	 *
-	 * @var string
 	 */
 	protected const SIGNUP_TEMPLATE_TABLE = 'wp_scw_template';
 
 	/**
 	 * Rolling signup template item table.
 	 * A template may have many template items and they are held in this table.
-	 *
-	 * @var string
 	 */
 	protected const SIGNUP_TEMPLATE_ITEM_TABLE = 'wp_scw_template_item';
 
@@ -114,8 +93,6 @@ class SignUpsBase {
 	 * Two examples of categories are Lathe, Ring Bowl and CNC.
 	 * These are the labels that appear on the member landing page
 	 * and each signup is assigned a category.
-	 *
-	 * @var string
 	 */
 	protected const SIGNUP_CATEGORY_TABLE = 'wp_scw_signup_categories';
 
@@ -123,8 +100,6 @@ class SignUpsBase {
 	 * Spider Calendar Event table.
 	 * The Signups Plugin uses the Spider Calendar Plugin to help 
 	 * members visualize when signups are scheduled.
-	 *
-	 * @var string
 	 */
 	protected const SPIDER_CALENDAR_EVENT_TABLE = 'wp_spidercalendar_event';
 
@@ -132,8 +107,6 @@ class SignUpsBase {
 	 * Data about received text messages.
 	 * This has nothing to do with signups but a endpoint was needed to record
 	 * text messages that were replies to texts sent via Twillo.
-	 *
-	 * @var string
 	 */
 	protected const TEXT_TABLE = 'wp_scw_text_messages';
 
@@ -141,8 +114,6 @@ class SignUpsBase {
 	 * Members table.
 	 * The list of currently active members of the woodshop.
 	 * It is updated nightly via one of the RestFul APIs. 
-	 *
-	 * @var string
 	 */
 	protected const MEMBERS_TABLE = 'wp_scw_members';
 
@@ -150,8 +121,6 @@ class SignUpsBase {
 	 * Machine permissions table.
 	 * Members can have multiple permissions. This table holds the list
 	 * of permissions for each member.
-	 *
-	 * @var string
 	 */
 	protected const MACHINE_PERMISSIONS_TABLE = 'wp_scw_machine_permissions';
 
@@ -161,8 +130,6 @@ class SignUpsBase {
 	 * information goes into this table. During the night the list is retrieved
 	 * via a RestFul API. Then the data is used on the server to update the members
 	 * contact information.
-	 *
-	 * @var string
 	 */
 	protected const UNSUBSCRIBE_TABLE = 'wp_scw_unsubscribe';
 
@@ -170,8 +137,6 @@ class SignUpsBase {
 	 * Instructors table.
 	 * Instructors can teach multiple classes and classes can have multiple instructors.
 	 * This table holds the list of instructors.
-	 *
-	 * @var string
 	 */
 	protected const INSTRUCTORS_TABLE = 'wp_scw_instructors';
 
@@ -179,8 +144,6 @@ class SignUpsBase {
 	 * Session instructors table.
 	 * While classes can have multiple instructors, a subset of them are
 	 * selected to teach each individual session. They are held in this table.
-	 *
-	 * @var string
 	 */
 	protected const SESSION_INSTRUCTORS_TABLE = 'wp_scw_session_instructors';
 
@@ -189,8 +152,6 @@ class SignUpsBase {
 	 * New members are held here until they complete orientation.
 	 * After orientation they added to the members table on the server.
 	 * They are then pushed to the server. 
-	 *
-	 * @var string
 	 */
 	protected const NEW_MEMBER_TABLE = 'wp_scw_new_member';
 
@@ -198,66 +159,49 @@ class SignUpsBase {
 	 * Log table.
 	 * Although not heavily used, there are a set of logging functions
 	 * that write to this table. This is mostly used for debugging purposes.
-	 *
-	 * @var mixed
 	 */
 	protected const LOG_TABLE = 'wp_scw_logs';
 
 	/**
 	 * Format DateTime as 2020-08-13 6:00 am.
-	 *
-	 * @var string
 	 */
 	protected const DATETIME_FORMAT = 'Y-m-d g:i A';
 
 	/**
 	 * Format DateTime as 2020-08-13T6:00 am.
 	 * Acceptable for HTML Date Input
-	 *
-	 * @var string
 	 */
 	protected const DATETIME_FORMAT_INPUT = 'Y-m-d\TH:i';
 
 	/**
 	 * Format Date as 2020-08-13.
 	 * Acceptable for HTML Date Input
-	 *
-	 * @var string
 	 */
 	protected const DATE_FORMAT3 = 'Y-m-d';
 
 	/**
 	 * Format Date as Mon 08-13-2020.
-	 *
-	 * @var string
 	 */
 	protected const DATE_FORMAT = 'D m-d-Y';
 
 	/**
 	 * Format Date as 08-13-2020.
-	 *
-	 * @var string
 	 */
 	protected const DATE_FORMAT2 = 'm-d-Y';
 
 	/**
 	 * Format Date as 2020-08-13.
-	 *
-	 * @var string
 	 */
 	protected const TIME_FORMAT = 'g:iA';
 
 	/**
 	 * Date timezone.
-	 *
-	 * @var string
 	 */
 	protected $date_time_zone;
 
 	/**
 	 * __construct
 	 *
-	 * @return void
 	 */
 	public function __construct() {
 		$this->date_time_zone = new DateTimeZone( 'America/Phoenix' );
