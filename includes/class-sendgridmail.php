@@ -12,17 +12,14 @@
 use \SendGrid\Mail\Mail;
 
 /**
- * Mirror of the database Session object.
- * Used for creating new sessions to be added to the DB.
- *
- * @package SignUps
+ * Helper class for sending email via Twilio SendGrid
  */
 class SendGridMail extends SignUpsBase {
 
 	/**
 	 * Used to send an email.
 	 *
-	 * @param  mixed   $email_address Email address of the receipient.
+	 * @param  mixed   $email_address Email address of the recipient.
 	 * @param  mixed   $subject subject for the email.
 	 * @param  mixed   $message Message body for the email.
 	 * @param  boolean $class_email Used to get the correct From email address.

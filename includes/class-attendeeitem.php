@@ -7,7 +7,7 @@
  */
 
 /**
- * Mirror of the database Class object.
+ * Mirror of the database wp_scw_attendees table.
  * Used for creating new attendee items to be added to the DB.
  */
 class AttendeeItem {

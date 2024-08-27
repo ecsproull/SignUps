@@ -10,38 +10,36 @@
  */
 
 /**
- * Mirror of the database Session object.
+ * Class for managing Stripe.com payments.
  * Used for creating new sessions to be added to the DB.
- *
- * @package SignUps
  */
 class StripePayments extends SignUpsBase {
 
 	/**
 	 * Stripe API secret
 	 *
-	 *  mixed
+	 *  string
 	 */
 	private $stripe_api_secret;
 
 	/**
 	 * Stripe API key.
 	 *
-	 *  mixed
+	 *  string
 	 */
 	private $stripe_api_key;
 
 	/**
 	 * Stripe Endpoint Secret.
 	 *
-	 *  mixed
+	 *  string
 	 */
 	private $stripe_endpoint_secret;
 
 	/**
 	 * Stripe root URL.
 	 *
-	 *  mixed
+	 *  string
 	 */
 	private $stripe_root_url;
 
@@ -67,15 +65,18 @@ class StripePayments extends SignUpsBase {
 		$this->stripe_root_url        = $stripe_row[0]->stripe_root_url;
 	}
 
-		/**
-		 * Verification is done in the Payment Event handler.
-		 */
+	/**
+	 * Verification is done in the Payment Event handler.
+	 */
 	public function permissions_check() {
 		return true;
 	}
 
 	/**
 	 * Called by Stripe.com when a payment has been processed.
+	 * There are several events but we only register for a few of them.
+	 * Event registration is done on the Stripe.com web site when you 
+	 * set up the account.
 	 */
 	public function payment_event() {
 		global $wpdb;
@@ -238,7 +239,9 @@ class StripePayments extends SignUpsBase {
 	}
 
 	/**
-	 * Payment form.
+	 * When money is to be collected we transfer control back to Stripe.com and they do the credit
+	 * card processing. As that process proceeds, Stripe sends events back to us to let us know 
+	 * about the progress.
 	 *
 	 * @param string $description Description of what is bing paid for..
 	 * @param int    $price_id    The price ID to be charged to.
@@ -279,7 +282,9 @@ class StripePayments extends SignUpsBase {
 	}
 
 	/**
-	 * Shortcode for the Payment Success page
+	 * Shortcode for the Payment Success page. This is what we show when a payment succeeds.
+	 * WordPress pages have to added that implement this shortcode. A link to that page is 
+	 * passed in the collect_money function.
 	 *
 	 * @return void
 	 */
@@ -372,7 +377,7 @@ class StripePayments extends SignUpsBase {
 	}
 
 	/**
-	 * Shortcode for the Payment failure page
+	 * Shortcode for the Payment failure page.
 	 *
 	 * @return void
 	 */
@@ -385,8 +390,9 @@ class StripePayments extends SignUpsBase {
 	}
 
 	/**
-	 * Update the price for a signup.
-	 * The price is registered with Stipe.Com.
+	 * Update the price for a signup on Stripe.com.
+	 * The price is registered with Stipe.Com and this is a 
+	 * helper function to update the price of an existing item.
 	 *
 	 * @param  mixed $price_id Original price id.
 	 * @param  mixed $product_id Product Id.

@@ -15,7 +15,8 @@
 class DbSignUpTables {
 
 	/**
-	 * Creates the DB tables when the the plugin is activated.
+	 * The only function and it creates the DB tables when the the plugin is activated.
+	 * Each table is checked to see if it exists. If not, it is created.
 	 */
 	public function create_db_tables() {
 		global $wpdb;

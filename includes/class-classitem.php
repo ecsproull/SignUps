@@ -7,7 +7,7 @@
  */
 
 /**
- * Mirror of the database Class object.
+ * Mirror of the database wp_scw_signups table.
  * Used for creating new signup items to be added to the DB.
  */
 class ClassItem {
