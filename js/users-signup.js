@@ -399,12 +399,12 @@ jQuery(document).ready(function($){
 	});
 
 	$(".expand-button").click( function(event) {
-		var data = $.parseJSON($(this).attr("data-button"));
+		var data = $(this).attr("data-button");
 		if ($(".expand-button").html() == "Show All") {
-			$("." + data.session_id).prop("hidden", false);
+			$("." + data).prop("hidden", false);
 			$(".expand-button").html("Hide");
 		} else {
-			$("." + data.session_id).prop("hidden", true);
+			$("." + data).prop("hidden", true);
 			$(".expand-button").html("Show All");
 		}
 	});

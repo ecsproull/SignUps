@@ -1,5 +1,5 @@
 <?php
-/**
+/*
  * Summary
  * Shortcode class.
  *
@@ -96,7 +96,7 @@ ob_start();
 	 * @param mixed $post Data to use to send the mail.
 	 * @return void
 	 */
-	protected function send_email( $post ) {
+	private function send_email( $post ) {
 		$sgm         = new SendGridMail();
 		$class_email = false;
 		if ( isset( $post['class_email'] ) && $post['class_email'] ) {
@@ -880,7 +880,7 @@ ob_start();
 									if ( $count > 3 ) {
 										?>
 										<button class="btn btn-sm bg-primary mr-auto ml-auto expand-button" type='button' 
-											data-button='{"session_id": <?php echo esc_html( $session->session_id ); ?>}' >Show All</button>
+											data-button="<?php echo esc_html( $session->session_id ); ?>" >Show All</button>
 										<?php
 									}
 									?>
@@ -1207,7 +1207,7 @@ ob_start();
 	 * @param string $mail_group The email group.
 	 * @return void
 	 */
-	protected function unsubscribe_nag_mailer( $key, $badge, $mail_group ) {
+	private function unsubscribe_nag_mailer( $key, $badge, $mail_group ) {
 		global $wpdb;
 		$ip_address    = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : 'No Ip Address';
 		$pattern_key   = '/^[0-9a-f]{32}$|^[0-9a-f]{14}\.[0-9]{8}$/ms';

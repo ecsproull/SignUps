@@ -1,7 +1,6 @@
 <?php
-/**
+/*
  * Summary
- * Place class.
  *
  * @package     SignUps
  * @author      Edward Sproull

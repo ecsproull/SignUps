@@ -1,7 +1,7 @@
 <?php
-/**
+/*
  * Summary
- * Place class.
+ * Signup Database table creation.
  *
  * @package     SignUps
  * @author      Edward Sproull

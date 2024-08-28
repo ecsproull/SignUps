@@ -1,7 +1,7 @@
 <?php
-/**
+/*
  * Summary
- * Data to send out notificiation about an upcomming class.
+ * Data to send out notification about an upcoming classes.
  *
  * @package SignUps
  */

@@ -1,5 +1,5 @@
 <?php
-/**
+/*
  * Summary
  * Database class.
  *

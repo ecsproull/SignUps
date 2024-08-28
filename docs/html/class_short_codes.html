@@ -122,9 +122,6 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a9366f3631732f02fafe2ef8faa3519ad" id="r_a9366f3631732f02fafe2ef8faa3519ad"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9366f3631732f02fafe2ef8faa3519ad">send_email</a> ( $post)</td></tr>
-<tr class="memdesc:a9366f3631732f02fafe2ef8faa3519ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">The information to be sent in an email is collected on a Form.  <br /></td></tr>
-<tr class="separator:a9366f3631732f02fafe2ef8faa3519ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a177e53b3c808e0c9cfc29cb32b381056" id="r_a177e53b3c808e0c9cfc29cb32b381056"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a177e53b3c808e0c9cfc29cb32b381056">create_new_user_table</a> ()</td></tr>
 <tr class="memdesc:a177e53b3c808e0c9cfc29cb32b381056"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a section of HTML for a new user to identify themselves.  <br /></td></tr>
 <tr class="separator:a177e53b3c808e0c9cfc29cb32b381056"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -168,11 +165,38 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:ae56bdd10a40f3d85ed1e62eb8ee8d136 inherit pro_methods_class_sign_ups_base" id="r_ae56bdd10a40f3d85ed1e62eb8ee8d136"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#ae56bdd10a40f3d85ed1e62eb8ee8d136">create_rolling_session_select_form2</a> ( $signup_name, $attendees, $signup_id, $template, $template_items, $user_group, $admin, $secret, $description, $template_items2, $rolling_days=null)</td></tr>
 <tr class="memdesc:ae56bdd10a40f3d85ed1e62eb8ee8d136 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a form that displays the rolling sessions along with their attendees.  <br /></td></tr>
 <tr class="separator:ae56bdd10a40f3d85ed1e62eb8ee8d136 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5a4899833a4a352850eead3cbf36f85 inherit pro_methods_class_sign_ups_base" id="r_aa5a4899833a4a352850eead3cbf36f85"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#aa5a4899833a4a352850eead3cbf36f85">add_attendee_rolling</a> ( $post)</td></tr>
+<tr class="memdesc:aa5a4899833a4a352850eead3cbf36f85 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add attendee for the selected spots.  <br /></td></tr>
+<tr class="separator:aa5a4899833a4a352850eead3cbf36f85 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48d0251d44fa8c47714fb9806f95f64f inherit pro_methods_class_sign_ups_base" id="r_a48d0251d44fa8c47714fb9806f95f64f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a48d0251d44fa8c47714fb9806f95f64f">load_template_selection</a> ( $template_id, $add_new, $template_id_name, $select_id='template-select', $default_title='None')</td></tr>
+<tr class="memdesc:a48d0251d44fa8c47714fb9806f95f64f inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads the template selection dropdown list.  <br /></td></tr>
+<tr class="separator:a48d0251d44fa8c47714fb9806f95f64f inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab40563eddab356a2339a42106dbafd0e inherit pro_methods_class_sign_ups_base" id="r_ab40563eddab356a2339a42106dbafd0e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#ab40563eddab356a2339a42106dbafd0e">update_sessions_price_id</a> ( $signup_id, $new_price_id)</td></tr>
+<tr class="memdesc:ab40563eddab356a2339a42106dbafd0e inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the price id of all sessions for a signup.  <br /></td></tr>
+<tr class="separator:ab40563eddab356a2339a42106dbafd0e inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ec61b095c2817c3ec8771ddc5045a51 inherit pro_methods_class_sign_ups_base" id="r_a8ec61b095c2817c3ec8771ddc5045a51"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a8ec61b095c2817c3ec8771ddc5045a51">create_description_section</a> ( $description_object)</td></tr>
+<tr class="memdesc:a8ec61b095c2817c3ec8771ddc5045a51 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates the description, short description and instructions input block.  <br /></td></tr>
+<tr class="separator:a8ec61b095c2817c3ec8771ddc5045a51 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a396564cb5b18c327d64ca66811342ead inherit pro_methods_class_sign_ups_base" id="r_a396564cb5b18c327d64ca66811342ead"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a396564cb5b18c327d64ca66811342ead">add_remove_from_calendar</a> ( $signup_id, $signup_name, $add)</td></tr>
+<tr class="memdesc:a396564cb5b18c327d64ca66811342ead inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes items from the calendar in response to removing admin approval from a signup.  <br /></td></tr>
+<tr class="separator:a396564cb5b18c327d64ca66811342ead inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17bf20463bd03567a844c7f65b6ae9cb inherit pro_methods_class_sign_ups_base" id="r_a17bf20463bd03567a844c7f65b6ae9cb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a17bf20463bd03567a844c7f65b6ae9cb">update_calendar</a> ( $post)</td></tr>
+<tr class="memdesc:a17bf20463bd03567a844c7f65b6ae9cb inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the clubs calendar.  <br /></td></tr>
+<tr class="separator:a17bf20463bd03567a844c7f65b6ae9cb inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a855d366ee44471f1f9416b4bdabac984 inherit pro_methods_class_sign_ups_base" id="r_a855d366ee44471f1f9416b4bdabac984"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a855d366ee44471f1f9416b4bdabac984">get_session_email_data</a> ( $session_id=null)</td></tr>
+<tr class="memdesc:a855d366ee44471f1f9416b4bdabac984 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the data to create a pre-class email.  <br /></td></tr>
+<tr class="separator:a855d366ee44471f1f9416b4bdabac984 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab950ed130c89466a8df516e4334590fa inherit pro_methods_class_sign_ups_base" id="r_ab950ed130c89466a8df516e4334590fa"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#ab950ed130c89466a8df516e4334590fa">get_session_email_body</a> ( $session_id)</td></tr>
+<tr class="memdesc:ab950ed130c89466a8df516e4334590fa inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Formats the body of a session email to an attendee.  <br /></td></tr>
+<tr class="separator:ab950ed130c89466a8df516e4334590fa inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
+<tr class="memitem:a9366f3631732f02fafe2ef8faa3519ad" id="r_a9366f3631732f02fafe2ef8faa3519ad"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9366f3631732f02fafe2ef8faa3519ad">send_email</a> ( $post)</td></tr>
+<tr class="memdesc:a9366f3631732f02fafe2ef8faa3519ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">The information to be sent in an email is collected on a Form.  <br /></td></tr>
+<tr class="separator:a9366f3631732f02fafe2ef8faa3519ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d35ec69f75a57d6b858c0162e2d840f" id="r_a4d35ec69f75a57d6b858c0162e2d840f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4d35ec69f75a57d6b858c0162e2d840f">create_select_signup</a> ( $admin_view=false)</td></tr>
-<tr class="memdesc:a4d35ec69f75a57d6b858c0162e2d840f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the the data required for the create_select_signup_form function to populate the <a class="el" href="namespace_sign_ups.html" title="Summary Database class.">SignUps</a> landing page.  <br /></td></tr>
+<tr class="memdesc:a4d35ec69f75a57d6b858c0162e2d840f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the the data required for the create_select_signup_form function to populate the SignUps landing page.  <br /></td></tr>
 <tr class="separator:a4d35ec69f75a57d6b858c0162e2d840f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a69197c4a3486578a0730bff041d05bd0" id="r_a69197c4a3486578a0730bff041d05bd0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a69197c4a3486578a0730bff041d05bd0">create_signup_form</a> ( $signup_id, $secret=null)</td></tr>
 <tr class="memdesc:a69197c4a3486578a0730bff041d05bd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates the signup form for an individual event or class.  <br /></td></tr>
@@ -189,6 +213,18 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a9e9780347df8dccf51a9c30147cd835f" id="r_a9e9780347df8dccf51a9c30147cd835f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9e9780347df8dccf51a9c30147cd835f">create_session_select_form</a> ( $signup_name, $sessions, $attendees, $instructors, $cost, $signup_id, $user_group, $signup_email, $signup_contact_name)</td></tr>
 <tr class="memdesc:a9e9780347df8dccf51a9c30147cd835f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a form that displays the sessions along with their attendees.  <br /></td></tr>
 <tr class="separator:a9e9780347df8dccf51a9c30147cd835f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a193e3ae6ff523d9009f505e9493a2f4a" id="r_a193e3ae6ff523d9009f505e9493a2f4a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a193e3ae6ff523d9009f505e9493a2f4a">create_description_form</a> ( $signup_id, $secret=null)</td></tr>
+<tr class="memdesc:a193e3ae6ff523d9009f505e9493a2f4a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a signup description block.  <br /></td></tr>
+<tr class="separator:a193e3ae6ff523d9009f505e9493a2f4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac25f4fcc09fcaf60049a0ec867c69d8b" id="r_ac25f4fcc09fcaf60049a0ec867c69d8b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac25f4fcc09fcaf60049a0ec867c69d8b">create_session_email_link</a> ( $contact_email, $contact_name, $signup_name)</td></tr>
+<tr class="memdesc:ac25f4fcc09fcaf60049a0ec867c69d8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an email link that opens the email form with the proper parameters.  <br /></td></tr>
+<tr class="separator:ac25f4fcc09fcaf60049a0ec867c69d8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9bbf2c0b8882f6aa181049943cc5df79" id="r_a9bbf2c0b8882f6aa181049943cc5df79"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9bbf2c0b8882f6aa181049943cc5df79">create_email_form</a> ( $post, $admin=true)</td></tr>
+<tr class="memdesc:a9bbf2c0b8882f6aa181049943cc5df79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates the form for sending the an email.  <br /></td></tr>
+<tr class="separator:a9bbf2c0b8882f6aa181049943cc5df79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab8829fc2c462e7a3646d5198e5d15d21" id="r_ab8829fc2c462e7a3646d5198e5d15d21"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab8829fc2c462e7a3646d5198e5d15d21">unsubscribe_nag_mailer</a> ( $key, $badge, $mail_group)</td></tr>
+<tr class="memdesc:ab8829fc2c462e7a3646d5198e5d15d21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called in response to a click on the Unsubscribe link in a generated monitor or class email.  <br /></td></tr>
+<tr class="separator:ab8829fc2c462e7a3646d5198e5d15d21"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -310,7 +346,7 @@ Additional Inherited Members</h2></td></tr>
 <p>If the $post array contains a remove_me field, that is handled at the top of the function and then the function returns. This is the case where a member removes themselves from a signup. This will only happens when the signup does not involve money.</p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="#a9e9780347df8dccf51a9c30147cd835f" title="Creates a form that displays the sessions along with their attendees.">ShortCodes\create_session_select_form()</a> </dd>
 <dd>
-<a class="el" href="class_stripe_payments.html#a5a757311ba046d477d16bec8dc8ff5bf" title="Payment form.">StripePayments\collect_money()</a></dd></dl>
+<a class="el" href="class_stripe_payments.html#a5a757311ba046d477d16bec8dc8ff5bf" title="When money is to be collected we transfer control back to Stripe.com and they do the credit card proc...">StripePayments\collect_money()</a></dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramtype">mixed</td><td class="paramname">$post</td><td>Data from the form. </td></tr>
@@ -319,6 +355,89 @@ Additional Inherited Members</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 <p>Four checks before we collect money. 1.) There is a balance owed which will be the full amount. 2.) The last inserted ID is valid. 3.) The insert didn't fail. 4.) Exactly one row is inserted. It can be 0 but never more than 1.</p>
+
+</div>
+</div>
+<a id="a193e3ae6ff523d9009f505e9493a2f4a" name="a193e3ae6ff523d9009f505e9493a2f4a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a193e3ae6ff523d9009f505e9493a2f4a">&#9670;&#160;</a></span>create_description_form()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">create_description_form </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$signup_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$secret</em></span><span class="paramdefsep"> = </span><span class="paramdefval">null</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Creates a signup description block. </p>
+<p>Once a user selected a class from the landing page they progress to this page where a detailed description is displayed. It is here that the have the option continue or cancel the signup process.</p>
+<p>It should be noted that this page is made up of a aggregation of several bits of data. Cost, Schedule, Contact and any preclass instructions are all part of this page. The Contacts is a link that a user can use to ask questions about the class.</p>
+<p>Clicking Continue transfers the data to the create_signup_form function which gets the data together so the session selection page can be shown.</p>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a69197c4a3486578a0730bff041d05bd0" title="Creates the signup form for an individual event or class.">ShortCodes\create_signup_form()</a> <br  />
+</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramtype">mixed</td><td class="paramname">$signup_id</td><td>Id of the signup. </td></tr>
+    <tr><td class="paramtype">string</td><td class="paramname">$secret</td><td>Members secret used to identify the member. (obsolete) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
+
+</div>
+</div>
+<a id="a9bbf2c0b8882f6aa181049943cc5df79" name="a9bbf2c0b8882f6aa181049943cc5df79"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9bbf2c0b8882f6aa181049943cc5df79">&#9670;&#160;</a></span>create_email_form()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">create_email_form </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$post</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$admin</em></span><span class="paramdefsep"> = </span><span class="paramdefval">true</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Creates the form for sending the an email. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramtype">mixed</td><td class="paramname">$post</td><td>Data from the calling form. </td></tr>
+    <tr><td class="paramtype">boolean</td><td class="paramname">$admin</td><td>Set to true if this is called from the administrator side. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
 </div>
 </div>
@@ -374,7 +493,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Retrieves the the data required for the create_select_signup_form function to populate the <a class="el" href="namespace_sign_ups.html" title="Summary Database class.">SignUps</a> landing page. </p>
+<p>Retrieves the the data required for the create_select_signup_form function to populate the SignUps landing page. </p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="#aeab8981e2b7f0b02bc80cdd107c1445d" title="Creates the form for selecting a signup.">ShortCodes\create_select_signup_form()</a></dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -420,6 +539,51 @@ Additional Inherited Members</h2></td></tr>
   <table class="params">
     <tr><td class="paramtype">mixed</td><td class="paramname">$signups</td><td>The results of a DB query for available classes. </td></tr>
     <tr><td class="paramtype">mixed</td><td class="paramname">$categories</td><td>the list of categories. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
+
+</div>
+</div>
+<a id="ac25f4fcc09fcaf60049a0ec867c69d8b" name="ac25f4fcc09fcaf60049a0ec867c69d8b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac25f4fcc09fcaf60049a0ec867c69d8b">&#9670;&#160;</a></span>create_session_email_link()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">create_session_email_link </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$contact_email</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$contact_name</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$signup_name</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Creates an email link that opens the email form with the proper parameters. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramtype">mixed</td><td class="paramname">$contact_email</td><td>The person being emailed. </td></tr>
+    <tr><td class="paramtype">mixed</td><td class="paramname">$contact_name</td><td>The name of the person being emailed. </td></tr>
+    <tr><td class="paramtype">mixed</td><td class="paramname">$signup_name</td><td>The signup name. </td></tr>
   </table>
   </dd>
 </dl>
@@ -604,17 +768,63 @@ Additional Inherited Members</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
 <p>The information to be sent in an email is collected on a Form. </p>
 <p>That Form is created in the create_email_form function. Once the users fills out the Form and clicks the Send Email button, this function is called to send the email.</p>
-<dl class="section see"><dt>See also</dt><dd>ShortCodes::create_email_form()</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a9bbf2c0b8882f6aa181049943cc5df79" title="Creates the form for sending the an email.">ShortCodes\create_email_form()</a></dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramtype">mixed</td><td class="paramname">$post</td><td>Data to use to send the mail. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
+
+</div>
+</div>
+<a id="ab8829fc2c462e7a3646d5198e5d15d21" name="ab8829fc2c462e7a3646d5198e5d15d21"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab8829fc2c462e7a3646d5198e5d15d21">&#9670;&#160;</a></span>unsubscribe_nag_mailer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsubscribe_nag_mailer </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$key</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$badge</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$mail_group</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Called in response to a click on the Unsubscribe link in a generated monitor or class email. </p>
+<p>The request is stored in the unsubscribe table where the server can retrieve it and perform the unsubscribe on the server.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramtype">string</td><td class="paramname">$key</td><td>The key that identifies the member. </td></tr>
+    <tr><td class="paramtype">string</td><td class="paramname">$badge</td><td>The member's badge number. </td></tr>
+    <tr><td class="paramtype">string</td><td class="paramname">$mail_group</td><td>The email group. </td></tr>
   </table>
   </dd>
 </dl>

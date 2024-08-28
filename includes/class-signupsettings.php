@@ -1,5 +1,5 @@
 <?php
-/**
+/*
  * Summary
  * Signup Settings.
  *
@@ -65,8 +65,8 @@ class SignupSettings extends SignUpsBase {
 				$this->confirm_class_delete( $post );
 			} elseif ( isset( $post['confirm_delete_class'] ) ) {
 				$this->delete_class( $post );
-			} elseif ( isset( $post['session_add_slots'] ) ) {
-				$this->add_session_slots( (object) $post, $post['signup_name'] );
+			} elseif ( isset( $post['add_sessions'] ) ) {
+				$this->add_sessions( (object) $post, $post['signup_name'] );
 			} elseif ( isset( $post['submit_new_class'] ) ) {
 				$this->submit_new_class( $post );
 			} elseif ( isset( $post['load_create_class_form'] ) ) {
@@ -705,10 +705,8 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	/**
-	 * Adds slots to the Create Session Form for review before actually creating the slots.
+	 * Add sessions to the Create Session Form for review before actually creating the sessions.
 	 * Returns the users back to the Create Session Form with the newly created sessions.
-	 * 
-	 * TODO: That this could be better named. It isn't creating slots but rather it is creating sessions.
 	 * 
 	 * @see SignupSettings::create_session_form()
 	 *
@@ -716,7 +714,7 @@ class SignupSettings extends SignUpsBase {
 	 * @param  string $signup_name The name of the signup.
 	 * @return void
 	 */
-	private function add_session_slots( $session_item, $signup_name ) {
+	private function add_sessions( $session_item, $signup_name ) {
 		global $wpdb;
 		$start_dates                    = array();
 		$end_dates                      = array();
@@ -1862,7 +1860,7 @@ class SignupSettings extends SignUpsBase {
 					value="1"></div>
 			</div>
 			<div class="text-center">
-				<button class="btn btn-primary mt-3 mb-3 ml-5" name="session_add_slots" type="submit" value="1" <?php echo $session_id ? 'hidden' : ''; ?> ><b><i>Update Sessions</i></b></button>
+				<button class="btn btn-primary mt-3 mb-3 ml-5" name="add_sessions" type="submit" value="1" <?php echo $session_id ? 'hidden' : ''; ?> ><b><i>Update Sessions</i></b></button>
 			</div>
 			<div id="session-table" class="session-box mr-auto ml-auto">
 				<?php
@@ -2262,7 +2260,7 @@ class SignupSettings extends SignUpsBase {
 					$new_session['session_start_formatted'] = array( 0 => $new_session['session_start_formatted'] );
 					$new_session['session_end_formatted']   = array( 0 => $new_session['session_end_formatted'] );
 					$new_session['session_end_repeat']      = $post['session_end_repeat'];
-					$this->add_session_slots( (object) $new_session, $post['description_title'] );
+					$this->add_sessions( (object) $new_session, $post['description_title'] );
 					return;
 				}
 

@@ -9,11 +9,10 @@ var searchData=
   ['signup_5fplugin_5ftop_5fmenu_6',['signup_plugin_top_menu',['../class_sign_ups_plugin.html#a7fe9c87ff2c4d889a2f60bc5e82e8f0e',1,'SignUpsPlugin']]],
   ['signup_5fsettings_5fpage_7',['signup_settings_page',['../class_signup_settings.html#a3e1cb28d94d934a8d1d97f5add6c8e4c',1,'SignupSettings']]],
   ['submit_5fclass_8',['submit_class',['../class_signup_settings.html#abde11ae35febd1f6f542b3054c1339c5',1,'SignupSettings']]],
-  ['submit_5fdescription_9',['submit_description',['../class_description_editor.html#a0ee7f809da9b16ccabb1338f853089af',1,'DescriptionEditor']]],
-  ['submit_5fexceptions_10',['submit_exceptions',['../class_rolling_exceptions_editor.html#a697c8b560a7bf77b3eaf98640908e86b',1,'RollingExceptionsEditor']]],
-  ['submit_5fhtml_11',['submit_html',['../class_html_editor.html#a5dde2104c0e81940d7c2ab700ec8e789',1,'HtmlEditor']]],
-  ['submit_5fnew_5fclass_12',['submit_new_class',['../class_signup_settings.html#a93f1122d2c2e6e82ccb6893a4ea5b466',1,'SignupSettings']]],
-  ['submit_5fsession_13',['submit_session',['../class_signup_settings.html#a015777af45e0b313780b5b362f3358a9',1,'SignupSettings']]],
-  ['submit_5fsession_5fattendees_14',['submit_session_attendees',['../class_signup_settings.html#a6ff3fe8481b743254c6038afa35802b1',1,'SignupSettings']]],
-  ['submit_5ftemplate_15',['submit_template',['../class_rolling_templates_editor.html#a6c68c6d154ea1815b249ad3490913d8c',1,'RollingTemplatesEditor']]]
+  ['submit_5fexceptions_9',['submit_exceptions',['../class_rolling_exceptions_editor.html#a697c8b560a7bf77b3eaf98640908e86b',1,'RollingExceptionsEditor']]],
+  ['submit_5fhtml_10',['submit_html',['../class_html_editor.html#a5dde2104c0e81940d7c2ab700ec8e789',1,'HtmlEditor']]],
+  ['submit_5fnew_5fclass_11',['submit_new_class',['../class_signup_settings.html#a93f1122d2c2e6e82ccb6893a4ea5b466',1,'SignupSettings']]],
+  ['submit_5fsession_12',['submit_session',['../class_signup_settings.html#a015777af45e0b313780b5b362f3358a9',1,'SignupSettings']]],
+  ['submit_5fsession_5fattendees_13',['submit_session_attendees',['../class_signup_settings.html#a6ff3fe8481b743254c6038afa35802b1',1,'SignupSettings']]],
+  ['submit_5ftemplate_14',['submit_template',['../class_rolling_templates_editor.html#a6c68c6d154ea1815b249ad3490913d8c',1,'RollingTemplatesEditor']]]
 ];

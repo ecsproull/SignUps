@@ -92,6 +92,9 @@ $(function(){ initResizable(false); });
   <div class="headertitle"><div class="title">SendGridMail Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Helper class for sending email via Twilio SendGrid.  
+ <a href="#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for SendGridMail:</div>
 <div class="dyncontent">
@@ -157,6 +160,30 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memitem:ae56bdd10a40f3d85ed1e62eb8ee8d136 inherit pro_methods_class_sign_ups_base" id="r_ae56bdd10a40f3d85ed1e62eb8ee8d136"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#ae56bdd10a40f3d85ed1e62eb8ee8d136">create_rolling_session_select_form2</a> ( $signup_name, $attendees, $signup_id, $template, $template_items, $user_group, $admin, $secret, $description, $template_items2, $rolling_days=null)</td></tr>
 <tr class="memdesc:ae56bdd10a40f3d85ed1e62eb8ee8d136 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a form that displays the rolling sessions along with their attendees.  <br /></td></tr>
 <tr class="separator:ae56bdd10a40f3d85ed1e62eb8ee8d136 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5a4899833a4a352850eead3cbf36f85 inherit pro_methods_class_sign_ups_base" id="r_aa5a4899833a4a352850eead3cbf36f85"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#aa5a4899833a4a352850eead3cbf36f85">add_attendee_rolling</a> ( $post)</td></tr>
+<tr class="memdesc:aa5a4899833a4a352850eead3cbf36f85 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add attendee for the selected spots.  <br /></td></tr>
+<tr class="separator:aa5a4899833a4a352850eead3cbf36f85 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48d0251d44fa8c47714fb9806f95f64f inherit pro_methods_class_sign_ups_base" id="r_a48d0251d44fa8c47714fb9806f95f64f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a48d0251d44fa8c47714fb9806f95f64f">load_template_selection</a> ( $template_id, $add_new, $template_id_name, $select_id='template-select', $default_title='None')</td></tr>
+<tr class="memdesc:a48d0251d44fa8c47714fb9806f95f64f inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads the template selection dropdown list.  <br /></td></tr>
+<tr class="separator:a48d0251d44fa8c47714fb9806f95f64f inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab40563eddab356a2339a42106dbafd0e inherit pro_methods_class_sign_ups_base" id="r_ab40563eddab356a2339a42106dbafd0e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#ab40563eddab356a2339a42106dbafd0e">update_sessions_price_id</a> ( $signup_id, $new_price_id)</td></tr>
+<tr class="memdesc:ab40563eddab356a2339a42106dbafd0e inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the price id of all sessions for a signup.  <br /></td></tr>
+<tr class="separator:ab40563eddab356a2339a42106dbafd0e inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ec61b095c2817c3ec8771ddc5045a51 inherit pro_methods_class_sign_ups_base" id="r_a8ec61b095c2817c3ec8771ddc5045a51"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a8ec61b095c2817c3ec8771ddc5045a51">create_description_section</a> ( $description_object)</td></tr>
+<tr class="memdesc:a8ec61b095c2817c3ec8771ddc5045a51 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates the description, short description and instructions input block.  <br /></td></tr>
+<tr class="separator:a8ec61b095c2817c3ec8771ddc5045a51 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a396564cb5b18c327d64ca66811342ead inherit pro_methods_class_sign_ups_base" id="r_a396564cb5b18c327d64ca66811342ead"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a396564cb5b18c327d64ca66811342ead">add_remove_from_calendar</a> ( $signup_id, $signup_name, $add)</td></tr>
+<tr class="memdesc:a396564cb5b18c327d64ca66811342ead inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes items from the calendar in response to removing admin approval from a signup.  <br /></td></tr>
+<tr class="separator:a396564cb5b18c327d64ca66811342ead inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17bf20463bd03567a844c7f65b6ae9cb inherit pro_methods_class_sign_ups_base" id="r_a17bf20463bd03567a844c7f65b6ae9cb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a17bf20463bd03567a844c7f65b6ae9cb">update_calendar</a> ( $post)</td></tr>
+<tr class="memdesc:a17bf20463bd03567a844c7f65b6ae9cb inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the clubs calendar.  <br /></td></tr>
+<tr class="separator:a17bf20463bd03567a844c7f65b6ae9cb inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a855d366ee44471f1f9416b4bdabac984 inherit pro_methods_class_sign_ups_base" id="r_a855d366ee44471f1f9416b4bdabac984"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a855d366ee44471f1f9416b4bdabac984">get_session_email_data</a> ( $session_id=null)</td></tr>
+<tr class="memdesc:a855d366ee44471f1f9416b4bdabac984 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the data to create a pre-class email.  <br /></td></tr>
+<tr class="separator:a855d366ee44471f1f9416b4bdabac984 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab950ed130c89466a8df516e4334590fa inherit pro_methods_class_sign_ups_base" id="r_ab950ed130c89466a8df516e4334590fa"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#ab950ed130c89466a8df516e4334590fa">get_session_email_body</a> ( $session_id)</td></tr>
+<tr class="memdesc:ab950ed130c89466a8df516e4334590fa inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Formats the body of a session email to an attendee.  <br /></td></tr>
+<tr class="separator:ab950ed130c89466a8df516e4334590fa inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_class_sign_ups_base"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_class_sign_ups_base')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_sign_ups_base.html">SignUpsBase</a></td></tr>
 <tr class="memitem:ae68023bd4fe0e3fd1d06dbe91836ed41 inherit pro_attribs_class_sign_ups_base" id="r_ae68023bd4fe0e3fd1d06dbe91836ed41"><td class="memItemLeft" align="right" valign="top">const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#ae68023bd4fe0e3fd1d06dbe91836ed41">ATTENDEES_TABLE</a> = 'wp_scw_attendees'</td></tr>
 <tr class="memdesc:ae68023bd4fe0e3fd1d06dbe91836ed41 inherit pro_attribs_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Database attendees table.  <br /></td></tr>
@@ -243,7 +270,9 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memdesc:aa1fbdccaf409550551968e6b7ba31df1 inherit pro_attribs_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Date timezone.  <br /></td></tr>
 <tr class="separator:aa1fbdccaf409550551968e6b7ba31df1 inherit pro_attribs_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Function Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Helper class for sending email via Twilio SendGrid. </p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="aebc00fa4783b059d1d122fb2612a88ac" name="aebc00fa4783b059d1d122fb2612a88ac"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aebc00fa4783b059d1d122fb2612a88ac">&#9670;&#160;</a></span>send_mail()</h2>
 
@@ -281,7 +310,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Used to send an email. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramtype">mixed</td><td class="paramname">$email_address</td><td>Email address of the receipient. </td></tr>
+    <tr><td class="paramtype">mixed</td><td class="paramname">$email_address</td><td>Email address of the recipient. </td></tr>
     <tr><td class="paramtype">mixed</td><td class="paramname">$subject</td><td>subject for the email. </td></tr>
     <tr><td class="paramtype">mixed</td><td class="paramname">$message</td><td>Message body for the email. </td></tr>
     <tr><td class="paramtype">boolean</td><td class="paramname">$class_email</td><td>Used to get the correct From email address. </td></tr>

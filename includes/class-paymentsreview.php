@@ -1,5 +1,5 @@
 <?php
-/**
+/*
  * Summary
  * Payments review class.
  *

@@ -1,9 +1,7 @@
 <?php
-/**
+/*
  * Summary
- * Database class.
- *
- * @package SignUps
+ * TimeException class.
  */
 
 /**

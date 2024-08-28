@@ -1,7 +1,7 @@
 <?php
-/**
+/*
  * Summary
- * Reportscode class.
+ * Reports class.
  *
  * @package SignUps
  */

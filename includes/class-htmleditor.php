@@ -1,7 +1,6 @@
 <?php
-/**
+/*
  * Summary
- * HtmlEditor class.
  *
  * @package     SignUps
  * @author      Edward Sproull

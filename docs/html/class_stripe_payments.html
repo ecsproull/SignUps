@@ -93,6 +93,9 @@ $(function(){ initResizable(false); });
   <div class="headertitle"><div class="title">StripePayments Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Class for managing Stripe.com payments.  
+ <a href="#details">More...</a></p>
 <div class="dynheader">
 Inheritance diagram for StripePayments:</div>
 <div class="dyncontent">
@@ -115,7 +118,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a79c94d8e2ec530f90fed68bddd329d98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by Stripe.com when a payment has been processed.  <br /></td></tr>
 <tr class="separator:a79c94d8e2ec530f90fed68bddd329d98"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5a757311ba046d477d16bec8dc8ff5bf" id="r_a5a757311ba046d477d16bec8dc8ff5bf"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5a757311ba046d477d16bec8dc8ff5bf">collect_money</a> ( $description, $price_id, $badge, $attendee_id, $cost, $qty)</td></tr>
-<tr class="memdesc:a5a757311ba046d477d16bec8dc8ff5bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Payment form.  <br /></td></tr>
+<tr class="memdesc:a5a757311ba046d477d16bec8dc8ff5bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">When money is to be collected we transfer control back to Stripe.com and they do the credit card processing.  <br /></td></tr>
 <tr class="separator:a5a757311ba046d477d16bec8dc8ff5bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:add82b313034133feb8ad42ed07afbbd2" id="r_add82b313034133feb8ad42ed07afbbd2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#add82b313034133feb8ad42ed07afbbd2">payment_success</a> ()</td></tr>
 <tr class="memdesc:add82b313034133feb8ad42ed07afbbd2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shortcode for the Payment Success page.  <br /></td></tr>
@@ -124,7 +127,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:aa88e64e053b5ba73e5bf90181bc9d35f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shortcode for the Payment failure page.  <br /></td></tr>
 <tr class="separator:aa88e64e053b5ba73e5bf90181bc9d35f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a398fc82084a9848b9d67fbb7faa8b738" id="r_a398fc82084a9848b9d67fbb7faa8b738"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a398fc82084a9848b9d67fbb7faa8b738">update_price</a> ( $price_id, $product_id, $new_cost)</td></tr>
-<tr class="memdesc:a398fc82084a9848b9d67fbb7faa8b738"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the price for a signup.  <br /></td></tr>
+<tr class="memdesc:a398fc82084a9848b9d67fbb7faa8b738"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the price for a signup on Stripe.com.  <br /></td></tr>
 <tr class="separator:a398fc82084a9848b9d67fbb7faa8b738"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8a407c7841c7caddef3af2b0e9105384" id="r_a8a407c7841c7caddef3af2b0e9105384"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8a407c7841c7caddef3af2b0e9105384">create_product</a> ( $name, $cost)</td></tr>
 <tr class="memdesc:a8a407c7841c7caddef3af2b0e9105384"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create the product id and price id for a signup.  <br /></td></tr>
@@ -191,6 +194,30 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memitem:ae56bdd10a40f3d85ed1e62eb8ee8d136 inherit pro_methods_class_sign_ups_base" id="r_ae56bdd10a40f3d85ed1e62eb8ee8d136"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#ae56bdd10a40f3d85ed1e62eb8ee8d136">create_rolling_session_select_form2</a> ( $signup_name, $attendees, $signup_id, $template, $template_items, $user_group, $admin, $secret, $description, $template_items2, $rolling_days=null)</td></tr>
 <tr class="memdesc:ae56bdd10a40f3d85ed1e62eb8ee8d136 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a form that displays the rolling sessions along with their attendees.  <br /></td></tr>
 <tr class="separator:ae56bdd10a40f3d85ed1e62eb8ee8d136 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5a4899833a4a352850eead3cbf36f85 inherit pro_methods_class_sign_ups_base" id="r_aa5a4899833a4a352850eead3cbf36f85"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#aa5a4899833a4a352850eead3cbf36f85">add_attendee_rolling</a> ( $post)</td></tr>
+<tr class="memdesc:aa5a4899833a4a352850eead3cbf36f85 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add attendee for the selected spots.  <br /></td></tr>
+<tr class="separator:aa5a4899833a4a352850eead3cbf36f85 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48d0251d44fa8c47714fb9806f95f64f inherit pro_methods_class_sign_ups_base" id="r_a48d0251d44fa8c47714fb9806f95f64f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a48d0251d44fa8c47714fb9806f95f64f">load_template_selection</a> ( $template_id, $add_new, $template_id_name, $select_id='template-select', $default_title='None')</td></tr>
+<tr class="memdesc:a48d0251d44fa8c47714fb9806f95f64f inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads the template selection dropdown list.  <br /></td></tr>
+<tr class="separator:a48d0251d44fa8c47714fb9806f95f64f inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab40563eddab356a2339a42106dbafd0e inherit pro_methods_class_sign_ups_base" id="r_ab40563eddab356a2339a42106dbafd0e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#ab40563eddab356a2339a42106dbafd0e">update_sessions_price_id</a> ( $signup_id, $new_price_id)</td></tr>
+<tr class="memdesc:ab40563eddab356a2339a42106dbafd0e inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the price id of all sessions for a signup.  <br /></td></tr>
+<tr class="separator:ab40563eddab356a2339a42106dbafd0e inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ec61b095c2817c3ec8771ddc5045a51 inherit pro_methods_class_sign_ups_base" id="r_a8ec61b095c2817c3ec8771ddc5045a51"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a8ec61b095c2817c3ec8771ddc5045a51">create_description_section</a> ( $description_object)</td></tr>
+<tr class="memdesc:a8ec61b095c2817c3ec8771ddc5045a51 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates the description, short description and instructions input block.  <br /></td></tr>
+<tr class="separator:a8ec61b095c2817c3ec8771ddc5045a51 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a396564cb5b18c327d64ca66811342ead inherit pro_methods_class_sign_ups_base" id="r_a396564cb5b18c327d64ca66811342ead"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a396564cb5b18c327d64ca66811342ead">add_remove_from_calendar</a> ( $signup_id, $signup_name, $add)</td></tr>
+<tr class="memdesc:a396564cb5b18c327d64ca66811342ead inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes items from the calendar in response to removing admin approval from a signup.  <br /></td></tr>
+<tr class="separator:a396564cb5b18c327d64ca66811342ead inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17bf20463bd03567a844c7f65b6ae9cb inherit pro_methods_class_sign_ups_base" id="r_a17bf20463bd03567a844c7f65b6ae9cb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a17bf20463bd03567a844c7f65b6ae9cb">update_calendar</a> ( $post)</td></tr>
+<tr class="memdesc:a17bf20463bd03567a844c7f65b6ae9cb inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the clubs calendar.  <br /></td></tr>
+<tr class="separator:a17bf20463bd03567a844c7f65b6ae9cb inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a855d366ee44471f1f9416b4bdabac984 inherit pro_methods_class_sign_ups_base" id="r_a855d366ee44471f1f9416b4bdabac984"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a855d366ee44471f1f9416b4bdabac984">get_session_email_data</a> ( $session_id=null)</td></tr>
+<tr class="memdesc:a855d366ee44471f1f9416b4bdabac984 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the data to create a pre-class email.  <br /></td></tr>
+<tr class="separator:a855d366ee44471f1f9416b4bdabac984 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab950ed130c89466a8df516e4334590fa inherit pro_methods_class_sign_ups_base" id="r_ab950ed130c89466a8df516e4334590fa"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#ab950ed130c89466a8df516e4334590fa">get_session_email_body</a> ( $session_id)</td></tr>
+<tr class="memdesc:ab950ed130c89466a8df516e4334590fa inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Formats the body of a session email to an attendee.  <br /></td></tr>
+<tr class="separator:ab950ed130c89466a8df516e4334590fa inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_class_sign_ups_base"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_class_sign_ups_base')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_sign_ups_base.html">SignUpsBase</a></td></tr>
 <tr class="memitem:ae68023bd4fe0e3fd1d06dbe91836ed41 inherit pro_attribs_class_sign_ups_base" id="r_ae68023bd4fe0e3fd1d06dbe91836ed41"><td class="memItemLeft" align="right" valign="top">const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#ae68023bd4fe0e3fd1d06dbe91836ed41">ATTENDEES_TABLE</a> = 'wp_scw_attendees'</td></tr>
 <tr class="memdesc:ae68023bd4fe0e3fd1d06dbe91836ed41 inherit pro_attribs_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Database attendees table.  <br /></td></tr>
@@ -277,7 +304,10 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memdesc:aa1fbdccaf409550551968e6b7ba31df1 inherit pro_attribs_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Date timezone.  <br /></td></tr>
 <tr class="separator:aa1fbdccaf409550551968e6b7ba31df1 inherit pro_attribs_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Class for managing Stripe.com payments. </p>
+<p>Used for creating new sessions to be added to the DB. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a095c5d389db211932136b53f25f39685" name="a095c5d389db211932136b53f25f39685"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a095c5d389db211932136b53f25f39685">&#9670;&#160;</a></span>__construct()</h2>
 
@@ -339,7 +369,8 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Payment form. </p>
+<p>When money is to be collected we transfer control back to Stripe.com and they do the credit card processing. </p>
+<p>As that process proceeds, Stripe sends events back to us to let us know about the progress.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramtype">string</td><td class="paramname">$description</td><td>Description of what is bing paid for.. </td></tr>
@@ -403,6 +434,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Called by Stripe.com when a payment has been processed. </p>
+<p>There are several events but we only register for a few of them. Event registration is done on the Stripe.com web site when you set up the account. </p>
 <p>Only verify the event if there is an endpoint secret defined Otherwise use the basic decoded event</p>
 
 </div>
@@ -443,6 +475,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Shortcode for the Payment Success page. </p>
+<p>This is what we show when a payment succeeds. WordPress pages have to added that implement this shortcode. A link to that page is passed in the collect_money function.</p>
 <dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
 </div>
@@ -490,8 +523,8 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Update the price for a signup. </p>
-<p>The price is registered with Stipe.Com.</p>
+<p>Update the price for a signup on Stripe.com. </p>
+<p>The price is registered with Stipe.Com and this is a helper function to update the price of an existing item.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramtype">mixed</td><td class="paramname">$price_id</td><td>Original price id. </td></tr>
@@ -526,7 +559,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Stripe API key. </p>
-<p>mixed </p>
+<p>string </p>
 
 </div>
 </div>
@@ -551,7 +584,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Stripe API secret. </p>
-<p>mixed </p>
+<p>string </p>
 
 </div>
 </div>
@@ -576,7 +609,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Stripe Endpoint Secret. </p>
-<p>mixed </p>
+<p>string </p>
 
 </div>
 </div>
@@ -601,7 +634,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Stripe root URL. </p>
-<p>mixed </p>
+<p>string </p>
 
 </div>
 </div>
