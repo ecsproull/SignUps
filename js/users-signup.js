@@ -400,12 +400,12 @@ jQuery(document).ready(function($){
 
 	$(".expand-button").click( function(event) {
 		var data = $(this).attr("data-button");
-		if ($(".expand-button").html() == "Show All") {
+		if ($("." + data + "-expand-button").html() == "Show All") {
 			$("." + data).prop("hidden", false);
-			$(".expand-button").html("Hide");
+			$("." + data + "-expand-button").html("Hide");
 		} else {
 			$("." + data).prop("hidden", true);
-			$(".expand-button").html("Show All");
+			$("." + data + "-expand-button").html("Show All");
 		}
 	});
 

@@ -1105,7 +1105,7 @@ class SignUpsBase {
 
 													if ( $count > 3 ) {
 														?>
-														<button class="btn btn-sm bg-primary mr-auto ml-auto expand-button" type='button' 
+														<button class="btn btn-sm bg-primary mr-auto ml-auto <?php echo esc_html( $random_number . '-expand-button' ); ?> expand-button" type='button' 
 															data-button="<?php echo esc_html( $random_number ); ?>" >Show All</button>
 														<?php
 													}
