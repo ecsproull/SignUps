@@ -1,5 +1,11 @@
 jQuery(document).ready(function($){
 	var scw_submitting = 0;
+
+	/**
+	 * When the "Lookup" button is clicked on a signup form in order to 
+	 * look up the member, this function retrieves the member's data from the server.
+	 * Duplicate code is in signups.js
+	 */
 	$("#get_member_button").click(function(){
 		var req = $.ajax({
 			url: wpApiSettings.root + "scwmembers/v1/members",
@@ -31,8 +37,6 @@ jQuery(document).ready(function($){
 					SetServerCookie("");
 					Cookies.set("signups_scw_badge");
 				}
-
-				//$("#update-butt").click();
 
 				$(".rolling-remove-chk").prop("hidden", true);
 				$(".move").prop("hidden", true);
@@ -69,6 +73,10 @@ jQuery(document).ready(function($){
 		});
 	});
 
+	/**
+	 * In the private Reports page there is a button to email the class.
+	 * This handles that click and copies the class emails to the clipboard.
+	 */
 	$(".instructors-email-class").click( function(e) {
 		var email_elements = $("." + $(document.activeElement).val());
 		var email_list = "";
@@ -79,14 +87,17 @@ jQuery(document).ready(function($){
 		alert ("Email addresses were copied to the clipboard.");
 	})
 
-	$("#badge-inp").on("blur", (e) => {
+	/**
+	 * If the badge input TextBox looses focus it attempts to look up what is
+	 * in the edit box. 
+	 */
+	$("#badge-input").on("blur", (e) => {
 		$("#get_member_button").trigger("click");
 	});
 
-	$("#session_select").on("load", (e) => {
-		//debugger;
-	});
-
+	/**
+	 * Pressing the enter key in the badge input TextBox triggers the lookup action.
+	 */
 	$("#badge-input").on("keydown", (e) => {
 		if (e.code === "Enter" || e.code === "NumpadEnter") { 
 			$("#get_member_button").trigger("click");
@@ -94,27 +105,13 @@ jQuery(document).ready(function($){
 		}
 	});
 
-	$("#description_duration").on("keydown", (e) => {
-		if(e.which === 8 || e.which === 46 || e.which === 37 || e.which === 39 ) {
-			return;
-		}
-
-		var val = $("#description_duration").val(); 
-		var len = val.length;
-		if (len === 2 && !val.includes(":")) {
-			$("#description_duration").val(val + ":");
-		}
-
-		if (val.includes(":") && e.which == 186) {
-			e.preventDefault();
-			return;
-		}
-
-		if(((e.which < 48 || e.which > 57) && e.which != 186) || len > 4){
-			e.preventDefault();
-		}
-	});
-
+	/**
+	 * Currently unused. All users have a unique ID assigned to them
+	 * and this id was originally sent to them in an email an allowed
+	 * then to edit their signups. This has been relaxed and a user only 
+	 * needs their badge number to edit their signups. If more security is 
+	 * needed this code can still be used.
+	 */
 	$("#user-edit-id").on("input", function() {
 		var len = $(this).val().length;
 		if(len === 32) {
@@ -127,24 +124,11 @@ jQuery(document).ready(function($){
 
 	});
 
-	$("#update-butt").click(function(e){
-		$(this).attr("clicked", "true");
-		return;
-	})
-
-	$("#toggle-view").click(function(e) {
-		var x = $("#report-view").css("display");
-		if ($("#report-view").css("display") == "block") {
-			$("#report-view").css("display", "none");
-			$("#all-items").css("display", "block");
-			$("#toggle-view").html("Report View");
-		} else {
-			$("#report-view").css("display", "block");
-			$("#all-items").css("display", "none");
-			$("#toggle-view").html("All Slots");
-		}
-	})
-
+	/**
+	 * When the users changes the number of rolling days to be shown
+	 * in a rolling signup this causes the form to update with the newly 
+	 * selected number of days showing.
+	 */
 	$("#rolling-days").on("change", function(e) {
 		e.preventDefault();
 		$("<input />").attr("type", "hidden")
@@ -156,6 +140,13 @@ jQuery(document).ready(function($){
 		$(".signup_form").submit();
 	});
 
+	/**
+	 * The submit button on signup forms (Class and Rolling) is handled here to  display
+	 * a confirmation popup before the actual submit is done. There are several special 
+	 * cases that need to be handled and they are at the top of the function.
+	 * In some cases it is one of the email buttons being clicked
+	 * and those are just pass through. 
+	 */
 	$(".signup_form").submit(function(e){
 		//debugger;
 		e.preventDefault();
@@ -253,6 +244,11 @@ jQuery(document).ready(function($){
 		  });
 	});
 
+	/**
+	 * Stores a cookie with the users badge number.
+	 * This functionality is on both the admin and user side.
+	 * The also contacts the server to store that information there also.
+	 */
 	$("#remember_me").click(function() {
 		var badgeToSet = "";
 		if ($("#remember_me").is(":checked")){
@@ -267,6 +263,10 @@ jQuery(document).ready(function($){
 		SetServerCookie( badgeToSet );
 	})
 
+	/**
+	 * Helper function to set a cookie on the server.
+	 * @param {*} badgeToSet Badge to set.
+	 */
 	function SetServerCookie( badgeToSet ) {
 		$.ajax({
 			url: wpApiSettings.root + "scwmembers/v1/cookies",
@@ -280,6 +280,12 @@ jQuery(document).ready(function($){
 		});
 	}
 
+	/**
+	 * This was meant to enforce rules for signing for various machines.
+	 * The goal was to limit someone from hogging a machine by signing up
+	 * all of the slots in one day. That plan in currently on hold but the code
+	 * remains done and test it we want to enable it again.
+	 */
 	$(".rolling-add-chk").click(function(x) {
 		var val = x.currentTarget.value;
 		if (val) {
@@ -321,13 +327,6 @@ jQuery(document).ready(function($){
 			} else {
 				var arr = val.split(",");
 				var checked = x.currentTarget.checked;
-				/*var checkedCount = $(".rolling-add-chk:checkbox:checked").length;
-				 if (checkedCount > 2) {
-					alert("Only the first two signups at a time.");
-					x.currentTarget.checked = false;
-					return;
-				} */
-
 				$(".rolling-add-chk").each(function(i, e) {
 					if ($(this).val() === val) {
 						return true;
@@ -345,28 +344,19 @@ jQuery(document).ready(function($){
 		}
 	});
 
-	$(".rolling-remove-chk").click(function(x) {
-		//checkUsersEdits();
-	});
-
-	function checkUsersEdits() {
-		$(".attendee-row").each(function(i, e) {
-			if ($(this).find(".rolling-remove-chk:visible").length) {
-				if ($(this).find(".rolling-remove-chk").is(":checked")) {
-					$(this).find(".rolling-add-chk").attr("disabled", false);
-				} else {
-					if (!$(this).find(".rolling-remove-chk").is(":hidden")) {
-						$(this).find(".rolling-add-chk").attr("disabled", true);
-					}
-				}
-			}
-		});
-	}
-
+	/**
+	 * Returns the user to https://scwwoodshop.com
+	 */
 	$(".back-button").click(function() {
 		window.location.href = "https://" + location.hostname;
 	});
 
+	/**
+	 * Hides or shows the Submit buttons based on session selection.
+	 * In reality any of the Submit buttons would submit the form
+	 * correctly. When a session selection is made we reduce the confusion
+	 * and only show the Submit button for the session selected.
+	 */
 	$("#selection-table input:radio").click (function(e) {
 		var arr = e.currentTarget.value.split(",");
 		var active_submit_id = "submit_" + arr[3];
@@ -387,6 +377,10 @@ jQuery(document).ready(function($){
 		$(".custom-alert").hide();
 	});
 
+	/**
+	 * Presents the user with a warning when navigating away from
+	 * a Rolling selection form with un-submitted work.
+	 */
 	$(window).on("beforeunload", function(){
 		if (scw_submitting) {
 			scw_submitting = 0;
@@ -398,6 +392,11 @@ jQuery(document).ready(function($){
 		}
 	});
 
+	/**
+	 * When there are more than 3 members signed up for a class session all but
+	 * the first 3 are hidden and a Show All button is displayed. Clicking 
+	 * the button toggles the view to show all or hide the extras.
+	 */
 	$(".expand-button").click( function(event) {
 		var data = $(this).attr("data-button");
 		if ($("." + data + "-expand-button").html() == "Show All") {
@@ -409,10 +408,19 @@ jQuery(document).ready(function($){
 		}
 	});
 
+	/**
+	 * Currently unused.
+	 */
 	$("#download").click(function(e){
 		download($("#csv_data").val() ,"CncUsers.csv", "text/csv;charset=utf-8;")
 	})
 
+	/**
+	 * Prevents an attempt to move more than one session at a time.
+	 * Also displays a help message to help member move themselves.
+	 * 2-b-clear, a member may move themselves between the sessions 
+	 * of a class. They can't move to another class as that involves money.
+	 */
 	$(".move_me").click(function(e) {
 		var count = $("input[name='move_me[]']:checked").length;
 		if (count > 1) {
@@ -433,6 +441,9 @@ jQuery(document).ready(function($){
 		}
 	})
 
+	/**
+	 * Currently unused.
+	 */
 	function download(data, filename, type) {
 		var file = new Blob([data], {type: type});
 		if (window.navigator.msSaveOrOpenBlob) // IE10+
@@ -451,9 +462,10 @@ jQuery(document).ready(function($){
 		}
 	}
 
-	//$(table).find("tbody").append("<tr><td>aaaa</td></tr>");
-	
-	///// Sripe payment stuff below here. /////
+	/**
+	 * Stripe payment stuff below here. This has to do with the IFrame that
+	 * is displayed during the payment process.
+	 */
 	// show shipping address if different
 	function showMe() {
 		var box = document.getElementById("same");

@@ -414,7 +414,9 @@ class StripePayments extends SignUpsBase {
 				return $result->id;
 			}
 		} catch ( Exception $e ) {
-
+			?>
+			<h2>Exception updating price id. <?php echo $e->getMessage(); ?></h2>
+			<?php
 		}
 
 		return $result->id;

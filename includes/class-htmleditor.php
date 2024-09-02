@@ -95,7 +95,6 @@ class HtmlEditor extends SignUpsBase {
 				$this->create_description_section( $description_object )
 				?>
 				<div class="mt-2">
-					<!-- button type="button" id="display-html" class="btn bt-md btn-primary mr-auto ml-auto mt-2">Preview</button -->
 					<input class="btn bt-md btn-primary mr-auto ml-auto mt-2" type="submit" value="Submit" name="submit_html">
 				</div> 
 				<?php

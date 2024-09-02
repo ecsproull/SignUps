@@ -11,8 +11,10 @@
 
 
 /**
- * RollingExceptionsEditor is used to edit the Rolling Exceptions
- * It is accessd via the submenu item named Exceptions.
+ * RollingExceptionsEditor is used to edit the time exceptions for the rolling signups.
+ * Rolling signups generate signups for a set number of days. Exceptions are things
+ * like shop closings, machine maintenance or any time you want to skip.
+ * It is accessed via the submenu item named Exceptions.
  */
 class RollingExceptionsEditor extends SignUpsBase {
 
@@ -79,7 +81,7 @@ class RollingExceptionsEditor extends SignUpsBase {
 	}
 
 	/**
-	 * Loads the exceptions form.
+	 * Loads the exceptions editor form.
 	 *
 	 * @return void
 	 */

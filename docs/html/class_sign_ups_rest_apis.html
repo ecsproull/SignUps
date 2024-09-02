@@ -127,7 +127,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a22900f016255952926eefdb2663e0e49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get's the next orientation attendee list.  <br /></td></tr>
 <tr class="separator:a22900f016255952926eefdb2663e0e49"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad62116ea226ffbfb8366e540dfc80da" id="r_aad62116ea226ffbfb8366e540dfc80da"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aad62116ea226ffbfb8366e540dfc80da">register_payment_route</a> ()</td></tr>
-<tr class="memdesc:aad62116ea226ffbfb8366e540dfc80da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Route used for Stripe.com callback.  <br /></td></tr>
+<tr class="memdesc:aad62116ea226ffbfb8366e540dfc80da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers the route used for Stripe.com callback.  <br /></td></tr>
 <tr class="separator:aad62116ea226ffbfb8366e540dfc80da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab948995c3a3d96664cd0a0b2a5de5c5b" id="r_ab948995c3a3d96664cd0a0b2a5de5c5b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab948995c3a3d96664cd0a0b2a5de5c5b">unsubscribe_list</a> ( $data)</td></tr>
 <tr class="memdesc:ab948995c3a3d96664cd0a0b2a5de5c5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the list of members wishing to unsubscribe from the nag mailer.  <br /></td></tr>
@@ -360,6 +360,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get the attendees for an upcoming class. </p>
+<p>This is used for sending the email reminders to class attendees.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramtype">mixed</td><td class="paramname">$data</td><td>Posted data that tells the date for the classes. </td></tr>
@@ -412,6 +413,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get the status of a class for an instructor. </p>
+<p>When creating the reminder emails concerning classes this is used to get the class status. This information is usually used to inform the instructors of the class.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramtype">mixed</td><td class="paramname">$request</td><td>Request data. </td></tr>
@@ -465,6 +467,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Gets the monitors for the specified date. </p>
+<p>Again, this is used by the nag mailer to get the data for the email.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramtype">mixed</td><td class="paramname">$request</td><td>The request data that contains the date of interest. </td></tr>
@@ -491,6 +494,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get's the next orientation attendee list. </p>
+<p>This is used when importing new members into the shop and QB database.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramtype">mixed</td><td class="paramname">$data</td><td>Data for the request. </td></tr>
@@ -590,7 +594,7 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Route used for Stripe.com callback. </p>
+<p>Registers the route used for Stripe.com callback. </p>
 <dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
 </div>
@@ -611,6 +615,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Search the member database table for a member. </p>
+<p>This is used from the admin pages to allow easy look up of a member. The search only requires part of a name, badge, email or phone number to locate a matching list of members to choose from.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramtype">mixed</td><td class="paramname">$request</td><td>Posted data to search with. </td></tr>
@@ -663,7 +668,7 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Get the list of members wishing to unsubscribe from the nag mailer. </p>
-<p>This function is also used to clear the list after they have been unsubscribed.</p>
+<p>This function is also used to clear the list after they have been unsubscribed. The list of who is subscribed and unsubscribed is kept in the shop database. The nag mailer application updates that list based on the data requested here.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramtype">mixed</td><td class="paramname">$data</td><td></td></tr>

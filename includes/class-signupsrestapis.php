@@ -225,7 +225,9 @@ class SignUpsRestApis extends SignUpsBase {
 	}
 
 	/**
-	 * Get the status of a class for an instructor.
+	 * Get the status of a class for an instructor. When creating the reminder
+	 * emails concerning classes this is used to get the class status. This 
+	 * information is usually used to inform the instructors of the class.
 	 *
 	 * @param  mixed $request Request data.
 	 * @return mixed Class contacts and number of students signed up.
@@ -278,7 +280,9 @@ class SignUpsRestApis extends SignUpsBase {
 	}
 
 	/**
-	 * Search the member database table for a member.
+	 * Search the member database table for a member. This is used from the admin
+	 * pages to allow easy look up of a member. The search only requires part of a
+	 * name, badge, email or phone number to locate a matching list of members to choose from.
 	 *
 	 * @param  mixed $request Posted data to search with.
 	 * @return object
@@ -315,7 +319,8 @@ class SignUpsRestApis extends SignUpsBase {
 	}
 
 	/**
-	 * Get the attendees for an upcoming class.
+	 * Get the attendees for an upcoming class. This is used for sending the 
+	 * email reminders to class attendees.
 	 *
 	 * @param  mixed $data Posted data that tells the date for the classes.
 	 * @return void
@@ -351,7 +356,8 @@ class SignUpsRestApis extends SignUpsBase {
 	}
 
 	/**
-	 * Get's the next orientation attendee list.
+	 * Get's the next orientation attendee list. This is used when importing
+	 * new members into the shop and QB database.
 	 *
 	 * @param  mixed $data Data for the request.
 	 * @return void
@@ -389,7 +395,7 @@ class SignUpsRestApis extends SignUpsBase {
 	}
 
 	/**
-	 * Route used for Stripe.com callback.
+	 * Registers the route used for Stripe.com callback.
 	 *
 	 * @return void
 	 */
@@ -408,6 +414,8 @@ class SignUpsRestApis extends SignUpsBase {
 	/**
 	 * Get the list of members wishing to unsubscribe from the nag mailer.
 	 * This function is also used to clear the list after they have been unsubscribed.
+	 * The list of who is subscribed and unsubscribed is kept in the shop database. The 
+	 * nag mailer application updates that list based on the data requested here.
 	 *
 	 * @param  mixed $data
 	 * @return void
@@ -452,7 +460,8 @@ class SignUpsRestApis extends SignUpsBase {
 	}
 
 	/**
-	 * Gets the monitors for the specified date.
+	 * Gets the monitors for the specified date. Again, this is used by the nag mailer 
+	 * to get the data for the email.
 	 *
 	 * @param  mixed $request The request data that contains the date of interest.
 	 * @return mixed $results the results of the query.

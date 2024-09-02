@@ -10,7 +10,11 @@
  */
 
 /**
- * RollingTemplatesEditor is used to edit the Rolling Templates
+ * RollingTemplatesEditor is used to edit the Rolling Templates.
+ * Rolling signups, like Monitor, Cnc or Laser, generate signups for
+ * a set number of days. The templates are used to determine things like
+ * how many days per week, the number of sessions per day, start time and 
+ * the item title for the slots created.
  * It accessed via the submenu item name Rolling Templates.
  */
 class RollingTemplatesEditor extends SignUpsBase {
@@ -23,7 +27,7 @@ class RollingTemplatesEditor extends SignUpsBase {
 	}
 
 	/**
-	 * load_products_editor
+	 * Entry point for the editor.
 	 *
 	 * @return void
 	 */
@@ -45,6 +49,13 @@ class RollingTemplatesEditor extends SignUpsBase {
 		}
 	}
 
+
+	/**
+	 * Handles the form submission. Data from the form is entered into the database.
+	 *
+	 * @param  array $post The data collected on the form being submitted.
+	 * @return void
+	 */
 	private function submit_template( $post ) {
 		global $wpdb;
 		$data                          = array();
@@ -121,7 +132,14 @@ class RollingTemplatesEditor extends SignUpsBase {
 		</form>
 		<?php
 	}
-
+		
+	/**
+	 * Loads the form to edit or create the parameters for a rolling signup.
+	 * The collection of parameters is called a "Rolling Template".
+	 *
+	 * @param  mixed $template_id
+	 * @return void
+	 */
 	private function load_template_form( $template_id ) {
 		global $wpdb;
 		$templates = $wpdb->get_results(

@@ -1,6 +1,5 @@
 <?php
 /*
- * Summary
  * TimeException class.
  */
 

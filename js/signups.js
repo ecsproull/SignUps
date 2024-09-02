@@ -1,4 +1,13 @@
+/**
+ * Administrator JS. Only loaded on the administrator side.
+ * Some of the functions are duplicated on the user side.
+ */
 jQuery( document ).ready( function($){
+	/**
+	 * Fires when the short description is ready.
+	 * After the Description and instruction editors are ready 
+	 * they need to a have the HTML editor attached to them.
+	 */
 	$("#description_short").ready(function(){
 		loadEditor($("#description_short")[0]);
 	});
@@ -11,6 +20,10 @@ jQuery( document ).ready( function($){
 		loadEditor($("#description_instructions")[0]);
 	});
 
+	/**
+	 * Does the work of turning a TextArea into an HTML editor.
+	 * @param {*} ele The element to attach to.
+	 */
 	function loadEditor(ele) {
 		CKEDITOR.ClassicEditor.create(ele, {
 			// https://ckeditor.com/docs/ckeditor5/latest/features/toolbar/toolbar.html#extended-toolbar-configuration-format
@@ -156,6 +169,35 @@ jQuery( document ).ready( function($){
 		};
 	}
 
+	/**
+	 * Prevents bogus data from being entered into the class duration EditBox.
+	 */
+	$("#description_duration").on("keydown", (e) => {
+		if(e.which === 8 || e.which === 46 || e.which === 37 || e.which === 39 ) {
+			return;
+		}
+
+		var val = $("#description_duration").val(); 
+		var len = val.length;
+		if (len === 2 && !val.includes(":")) {
+			$("#description_duration").val(val + ":");
+		}
+
+		if (val.includes(":") && e.which == 186) {
+			e.preventDefault();
+			return;
+		}
+
+		if(((e.which < 48 || e.which > 57) && e.which != 186) || len > 4){
+			e.preventDefault();
+		}
+	});
+
+	/**
+	 * When the "Lookup" button is clicked on a signup form in order to 
+	 * look up the member, this function retrieves the member's data from the server.
+	 * Duplicate code is in users-signups.js
+	 */
 	$("#get_member_button").click(function(){
 		var req = $.ajax({
 			url: wpApiSettings.root + 'scwmembers/v1/members',
@@ -199,6 +241,11 @@ jQuery( document ).ready( function($){
 		});
 	});
 
+	/**
+	 * When an administrator wishes to search for a member, this function 
+	 * contacts the sever for a results set and then displays that set for
+	 * the administrator to choose from. 
+	 */
 	$("#search_button").click(function(){
 
 		if ($('#search-results').html()) {
@@ -284,6 +331,11 @@ jQuery( document ).ready( function($){
 		});
 	});
 
+	/**
+	 * Stores a cookie with the users badge number.
+	 * This functionality is on both the admin and user side.
+	 * It also contacts the server to store that information there also.
+	 */
 	$("#remember_me").click(function() {
 		var badgeToSet = "";
 		if ($("#remember_me").is(":checked")){
@@ -307,12 +359,21 @@ jQuery( document ).ready( function($){
 		});
 	})
 
+	/**
+	 * This captures the ENTER key within the badge input edit box
+	 * and executes the search.
+	 */
 	$("#badge-input").on('keyup', (e) => { 
 		if (e.code === 'Enter' || e.code === 'NumpadEnter') { 
 			$("#get_member_button").trigger("click");
 		}
 	});
 
+	/**
+	 * When editing sessions for a class there is an "Actions"
+	 * button. Click on the Actions button opens a popup with several 
+	 * menu items. The next three function open and close that popup.
+	 */
 	var openPopup = null;
 	function closePopup() {
 		if ( openPopup ) {
@@ -337,26 +398,10 @@ jQuery( document ).ready( function($){
 		closePopup();
 	});
 
-	/*
-	$( "#thumbnail" ).change(function( e ){
-		$( "#displayThumb" ).attr( "src", e.currentTarget.value );
-	});
-	*/
-
-	$( '#first-name,#last-name,#badge-input' ).change( function() {
-			//checkAttendeeValid();
-	});
-
-	function checkAttendeeValid() {
-		if ( $( '#firstname').val() != '' &&
-			$( '#lastname' ).val() != '' &&
-			$( '#badge' ).val() != '' ) {
-			$( '#submit_attendees' ).prop('disabled', false);
-		} else {
-			$( '#submit_attendees' ).prop('disabled', true);
-		}
-	}
-
+	/**
+	 * Enables and disables buttons on the session editor's Actions menu
+	 * based on what checkboxes are selected.
+	 */
 	$( '.addChk,.selChk' ).change( function( e ) {
 		let to_slot = null;
 		let from_slot = null;
@@ -403,12 +448,18 @@ jQuery( document ).ready( function($){
 		}
 	});
 
+	/**
+	 * Helper function to disable the Move button.
+	 */
 	function disableMoveButton() {
 		$( "input[name=move_attendees]" ).each( function( index, element ) {
 			element.disabled = true;
 		});
 	}
 
+	/**
+	 * Handles the drag start event when an admin drags a member from one session another session.
+	 */
 	var lastDragSessionId = -1;
 	$( ".drag-row").on( 'dragstart', function(evt) {
 		let arr =  evt.target.dataset['dragable'].split(',');
@@ -418,12 +469,18 @@ jQuery( document ).ready( function($){
 		lastDragSessionId = arr[1];
 	})
 
+	/**
+	 * Handled the drag over event during a member drag operation.
+	 */
 	$( ".add-attendee-row").on( 'dragover', function(evt) {
 		if (evt.currentTarget.dataset['sessionId'] != lastDragSessionId ) {
 			evt.originalEvent.preventDefault();
 		}
 	})
 
+	/**
+	 * Handles the drop event when dragging and dropping a member into a new session of a class.
+	 */
 	$( ".add-attendee-row").on( 'drop', function(evt) {
 		if (confirm( "Confirm Attendee Move") ) {
 			$(":checkbox").prop( "checked", false );
@@ -452,37 +509,64 @@ jQuery( document ).ready( function($){
 
 	});
 
+	/**
+	 * When adding sessions to a class and you alter any of the 
+	 * settings used to auto-generate future sessions, this automatically 
+	 * check the "Save Settings" checkbox. If the user doesn't want to save them
+	 * they must uncheck this setting.
+	 */
 	$(".session-setting").on('change', function(e) {
 		$(".save-settings").prop( "checked", true );
 	});
 
-	$("#signup_Repeat").on('change', function(e){
-		if($("#signup_Repeat").val() != 0) {
-			$("#day-of-month").val("");
+	/**
+	 * When adding sessions to a class and you set the signup repeat to 
+	 * something like "2 weeks" this clears the day of the month. Having a
+	 * day of the month set would override the "2 weeks" that you just set, so 
+	 * we clear it. Id it is set back to Monthly then we enable the day of the month.
+	 */
+	$("#signup_Repeat").on("change", function(e) {
+		if ($(e.target).val() !== '0') {
+			$("#day-of-month").val('');
+			$("#day-of-month").prop('disabled', true);
+		} else {
+			$("#day-of-month").prop('disabled', false);
 		}
 	});
 
+	/**
+	 * If you add a day of the month for the class this 
+	 * clears the signup repeat.
+	 */
 	$("#day-of-month").on('change', function(e) {
 		if($("#day-of-month").val()) {
 			$("#signup_Repeat").val("0");
 		}
 	});
+	
 
+	/**
+	 * At the top of each signup's property page there is
+	 * a URL for that signup. There is a button that an admin
+	 * can you to copy that link. The button click is handled here.
+	 */
 	$("#copy-signup-link").click( function(e) {
 		var copyText = $("#signup-url").text();
 		navigator.clipboard.writeText(copyText);
    });
 
-	// Add rolling information to the create class form.
-	$("#rolling-signup").change( function(e) {
-		alert(e.currentTarget.value);
-	});
-
+	/**
+	 * On the instructors editor form, if you change the class selection 
+	 * this causes the form to reload with the correct instructors.
+	 */
 	$("#select_class").change(function(e) {
 		$("#reload").val("1");
 		$("#instructors-form").submit();
 	});
 
+	/**
+	 * Appears this is dead code. TODO: Verify and remove.
+	 */
 	$( "button#add-time-slot" ).click( function( event ) {
 		let val_str = $( "button#add-time-slot" ).val();
 		$('#session-table').append(
@@ -500,6 +584,11 @@ jQuery( document ).ready( function($){
 		$( "button#add-time-slot" ).val(++val_int);
 	});
 
+	/**
+	 * On the instructors editor form, after searching and loading an instructors information,
+	 * clicking the Add Instructor button will fire this. The instructors information will be 
+	 * added to the form for submission.
+	 */
 	$("#add-instructor").click( function(e) {
 		$('#inst-list').append(
 			'<div><input class="w-99" type="text" name="instructors_badge[]" value="' + $('.member-badge').val() + '"></div>' +
@@ -512,6 +601,11 @@ jQuery( document ).ready( function($){
 		);
 	});
 
+	/**
+	 * In the edit session form there is a button to email the session
+	 * attendees and instructors. Clicking that button will copy the list of
+	 * email address to the clipboard for use in you favorite email app.
+	 */
 	$(".email-butt").click( function(e) {
 		var emailClass = '.' + e.target.value;
 		var emailId = '#' + e.target.value;
@@ -527,62 +621,28 @@ jQuery( document ).ready( function($){
 		document.location.href = "mailto:" + emailAddresses + "?subject=" +  $("#signup_name").text();
 	});
 
-	$("#signup_duration").on('keydown', (e) => {
-		if(e.which === 8 || e.which === 46 || e.which === 37 || e.which === 39 ) {
-			return;
-		}
 
-		var val = $("#signup_duration").val(); 
-		var len = val.length;
-		if (len === 2 && !val.includes(':')) {
-			$("#signup_duration").val(val + ':');
-		}
-
-		if (val.includes(':') && e.which == 186) {
-			e.preventDefault();
-			return;
-		}
-
-		if(((e.which < 48 || e.which > 57) && e.which != 186) || len > 4){
-			e.preventDefault();
-		}
-	});
-
-	/* $("#session-table").on("change", ".start-time", function( event ) {
-		let minutes = $("#default-minutes").val();
-
-		if (minutes === "0") {
-			alert("Please set the number of minutes for the session to get auto time updates.")
-		}
-
-		let start_id = event.target.id;
-		let end_id = '#' + start_id.replace(/start/g, "end")
-		start_id = '#' + start_id;
-
-		let date = new Date($(start_id).val());
-		date.setTime(date.getTime() + parseInt(minutes) * 60 * 1000);
-		date.setTime(date.getTime() + -7 * 60 * 60 * 1000);
-		let end_date = date.toISOString();
-		let pos1 = end_date.indexOf(":");
-		let pos2 = end_date.indexOf(":", pos1 + 1);
-		end_date = end_date.substring(0, pos2);
-		$(end_id).val(end_date);
-	}); */
-
-	$( "#display-html" ).click( function( event ) {
-		$("#html-description-display").html($("#html-signup-description").val());
-	});
-
+	/**
+	 * When the signup selection is changed the form saves changes
+	 * and then reloads with the data for the newly selected signup.
+	 */
 	$("#signup-select").on("change", function (e) {
 		document.html_form.submit();
 	});
 
+	/**
+	 * When a different template is selected in the Template Editor
+	 * the form reloads with the data for the newly selected template.
+	 */
 	$("#template-select").on("change", function (e) {
 		if (document.template_form) {
 			document.template_form.submit();
 		}
 	});
 
+	/**
+	 * Adds a new row to the Template Editor.
+	 */
 	$('.add-template-row').click( function() {
 		$('.template-table').find('tbody').append(
 			"<tr>" +
@@ -599,6 +659,10 @@ jQuery( document ).ready( function($){
 		);
 	});
 
+	/**
+	 * Processes the click event when a different editor is selected in the 
+	 * HTML Editor.
+	 */
 	$('.nav-link').click( function (e) {
 		if (e.currentTarget.innerText == "Description") {
 			$('#html-signup-description').show();
@@ -624,6 +688,10 @@ jQuery( document ).ready( function($){
 		}
 	})
 
+	/**
+	 * Called when the Start DateTime Picker is changed in the 
+	 * Rolling Exceptions Editor.
+	 */
 	$(".datetime-picker-start").on("change", function(e){
 		var key =  $(e.target).attr('key');
 		var time = $(".datetime-picker-start[key=" + key + "]").val();
@@ -633,6 +701,10 @@ jQuery( document ).ready( function($){
 		$(".datetime-picker-end[key=" + key + "]").val(time);
 	})
 
+	/**
+	 * Called when the End DateTime Picker is changed in the 
+	 * Rolling Exceptions Editor.
+	 */
 	$(".datetime-picker-end").on("change", function(e){
 		var key =  $(e.target).attr('key');
 		var time = $(".datetime-picker-end[key=" + key + "]").val();
@@ -641,15 +713,12 @@ jQuery( document ).ready( function($){
 		$(".datetime-picker-end[key=" + key + "]").val(time);
 	})
 
-	$("#signup_Repeat").on("change", function(e) {
-		if ($(e.target).val() !== '0') {
-			$("#day-of-month").val('');
-			$("#day-of-month").prop('disabled', true);
-		} else {
-			$("#day-of-month").prop('disabled', false);
-		}
-	});
-
+	/**
+	 * When adding sessions to a signup you can set the Start Time
+	 * in two different places. In the upper half of the form or in the
+	 * first item in the list of sessions to be added. 
+	 * The next two function keep these two in sync.  
+	 */	
 	$("#start-time").on("change", function(e) {
 		$("#start-time-0").val($("#start-time").val());
 	});
@@ -658,6 +727,11 @@ jQuery( document ).ready( function($){
 		$("#start-time").val($("#start-time-0").val());
 	});
 
+	/**
+	 * When there are more than three slots in a signup list, 
+	 * only the first 3 are visible. This allows the user to expand
+	 * and see the full list. 
+	 */
 	$(".expand-button").click( function(event) {
 		var data = $(this).attr("data-button");
 		if ($("." + data + "-expand-button").html() == "Show All") {

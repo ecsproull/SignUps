@@ -1,14 +1,14 @@
 var searchData=
 [
-  ['receive_5fmembers_0',['receive_members',['../class_sign_ups_rest_apis.html#a36b1e5c0a0efb8c99d7446752d019eea',1,'SignUpsRestApis']]],
-  ['receive_5ftext_1',['receive_text',['../class_sign_ups_rest_apis.html#a77c363ed489023d066f65b543f5be582',1,'SignUpsRestApis']]],
-  ['register_5fpayment_5froute_2',['register_payment_route',['../class_sign_ups_rest_apis.html#aad62116ea226ffbfb8366e540dfc80da',1,'SignUpsRestApis']]],
-  ['register_5froute_3',['register_route',['../class_sign_ups_base.html#adfb88f28645bbfbd296303f4b88a66c7',1,'SignUpsBase']]],
-  ['reports_4',['Reports',['../class_reports.html',1,'']]],
-  ['review_5fpayments_5',['review_payments',['../class_payments_review.html#a3cc542d747a5474b47f3779c64600cff',1,'PaymentsReview']]],
-  ['rolling_5fexceptions_5ftable_6',['ROLLING_EXCEPTIONS_TABLE',['../class_sign_ups_base.html#a3d7067e8f7fd1f04cbff3c3729f2e604',1,'SignUpsBase']]],
-  ['rolling_5ftable_7',['ROLLING_TABLE',['../class_sign_ups_base.html#a9b6eb5d2fbd55eebf85a48196072a860',1,'SignUpsBase']]],
-  ['rollingexceptionseditor_8',['RollingExceptionsEditor',['../class_rolling_exceptions_editor.html',1,'']]],
-  ['rollingslot_9',['RollingSlot',['../class_rolling_slot.html',1,'']]],
-  ['rollingtemplateseditor_10',['RollingTemplatesEditor',['../class_rolling_templates_editor.html',1,'']]]
+  ['payment_5fevent_0',['payment_event',['../class_stripe_payments.html#a79c94d8e2ec530f90fed68bddd329d98',1,'StripePayments']]],
+  ['payment_5ffailure_1',['payment_failure',['../class_stripe_payments.html#aa88e64e053b5ba73e5bf90181bc9d35f',1,'StripePayments']]],
+  ['payment_5fsuccess_2',['payment_success',['../class_stripe_payments.html#add82b313034133feb8ad42ed07afbbd2',1,'StripePayments']]],
+  ['payments_5ftable_3',['PAYMENTS_TABLE',['../class_sign_ups_base.html#af729bf989944b4a6359775813d404df3',1,'SignUpsBase']]],
+  ['paymentsreview_4',['PaymentsReview',['../class_payments_review.html',1,'']]],
+  ['permissions_5fcheck_5',['permissions_check',['../class_sign_ups_rest_apis.html#a382177f9012d339a00e60883ccd4cdf6',1,'SignUpsRestApis\permissions_check()'],['../class_stripe_payments.html#a382177f9012d339a00e60883ccd4cdf6',1,'StripePayments\permissions_check()']]],
+  ['plugins_20signups_20docs_20html_20annotated_20html_20signups_20a_20h1_6',['&lt;h1&gt;Sun City West Woodshop &lt;a href=&quot;file:///D:/Apache24/htdocs/wordpress/wp-content/plugins/SignUps/docs/html/annotated.html&quot;&gt;SignUps&lt;/a&gt;&lt;/h1&gt;',['../index.html',1,'']]],
+  ['plugins_5floaded_7',['plugins_loaded',['../class_sign_ups_plugin.html#a1203dc9c70a07e3c79b2806822be0dc0',1,'SignUpsPlugin']]],
+  ['prettify_2djsdoc_2ecss_8',['prettify-jsdoc.css',['../prettify-jsdoc_8css.html',1,'']]],
+  ['prettify_2dtomorrow_2ecss_9',['prettify-tomorrow.css',['../prettify-tomorrow_8css.html',1,'']]],
+  ['prettify_2ejs_10',['prettify.js',['../prettify_8js.html',1,'']]]
 ];

@@ -1,5 +1,8 @@
 /** \mainpage <h1>Sun City West Woodshop <a href="file:///D:/Apache24/htdocs/wordpress/wp-content/plugins/SignUps/docs/html/annotated.html">SignUps</a></h1>
 - Desciption: This is a WordPress plugin that is used by members of the SCW Woodshop to sign up for classes and also to reserve time on machines that require a reservation.
+- Package: SignUps
+- Author: Ed Sproull
+- Copyright: You have the right to copy. Licensed under GPL-2.0+
 - Basics: As is all of WordPress the plugin is written in the PHP language. The classes and their functions are sescribed in this document.
 - More Info: <a href="https://1drv.ms/w/s!Am4PZtA_Pelc3gWWbFvlNfOhuj8e?e=jSdJ28">Signups Word Document</a> 
 */

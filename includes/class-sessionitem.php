@@ -1,13 +1,11 @@
 <?php
 /*
- * Summary
- * Database class.
  *
  * @package SignUps
  */
 
 /**
- * Mirror of the database Session object.
+ * Mirror of the database wp_scw_sessions object.
  * Used for creating new sessions to be added to the DB.
  */
 class SessionItem {

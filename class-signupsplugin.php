@@ -1,14 +1,10 @@
 <?php
 /*
- * Summary
- * Database class.
- *
  * @package     SignUps
  * @author      Edward Sproull
- * @copyright   You have the right to copy
- * license     GPL-2.0+
+ * @copyright   You have the right to copy. Licensed under GPL-2.0+
  * 
- * This is the content of my section.
+ * SignUps is a WordPress plugin used by the Sun City West Woodshop members to sign up for classes and other club activities.
  */
 
 /**
