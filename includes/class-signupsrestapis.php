@@ -468,17 +468,24 @@ class SignUpsRestApis extends SignUpsBase {
 	 */
 	public function get_monitors( $request ) {
 		global $wpdb;
-		$template_id = 1;
+		$signup_id = 1;
 		$date        = $request['date'];
 		$pattern     = '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/ms';
 		if ( preg_match( $pattern, $date ) ) {
 			$date_time = new DateTime( $date );
+			$temp_id = 1;
+
+			// When this is in use it should be checking the request date.
+			if ( $date_time > new Datetime( "9/21/2024") ) {
+				$temp_id = 1;
+			}
 			$templates  = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT *
 					FROM %1s
-					WHERE template_item_template_id = 4',
-					self::SIGNUP_TEMPLATE_ITEM_TABLE
+					WHERE template_item_template_id = %d',
+					self::SIGNUP_TEMPLATE_ITEM_TABLE,
+					$temp_id
 				),
 				OBJECT
 			);
@@ -498,7 +505,7 @@ class SignUpsRestApis extends SignUpsBase {
 					WHERE attendee_signup_id = %d && attendee_start_formatted LIKE  %s',
 					self::ATTENDEES_ROLLING_TABLE,
 					self::MEMBERS_TABLE,
-					$template_id,
+					$signup_id,
 					$wpdb->esc_like( $date ) . '%'
 				),
 				OBJECT

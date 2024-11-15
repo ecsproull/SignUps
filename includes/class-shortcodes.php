@@ -267,7 +267,8 @@ ob_start();
 		} else {
 			$bad_debt = $wpdb->get_results(
 				$wpdb->prepare(
-					'SELECT attendee_id, 
+					'SELECT attendee_id,
+					attendee_session_id, 
 					attendee_payment_start,
 					attendee_badge
 					FROM %1s
@@ -279,6 +280,8 @@ ob_start();
 
 			$dt_now       = new DateTime( 'now', $this->date_time_zone );
 			$five_minutes = new DateInterval( 'PT5M' );
+			$sgm          = new SendGridMail();
+			$email_title  = 'Incomplete Class Payment';
 			foreach ( $bad_debt as $bd ) {
 				$dt_start = new DateTime( $bd->attendee_payment_start, $this->date_time_zone );
 				$dt_start->add( $five_minutes );
@@ -286,10 +289,12 @@ ob_start();
 					if ( $signup_orientation ) {
 						$where = array( 'new_member_id' => $bd->attendee_badge );
 						$wpdb->delete( self::NEW_MEMBER_TABLE, $where );
+						$email_title = 'Incomplete Orientation Payment';
 					}
 
 					$where = array( 'attendee_id' => $bd->attendee_id );
 					$wpdb->delete( self::ATTENDEES_TABLE, $where );
+					$sgm->send_mail( 'ecsproull765@gmail.com', $email_title, 'Badge:' . $bd->attendee_badge . ' Session ID:' . $bd->attendee_session_id );
 				}
 			}
 

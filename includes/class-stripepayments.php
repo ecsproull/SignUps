@@ -271,6 +271,9 @@ class StripePayments extends SignUpsBase {
 					),
 				),
 				'mode'        => 'payment',
+				'saved_payment_method_options' => array(
+					'payment_method_save' => 'disabled'
+				),
 				'success_url' => $signup_domain . '/payment-success?attendee_id=' . $attendee_id . '&badge=' . $badge,
 				'cancel_url'  => $signup_domain . '/payment-canceled?attendee_id=' . $attendee_id . '&badge=' . $badge,
 			)

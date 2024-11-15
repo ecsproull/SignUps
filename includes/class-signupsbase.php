@@ -1771,7 +1771,8 @@ class SignUpsBase {
 						signup_contact_firstname,
 						signup_contact_email,
 						signup_contact_lastname,
-						signup_default_minimum
+						signup_default_minimum,
+						signup_location
 					FROM %1s
 					WHERE signup_id = %d',
 					self::SIGNUPS_TABLE,
@@ -1804,7 +1805,7 @@ class SignUpsBase {
 			}
 
 			$data->class_title             = $signup[0]->signup_name;
-			$data->class_location          = $session->session_location;
+			$data->class_location          = $signup[0]->signup_location;
 			$data->date_time_formatted     = $session->session_start_formatted;
 			$data->class_slots             = $session->session_slots;
 			$data->class_signup_id         = $session->session_signup_id;

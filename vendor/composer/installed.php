@@ -3,7 +3,7 @@
         'name' => 'ecsproull/sign-ups',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '9fa3203ec566bf1e7d6f14cfbc951c79b5ef91ac',
+        'reference' => 'a069cfbcdb82987442715808727ff914b98bc90e',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'ecsproull/sign-ups' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '9fa3203ec566bf1e7d6f14cfbc951c79b5ef91ac',
+            'reference' => 'a069cfbcdb82987442715808727ff914b98bc90e',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -42,6 +42,15 @@
             'replaced' => array(
                 0 => '*',
             ),
+        ),
+        'squizlabs/php_codesniffer' => array(
+            'pretty_version' => '3.10.2',
+            'version' => '3.10.2.0',
+            'reference' => '86e5f5dd9a840c46810ebe5ff1885581c42a3017',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../squizlabs/php_codesniffer',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'starkbank/ecdsa' => array(
             'pretty_version' => '0.0.5',
