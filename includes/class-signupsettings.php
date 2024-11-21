@@ -1030,7 +1030,7 @@ class SignupSettings extends SignUpsBase {
 			);
 
 			$rows = $wpdb->insert( self::ATTENDEES_TABLE, $new_attendee );
-			if ( 1 === $rows ) {
+			if ( 1 === $rows && isset( $post['email_attendee'] ) ) {
 				$body         = '<p>An adminstrator added you to a class.</p>';
 				$body        .= $this->get_session_email_body( (int) $session->session_id );
 				$sgm          = new SendGridMail();
@@ -1295,6 +1295,13 @@ class SignupSettings extends SignUpsBase {
 						$this->create_user_table( '', $signup_id );
 					}
 					?>
+					<div>
+						<label>
+							Send attendee an email: 
+							<input class="form-check-input position-relative selChk" type="checkbox" name="email_attendee"
+								value="xxx">
+						</label>
+					</div> 
 					<input class="btn bt-md btn-danger mt-2" style="cursor:pointer;" type="button" onclick="window.history.go( -1 );" value="Back"></td>
 					<input id="submit_attendees" class="btn btn-primary mt-2" type="submit" value="Complete Add" name="submit_attendees"><td>
 					<input type='hidden' name='sessions' value="<?php echo esc_html( htmlentities( serialize( $sessions ) ) ); ?>" />

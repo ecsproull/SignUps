@@ -270,7 +270,10 @@ ob_start();
 					'SELECT attendee_id,
 					attendee_session_id, 
 					attendee_payment_start,
-					attendee_badge
+					attendee_badge,
+					attendee_payment_id,
+					attendee_checkout_id,
+					attendee_new_member_id
 					FROM %1s
 					WHERE 0 < attendee_balance_owed',
 					self::ATTENDEES_TABLE
@@ -286,14 +289,26 @@ ob_start();
 				$dt_start = new DateTime( $bd->attendee_payment_start, $this->date_time_zone );
 				$dt_start->add( $five_minutes );
 				if ( $dt_start->format( 'U' ) < $dt_now->format( 'U' ) ) {
-					if ( $signup_orientation ) {
-						$where = array( 'new_member_id' => $bd->attendee_badge );
-						$wpdb->delete( self::NEW_MEMBER_TABLE, $where );
-						$email_title = 'Incomplete Orientation Payment';
+					$payments = new StripePayments();
+					$payment_status = $payments->check_payment_intent( $bd->attendee_payment_id );
+
+					if ( $payment_status ) {
+						$email_title = 'Class payment succeeded with missed events';
+						$data        = array( 'attendee_balance_owed' => 0 );
+						$where       = array( 'attendee_id' => $bd->attendee_id );
+						$wpdb->update( SELF::ATTENDEES_TABLE, $data, $where );
+					} else {
+						$payments->expire_checkout_session( $bd->attendee_checkout_id );
+						if ( $bd->attendee_new_member_id > 0 ) {
+							$where = array( 'new_member_id' => $bd->attendee_new_member_id );
+							$wpdb->delete( self::NEW_MEMBER_TABLE, $where );
+							$email_title = 'Incomplete Orientation Payment';
+						}
+
+						$where = array( 'attendee_id' => $bd->attendee_id );
+						$wpdb->delete( self::ATTENDEES_TABLE, $where );
 					}
 
-					$where = array( 'attendee_id' => $bd->attendee_id );
-					$wpdb->delete( self::ATTENDEES_TABLE, $where );
 					$sgm->send_mail( 'ecsproull765@gmail.com', $email_title, 'Badge:' . $bd->attendee_badge . ' Session ID:' . $bd->attendee_session_id );
 				}
 			}
@@ -467,6 +482,7 @@ ob_start();
 			}
 		}
 
+		$insert_id = 0;
 		if ( isset( $post['new_member_rec_card'] ) ) {
 			$new_member                        = array();
 			$new_member['new_member_rec_card'] = $post['new_member_rec_card'];
@@ -481,9 +497,8 @@ ob_start();
 				$insert_id            = $wpdb->insert_id;
 				$post['badge_number'] = $insert_id;
 			} else {
-				$insert_id = '9999';
-				$sgm       = new SendGridMail();
-				$body      = '';
+				$sgm  = new SendGridMail();
+				$body = '';
 				foreach ( $new_member as $key => $value ) {
 					$body .= "Key: $key, Value: $value\n";
 				}
@@ -510,6 +525,9 @@ ob_start();
 		$new_attendee['attendee_badge']         = $post['badge_number'];
 		$new_attendee['attendee_payment_start'] = $now->format( self::DATETIME_FORMAT );
 		$new_attendee['attendee_plus_guest']    = isset( $post['attendee_plus_guest'] );
+		$new_attendee['attendee_checkout_id']   = null;
+		$new_attendee['attendee_payment_id']    = null;
+		$new_attendee['attendee_new_member_id'] = $insert_id;
 
 		if ( $new_attendee['attendee_plus_guest'] ) {
 			$qty++;

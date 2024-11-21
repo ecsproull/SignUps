@@ -76,6 +76,14 @@ class StripePayments extends SignUpsBase {
 	 * There are several events but we only register for a few of them.
 	 * Event registration is done on the Stripe.com web site when you 
 	 * set up the account.
+	 * 
+	 * Events we handle
+	 * checkout.session.completed
+	 * checkout.session.expired
+	 * payment_intent.canceled
+	 * payment_intent.created
+	 * payment_intent.payment_failed
+	 * payment_intent.succeeded
 	 */
 	public function payment_event() {
 		global $wpdb;
@@ -118,6 +126,12 @@ class StripePayments extends SignUpsBase {
 
 		http_response_code( 200 );
 		switch ( $event->type ) {
+			case 'payment_intent.created':
+				$payment_intent                       = $event->data->object;
+				$where = array( 'attendee_id'         => $payment_intent->metadata['attendee_id'] );
+				$data  = array( 'attendee_payment_id' => $payment_intent->id );
+				$wpdb->update( SELF::ATTENDEES_TABLE, $data, $where );
+				break;
 			case 'checkout.session.completed':
 				$payment_intent = $event->data->object;
 				/* $wpdb->query(
@@ -226,14 +240,76 @@ class StripePayments extends SignUpsBase {
 
 				//$wpdb->query( 'UNLOCK TABLES' );
 				break;
-			case 'payment_method.attached':
-				$payment_method = $event->data->object; // Contains a \Stripe\PaymentMethod.;.
-				break;
 			case 'checkout.session.expired':
 			case 'payment_intent.payment_failed':
 			case 'payment_intent.canceled':
+				$payment_intent = $event->data->object;
+				$bad_debt = $wpdb->get_row(
+					$wpdb->prepare(
+						'SELECT	attendee_payment_id,
+						attendee_new_member_id
+						FROM %1s
+						WHERE 0 < attendee_balance_owed && attendee_id = %1s',
+						self::ATTENDEES_TABLE,
+						$payment_intent->metadata['attendee_id']
+					),
+					OBJECT
+				);
+
+				if ( $bad_debt ) {
+					$where = array( 'attendee_id' => $payment_intent->metadata['attendee_id'] );
+					if ( $bad_debt->attendee_payment_id && $this->check_payment_intent( $bad_debt->attendee_payment_id ) ) {
+						$data = array( 'attendee_balance_owed' => 0 );
+						$wpdb->update( SELF::ATTENDEES_TABLE, $data, $where );
+					} else {
+						if ( $bad_debt->attendee_new_member_id > 0 ) {
+							$where_new_member = array( 'new_member_id' => $bad_debt->attendee_new_member_id );
+							$wpdb->delete( SELF::NEW_MEMBER_TABLE, $where_new_member );
+						}
+						$wpdb->delete( self::ATTENDEES_TABLE, $where );
+					}
+				}
 				break;
 			default:
+		}
+	}
+
+		
+	/**
+	 * To be used before deleting a pending payment. 
+	 *
+	 * @param  mixed $payment_intent_id The Payment ID.
+	 * @return boolean Succeeded or failed.
+	 */
+    public function check_payment_intent( $payment_intent_id )
+	{
+		if ( ! $payment_intent_id ) {
+			return false;
+		}
+
+		$stripe = new \Stripe\StripeClient( $this->stripe_api_secret );
+		$payment_intent = $stripe->paymentIntents->retrieve( $payment_intent_id, []);
+		return $payment_intent->status === 'succeeded';
+	}
+	
+	/**
+	 * Expires a checkout session. After this no payment can be processed.
+	 *
+	 * @param  mixed $checkout_session_id The id of the session to expire.
+	 * @return void
+	 */
+	public function expire_checkout_session( $checkout_session_id ) {
+		if ( ! $checkout_session_id ) {
+			return;
+		}
+
+		$stripe = new \Stripe\StripeClient( $this->stripe_api_secret );
+		$checkout_session = $stripe->checkout->sessions->retrieve( $checkout_session_id, [] );
+		if ( $checkout_session->status != 'expired' ) {
+			$session = $stripe->checkout->sessions->expire( $checkout_session_id, [] );
+			if ( $session->status != 'expired' ) {
+				// send error mail.
+			}
 		}
 	}
 
@@ -251,9 +327,12 @@ class StripePayments extends SignUpsBase {
 	 * @return void
 	 */
 	public function collect_money( $description, $price_id, $badge, $attendee_id, $cost, $qty ) {
+		global $wpdb;
 		\Stripe\Stripe::setApiKey( $this->stripe_api_secret );
 		header( 'Content-Type: application/json' );
 		$signup_domain    = $this->stripe_root_url;
+		$current_time     = time(); // Get the current Unix timestamp
+		$expire_time      = $current_time + (31 * 60);
 		$checkout_session = \Stripe\Checkout\Session::create(
 			array(
 				'metadata'    => array(
@@ -270,17 +349,29 @@ class StripePayments extends SignUpsBase {
 						'quantity' => $qty,
 					),
 				),
-				'mode'        => 'payment',
-				'saved_payment_method_options' => array(
-					'payment_method_save' => 'disabled'
+				'payment_intent_data' => array(
+					'metadata' => array(
+					  	'attendee_id' => $attendee_id,
+						'badge'       => $badge,
+						'cost'        => $cost,
+						'price_id'    => $price_id,
+						'description' => $description,
+						'qty'         => $qty
+					)
 				),
+				'mode'        => 'payment',
+				'expires_at'  => $expire_time,
 				'success_url' => $signup_domain . '/payment-success?attendee_id=' . $attendee_id . '&badge=' . $badge,
-				'cancel_url'  => $signup_domain . '/payment-canceled?attendee_id=' . $attendee_id . '&badge=' . $badge,
+				'cancel_url'  => $signup_domain . '/payment-canceled?attendee_id=' . $attendee_id,
 			)
 		);
 
 		header( 'HTTP/1.1 303 See Other' );
 		header( 'Location: ' . $checkout_session->url );
+
+		$where = array( 'attendee_id' => $attendee_id );
+		$data  = array( 'attendee_checkout_id' => $checkout_session->id);
+		$wpdb->update( SELF::ATTENDEES_TABLE, $data, $where );
 	}
 
 	/**
@@ -379,16 +470,38 @@ class StripePayments extends SignUpsBase {
 	}
 
 	/**
-	 * Shortcode for the Payment failure page.
+	 * Shortcode for the Payment canceled page.
 	 *
 	 * @return void
 	 */
-	public function payment_failure() {
-		$payment_id   = sanitize_text_field( get_query_var( 'paymentid' ) );
-		$badge_number = sanitize_text_field( get_query_var( 'badge' ) );
-		?>
-		<P>Payment Failed</P>
-		<?php
+	public function payment_canceled() {
+		global $wpdb;
+		$payment_id = sanitize_text_field( get_query_var( 'attendee_id' ) );
+		if ( $payment_id ) {
+			$bad_debt = $wpdb->get_row(
+				$wpdb->prepare(
+					'SELECT	attendee_checkout_id
+					FROM %1s
+					WHERE 0 < attendee_balance_owed && attendee_id = %1s',
+					self::ATTENDEES_TABLE,
+					$payment_id
+				),
+				OBJECT
+			);
+
+			if ( $bad_debt ) {
+				$stripe = new \Stripe\StripeClient( $this->stripe_api_secret );
+				$stripe->checkout->sessions->expire( $bad_debt->attendee_checkout_id, [] );
+			}
+
+			?>
+			<h2>Payment Cancelation Processed</h2>
+			<?php
+		} else {
+			?>
+			<h2>Invalid Attempt</h2>
+			<?php
+		}
 	}
 
 	/**

@@ -96,7 +96,7 @@ class SignUpsPlugin extends SignUpsBase {
 		$this->reports            = new Reports();
 		add_shortcode( 'scw_selectclass', array( $this->short_codes, 'user_signup' ) );
 		add_shortcode( 'scw_payment_success', array( $this->stripe_payments, 'payment_success' ) );
-		add_shortcode( 'scw_payment_failure', array( $this->stripe_payments, 'payment_failure' ) );
+		add_shortcode( 'scw_payment_canceled', array( $this->stripe_payments, 'payment_canceled' ) );
 		add_shortcode( 'scw_reports', array( $this->reports, 'class_reports' ) );
 		add_filter( 'query_vars', array( $this, 'wwp_custom_query_vars_filter' ) );
 	}
