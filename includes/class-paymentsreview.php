@@ -9,7 +9,7 @@
 ob_start();
 
 /**
- * PaymentsReview generates a list of Stripe Payments. 
+ * PaymentsReview generates a list of Stripe Payments.
  * This can be accessed via the submenu item named Payments.
  */
 class PaymentsReview extends SignUpsBase {
@@ -48,12 +48,30 @@ class PaymentsReview extends SignUpsBase {
 		<?php
 		$count = 0;
 		foreach ( $payments as $payment ) {
+			if ( ! $payment->member_lastname && ! $payment->member_firstname && $payment->payments_attendee_badge ) {
+				$new_member = $wpdb->get_row(
+					$wpdb->prepare(
+						'SELECT new_member_first, 
+							new_member_last 
+						FROM %1s 
+						WHERE new_member_id = %1s',
+						self::NEW_MEMBER_TABLE,
+						$payment->payments_attendee_badge
+					),
+					OBJECT
+				);
+
+				if ( $new_member ) {
+					$payment->member_firstname = $new_member->new_member_first;
+					$payment->member_lastname  = $new_member->new_member_last;
+				}
+			}
 			?>
-			<div class="payment-items font-weight-normal <?php echo $count % 2 ? 'bg-lightgray': ''; ?>">
+			<div class="payment-items font-weight-normal <?php echo $count % 2 ? 'bg-lightgray' : ''; ?>">
 				<div><?php echo esc_html( $payment->member_firstname ); ?></div>
 				<div><?php echo esc_html( $payment->member_lastname ); ?></div>
 				<div><?php echo esc_html( $payment->payments_attendee_badge ); ?></div>
-				<div><?php echo esc_html( substr( $payment->payments_start_time, 0, strpos($payment->payments_start_time, '.') - 3 ) ); ?></div>
+				<div><?php echo esc_html( substr( $payment->payments_start_time, 0, strpos( $payment->payments_start_time, '.' ) - 3 ) ); ?></div>
 				<div><?php echo esc_html( $payment->payments_signup_description ); ?></div>
 				<div><?php echo esc_html( $payment->payments_amount_charged ); ?></div>
 				<div><?php echo esc_html( substr( $payment->payments_status, 0, 3 ) ); ?></div>
