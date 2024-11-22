@@ -196,7 +196,7 @@ class SignupSettings extends SignUpsBase {
 				$new_price_id = null;
 				if ( ! $signup_product_id ) {
 					$price_data = $stripe->create_product( $post['signup_name'], $post['signup_cost'] );
-					if ( 2 === count( $price_data ) ) {
+					if ( $price_data ) {
 						$post['signup_default_price_id'] = $price_data['price_id'];
 						$post['signup_product_id']       = $price_data['product_id'];
 					} else {
@@ -786,7 +786,7 @@ class SignupSettings extends SignUpsBase {
 					}
 				} else {
 					?>
-					<h1 style="color:red;">Default day of month is not valid: <?php echo esc_html( $results[0]->signup_default_day_of_month ); ?> "</h1>"
+					<h1 style="color:red;">Default day of month is not valid: <?php echo esc_html( $start_date_string ); ?> "</h1>"
 					<?php
 				}
 
@@ -2187,7 +2187,7 @@ class SignupSettings extends SignUpsBase {
 		$duration_minutes = date_format( $duration, 'i' );
 
 		if ( (int) $duration_hours > 12 ) {
-			$duration_hours = $duration - 12;
+			$duration_hours = $duration->sub( new DateInterval( 'PT12H') );
 			$duration->modify( '-12 hours' );
 		}
 
@@ -2211,7 +2211,7 @@ class SignupSettings extends SignUpsBase {
 			if ( $new_signup['signup_cost'] > 0 ) {
 				$stripe        = new StripePayments();
 				$product_price = $stripe->create_product( $new_signup['signup_name'], $new_signup['signup_cost'] );
-				if ( count( $product_price ) === 2 ) {
+				if ( $product_price ) {
 					$data = array(
 						'signup_order'            => $signup_id,
 						'signup_product_id'       => $product_price['product_id'],

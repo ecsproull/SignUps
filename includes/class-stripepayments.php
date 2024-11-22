@@ -102,28 +102,6 @@ class StripePayments extends SignUpsBase {
 			exit();
 		}
 
-		if ( $stripe_endpoint_secret ) {
-			/**
-			 * Only verify the event if there is an endpoint secret defined
-			 * Otherwise use the basic decoded event
-			 */
-			if ( isset( $_SERVER['HTTP_STRIPE_SIGNATURE'] ) ) {
-				$sig_header = sanitize_text_field( wp_unslash( $_SERVER['HTTP_STRIPE_SIGNATURE'] ) );
-			}
-
-			try {
-				$event = \Stripe\Webhook::constructEvent(
-					$payload,
-					$sig_header,
-					$stripe_endpoint_secret
-				);
-			} catch ( \Stripe\Exception\SignatureVerificationException $e ) {
-				echo '⚠️  Webhook error while validating signature.';
-				http_response_code( 400 );
-				exit();
-			}
-		}
-
 		http_response_code( 200 );
 		switch ( $event->type ) {
 			case 'payment_intent.created':
@@ -544,7 +522,7 @@ class StripePayments extends SignUpsBase {
 	 *
 	 * @param string $name Name of the signup.
 	 * @param int    $cost The cost of the signup.
-	 * @return The new product and price id as a comma separated string.
+	 * @return The new product and price id as an array.
 	 */
 	public function create_product( $name, $cost ) {
 

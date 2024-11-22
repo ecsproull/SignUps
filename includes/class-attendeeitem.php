@@ -14,21 +14,21 @@ class AttendeeItem {
 
 	/**
 	 * The primary key.
-	 * 
-	 * int
+	 *
+	 * Int.
 	 */
 	public $attendee_id;
 
 	/**
 	 * The session id.
-	 * 
+	 *
 	 * int
 	 */
 	public $attendee_session_id;
 
 	/**
 	 * Email.
-	 * 
+	 *
 	 * string
 	 */
 	public $attendee_email;

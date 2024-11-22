@@ -779,7 +779,7 @@ class SignUpsRestApis extends SignUpsBase {
 	 * something that he doesn't have permission to do. 400 is returned if the member
 	 * isn't found in the database. 
 	 *
-	 * @param string $request Members badge number.
+	 * @param  object $request Members badge number.
 	 * @return array The results of the query.
 	 */
 	public function get_member( $request ) {
