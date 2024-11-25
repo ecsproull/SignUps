@@ -600,7 +600,7 @@ class SignUpsRestApis extends SignUpsBase {
 	public function receive_members( $data ) {
 		global $wpdb;
 		$dt_now = new DateTime( 'now', new DateTimeZone( 'America/Phoenix' ) );
-		$this->write_log( 'Begin member update ' . $dt_now->format( self::DATETIME_FORMAT_INPUT ) );
+		$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Begin member update ' . $dt_now->format( self::DATETIME_FORMAT_INPUT ) );
 		$key      = '8c62a157-7ee8-4104-9f91-930eac39fe2f';
 		$data_obj = json_decode( $data->get_body(), false );
 		if ( $data_obj->key !== $key ) {
@@ -698,7 +698,7 @@ class SignUpsRestApis extends SignUpsBase {
 			$wpdb->delete( self::MACHINE_PERMISSIONS_TABLE, $where );
 		}
 
-		$this->write_log( 'Member update complete' );
+		$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Member update complete' );
 	}
 	
 	/**

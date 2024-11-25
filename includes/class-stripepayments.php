@@ -8,6 +8,8 @@
  * license     GPL-2.0+
  */
 
+use Twilio\TwiML\Messaging\Message;
+
 /**
  * Class for managing Stripe.com payments.
  * Used for creating new sessions to be added to the DB.
@@ -17,35 +19,34 @@ class StripePayments extends SignUpsBase {
 	/**
 	 * Stripe API secret
 	 *
-	 *  string
+	 *  @var string
 	 */
 	private $stripe_api_secret;
 
 	/**
 	 * Stripe API key.
 	 *
-	 *  string
+	 *  @var string
 	 */
 	private $stripe_api_key;
 
 	/**
 	 * Stripe Endpoint Secret.
 	 *
-	 *  string
+	 *  @var string
 	 */
 	private $stripe_endpoint_secret;
 
 	/**
 	 * Stripe root URL.
 	 *
-	 *  string
+	 *  @var string
 	 */
 	private $stripe_root_url;
 
 
 	/**
-	 * __construct
-	 *
+	 * Constructor
 	 */
 	public function __construct() {
 		global $wpdb;
@@ -74,9 +75,9 @@ class StripePayments extends SignUpsBase {
 	/**
 	 * Called by Stripe.com when a payment has been processed.
 	 * There are several events but we only register for a few of them.
-	 * Event registration is done on the Stripe.com web site when you 
+	 * Event registration is done on the Stripe.com web site when you
 	 * set up the account.
-	 * 
+	 *
 	 * Events we handle
 	 * checkout.session.completed
 	 * checkout.session.expired
@@ -89,134 +90,50 @@ class StripePayments extends SignUpsBase {
 		global $wpdb;
 		\Stripe\Stripe::setApiKey( $this->stripe_api_key );
 
-		$payload = @file_get_contents( 'php://input' );
-		$event   = null;
+		$endpoint_secret = $this->stripe_endpoint_secret;
+		$payload         = @file_get_contents( 'php://input' );
+		$sig_header      = $_SERVER['HTTP_STRIPE_SIGNATURE'];
+		$event           = null;
 
 		try {
-			$event = \Stripe\Event::constructFrom(
-				json_decode( $payload, true )
+			$event = \Stripe\Webhook::constructEvent(
+				$payload,
+				$sig_header,
+				$endpoint_secret
 			);
 		} catch ( \UnexpectedValueException $e ) {
-			echo '⚠️  Webhook error while parsing basic request.';
+			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'UnexpectedValueException Message: ' . $e->getMessage() );
+			http_response_code( 400 );
+			exit();
+		} catch ( \Stripe\Exception\SignatureVerificationException $e ) {
+			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'SignatureVerificationException Message: ' . $e->getMessage() );
 			http_response_code( 400 );
 			exit();
 		}
 
 		http_response_code( 200 );
+		$payment_intent = $event->data->object;
+		$this->write_log(
+			__FUNCTION__,
+			basename( __FILE__ ),
+			'Payment Event: ' . $event->type . ' Attendee_id: ' . $payment_intent->metadata['attendee_id'] . ' Badge: ' . $payment_intent->metadata['badge'] . ' Status: ' . $payment_intent->status
+		);
+
 		switch ( $event->type ) {
 			case 'payment_intent.created':
-				$payment_intent                       = $event->data->object;
-				$where = array( 'attendee_id'         => $payment_intent->metadata['attendee_id'] );
 				$data  = array( 'attendee_payment_id' => $payment_intent->id );
-				$wpdb->update( SELF::ATTENDEES_TABLE, $data, $where );
+				$where = array( 'attendee_id' => $payment_intent->metadata['attendee_id'] );
+				$wpdb->update( self::ATTENDEES_TABLE, $data, $where );
+				//$this->update_database( $payment_intent->id, $payment_intent->metadata, $payment_intent->status );
 				break;
 			case 'checkout.session.completed':
-				$payment_intent = $event->data->object;
-				/* $wpdb->query(
-					$wpdb->prepare(
-						'LOCK TABLES %1s WRITE, %1s WRITE',
-						self::ATTENDEES_TABLE,
-						self::PAYMENTS_TABLE
-					)
-				); */
-
-				$payment_row = $wpdb->get_results(
-					$wpdb->prepare(
-						'SELECT payments_status
-						FROM %1s
-						WHERE payments_intent_id = %s',
-						self::PAYMENTS_TABLE,
-						$payment_intent->payment_intent
-					),
-					OBJECT
+				$data  = array(
+					'attendee_checkout_id' => $payment_intent->id,
+					'attendee_payment_id' => $payment_intent->payment_intent, 
 				);
-
-				$dt_now      = new DateTime( 'now', $this->date_time_zone );
-				$new_payment = array(
-					'payments_attendee_id'        => $payment_intent->metadata['attendee_id'],
-					'payments_amount_charged'     => (string) ( (int) $payment_intent->metadata['cost'] * $payment_intent->metadata['qty'] ),
-					'payments_signup_description' => $payment_intent->metadata['description'],
-					'payments_last_access_time'   => $dt_now->format( 'Y-m-d H:i:s.u' ),
-					'payments_attendee_badge'     => $payment_intent->metadata['badge'],
-					'payments_price_id'           => $payment_intent->metadata['price_id'],
-					'payments_status'             => $payment_intent->status,
-					'payments_intent_status_time' => $dt_now->format( 'Y-m-d H:i:s.u' ),
-				);
-
-				if ( ! $payment_row ) {
-					$new_payment['payments_intent_id']  = $payment_intent->payment_intent;
-					$new_payment['payments_start_time'] = $dt_now->format( 'Y-m-d H:i:s.u' );
-					$wpdb->insert( self::PAYMENTS_TABLE, $new_payment );
-				} else {
-					$where = array( 'payments_intent_id' => $payment_intent->payment_intent );
-					$wpdb->update( self::PAYMENTS_TABLE, $new_payment, $where );
-
-					if ( 'succeeded' === $payment_row[0]->payments_status || 'complete' === $payment_row[0]->payments_status ) {
-						$update = array( 'attendee_balance_owed' => 0 );
-						$where  = array( 'attendee_id' => $payment_intent->metadata['attendee_id'] );
-						$wpdb->update( self::ATTENDEES_TABLE, $update, $where );
-					}
-				}
-
-				//$wpdb->query( 'UNLOCK TABLES' );
-				break;
-
-			case 'payment_intent.succeeded':
-				$payment_intent = $event->data->object;
-				/* $wpdb->query(
-					$wpdb->prepare(
-						'LOCK TABLES %1s WRITE, %1s WRITE',
-						self::ATTENDEES_TABLE,
-						self::PAYMENTS_TABLE
-					)
-				); */
-
-				$payment_row = $wpdb->get_results(
-					$wpdb->prepare(
-						'SELECT payments_attendee_id
-						FROM %1s
-						WHERE payments_intent_id = %s',
-						self::PAYMENTS_TABLE,
-						$payment_intent->id
-					),
-					OBJECT
-				);
-
-				$dt_now = new DateTime( 'now', $this->date_time_zone );
-				$update = array(
-					'payments_customer_id'        => $payment_intent->customer,
-					'payments_status'             => $payment_intent->status,
-					'payments_last_access_time'   => $dt_now->format( 'Y-m-d H:i:s.u' ),
-					'payments_intent_status_time' => $dt_now->format( 'Y-m-d H:i:s.u' ),
-				);
-
-				if ( $payment_row ) {
-					$where = array(
-						'payments_intent_id' => $payment_intent->id,
-					);
-
-					$wpdb->update( self::PAYMENTS_TABLE, $update, $where );
-
-					if ( 'succeeded' === $payment_intent->status || 'complete' === $payment_intent->status ) {
-						$update = array(
-							'attendee_balance_owed' => 0,
-						);
-
-						$where = array(
-							'attendee_id' => $payment_row[0]->payments_attendee_id,
-						);
-
-						$wpdb->update( self::ATTENDEES_TABLE, $update, $where );
-					} else {
-						echo 'WTF';
-					}
-				} else {
-					$update['payments_intent_id']  = $payment_intent->id;
-					$update['payments_start_time'] = $dt_now->format( 'Y-m-d H:i:s.u' );
-					$wpdb->insert( self::PAYMENTS_TABLE, $update );
-				}
-
-				//$wpdb->query( 'UNLOCK TABLES' );
+				$where = array( 'attendee_id' => $payment_intent->metadata['attendee_id'] );
+				$wpdb->update( self::ATTENDEES_TABLE, $data, $where );
+				$this->update_database( $payment_intent->payment_intent, $payment_intent->metadata, $payment_intent->status );
 				break;
 			case 'checkout.session.expired':
 			case 'payment_intent.payment_failed':
@@ -238,11 +155,11 @@ class StripePayments extends SignUpsBase {
 					$where = array( 'attendee_id' => $payment_intent->metadata['attendee_id'] );
 					if ( $bad_debt->attendee_payment_id && $this->check_payment_intent( $bad_debt->attendee_payment_id ) ) {
 						$data = array( 'attendee_balance_owed' => 0 );
-						$wpdb->update( SELF::ATTENDEES_TABLE, $data, $where );
+						$wpdb->update( self::ATTENDEES_TABLE, $data, $where );
 					} else {
 						if ( $bad_debt->attendee_new_member_id > 0 ) {
 							$where_new_member = array( 'new_member_id' => $bad_debt->attendee_new_member_id );
-							$wpdb->delete( SELF::NEW_MEMBER_TABLE, $where_new_member );
+							$wpdb->delete( self::NEW_MEMBER_TABLE, $where_new_member );
 						}
 						$wpdb->delete( self::ATTENDEES_TABLE, $where );
 					}
@@ -252,24 +169,87 @@ class StripePayments extends SignUpsBase {
 		}
 	}
 
-		
 	/**
-	 * To be used before deleting a pending payment. 
+	 * Updates the database during an event callback.
+	 *
+	 * @param  mixed $payment_intent_id The payment intent id.
+	 * @param  mixed $metadata The metadata associated with this event.
+	 * @param  mixed $status The current status.
+	 * @return void
+	 */
+	private function update_database( $payment_intent_id, $metadata, $status ) {
+		global $wpdb;
+		if ( ! isset( $metadata['attendee_id'] ) ) {
+			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Called without attendee_id' );
+			return;
+		}
+		$payment_row = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT payments_status
+				FROM %1s
+				WHERE payments_intent_id = %s',
+				self::PAYMENTS_TABLE,
+				$payment_intent_id
+			),
+			OBJECT
+		);
+
+		$dt_now      = new DateTime( 'now', $this->date_time_zone );
+		$new_payment = array(
+			'payments_attendee_id'        => $metadata['attendee_id'],
+			'payments_amount_charged'     => (string) ( (int) $metadata['cost'] * $metadata['qty'] ),
+			'payments_signup_description' => $metadata['description'],
+			'payments_last_access_time'   => $dt_now->format( 'Y-m-d H:i:s.u' ),
+			'payments_attendee_badge'     => $metadata['badge'],
+			'payments_price_id'           => $metadata['price_id'],
+			'payments_status'             => $status,
+			'payments_intent_status_time' => $dt_now->format( 'Y-m-d H:i:s.u' ),
+		);
+
+		if ( ! $payment_row ) {
+			$new_payment['payments_intent_id']  = $payment_intent_id;
+			$new_payment['payments_start_time'] = $dt_now->format( 'Y-m-d H:i:s.u' );
+			$wpdb->insert( self::PAYMENTS_TABLE, $new_payment );
+		} else {
+			$where = array( 'payments_intent_id' => $payment_intent_id );
+			$wpdb->update( self::PAYMENTS_TABLE, $new_payment, $where );
+		}
+
+		if ( 'succeeded' === $payment_row[0]->payments_status ||
+				'complete' === $payment_row[0]->payments_status ||
+				'succeeded' === $status ||
+				'complete' === $status ) {
+			$update = array( 'attendee_balance_owed' => 0 );
+			$where  = array( 'attendee_id' => $metadata['attendee_id'] );
+			$rows   = $wpdb->update( self::ATTENDEES_TABLE, $update, $where );
+			if ( 1 === $rows ) {
+				$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Attendee update, ID: ' . $metadata['attendee_id'] );
+			} else {
+				$this->write_log( __FUNCTION__, basename( __FILE__ ), 'FAILED, Attendee update, ID: ' . $metadata['attendee_id'] );
+			}
+
+			$data = array( 'payments_status' => 'succeeded' );
+			$where = array( 'payments_intent_id' => $payment_intent_id );
+			$wpdb->update( self::ATTENDEES_TABLE, $data, $where );
+		}
+	}
+
+	/**
+	 * To be used before deleting a pending payment.
 	 *
 	 * @param  mixed $payment_intent_id The Payment ID.
 	 * @return boolean Succeeded or failed.
 	 */
-    public function check_payment_intent( $payment_intent_id )
-	{
+	public function check_payment_intent( $payment_intent_id ) {
 		if ( ! $payment_intent_id ) {
 			return false;
 		}
 
 		$stripe = new \Stripe\StripeClient( $this->stripe_api_secret );
-		$payment_intent = $stripe->paymentIntents->retrieve( $payment_intent_id, []);
-		return $payment_intent->status === 'succeeded';
+		$payment_intent = $stripe->paymentIntents->retrieve( $payment_intent_id, array() );
+		return 'succeeded' === $payment_intent->status;
 	}
-	
+
 	/**
 	 * Expires a checkout session. After this no payment can be processed.
 	 *
@@ -282,10 +262,10 @@ class StripePayments extends SignUpsBase {
 		}
 
 		$stripe = new \Stripe\StripeClient( $this->stripe_api_secret );
-		$checkout_session = $stripe->checkout->sessions->retrieve( $checkout_session_id, [] );
-		if ( $checkout_session->status != 'expired' ) {
-			$session = $stripe->checkout->sessions->expire( $checkout_session_id, [] );
-			if ( $session->status != 'expired' ) {
+		$checkout_session = $stripe->checkout->sessions->retrieve( $checkout_session_id, array() );
+		if ( 'open' === $checkout_session->status ) {
+			$session = $stripe->checkout->sessions->expire( $checkout_session_id, array() );
+			if ( 'expired' !== $session->status ) {
 				// send error mail.
 			}
 		}
@@ -293,7 +273,7 @@ class StripePayments extends SignUpsBase {
 
 	/**
 	 * When money is to be collected we transfer control back to Stripe.com and they do the credit
-	 * card processing. As that process proceeds, Stripe sends events back to us to let us know 
+	 * card processing. As that process proceeds, Stripe sends events back to us to let us know
 	 * about the progress.
 	 *
 	 * @param string $description Description of what is bing paid for..
@@ -309,19 +289,19 @@ class StripePayments extends SignUpsBase {
 		\Stripe\Stripe::setApiKey( $this->stripe_api_secret );
 		header( 'Content-Type: application/json' );
 		$signup_domain    = $this->stripe_root_url;
-		$current_time     = time(); // Get the current Unix timestamp
-		$expire_time      = $current_time + (31 * 60);
+		$current_time     = time();
+		$expire_time      = $current_time + ( 31 * 60 );
 		$checkout_session = \Stripe\Checkout\Session::create(
 			array(
-				'metadata'    => array(
+				'metadata'            => array(
 					'attendee_id' => $attendee_id,
 					'badge'       => $badge,
 					'cost'        => $cost,
 					'price_id'    => $price_id,
 					'description' => $description,
-					'qty'         => $qty
+					'qty'         => $qty,
 				),
-				'line_items'  => array(
+				'line_items'          => array(
 					array(
 						'price'    => $price_id,
 						'quantity' => $qty,
@@ -329,13 +309,13 @@ class StripePayments extends SignUpsBase {
 				),
 				'payment_intent_data' => array(
 					'metadata' => array(
-					  	'attendee_id' => $attendee_id,
+						'attendee_id' => $attendee_id,
 						'badge'       => $badge,
 						'cost'        => $cost,
 						'price_id'    => $price_id,
 						'description' => $description,
-						'qty'         => $qty
-					)
+						'qty'         => $qty,
+					),
 				),
 				'mode'        => 'payment',
 				'expires_at'  => $expire_time,
@@ -348,13 +328,13 @@ class StripePayments extends SignUpsBase {
 		header( 'Location: ' . $checkout_session->url );
 
 		$where = array( 'attendee_id' => $attendee_id );
-		$data  = array( 'attendee_checkout_id' => $checkout_session->id);
-		$wpdb->update( SELF::ATTENDEES_TABLE, $data, $where );
+		$data  = array( 'attendee_checkout_id' => $checkout_session->id );
+		$wpdb->update( self::ATTENDEES_TABLE, $data, $where );
 	}
 
 	/**
 	 * Shortcode for the Payment Success page. This is what we show when a payment succeeds.
-	 * WordPress pages have to added that implement this shortcode. A link to that page is 
+	 * WordPress pages have to added that implement this shortcode. A link to that page is
 	 * passed in the collect_money function.
 	 *
 	 * @return void
@@ -469,7 +449,7 @@ class StripePayments extends SignUpsBase {
 
 			if ( $bad_debt ) {
 				$stripe = new \Stripe\StripeClient( $this->stripe_api_secret );
-				$stripe->checkout->sessions->expire( $bad_debt->attendee_checkout_id, [] );
+				$stripe->checkout->sessions->expire( $bad_debt->attendee_checkout_id, array() );
 			}
 
 			?>
@@ -484,15 +464,14 @@ class StripePayments extends SignUpsBase {
 
 	/**
 	 * Update the price for a signup on Stripe.com.
-	 * The price is registered with Stipe.Com and this is a 
+	 * The price is registered with Stipe.Com and this is a
 	 * helper function to update the price of an existing item.
 	 *
-	 * @param  mixed $price_id Original price id.
 	 * @param  mixed $product_id Product Id.
 	 * @param  mixed $new_cost New cost.
 	 * @return The new price id.
 	 */
-	public function update_price( $price_id, $product_id, $new_cost ) {
+	public function update_price( $product_id, $new_cost ) {
 		$result = null;
 		try {
 			$stripe = new \Stripe\StripeClient( $this->stripe_api_secret );
@@ -509,7 +488,7 @@ class StripePayments extends SignUpsBase {
 			}
 		} catch ( Exception $e ) {
 			?>
-			<h2>Exception updating price id. <?php echo $e->getMessage(); ?></h2>
+			<h2>Exception updating price id. <?php echo esc_html( $e->getMessage() ); ?></h2>
 			<?php
 		}
 

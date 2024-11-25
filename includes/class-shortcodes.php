@@ -754,7 +754,7 @@ ob_start();
 	 * Once a session has been selected the information from this form
 	 * will be passed to the add_attendee_class function. Although this form
 	 * can be used to sign up for an event, it is usually used to signup for classes.
-	 * 
+	 *
 	 * @see ShortCodes::add_attendee_class()
 	 *
 	 * @param  string $signup_name The class name.
@@ -947,18 +947,18 @@ ob_start();
 	 * Once a user selected a class from the landing page they progress to this
 	 * page where a detailed description is displayed. It is here that the have the option
 	 * continue or cancel the signup process.
-	 * 
+	 *
 	 * It should be noted that this page is made up of a aggregation of several bits of data.
 	 * Cost, Schedule, Contact and any preclass instructions are all part of this page. The
 	 * Contacts is a link that a user can use to ask questions about the class.
-	 * 
+	 *
 	 * Clicking Continue transfers the data to the create_signup_form function which
 	 * gets the data together so the session selection page can be shown.
-	 * 
-	 * @see ShortCodes::create_signup_form()  
+	 *
+	 * @see ShortCodes::create_signup_form()
 	 *
 	 * @param  mixed  $signup_id Id of the signup.
-	 * @param  string $secret Members secret used to identify the member. (obsolete)
+	 * @param  string $secret Members secret used to identify the member.
 	 * @return void
 	 */
 	private function create_description_form( $signup_id, $secret = null ) {

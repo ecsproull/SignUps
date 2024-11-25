@@ -13,7 +13,6 @@
  * SignUpsBase is the base class for most other classes. It contains the strings
  * for accessing the database plus code that is used in multiple places. It is used on
  * both the user and admin side of the code.
- * 
  */
 class SignUpsBase {
 
@@ -24,7 +23,7 @@ class SignUpsBase {
 	protected const ATTENDEES_TABLE = 'wp_scw_attendees';
 
 	/**
-	 * Database signups table. 
+	 * Database signups table.
 	 * Signups include both rolling signups and class signups.
 	 */
 	protected const SIGNUPS_TABLE = 'wp_scw_signups';
@@ -38,7 +37,7 @@ class SignUpsBase {
 	/**
 	 * Database rolling attendees table.
 	 * Rolling attendees belong to a rolling signup such as monitors.
-	 * Rolling signups do not have sessions so the attendees are directly 
+	 * Rolling signups do not have sessions so the attendees are directly
 	 * associated with a signup slot. A slot is identified by a date and time.
 	 */
 	protected const ATTENDEES_ROLLING_TABLE = 'wp_scw_rolling_attendees';
@@ -97,7 +96,7 @@ class SignUpsBase {
 
 	/**
 	 * Spider Calendar Event table.
-	 * The Signups Plugin uses the Spider Calendar Plugin to help 
+	 * The Signups Plugin uses the Spider Calendar Plugin to help
 	 * members visualize when signups are scheduled.
 	 */
 	protected const SPIDER_CALENDAR_EVENT_TABLE = 'wp_spidercalendar_event';
@@ -112,7 +111,7 @@ class SignUpsBase {
 	/**
 	 * Members table.
 	 * The list of currently active members of the woodshop.
-	 * It is updated nightly via one of the RestFul APIs. 
+	 * It is updated nightly via one of the RestFul APIs.
 	 */
 	protected const MEMBERS_TABLE = 'wp_scw_members';
 
@@ -150,7 +149,7 @@ class SignUpsBase {
 	 * New members table.
 	 * New members are held here until they complete orientation.
 	 * After orientation they added to the members table on the server.
-	 * They are then pushed to the server. 
+	 * They are then pushed to the server.
 	 */
 	protected const NEW_MEMBER_TABLE = 'wp_scw_new_member';
 
@@ -195,12 +194,13 @@ class SignUpsBase {
 
 	/**
 	 * Date timezone.
+	 *
+	 * @var DateTimeZone
 	 */
 	protected $date_time_zone;
 
 	/**
-	 * __construct
-	 *
+	 * Constructor
 	 */
 	public function __construct() {
 		$this->date_time_zone = new DateTimeZone( 'America/Phoenix' );
@@ -209,12 +209,18 @@ class SignUpsBase {
 	/**
 	 * Writes a string to the log table in the database.
 	 *
-	 * @param  mixed $log_text The string to write to the log.
+	 * @param  mixed $calling_function The calling function name.
+	 * @param  mixed $file The file that the calling function is in.
+	 * @param  mixed $text The text to log.
 	 * @return void
 	 */
-	protected function write_log( $log_text ) {
+	protected function write_log( $calling_function, $file, $text, ) {
 		global $wpdb;
-		$log_data['logs_text'] = $log_text;
+		$log_data['logs_text']          = $text;
+		$log_data['logs_function_name'] = $calling_function;
+		$log_data['logs_file_name']     = $file;
+		$now                            = new DateTime( 'now', $this->date_time_zone );
+		$log_data['logs_date_time']     = $now->format( self::DATETIME_FORMAT );
 		$wpdb->insert( self::LOG_TABLE, $log_data );
 	}
 
@@ -260,19 +266,19 @@ class SignUpsBase {
 		$dt = new DateTime( $formatted_time );
 		return $dt->format( 'Y-m-d' );
 	}
-	
+
 	/**
 	 * When an administrator makes changes to a signup the change will
 	 * not appear immediately unless you clear the cache. That is, the cache
 	 * holds on to the old data. You can only clear the cache at plugin load/reload.
 	 * Upon load the plugin looks at the entry to decide if the cache needs cleared.
-	 * 
-	 * @param  int $value
+	 *
+	 * @param  int $value The stripe api secret.
 	 * @return void
 	 */
 	protected function set_clear_cache( $value ) {
 		global $wpdb;
-		$where = array( 'stripe_api_key' => 'cache');
+		$where = array( 'stripe_api_key' => 'cache' );
 		$data  = array( 'stripe_api_secret' => $value );
 		$wpdb->update( self::STRIPE_TABLE, $data, $where );
 	}
@@ -437,9 +443,8 @@ class SignUpsBase {
 
 	/**
 	 * Create a member search box used in administrative pages.
-	 * An admin often needs to find a member by name. This form 
+	 * An admin often needs to find a member by name. This form
 	 * allows for searching on part of a name, email address or phone number.
-	 * 
 	 *
 	 * @param  mixed $center Should the control be centered.
 	 * @param  mixed $badge Badge number.
@@ -858,10 +863,10 @@ class SignUpsBase {
 	 * This is a long function and studying the code is the only way to fully understand it.
 	 * It allows members to select slots and also remove themselves from a previously selected slot.
 	 * Some of the signups, such as monitors are not allowed to remove themselves within 2 days of their
-	 * duty time. By default the user can see the default number of days that the signup specifies. Usually 
+	 * duty time. By default the user can see the default number of days that the signup specifies. Usually
 	 * 30 days. There is a drop down where 60 and 90 days can be selected. The dropdown also allows to see
 	 * the past 30 days to look at the history.
-	 * 
+	 *
 	 * There is a lot of logic intertwined with the HTML that is being generated which makes this a hard
 	 * function to follow. Good luck.
 	 *
@@ -955,7 +960,7 @@ class SignUpsBase {
 								$day_of_week = $start_date->format( 'N' );
 								$day_items   = array_filter(
 									$template_items,
-									function( $value, $key ) use ( $day_of_week ) {
+									function ( $value, $key ) use ( $day_of_week ) {
 										return str_contains( $value->template_item_day_of_week, $day_of_week );
 									},
 									ARRAY_FILTER_USE_BOTH
@@ -970,7 +975,6 @@ class SignUpsBase {
 										} else {
 											return 0;
 										}
-										//return $st_time1 < $st_time2;
 									}
 								);
 
