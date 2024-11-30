@@ -315,7 +315,7 @@ class SignUpsBase {
 	 * Returns the HTML description for a signup.
 	 *
 	 * @param int $signup_id The signup id.
-	 * @return array
+	 * @return object
 	 */
 	protected function get_signup_html( $signup_id ) {
 		global $wpdb;
@@ -997,7 +997,6 @@ class SignUpsBase {
 										} else {
 											return 0;
 										}
-										//return $a[0]->template_item_start_time > $b[0]->template_item_start_time;
 									}
 								);
 
@@ -1259,15 +1258,7 @@ class SignUpsBase {
 				$where                = array();
 				$where['attendee_id'] = $slot_id;
 
-				/* $wpdb->query(
-					$wpdb->prepare(
-						'LOCK TABLES %1s WRITE',
-						self::ATTENDEES_ROLLING_TABLE
-					)
-				); */
-
 				$delete_return_value = $wpdb->delete( self::ATTENDEES_ROLLING_TABLE, $where );
-				//$wpdb->query( 'UNLOCK TABLES' );
 				?>
 				<tr class="attendee-row" style="background-color:#FFCCCB;">
 					<td><?php echo esc_html( $slot_start->format( self::DATE_FORMAT ) ); ?></td>
@@ -1358,15 +1349,7 @@ class SignUpsBase {
 						$new_attendee['attendee_end_time']        = $slot_end->format( 'U' );
 						$new_attendee['attendee_end_formatted']   = $slot_end->format( self::DATETIME_FORMAT );
 						$new_attendee['attendee_item']            = trim( $slot_parts[2] );
-						$comment_name                             = 'comment-' . $slot_parts[3];
 						$slot_count                               = $slot_parts[5];
-
-						/* $wpdb->query(
-							$wpdb->prepare(
-								'LOCK TABLES %1s WRITE',
-								self::ATTENDEES_ROLLING_TABLE
-							)
-						); */
 
 						$dup_rows = $wpdb->get_results(
 							$wpdb->prepare(
@@ -1390,7 +1373,6 @@ class SignUpsBase {
 							<?php
 						}
 
-						//$wpdb->query( 'UNLOCK TABLES' );
 						?>
 						<tr class="attendee-row">
 							<td><?php echo esc_html( $slot_start->format( self::DATE_FORMAT ) ); ?></td>
@@ -1469,7 +1451,7 @@ class SignUpsBase {
 		$template_id_name,
 		$select_id = 'template-select',
 		$default_title = 'None'
-		) {
+	) {
 		global $wpdb;
 		$templates = $wpdb->get_results(
 			$wpdb->prepare(
@@ -1583,9 +1565,9 @@ class SignUpsBase {
 	 * The calendar is another plugin called the Spider Calendar. We are just inputting rows
 	 * into their database.
 	 *
-	 * @param  int $signup_id The signup id that owns the sessions.
+	 * @param  int    $signup_id The signup id that owns the sessions.
 	 * @param  string $signup_name The sighup name.
-	 * @param  bool $add To add or remove from the calendar.
+	 * @param  bool   $add To add or remove from the calendar.
 	 * @return void
 	 */
 	protected function add_remove_from_calendar( $signup_id, $signup_name, $add ) {
@@ -1667,7 +1649,7 @@ class SignUpsBase {
 			$end_time   = $datetime->format( 'g:iA' );
 			$signup_url = get_site_url() . '/signups?signup_id=' . $post['signup_id'];
 
-			$text_for_date;
+			$text_for_date = '';
 			if ( $description ) {
 				if ( $description[0]->description_html_short ) {
 					$text_for_date = html_entity_decode( $description[0]->description_html_short );

@@ -113,10 +113,13 @@ class StripePayments extends SignUpsBase {
 
 		http_response_code( 200 );
 		$payment_intent = $event->data->object;
+		$log_text       = 'Payment Event: ' . $event->type . ' Attendee_id: ' . $payment_intent->metadata['attendee_id'];
+		$log_text      .= ' Badge: ' . $payment_intent->metadata['badge'] . ' Status: ' . $payment_intent->status;
+		$log_text      .= ' Desc: ' . $payment_intent->metadata['description'];
 		$this->write_log(
 			__FUNCTION__,
 			basename( __FILE__ ),
-			'Payment Event: ' . $event->type . ' Attendee_id: ' . $payment_intent->metadata['attendee_id'] . ' Badge: ' . $payment_intent->metadata['badge'] . ' Status: ' . $payment_intent->status
+			$log_text
 		);
 
 		switch ( $event->type ) {
@@ -124,16 +127,26 @@ class StripePayments extends SignUpsBase {
 				$data  = array( 'attendee_payment_id' => $payment_intent->id );
 				$where = array( 'attendee_id' => $payment_intent->metadata['attendee_id'] );
 				$wpdb->update( self::ATTENDEES_TABLE, $data, $where );
-				//$this->update_database( $payment_intent->id, $payment_intent->metadata, $payment_intent->status );
 				break;
 			case 'checkout.session.completed':
 				$data  = array(
 					'attendee_checkout_id' => $payment_intent->id,
-					'attendee_payment_id' => $payment_intent->payment_intent, 
+					'attendee_payment_id' => $payment_intent->payment_intent,
 				);
 				$where = array( 'attendee_id' => $payment_intent->metadata['attendee_id'] );
 				$wpdb->update( self::ATTENDEES_TABLE, $data, $where );
 				$this->update_database( $payment_intent->payment_intent, $payment_intent->metadata, $payment_intent->status );
+
+				if ( 'complete' === $payment_intent->status ) {
+					$update = array( 'attendee_balance_owed' => 0 );
+					$where  = array( 'attendee_id' => $payment_intent->metadata['attendee_id'] );
+					$rows   = $wpdb->update( self::ATTENDEES_TABLE, $update, $where );
+					if ( 1 === $rows ) {
+						$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Attendee update, ID: ' . $payment_intent->metadata['attendee_id'] );
+					} else {
+						$this->write_log( __FUNCTION__, basename( __FILE__ ), 'FAILED, Attendee update, ID: ' . $payment_intent->metadata['attendee_id'] );
+					}
+				}
 				break;
 			case 'checkout.session.expired':
 			case 'payment_intent.payment_failed':
@@ -183,16 +196,6 @@ class StripePayments extends SignUpsBase {
 			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Called without attendee_id' );
 			return;
 		}
-		$payment_row = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT payments_status
-				FROM %1s
-				WHERE payments_intent_id = %s',
-				self::PAYMENTS_TABLE,
-				$payment_intent_id
-			),
-			OBJECT
-		);
 
 		$dt_now      = new DateTime( 'now', $this->date_time_zone );
 		$new_payment = array(
@@ -204,34 +207,11 @@ class StripePayments extends SignUpsBase {
 			'payments_price_id'           => $metadata['price_id'],
 			'payments_status'             => $status,
 			'payments_intent_status_time' => $dt_now->format( 'Y-m-d H:i:s.u' ),
+			'payments_intent_id'          => $payment_intent_id,
+			'payments_start_time'         => $dt_now->format( 'Y-m-d H:i:s.u' ),
 		);
 
-		if ( ! $payment_row ) {
-			$new_payment['payments_intent_id']  = $payment_intent_id;
-			$new_payment['payments_start_time'] = $dt_now->format( 'Y-m-d H:i:s.u' );
-			$wpdb->insert( self::PAYMENTS_TABLE, $new_payment );
-		} else {
-			$where = array( 'payments_intent_id' => $payment_intent_id );
-			$wpdb->update( self::PAYMENTS_TABLE, $new_payment, $where );
-		}
-
-		if ( 'succeeded' === $payment_row[0]->payments_status ||
-				'complete' === $payment_row[0]->payments_status ||
-				'succeeded' === $status ||
-				'complete' === $status ) {
-			$update = array( 'attendee_balance_owed' => 0 );
-			$where  = array( 'attendee_id' => $metadata['attendee_id'] );
-			$rows   = $wpdb->update( self::ATTENDEES_TABLE, $update, $where );
-			if ( 1 === $rows ) {
-				$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Attendee update, ID: ' . $metadata['attendee_id'] );
-			} else {
-				$this->write_log( __FUNCTION__, basename( __FILE__ ), 'FAILED, Attendee update, ID: ' . $metadata['attendee_id'] );
-			}
-
-			$data = array( 'payments_status' => 'succeeded' );
-			$where = array( 'payments_intent_id' => $payment_intent_id );
-			$wpdb->update( self::ATTENDEES_TABLE, $data, $where );
-		}
+		$wpdb->insert( self::PAYMENTS_TABLE, $new_payment );
 	}
 
 	/**
@@ -264,10 +244,7 @@ class StripePayments extends SignUpsBase {
 		$stripe = new \Stripe\StripeClient( $this->stripe_api_secret );
 		$checkout_session = $stripe->checkout->sessions->retrieve( $checkout_session_id, array() );
 		if ( 'open' === $checkout_session->status ) {
-			$session = $stripe->checkout->sessions->expire( $checkout_session_id, array() );
-			if ( 'expired' !== $session->status ) {
-				// send error mail.
-			}
+			$stripe->checkout->sessions->expire( $checkout_session_id, array() );
 		}
 	}
 
@@ -330,6 +307,15 @@ class StripePayments extends SignUpsBase {
 		$where = array( 'attendee_id' => $attendee_id );
 		$data  = array( 'attendee_checkout_id' => $checkout_session->id );
 		$wpdb->update( self::ATTENDEES_TABLE, $data, $where );
+
+		$log_text  = ' Attendee_id: ' . $wpdb->insert_id;
+		$log_text .= ' Badge: ' . $badge;
+		$log_text .= ' Desc: ' . $description;
+		$this->write_log(
+			__FUNCTION__,
+			basename( __FILE__ ),
+			$log_text
+		);
 	}
 
 	/**

@@ -8,23 +8,23 @@
 
 ob_start();
 
- /**
-  * The ShortCodes class is the main class for generating the web pages that the user can see.
-  * The default function create_select_signup creates the landing page for the plugin.
-  */
- class ShortCodes extends SignUpsBase {
+/**
+ * The ShortCodes class is the main class for generating the web pages that the user can see.
+ * The default function create_select_signup creates the landing page for the plugin.
+ */
+class ShortCodes extends SignUpsBase {
 
 	/**
 	 * This is the entry function for the user side of the SignUp plugin.
-	 * This function is also called in response to a Form's submit button. The Submit button 
+	 * This function is also called in response to a Form's submit button. The Submit button
 	 * for each form dictates which helper function is called to process the data that is input
 	 * on a Form. For example when a users selects a class from the landing page the item selected
 	 * is a actually a Submit button. That is received here and then passed to the helper function
 	 * called  create_description_form that creates the description page for the class.
-	 * 
+	 *
 	 * This process of generating a Form, receiving user input and then navigating to the next Form
 	 * to process that input is the basis of how the plugin works.
-	 * 
+	 *
 	 * An understanding of HTML forms is necessary to understanding this code. While the code is
 	 * written PHP it generates HTML.
 	 *
@@ -32,10 +32,6 @@ ob_start();
 	 * @return void
 	 */
 	public function user_signup( $admin_view = false ) {
-		$admin = false;
-		if ( isset( $admin_view['admin'] ) ) {
-			$admin = $admin_view['admin'];
-		}
 		$post = wp_unslash( $_POST );
 		if ( 0 === count( $post ) ) {
 			$post = wp_unslash( $_GET );
@@ -68,21 +64,19 @@ ob_start();
 					$this->create_description_form( $post['signup_id'] );
 				}
 			}
-		} else {
-			if ( get_query_var( 'signup_id' ) ) {
-				if ( get_query_var( 'secret' ) ) {
-					$this->create_description_form( get_query_var( 'signup_id' ), get_query_var( 'secret' ) );
-				} else {
-					$this->create_description_form( get_query_var( 'signup_id' ) );
-				}
-			} elseif ( get_query_var( 'unsubscribe' ) ) {
-				$key        = get_query_var( 'unsubscribe' );
-				$badge      = get_query_var( 'badge' );
-				$mail_group = get_query_var( 'mail_group' );
-				$this->unsubscribe_nag_mailer( $key, $badge, $mail_group );
+		} elseif ( get_query_var( 'signup_id' ) ) {
+			if ( get_query_var( 'secret' ) ) {
+				$this->create_description_form( get_query_var( 'signup_id' ), get_query_var( 'secret' ) );
 			} else {
-				$this->create_select_signup( $admin_view );
+				$this->create_description_form( get_query_var( 'signup_id' ) );
 			}
+		} elseif ( get_query_var( 'unsubscribe' ) ) {
+			$key        = get_query_var( 'unsubscribe' );
+			$badge      = get_query_var( 'badge' );
+			$mail_group = get_query_var( 'mail_group' );
+			$this->unsubscribe_nag_mailer( $key, $badge, $mail_group );
+		} else {
+			$this->create_select_signup( $admin_view );
 		}
 	}
 
@@ -90,7 +84,7 @@ ob_start();
 	 * The information to be sent in an email is collected on a Form. That Form
 	 * is created in the create_email_form function. Once the users fills out the Form
 	 * and clicks the Send Email button, this function is called to send the email.
-	 * 
+	 *
 	 * @see ShortCodes::create_email_form()
 	 *
 	 * @param mixed $post Data to use to send the mail.
@@ -181,8 +175,8 @@ ob_start();
 
 	/**
 	 * Retrieves the the data required for the create_select_signup_form function to populate
-	 * the SignUps landing page. 
-	 * 
+	 * the SignUps landing page.
+	 *
 	 * @see ShortCodes::create_select_signup_form()
 	 *
 	 * @param boolean $admin_view Set to true when this  is displayed from the administrator view.
@@ -194,7 +188,7 @@ ob_start();
 		$admin_view = current_user_can( 'administrator' );
 		$signups    = null;
 		if ( $admin_view ) {
-			$signups = $wpdb->get_results(
+			$signups = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 				$wpdb->prepare(
 					'SELECT signup_id,
 					signup_name,
@@ -236,11 +230,11 @@ ob_start();
 	 * Creates the signup form for an individual event or class.
 	 * This function aggregates all of the data needed to display the signup form.
 	 * The create_session_select_form function actually displays the form to sign up.
-	 * 
+	 *
 	 * @see ShortCodes::create_session_select_form()
 	 *
 	 * @param string $signup_id The id of the signup to create a form for.
-	 * @param string $secret A members secret key used to identify the member. (Obsolete)
+	 * @param string $secret A members secret key used to identify the member.
 	 * @return void
 	 */
 	private function create_signup_form( $signup_id, $secret = null ) {
@@ -260,7 +254,6 @@ ob_start();
 		$signup_name         = $signups[0]->signup_name;
 		$signup_email        = $signups[0]->signup_contact_email;
 		$signup_contact_name = $signups[0]->signup_default_contact_name;
-		$signup_orientation  = 'residents' === $signups[0]->signup_group;
 
 		if ( $rolling ) {
 			$this->create_rolling_session( $signup_id, $secret );
@@ -296,7 +289,7 @@ ob_start();
 						$email_title = 'Class payment succeeded with missed events';
 						$data        = array( 'attendee_balance_owed' => 0 );
 						$where       = array( 'attendee_id' => $bd->attendee_id );
-						$wpdb->update( SELF::ATTENDEES_TABLE, $data, $where );
+						$wpdb->update( self::ATTENDEES_TABLE, $data, $where );
 					} else {
 						$payments->expire_checkout_session( $bd->attendee_checkout_id );
 						if ( $bd->attendee_new_member_id > 0 ) {
@@ -314,7 +307,6 @@ ob_start();
 			}
 
 			$signup_cost             = $signups[0]->signup_cost;
-			$signup_default_price_id = $signups[0]->signup_default_price_id;
 			$sessions                = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT session_id,
@@ -335,9 +327,7 @@ ob_start();
 			);
 
 			foreach ( $sessions as $session ) {
-				$attendees[ $session->session_id ]   = array();
-				$instructors[ $session->session_id ] = array();
-				$session_list                        = $wpdb->get_results(
+				$attendees[ $session->session_id ] = $wpdb->get_results(
 					$wpdb->prepare(
 						'SELECT *
 						FROM %1s
@@ -348,21 +338,12 @@ ob_start();
 					),
 					OBJECT
 				);
-
-				foreach ( $session_list as $attendee ) {
-					if ( 'INSTRUCTOR' === $attendee->attendee_item ) {
-						$instructors[ $session->session_id ][] = $attendee;
-					} else {
-						$attendees[ $session->session_id ][] = $attendee;
-					}
-				}
 			}
 
 			$this->create_session_select_form(
 				$signup_name,
 				$sessions,
 				$attendees,
-				$instructors,
 				$signup_cost,
 				$signup_id,
 				$signups[0]->signup_group,
@@ -446,17 +427,16 @@ ob_start();
 			</form>
 			<?php
 		}
-
 	}
 
 	/**
 	 * Add attendee to a session of a class in response to the member selecting the session to attend.
 	 * This function takes care all the bookwork involved, including collecting the money.
-	 * 
-	 * If the $post array contains a remove_me field, that is handled at the top of the 
-	 * function and then the function returns. This is the case where a member removes 
+	 *
+	 * If the $post array contains a remove_me field, that is handled at the top of the
+	 * function and then the function returns. This is the case where a member removes
 	 * themselves from a signup. This will only happens when the signup does not involve money.
-	 * 
+	 *
 	 * @see ShortCodes::create_session_select_form()
 	 * @see StripePayments::collect_money()
 	 *
@@ -543,14 +523,6 @@ ob_start();
 					<th>Status</th>
 				</tr>
 				<?php
-				/* $wpdb->query(
-					$wpdb->prepare(
-						'LOCK TABLES %1s WRITE, %1s READ',
-						self::ATTENDEES_TABLE,
-						self::SESSIONS_TABLE
-					)
-				); */
-
 				$current_session_attendees = $wpdb->get_results(
 					$wpdb->prepare(
 						'SELECT * FROM %1s WHERE attendee_session_id = %d AND attendee_item != "INSTRUCTOR"',
@@ -605,7 +577,6 @@ ob_start();
 						$last_id = $wpdb->insert_id;
 					}
 				}
-				//$wpdb->query( 'UNLOCK TABLES' );
 
 				/**
 				 * Four checks before we collect money.
@@ -626,9 +597,9 @@ ob_start();
 							$wpdb->prepare(
 								'SELECT signup_product_id
 								FROM %1s
-								WHERE signup_id = %s',
+								WHERE signup_id = %d',
 								self::SIGNUPS_TABLE,
-								$signup_id
+								$post['session_signup_id']
 							),
 							OBJECT
 						);
@@ -694,7 +665,7 @@ ob_start();
 
 	/**
 	 * Creates the form for selecting a signup. This is the landing page for members.
-	 * 
+	 *
 	 * @see ShortCodes::create_select_signup()
 	 *
 	 * @param  mixed $signups The results of a DB query for available classes.
@@ -758,19 +729,27 @@ ob_start();
 	 * @see ShortCodes::add_attendee_class()
 	 *
 	 * @param  string $signup_name The class name.
-	 * @param  array $sessions The list of sessions for the class.
-	 * @param  array $attendees The list of attendees for the class.
-	 * @param  array $instructors The list of instructors for the class.
-	 * @param  int $cost The cost of the signup in dollars.
-	 * @param  int $signup_id The signup id.
+	 * @param  array  $sessions The list of sessions for the class.
+	 * @param  array  $attendees The list of attendees for the class.
+	 * @param  int    $cost The cost of the signup in dollars.
+	 * @param  int    $signup_id The signup id.
 	 * @param  string $user_group The group that defines who can signup.  CNC, Member...etc.
 	 * @param  string $signup_email The email for the contact person for this signup.
 	 * @param  string $signup_contact_name The name for the contact person for this signup.
 	 * @return void
 	 */
-	private function create_session_select_form( $signup_name, $sessions, $attendees, $instructors,	$cost, $signup_id, $user_group,	$signup_email, $signup_contact_name	) {
+	private function create_session_select_form(
+		$signup_name,
+		$sessions,
+		$attendees,
+		$cost,
+		$signup_id,
+		$user_group,
+		$signup_email,
+		$signup_contact_name
+	) {
 		?>
-		<div id="session_select" class="text-center mw-800px">
+			<div id="session_select" class="text-center mw-800px">
 			<h1 class="mb-2"><?php echo esc_html( $signup_name ); ?></h1>
 			<div>
 				<form class="signup_form" method="GET">
@@ -855,7 +834,7 @@ ob_start();
 								$count = 0;
 								if ( isset( $attendees[ $session->session_id ] ) ) {
 									foreach ( $attendees[ $session->session_id ] as $attendee ) {
-										$count++;
+										++$count;
 										?>
 										<tr class="attendee-row <?php echo esc_html( $count > 3 ? $session->session_id : '' ); ?>" <?php echo $count > 3 ? 'hidden' : ''; ?> >
 											<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
@@ -1076,7 +1055,7 @@ ob_start();
 				if ( $description_object->description_prerequisite ) {
 					?>
 					<div class="text-right pr-2 font-weight-bold text-dark mb-2">Prerequisite: </div>
-					<div><?php echo $description_object->description_prerequisite; ?></div>
+					<div><?php echo esc_html( $description_object->description_prerequisite ); ?></div>
 					<?php
 				}
 
@@ -1224,7 +1203,7 @@ ob_start();
 	 * Called in response to a click on the Unsubscribe link in a generated monitor or class email.
 	 * The request is stored in the unsubscribe table where the server can retrieve it and
 	 * perform the unsubscribe on the server.
-	 * 
+	 *
 	 * @param string $key The key that identifies the member.
 	 * @param string $badge The member's badge number.
 	 * @param string $mail_group The email group.

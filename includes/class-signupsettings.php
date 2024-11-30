@@ -12,7 +12,7 @@
 /**
  * Admin page for the signups plugin. Contains the functions for editing the signups.
  * IMPORTANT: Everything in this class is called by an administrator and the term
- * "user" will always be an administrator. 
+ * "user" will always be an administrator.
  */
 class SignupSettings extends SignUpsBase {
 
@@ -143,7 +143,7 @@ class SignupSettings extends SignUpsBase {
 
 	/**
 	 * Submit class to database.
-	 * The function is only used for updating a signup once it 
+	 * The function is only used for updating a signup once it
 	 * has been edited.
 	 *
 	 * @param array $post The posted data from the edit form.
@@ -317,7 +317,7 @@ class SignupSettings extends SignUpsBase {
 		} else {
 			$this->update_message( $affected_row_count, $wpdb->last_error, 'Class' );
 		}
-		
+
 		$this->set_clear_cache( '1' );
 	}
 
@@ -325,7 +325,7 @@ class SignupSettings extends SignUpsBase {
 	 * Submit session to database.
 	 * When a session has been edited this is the function that saves
 	 * it to the database.
-	 * 
+	 *
 	 * When editing a session there is an option select the instructors
 	 * for the session. This function also links the selected instructors to the session.
 	 *
@@ -411,12 +411,17 @@ class SignupSettings extends SignUpsBase {
 		$add_to_calendar     = $signup[0]->signup_admin_approved;
 		$total_rows_updated  = 0;
 		array_map(
-			function( $start, $end, $keys ) use (
+			function (
+				$start,
+				$end,
+				$keys
+			) use (
 				$post,
 				$signup,
 				$add_to_calendar,
 				$preclass_email_days,
-				&$total_rows_updated ) {
+				&$total_rows_updated
+			) {
 				global $wpdb;
 				if ( $start && $end ) {
 					$session = $post;
@@ -842,7 +847,7 @@ class SignupSettings extends SignUpsBase {
 	/**
 	 * Aggregates the data to edit a single session.
 	 * The create_session_form is called to create the form.
-	 * 
+	 *
 	 * @see SignupSettings::create_session_form()
 	 *
 	 * @param int $post The posted data from the form.
@@ -1494,119 +1499,119 @@ class SignupSettings extends SignUpsBase {
 							</tr>
 							<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
 							<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
-							</form>
+						</form>
+						<?php
+						foreach ( $sessions as $session ) {
+							$session_date_time = esc_html( $this->format_date( $session->session_start_formatted ) );
+							$email_id          = 'email-session-' . $session->session_id;
+							?>
+							<form method="POST">
+							<tr>
+								<td class="text-left"> 
+									<?php echo esc_html( $session_date_time ); ?></td>
+								<td></td>
+								<td class="text-right pr-2"><?php echo $session->session_calendar_id > 0 ? '&#128197' : ''; ?></td>
+								<td>
+									<div class="popup" data-textid=<?php echo esc_html( 'sessionid' . $session->session_id ); ?> ><b><i><u>Actions</u></i></b>
+										<span class="popuptext" id=<?php echo esc_html( 'sessionid' . $session->session_id ); ?> >
+											<input class="btn btn-primary w-90 mb-1" 
+												type="submit"
+												name="edit_session"
+												value="Edit Session"> 
+											<input class="btn btn-danger w-90 mb-1" 
+												type="submit"
+												name="delete_session"
+												value="Delete Session" 
+												onclick="return confirm('Confirm Session Delete')">
+											<?php
+											if ( count( $attendees[ $session->session_id ] ) < $session->session_slots ) {
+												?>
+												<input class="btn btn-success w-90" type="submit" name="add_attendee" value="Add Attendee">
+												<?php
+											}
+											?>
+											<input  id=<?php echo esc_html( 'move' . $session->session_id ); ?>
+												class="btn btn-primary w-90 mb-1 mt-2"
+												type="submit"
+												name="move_attendees"
+												value="Move Selected"
+												disabled="true">
+											<input class="btn btn-danger w-90 mb-1" 
+												type="submit"
+												name="delete_attendees"
+												value="Delete Selected"
+												onclick="return confirm('Confirm Attendee Delete')" >
+											<?php
+											if ( $session->session_calendar_id > 0 ) {
+												?>
+												<input class="btn btn-danger w-90 mb-1" type="submit" name="update_calendar" value="Remove From Cal">
+												<?php
+											} else {
+												?>
+												<input class="btn btn-success w-90 mb-1" type="submit" name="update_calendar" value="Add To Cal">
+												<?php
+											}
+											?>
+											<button class="btn btn-primary w-90 mb-1 email-butt" 
+												type="button"
+												name="email_session"
+												value="<?php echo esc_html( $email_id ); ?>">Email Session</button> 
+										</span>
+									</div>
+									<div id="<?php echo 'email-session-' . esc_html( $session->session_id ); ?>" class="email-body text-left" hidden>
+										<?php echo $this->get_session_email_body( $session->session_id ); ?>
+									</div>
+								</td>
+							</tr>
+							<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
+							<input type="hidden" name="signup_id" value="<?php echo esc_html( $signup_id ); ?>">
+							<input type="hidden" name="session_id" value="<?php echo esc_html( $session->session_id ); ?>">
+							<input type="hidden" name="session_calendar_id" value="<?php echo esc_html( $session->session_calendar_id ); ?>">
+							<input  id=<?php echo esc_html( 'move_to' . $session->session_id ); ?> type="hidden" name="move_to" value="0">
 							<?php
-							foreach ( $sessions as $session ) {
-								$session_date_time = esc_html( $this->format_date( $session->session_start_formatted ) );
-								$email_id          = 'email-session-' . $session->session_id;
+							wp_nonce_field( 'signups', 'mynonce' );
+
+							foreach ( $attendees[ $session->session_id ] as $attendee ) {
 								?>
-								<form method="POST">
-								<tr>
-									<td class="text-left"> 
-										<?php echo esc_html( $session_date_time ); ?></td>
-									<td></td>
-									<td class="text-right pr-2"><?php echo $session->session_calendar_id > 0 ? '&#128197' : ''; ?></td>
-									<td>
-										<div class="popup" data-textid=<?php echo esc_html( 'sessionid' . $session->session_id ); ?> ><b><i><u>Actions</u></i></b>
-											<span class="popuptext" id=<?php echo esc_html( 'sessionid' . $session->session_id ); ?> >
-												<input class="btn btn-primary w-90 mb-1" 
-													type="submit"
-													name="edit_session"
-													value="Edit Session"> 
-												<input class="btn btn-danger w-90 mb-1" 
-													type="submit"
-													name="delete_session"
-													value="Delete Session" 
-													onclick="return confirm('Confirm Session Delete')">
-												<?php
-												if ( count( $attendees[ $session->session_id ] ) < $session->session_slots ) {
-													?>
-													<input class="btn btn-success w-90" type="submit" name="add_attendee" value="Add Attendee">
-													<?php
-												}
-												?>
-												<input  id=<?php echo esc_html( 'move' . $session->session_id ); ?>
-													class="btn btn-primary w-90 mb-1 mt-2"
-													type="submit"
-													name="move_attendees"
-													value="Move Selected"
-													disabled="true">
-												<input class="btn btn-danger w-90 mb-1" 
-													type="submit"
-													name="delete_attendees"
-													value="Delete Selected"
-													onclick="return confirm('Confirm Attendee Delete')" >
-												<?php
-												if ( $session->session_calendar_id > 0 ) {
-													?>
-													<input class="btn btn-danger w-90 mb-1" type="submit" name="update_calendar" value="Remove From Cal">
-													<?php
-												} else {
-													?>
-													<input class="btn btn-success w-90 mb-1" type="submit" name="update_calendar" value="Add To Cal">
-													<?php
-												}
-												?>
-												<button class="btn btn-primary w-90 mb-1 email-butt" 
-													type="button"
-													name="email_session"
-													value="<?php echo esc_html( $email_id ); ?>">Email Session</button> 
-											</span>
-										</div>
-										<div id="<?php echo 'email-session-' . esc_html( $session->session_id ); ?>" class="email-body text-left" hidden>
-											<?php echo $this->get_session_email_body( $session->session_id ); ?>
-										</div>
-									</td>
+								<tr class="drag-row" draggable="true" data-dragable="<?php $this->session_attendee_string( $attendee->attendee_id, $session->session_id ); ?>" >
+									<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
+									<td>Attendee</td>
+									<td><span class="<?php echo esc_html( $email_id ); ?>"><?php echo esc_html( $attendee->attendee_email ); ?></span></td>
+									<td class="centerCheckBox"> <input class="form-check-input position-relative selChk" type="checkbox" name="selectedAttendee[]"
+										value="<?php $this->session_attendee_string( $attendee->attendee_id, $session->session_id ); ?>"> </td>
 								</tr>
-								<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
-								<input type="hidden" name="signup_id" value="<?php echo esc_html( $signup_id ); ?>">
-								<input type="hidden" name="session_id" value="<?php echo esc_html( $session->session_id ); ?>">
-								<input type="hidden" name="session_calendar_id" value="<?php echo esc_html( $session->session_calendar_id ); ?>">
-								<input  id=<?php echo esc_html( 'move_to' . $session->session_id ); ?> type="hidden" name="move_to" value="0">
 								<?php
-								wp_nonce_field( 'signups', 'mynonce' );
+							}
 
-								foreach ( $attendees[ $session->session_id ] as $attendee ) {
-									?>
-									<tr class="drag-row" draggable="true" data-dragable="<?php $this->session_attendee_string( $attendee->attendee_id, $session->session_id ); ?>" >
-										<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
-										<td>Attendee</td>
-										<td><span class="<?php echo esc_html( $email_id ); ?>"><?php echo esc_html( $attendee->attendee_email ); ?></span></td>
-										<td class="centerCheckBox"> <input class="form-check-input position-relative selChk" type="checkbox" name="selectedAttendee[]"
-											value="<?php $this->session_attendee_string( $attendee->attendee_id, $session->session_id ); ?>"> </td>
-									</tr>
-									<?php
-								}
+							for ( $i = count( $attendees[ $session->session_id ] ); $i < $session->session_slots; $i++ ) {
+								?>
+								<tr class="add-attendee-row" data-session-id="<?php echo esc_html( $session->session_id ); ?>" >
+									<td class='addAtt'> Add Attendee</td>
+									<td><?php echo esc_html( $this->format_date( $session->session_start_formatted ) ); ?></td>
+									<td></td>
+									<td class="centerCheckBox"> <input class="form-check-input position-relative addChk" type="checkbox" name="addedAttendee[]" value="<?php $this->session_attendee_string( -1, $session->session_id ); ?>"> </td>
+								</tr>
+								<?php
+							}
 
-								for ( $i = count( $attendees[ $session->session_id ] ); $i < $session->session_slots; $i++ ) {
+							if ( $instructors ) {
+								foreach ( $instructors[ $session->session_id ] as $instructor ) {
 									?>
-									<tr class="add-attendee-row" data-session-id="<?php echo esc_html( $session->session_id ); ?>" >
-										<td class='addAtt'> Add Attendee</td>
-										<td><?php echo esc_html( $this->format_date( $session->session_start_formatted ) ); ?></td>
+									<tr class="drag-row bk-lg fw-bold instructor">
+										<td class="fw-bold"><?php echo esc_html( $instructor->instructors_name ); ?></td>
+										<td>Instructor</td>
+										<td><span class="<?php echo esc_html( $email_id ); ?>"><?php echo esc_html( $instructor->instructors_email ); ?></span></td>
 										<td></td>
-										<td class="centerCheckBox"> <input class="form-check-input position-relative addChk" type="checkbox" name="addedAttendee[]" value="<?php $this->session_attendee_string( -1, $session->session_id ); ?>"> </td>
 									</tr>
 									<?php
 								}
-
-								if ( $instructors ) {
-									foreach ( $instructors[ $session->session_id ] as $instructor ) {
-										?>
-										<tr class="drag-row bk-lg fw-bold instructor">
-											<td class="fw-bold"><?php echo esc_html( $instructor->instructors_name ); ?></td>
-											<td>Instructor</td>
-											<td><span class="<?php echo esc_html( $email_id ); ?>"><?php echo esc_html( $instructor->instructors_email ); ?></span></td>
-											<td></td>
-										</tr>
-										<?php
-									}
-								}
+							}
 							?>
 							</form>
 							<?php
 						}
 						?>
-				</table>
+					</table>
 				<div id="instructions" hidden>
 					<?php echo $instructions; ?>
 				</div>
@@ -1879,7 +1884,7 @@ class SignupSettings extends SignUpsBase {
 						value="<?php echo esc_html( $data->session_start_formatted[ $i ] ); ?>" /> </div>
 
 					<div class="text-right mr-2"><label>End Time:</label></div>
-					<div><input id="end-time-<?php echo $i; ?>" class="w-250px" type="datetime-local" name="session_end_formatted[]" 
+					<div><input id="end-time-<?php echo esc_html( $i ); ?>" class="w-250px" type="datetime-local" name="session_end_formatted[]" 
 						value="<?php echo esc_html( $data->session_end_formatted[ $i ] ); ?>" /></div>
 					<?php
 				}
