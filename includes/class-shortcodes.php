@@ -967,7 +967,7 @@ class ShortCodes extends SignUpsBase {
 				signup_rolling_template,
 				signup_location
 				FROM %1s
-				WHERE signup_id = %s',
+				WHERE signup_id = %s && signup_admin_approved = 1',
 				self::SIGNUPS_TABLE,
 				$signup_id
 			),

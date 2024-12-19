@@ -332,7 +332,7 @@ class StripePayments extends SignUpsBase {
 		$badge_number     = sanitize_text_field( get_query_var( 'badge' ) );
 		$payment_row      = $wpdb->get_row(
 			$wpdb->prepare(
-				'SELECT payments_intent_id, payments_signup_description, payments_status, payments_attendee_id
+				'SELECT payments_id, payments_intent_id, payments_signup_description, payments_status, payments_attendee_id, payments_email_sent
 				FROM %1s
 				WHERE payments_attendee_id = %s',
 				self::PAYMENTS_TABLE,
@@ -360,7 +360,7 @@ class StripePayments extends SignUpsBase {
 			<?php
 		}
 
-		if ( $payment_complete ) {
+		if ( $payment_complete && ! $payment_row->payments_email_sent ) {
 			$email = null;
 			if ( (int) $badge_number > 1000 ) {
 				$results = $wpdb->get_results(
@@ -405,6 +405,9 @@ class StripePayments extends SignUpsBase {
 				$sgm          = new SendGridMail();
 				$email_status = $sgm->send_mail( $email, 'You are signed up for ' . $signup_parts[0], $body, true );
 				if ( $email_status ) {
+					$data  = array( 'payments_email_sent' => 1 );
+					$where = array( 'payments_id' => $payment_row->payments_id );
+					$wpdb->update( self::PAYMENTS_TABLE, $data, $where );
 					?>
 					<h2>An email was set to <?php echo esc_html( $email ); ?> with your payment id : <?php echo esc_html( $payment_row->payments_intent_id ); ?></h2>
 					<?php
