@@ -1045,16 +1045,11 @@ class SignUpsBase {
 														<input class="form-check-input ml-2 rolling-remove-chk mt-2 <?php echo esc_html( $attendee->attendee_badge ); ?>" 
 															type="checkbox" name="remove_slots[]" 
 															<?php echo $this->add_remove_chk( $start_date, $user_badge, $attendee, $secret, $template ) || $admin ? '' : 'hidden'; ?>
-															value="
-															<?php
-															echo esc_html(
+															value="<?php echo esc_html(
 																$start_date->format( self::DATETIME_FORMAT ) . ',' .
 																$temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $item->template_item_title . ',' .
 																$comment_index . ',' . $attendee->attendee_id
-															);
-															?>
-															"
-															>
+															);?>" >
 													</td>
 													<?php
 												} else {
@@ -1091,15 +1086,11 @@ class SignUpsBase {
 															<input class="form-check-input ml-2 rolling-remove-chk mt-2 <?php echo esc_html( $attendee->attendee_badge ); ?>" 
 																type="checkbox" name="remove_slots[]" 
 																<?php echo $this->add_remove_chk( $start_date, $user_badge, $attendee, $secret, $template ) || $admin ? '' : 'hidden'; ?>
-																value="
-																<?php
-																echo esc_html(
+																value="<?php echo esc_html(
 																	$start_date->format( self::DATETIME_FORMAT ) . ',' .
 																	$temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $item->template_item_title . ',' .
 																	$comment_index . ',' . $attendee->attendee_id
-																);
-																?>
-																">
+																);?>">
 															<br>
 														</div>
 														<?php
@@ -1249,6 +1240,60 @@ class SignUpsBase {
 			</tr>
 		<?php
 
+		if ( ! isset( $post['is_admin'] ) ) {
+			$member = $wpdb->get_row(
+				$wpdb->prepare(
+					'SELECT *
+					FROM %1s
+					WHERE member_email = %s',
+					self::MEMBERS_TABLE,
+					$post['email']
+				),
+				OBJECT
+			);
+
+			$hacker = false;
+			if ( $member ) {
+				if ( isset( $post['remove_slots'] ) ) {
+					foreach ( $post['remove_slots'] as $slot ) {
+						$slot_parts = explode( ',', $slot );
+						$slot_id    = $slot_parts[4];
+						$where      = array();
+
+						$attendee_row = $wpdb->get_row(
+							$wpdb->prepare(
+								'SELECT * FROM %1s WHERE attendee_id = %d',
+								self::ATTENDEES_ROLLING_TABLE,
+								$slot_id
+							),
+							OBJECT
+						);
+
+						if ( $attendee_row->attendee_email != $post['email'] ) {
+							$hacker = true;
+						}
+					}
+				}
+			} else {
+				$hacker = true;
+			}
+
+			if ( $hacker ) {
+				$current_user = wp_get_current_user();
+				$sgm          = new SendGridMail();
+				$ip_address   = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : 'No Ip Address';
+				$body1        = '<br><br> Calling IP Address: ' . $ip_address . '<br>';
+				$body1       .= 'Host Root : ' . get_site_url() . '<br>';
+				$body1       .= '<pre>' . htmlspecialchars( wp_json_encode( $post, JSON_PRETTY_PRINT ), ENT_QUOTES, 'UTF-8' ) . '</pre>';
+				$sgm->send_mail( 'ecsproull765@gmail.com', 'Attn HACKER: Woodshop Signup delete', $body1 );
+				?>
+				<h2>Your request could not be completed due to security issues. Please contact the system admin if you feel this should work.</h>
+				<?php
+				$body = '';
+				return;
+			}
+		}
+
 		if ( isset( $post['remove_slots'] ) ) {
 			foreach ( $post['remove_slots'] as $slot ) {
 				$slot_parts           = explode( ',', $slot );
@@ -1259,6 +1304,19 @@ class SignUpsBase {
 				$where['attendee_id'] = $slot_id;
 
 				$delete_return_value = $wpdb->delete( self::ATTENDEES_ROLLING_TABLE, $where );
+
+				if ( $delete_return_value ) {
+					$current_user = wp_get_current_user();
+					$sgm          = new SendGridMail();
+					$ip_address   = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : 'No Ip Address';
+					$body2        = '<br><br> Calling IP Address: ' . $ip_address . '<br>';
+					$body2       .= 'Host Root : ' . get_site_url() . '<br>';
+					$body2       .= 'Items deleted : ' . $delete_return_value . '<br>';
+					$body2       .= 'Signup ID : ' . $post['add_attendee_session'] . '<br>';
+					$body2       .= 'Attendee Email : ' . $post['email'] . '<br>';
+					$body2       .= '<pre>' . htmlspecialchars( wp_json_encode( $post, JSON_PRETTY_PRINT ), ENT_QUOTES, 'UTF-8' ) . '</pre>';
+					$sgm->send_mail( 'ecsproull765@gmail.com', 'Attn Ed: Woodshop Signup delete', $body2 );
+				}
 				?>
 				<tr class="attendee-row" style="background-color:#FFCCCB;">
 					<td><?php echo esc_html( $slot_start->format( self::DATE_FORMAT ) ); ?></td>

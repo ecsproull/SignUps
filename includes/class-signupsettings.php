@@ -1721,6 +1721,7 @@ class SignupSettings extends SignUpsBase {
 						<option value="cnc" <?php echo 'cnc' === $data->signup_group ? 'selected' : ''; ?> >Cnc Users</option>
 						<option value="laser" <?php echo 'laser' === $data->signup_group ? 'selected' : ''; ?> >Laser Users</option>
 						<option value="p2s_laser" <?php echo 'p2s_laser' === $data->signup_group ? 'selected' : ''; ?> >P2S Laser Users</option>
+						<option value="shp_origin" <?php echo 'shp_origin' === $data->signup_group ? 'selected' : ''; ?> >Shaper Origin</option>
 						<option value="lbc" <?php echo 'lbc' === $data->signup_group ? 'selected' : ''; ?> >Lathe Boot Camp</option>
 					</select>
 				</div>
@@ -2072,6 +2073,7 @@ class SignupSettings extends SignUpsBase {
 					<option value="cnc">Cnc Users</option>
 					<option value="laser">Laser Users</option>
 					<option value="p2s_laser">P2S Laser Users</option>
+					<option value="shp_origin">Shaper Origin</option>
 					<option value="lbc">Lathe Boot Camp</option>
 				</select>
 			</div>
