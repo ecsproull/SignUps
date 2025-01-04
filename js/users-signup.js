@@ -100,7 +100,7 @@ jQuery(document).ready(function($){
 	 */
 	$("#badge-input").on("keydown", (e) => {
 		if (e.code === "Enter" || e.code === "NumpadEnter") { 
-			$("#get_member_button").trigger("click");
+			$("#member_button").trigger("click");
 			e.preventDefault();
 		}
 	});
@@ -151,6 +151,23 @@ jQuery(document).ready(function($){
 		//debugger;
 		e.preventDefault();
 		var form = this;
+		if (document.activeElement.getAttribute('name') == 'login' ||
+	        document.activeElement.getAttribute('name') == 'badge_number') {
+			$("#email").append('<input type="hidden" name="login" value="1" />');
+			$("<input />").attr("type", "hidden")
+				.attr("name", "continue_signup")
+				.attr("value", $("#update-butt").val())
+				.appendTo(".signup_form");
+			form.submit();
+			return;
+		}
+
+		if (document.activeElement.getAttribute('name') == 'logout') {
+			$("#email").append('<input type="hidden" name="logout" value="1" />');
+			form.submit();
+			return;
+		}
+
 		if (document.activeElement.getAttribute('name') == 'email_admin') {
 			$("#email").append('<input type="hidden" name="email_admin" value="1" />');
 			form.submit();

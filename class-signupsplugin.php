@@ -99,6 +99,27 @@ class SignUpsPlugin extends SignUpsBase {
 		add_shortcode( 'scw_payment_canceled', array( $this->stripe_payments, 'payment_canceled' ) );
 		add_shortcode( 'scw_reports', array( $this->reports, 'class_reports' ) );
 		add_filter( 'query_vars', array( $this, 'wwp_custom_query_vars_filter' ) );
+		add_filter( 'nonce_user_logged_out', array( $this, 'wpdocs_modify_nonce_for_logged_out_users' ), 10, 2 );
+	}
+
+	/**
+	 * Custom function to modify the nonce value for logged-out users.
+	 *
+	 * @param int    $uid    The user ID (0 for logged-out users).
+	 * @param string $action The nonce action.
+	 *
+	 * @return int The modified user ID.
+	 * */
+	public function wpdocs_modify_nonce_for_logged_out_users( $uid, $action ) {
+		if ( 'signups' === $action || 'wp_rest' === $action ) {
+ 			if ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+				$uid = (int) str_replace('.', "", $_SERVER['REMOTE_ADDR']);
+			} else {
+				$uid = 324554;
+			}
+		}
+
+		return $uid;
 	}
 	
 	/**

@@ -580,9 +580,10 @@ class SignUpsRestApis extends SignUpsBase {
 		$verified = wp_verify_nonce( $nonce, 'wp_rest' );
 		if ( $verified ) {
 			if ( $request['badge'] ) {
-				setcookie( 'signups_scw_badge', $request['badge'] );
+				setcookie( 'signups_scw_badge', $request['badge'], );
 			} else {
 				unset( $_COOKIE['signups_scw_badge'] );
+				setcookie( 'signups_scw_badge', '', -1, '/' );
 			}
 		}
 	}
@@ -599,114 +600,136 @@ class SignUpsRestApis extends SignUpsBase {
 	 */
 	public function receive_members( $data ) {
 		global $wpdb;
-		$dt_now = new DateTime( 'now', new DateTimeZone( 'America/Phoenix' ) );
-		//$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Begin member update ' . $dt_now->format( self::DATETIME_FORMAT_INPUT ) );
+		$log = true;
 		$key      = '8c62a157-7ee8-4104-9f91-930eac39fe2f';
 		$data_obj = json_decode( $data->get_body(), false );
 		if ( $data_obj->key !== $key ) {
 			return;
 		}
 
-		$all_members = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT *
-				FROM %1s
-				ORDER BY member_badge',
-				self::MEMBERS_TABLE,
-			),
-			OBJECT
-		);
-
-		$length   = count( $data_obj->members );
-		for ( $i = 0; $i < $length; $i++ ) {
-			$member = $wpdb->get_results(
+		try {
+			$all_members = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT *
 					FROM %1s
-					WHERE member_badge = %s',
+					ORDER BY member_badge',
 					self::MEMBERS_TABLE,
-					$data_obj->members[ $i ]->badge
 				),
 				OBJECT
 			);
 
-			$data = array();
-			$data['member_badge']        = $data_obj->members[ $i ]->badge;
-			$data['member_lastname']     = $data_obj->members[ $i ]->last;
-			$data['member_firstname']    = $data_obj->members[ $i ]->first;
-			$data['member_phone']        = $data_obj->members[ $i ]->phone;
-			$data['member_email']        = $data_obj->members[ $i ]->email;
-			$data['member_email_secret'] = $data_obj->members[ $i ]->email_secret;
+			$length   = count( $data_obj->members );
+			for ( $i = 0; $i < $length; $i++ ) {
+				$member = $wpdb->get_row(
+					$wpdb->prepare(
+						'SELECT *
+						FROM %1s
+						WHERE member_badge = %s',
+						self::MEMBERS_TABLE,
+						$data_obj->members[ $i ]->badge
+					),
+					OBJECT
+				);
 
-			if ( ! $member ) {
-				$data['member_secret'] = $data_obj->members[ $i ]->secret;
+				if ( $log  && ! $member ) {
+					$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Member not found : ' .  $data_obj->members[ $i ]->badge );
+				}
+
+				$data = array();
+				$data['member_badge']        = $data_obj->members[ $i ]->badge;
+				$data['member_lastname']     = $data_obj->members[ $i ]->last;
+				$data['member_firstname']    = $data_obj->members[ $i ]->first;
+				$data['member_phone']        = $data_obj->members[ $i ]->phone;
+				$data['member_email']        = $data_obj->members[ $i ]->email;
+				$data['member_email_secret'] = $data_obj->members[ $i ]->email_secret;
+
+				if ( ! $member ) {
+					$data['member_secret'] = $data_obj->members[ $i ]->secret;
+				}
+
+				if ( $member ) {
+					if ( ! $member->member_user_id ) {
+						$user_id = wp_create_user( $member->member_badge, $member->member_secret, $member->member_email );
+						$data['member_user_id'] = $user_id;
+					}
+					$where = array( 'member_badge' => $member->member_badge );
+					$wpdb->update( self::MEMBERS_TABLE, $data, $where );
+					$count_remaining = count( $all_members );
+					for ( $m = 0; $m < $count_remaining; $m++ ) {
+						if ( $all_members[ $m ]->member_badge === $member->member_badge ) {
+							array_splice( $all_members, $m, 1 );
+							break;
+						}
+					}
+				} else {
+					$user_id = wp_create_user( $data['member_badge'], $data['member_secret'], $data['member_email'] );
+					$data['member_user_id'] = $user_id;
+					$wpdb->insert( self::MEMBERS_TABLE, $data );
+				}
 			}
 
-			if ( $member ) {
-				$where           = array( 'member_badge' => $member[0]->member_badge );
-				$result          = $wpdb->update( self::MEMBERS_TABLE, $data, $where );
-				$count_remaining = count( $all_members );
-				for ( $m =  0; $m < $count_remaining; $m++ ) {
-					if ( $all_members[ $m ]->member_badge === $member[0]->member_badge ) {
-						array_splice( $all_members, $m, 1 );
-						break;
+			if ( $data_obj->clean_permissions ) {
+				$wpdb->query(
+					$wpdb->prepare(
+						'TRUNCATE TABLE %1s',
+						self::MACHINE_PERMISSIONS_TABLE,
+					)
+				);
+			}
+
+			$length = count( $data_obj->permissions );
+			for ( $i = 0; $i < $length; $i++ ) {
+				$machine_badge = trim( $data_obj->permissions[ $i ]->badge );
+				$machine_name  = trim( $data_obj->permissions[ $i ]->machine_name );
+				$permission = $wpdb->get_results(
+					$wpdb->prepare(
+						'SELECT *
+						FROM %1s
+						WHERE permission_badge = %s && permission_machine_name = %s',
+						self::MACHINE_PERMISSIONS_TABLE,
+						$machine_badge,
+						$machine_name
+					),
+					OBJECT
+				);
+
+				if ( ! $permission ) {
+					$data                            = array();
+					$data['permission_badge']        = $data_obj->permissions[ $i ]->badge;
+					$data['permission_machine_name'] = $data_obj->permissions[ $i ]->machine_name;
+					$wpdb->insert( self::MACHINE_PERMISSIONS_TABLE, $data );
+				}
+			}
+
+			foreach ( $all_members as $extra_member ) {
+				if ( $extra_member->member_user_id ) {
+					if ( get_user_by( 'id', $extra_member->member_user_id ) ) {
+						$this->write_log( __FUNCTION__, basename( __FILE__ ), 'User Needs deleted, ID : ' . $extra_member->member_user_id );
 					}
 				}
-			} else {
-				$wpdb->insert( self::MEMBERS_TABLE, $data );
+
+				$where = array( 'member_ID' => $extra_member->member_ID );
+				$wpdb->delete( self::MEMBERS_TABLE, $where );
+
+				$where = array( 'badge' => $extra_member->member_badge );
+				$wpdb->delete( self::MACHINE_PERMISSIONS_TABLE, $where );
 			}
+
+		} catch ( Exception $e ) {
+			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Exception Msg : ' . $e->getMessage() );
 		}
 
-		if ( $data_obj->clean_permissions ) {
-			$delete = $wpdb->query(
-				$wpdb->prepare(
-					'TRUNCATE TABLE %1s',
-					self::MACHINE_PERMISSIONS_TABLE,
-				)
-			);
+		if ( $log ) {
+			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Member update complete' );
 		}
-
-		$length = count( $data_obj->permissions );
-		for ( $i = 0; $i < $length; $i++ ) {
-			$machine_badge = trim( $data_obj->permissions[ $i ]->badge );
-			$machine_name  = trim( $data_obj->permissions[ $i ]->machine_name );
-			$permission = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT *
-					FROM %1s
-					WHERE permission_badge = %s && permission_machine_name = %s',
-					self::MACHINE_PERMISSIONS_TABLE,
-					$machine_badge,
-					$machine_name
-				),
-				OBJECT
-			);
-
-			if ( ! $permission ) {
-				$data                            = array();
-				$data['permission_badge']        = $data_obj->permissions[ $i ]->badge;
-				$data['permission_machine_name'] = $data_obj->permissions[ $i ]->machine_name;
-				$wpdb->insert( self::MACHINE_PERMISSIONS_TABLE, $data );
-			}
-		}
-
-		foreach( $all_members as $extra_member ) {
-			$where = array( 'member_ID' => $extra_member->member_ID );
-			$wpdb->delete( self::MEMBERS_TABLE, $where );
-
-			$where = array( 'badge' => $extra_member->member_badge );
-			$wpdb->delete( self::MACHINE_PERMISSIONS_TABLE, $where );
-		}
-
-		//$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Member update complete' );
 	}
-	
+
 	/**
 	 * A validation callback that always returns true.
 	 * Validation is done elsewhere.
 	 *
-	 * @param  mixed $data
-	 * @return void
+	 * @param  mixed $data unused.
+	 * @return bool	Always returns true.
 	 */
 	public function verify_member_data( $data ) {
 		return true;
@@ -751,7 +774,7 @@ class SignUpsRestApis extends SignUpsBase {
 		if ( $result ) {
 			$all = $statement->fetchAll( PDO::FETCH_ASSOC );
 			if ( $all ) {
-				$message = $twilio->messages->create(
+				$twilio->messages->create(
 					'+14253513207',
 					[
 						"body" => $data['From'] . ' - ' . $all[0]['Badge'] . ' - ' . $all[0]['FirstName'] . ' - ' . $all[0]['LastName'] . ' - ' . $all[0]['Email'] . ' Msg:' . $data['Body'],
@@ -777,7 +800,7 @@ class SignUpsRestApis extends SignUpsBase {
 	 * Returns a member's data. Called from JS to populate the member lookup table.
 	 * This has two error codes. 401 is returned if a member tries to sign up for
 	 * something that he doesn't have permission to do. 400 is returned if the member
-	 * isn't found in the database. 
+	 * isn't found in the database.
 	 *
 	 * @param  object $request Members badge number.
 	 * @return array The results of the query.
