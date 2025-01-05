@@ -926,6 +926,7 @@ class SignUpsBase {
 						<?php
 						$user_badge = null;
 						wp_nonce_field( 'signups', 'mynonce' );
+						wp_nonce_field( 'signups_attendee', 'attendee_identifier' );
 						if ( ! $admin ) {
 							$user_badge = $this->create_user_table( $user_group, $signup_id, $secret );
 							?>
