@@ -3,7 +3,7 @@
  * @package     SignUps
  * @author      Edward Sproull
  * @copyright   You have the right to copy. Licensed under GPL-2.0+
- * 
+ *
  * SignUps is a WordPress plugin used by the Sun City West Woodshop members to sign up for classes and other club activities.
  */
 
@@ -43,7 +43,7 @@ require 'includes/class-sessionemaildata.php';
 
 /**
  * Main SignUps class. This is the entry point for the plugin.
- * Several other classes are required in this file and all are instantiated here. 
+ * Several other classes are required in this file and all are instantiated here.
  */
 class SignUpsPlugin extends SignUpsBase {
 
@@ -100,6 +100,22 @@ class SignUpsPlugin extends SignUpsBase {
 		add_shortcode( 'scw_reports', array( $this->reports, 'class_reports' ) );
 		add_filter( 'query_vars', array( $this, 'wwp_custom_query_vars_filter' ) );
 		add_filter( 'nonce_user_logged_out', array( $this, 'wpdocs_modify_nonce_for_logged_out_users' ), 10, 2 );
+		add_filter( 'nonce_life', array( $this, 'modify_nonce_life' ), 10, 2 );
+	}
+	
+	/**
+	 * Modify the life time of the nounce.
+	 *
+	 * @param  mixed $lifespan Normally set to 24 hours but we want to shorten it to an hour.
+	 * @param  mixed $action The nonce by name.
+	 * @return void
+	 */
+	public function modify_nonce_life( $lifespan, $action ) {
+		if ( 'signups_attendee' === $action ) {
+			$lifespan = 3600;
+		}
+
+		return $lifespan;
 	}
 
 	/**
@@ -113,7 +129,7 @@ class SignUpsPlugin extends SignUpsBase {
 	public function wpdocs_modify_nonce_for_logged_out_users( $uid, $action ) {
 		if ( 'signups' === $action || 'wp_rest' === $action ) {
  			if ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
-				$uid = (int) str_replace('.', "", $_SERVER['REMOTE_ADDR']);
+				$uid = (int) str_replace( '.', "", $_SERVER['REMOTE_ADDR'] );
 			} else {
 				$uid = 324554;
 			}

@@ -24,7 +24,7 @@ class SignupSettings extends SignUpsBase {
 	 */
 	public function signup_settings_page() {
 		$post = wp_unslash( $_POST );
-		if ( isset( $_POST['mynonce'] ) && wp_verify_nonce( $post['mynonce'], 'signups' ) ) {
+		if ( isset( $_POST['mynonce'] ) && wp_verify_nonce( $post['mynonce'], 'signups' ) && current_user_can( 'administrator' ) ) {
 			unset( $post['mynonce'] );
 			unset( $post['_wp_http_referer'] );
 			if ( isset( $post['submit_class'] ) ) {

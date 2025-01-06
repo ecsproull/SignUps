@@ -50,15 +50,11 @@ class ShortCodes extends SignUpsBase {
 			} elseif ( isset( $post['rolling_days_new'] ) ) {
 				$this->create_rolling_session( $post['add_attendee_session'], null, false, $post['rolling_days_new'] );
 			} elseif ( isset( $post['add_attendee_session'] ) ) {
-				if ( isset( $post['attendee_identifier'] ) && wp_verify_nonce( $post['attendee_identifier'], 'signups_attendee' ) ) { 
+				if ( isset( $post['attendee_identifier'] ) && wp_verify_nonce( $post['attendee_identifier'], 'signups_attendee' ) ) {
 					$this->add_attendee_rolling( $post );
 				} else {
-					$sgm          = new SendGridMail();
-					$ip_address   = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : 'No Ip Address';
-					$body1        = '<br><br> Calling IP Address: ' . $ip_address . '<br>';
-					$body1       .= 'Host Root : ' . get_site_url() . '<br>';
-					$body1       .= '<pre>' . htmlspecialchars( wp_json_encode( $post, JSON_PRETTY_PRINT ), ENT_QUOTES, 'UTF-8' ) . '</pre>';
-					$sgm->send_mail( 'ecsproull765@gmail.com', 'Attn HACKER: Woodshop Signup POST FAILED', $body1 );
+					$this->send_alert_email( $post, 'Attn HACKER: Woodshop Signup POST FAILED' );
+					$this->create_select_signup( false );
 				}
 			} elseif ( isset( $post['move_me'] ) ) {
 				$this->move_attendee_class( $post );

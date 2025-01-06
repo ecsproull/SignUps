@@ -1280,13 +1280,7 @@ class SignUpsBase {
 			}
 
 			if ( $hacker ) {
-				$current_user = wp_get_current_user();
-				$sgm          = new SendGridMail();
-				$ip_address   = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : 'No Ip Address';
-				$body1        = '<br><br> Calling IP Address: ' . $ip_address . '<br>';
-				$body1       .= 'Host Root : ' . get_site_url() . '<br>';
-				$body1       .= '<pre>' . htmlspecialchars( wp_json_encode( $post, JSON_PRETTY_PRINT ), ENT_QUOTES, 'UTF-8' ) . '</pre>';
-				$sgm->send_mail( 'ecsproull765@gmail.com', 'Attn HACKER: Woodshop Signup delete', $body1 );
+				$this->send_alert_email( $post, 'Attn HACKER: Woodshop Signup delete' );
 				?>
 				<h2>Your request could not be completed due to security issues. Please contact the system admin if you feel this should work.</h>
 				<?php
@@ -1307,16 +1301,7 @@ class SignUpsBase {
 				$delete_return_value = $wpdb->delete( self::ATTENDEES_ROLLING_TABLE, $where );
 
 				if ( $delete_return_value ) {
-					$current_user = wp_get_current_user();
-					$sgm          = new SendGridMail();
-					$ip_address   = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : 'No Ip Address';
-					$body2        = '<br><br> Calling IP Address: ' . $ip_address . '<br>';
-					$body2       .= 'Host Root : ' . get_site_url() . '<br>';
-					$body2       .= 'Items deleted : ' . $delete_return_value . '<br>';
-					$body2       .= 'Signup ID : ' . $post['add_attendee_session'] . '<br>';
-					$body2       .= 'Attendee Email : ' . $post['email'] . '<br>';
-					$body2       .= '<pre>' . htmlspecialchars( wp_json_encode( $post, JSON_PRETTY_PRINT ), ENT_QUOTES, 'UTF-8' ) . '</pre>';
-					$sgm->send_mail( 'ecsproull765@gmail.com', 'Attn Ed: Woodshop Signup delete', $body2 );
+					$this->send_alert_email( $post, 'Attn Ed: Woodshop Signup delete' );
 				}
 				?>
 				<tr class="attendee-row" style="background-color:#FFCCCB;">
@@ -1492,6 +1477,22 @@ class SignUpsBase {
 		}
 
 		clean_post_cache( $post );
+	}
+
+	/**
+	 * Sends alert email to a single address.
+	 *
+	 * @param  mixed $post The post to include in the email.
+	 * @param  mixed $subject The alert subject.
+	 * @return void
+	 */
+	protected function send_alert_email( $post, $subject ) {
+		$sgm        = new SendGridMail();
+		$ip_address = isset( $_SERVER['REMOTE_ADDR'] ) ? wp_unslash( $_SERVER['REMOTE_ADDR'] ) : 'No Ip Address';
+		$body1      = '<br><br> Calling IP Address: ' . $ip_address . '<br>';
+		$body1     .= 'Host Root : ' . get_site_url() . '<br>';
+		$body1     .= '<pre>' . htmlspecialchars( wp_json_encode( $post, JSON_PRETTY_PRINT ), ENT_QUOTES, 'UTF-8' ) . '</pre>';
+		$sgm->send_mail( 'ecsproull765@gmail.com', $subject, $body1 );
 	}
 
 	/**
