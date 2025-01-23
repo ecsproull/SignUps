@@ -261,7 +261,7 @@ class StripePayments extends SignUpsBase {
 	 * @param int    $qty         The quantity being purchased.
 	 * @return void
 	 */
-	public function collect_money( $description, $price_id, $badge, $attendee_id, $cost, $qty ) {
+	public function collect_money( $description, $price_id, $badge, $attendee_id, $cost, $qty, $signup_id ) {
 		global $wpdb;
 		\Stripe\Stripe::setApiKey( $this->stripe_api_secret );
 		header( 'Content-Type: application/json' );
@@ -294,10 +294,10 @@ class StripePayments extends SignUpsBase {
 						'qty'         => $qty,
 					),
 				),
-				'mode'        => 'payment',
-				'expires_at'  => $expire_time,
-				'success_url' => $signup_domain . '/payment-success?attendee_id=' . $attendee_id . '&badge=' . $badge,
-				'cancel_url'  => $signup_domain . '/payment-canceled?attendee_id=' . $attendee_id,
+				'mode'                => 'payment',
+				'expires_at'          => $expire_time,
+				'success_url'         => $signup_domain . '/signups?payment_success=1&attendee_id=' . $attendee_id . '&signup_id=' . $signup_id . '&badge=' . $badge . '&mynonce=' . wp_create_nonce( 'signups' ),
+				'cancel_url'          => $signup_domain . '/signups?payment_canceled=1&attendee_id=' . $attendee_id . '&signup_id=' . $signup_id . '&mynonce=' . wp_create_nonce( 'signups' ),
 			)
 		);
 
@@ -325,11 +325,12 @@ class StripePayments extends SignUpsBase {
 	 *
 	 * @return void
 	 */
-	public function payment_success() {
+	public function payment_success( $post ) {
 		global $wpdb;
 		$payment_complete = false;
-		$attendee_id      = sanitize_text_field( get_query_var( 'attendee_id' ) );
-		$badge_number     = sanitize_text_field( get_query_var( 'badge' ) );
+		$attendee_id      = $post['attendee_id'];
+		$badge_number     = $post['badge'];
+		$signup_id        = $post['signup_id'];
 		$payment_row      = $wpdb->get_row(
 			$wpdb->prepare(
 				'SELECT payments_id, payments_intent_id, payments_signup_description, payments_status, payments_attendee_id, payments_email_sent
@@ -409,21 +410,50 @@ class StripePayments extends SignUpsBase {
 					$where = array( 'payments_id' => $payment_row->payments_id );
 					$wpdb->update( self::PAYMENTS_TABLE, $data, $where );
 					?>
-					<h2>An email was set to <?php echo esc_html( $email ); ?> with your payment id : <?php echo esc_html( $payment_row->payments_intent_id ); ?></h2>
+					<h2>A confirmation email was set to <?php echo esc_html( $email ); ?></h2>
+					<h2>Your payment id is : <?php echo esc_html( $payment_row->payments_intent_id ); ?></h2>
 					<?php
+					$this->create_done_or_logout( $signup_id );
 				}
 			}
 		}
 	}
-
+	
 	/**
-	 * Shortcode for the Payment canceled page.
+	 * Creates the block that contains the buttons to continue once a payment is complete.
 	 *
+	 * @param  mixed $signup_id The signup id.
 	 * @return void
 	 */
-	public function payment_canceled() {
+	private function create_done_or_logout( $signup_id ) {
+		?>
+		<form method="POST">
+			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+			<div class="return-or-logout">
+				<div></div>
+				<div class="text-center">
+						<button class="btn btn-primary signup-submit" type="submit" name="continue_signup" value="<?php echo esc_html( $signup_id ); ?>" >View Signup</button>
+				</div>
+					<div></div>
+				<div class="text-center">
+					<button class="btn btn-primary" type="submit" name="all_done" value="-1" >I'm Done</button>
+				</div>
+				<div></div>
+			</div>
+		</form>
+		<?php
+	}
+
+	/**
+	 * Payment canceled message.
+	 *
+	 * @param  mixed $post Url parameters.
+	 * @return void
+	 */
+	public function payment_canceled( $post ) {
 		global $wpdb;
-		$payment_id = sanitize_text_field( get_query_var( 'attendee_id' ) );
+		$payment_id = $post['attendee_id'];
+		$signup_id        = $post['signup_id'];
 		if ( $payment_id ) {
 			$bad_debt = $wpdb->get_row(
 				$wpdb->prepare(
@@ -448,6 +478,7 @@ class StripePayments extends SignUpsBase {
 			?>
 			<h2>Invalid Attempt</h2>
 			<?php
+			$this->create_done_or_logout( $signup_id );
 		}
 	}
 

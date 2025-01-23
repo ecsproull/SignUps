@@ -75,13 +75,12 @@ class SignUpsPlugin extends SignUpsBase {
 
 
 	/**
-	 * The constructor does a lot of work by instantiated several objects that 
+	 * The constructor does a lot of work by instantiated several objects that
 	 * are required for various ShortCodes. The ShortCodes are also registered here.
-	 * 
-	 * It is important to understand that this plugin is one big ShortCode. The ShortCodes
-	 * class in the root of the public user interface. SignupSettings class is the root of the 
-	 * administration interface.
 	 *
+	 * It is important to understand that this plugin is one big ShortCode. The ShortCodes
+	 * class in the root of the public user interface. SignupSettings class is the root of the
+	 * administration interface.
 	 */
 	public function __construct() {
 		setcookie( 'signups_scw_cache', 'ignore', time()+3600 );
@@ -101,14 +100,25 @@ class SignUpsPlugin extends SignUpsBase {
 		add_filter( 'query_vars', array( $this, 'wwp_custom_query_vars_filter' ) );
 		add_filter( 'nonce_user_logged_out', array( $this, 'wpdocs_modify_nonce_for_logged_out_users' ), 10, 2 );
 		add_filter( 'nonce_life', array( $this, 'modify_nonce_life' ), 10, 2 );
+		add_filter( 'show_admin_bar', array( $this, 'restrict_admin_bar' ) );
 	}
-	
+
+	/**
+	 * Don't show the admin bar unless an admin is logged in.
+	 *
+	 * @param  mixed $show Unused in our case.
+	 * @return void
+	 */
+	public function restrict_admin_bar( $show ) {
+		return current_user_can( 'edit_plugins' ) ? true : false;
+	}
+
 	/**
 	 * Modify the life time of the nounce.
 	 *
 	 * @param  mixed $lifespan Normally set to 24 hours but we want to shorten it to an hour.
 	 * @param  mixed $action The nonce by name.
-	 * @return void
+	 * @return The life span.
 	 */
 	public function modify_nonce_life( $lifespan, $action ) {
 		if ( 'signups_attendee' === $action ) {
@@ -220,6 +230,8 @@ class SignUpsPlugin extends SignUpsBase {
 			return;
 		}
 
+		$keys = $this->getCaptchaKeys();
+
 		wp_register_style( 'signup_bs_style', plugin_dir_url( __FILE__ ) . 'bootstrap/css/bootstrap.min.css', array(), 1 );
 		wp_enqueue_style( 'signup_bs_style' );
 		$ver_styles = filemtime( plugin_dir_path( __FILE__ ) . 'css/style.css' );
@@ -229,6 +241,9 @@ class SignUpsPlugin extends SignUpsBase {
 		wp_register_style( 'user_signup_style', plugin_dir_url( __FILE__ ) . 'css/users-styles.css', array(), $ver_user_styles );
 		wp_enqueue_style( 'user_signup_style' );
 		wp_enqueue_script( 'jquery' );
+		wp_enqueue_script( 'recap', 'https://www.google.com/recaptcha/api.js?render=' . $keys->stripe_api_key, array(), '1.0.0.0', false, true );
+		$ver_common_js = filemtime( plugin_dir_path( __FILE__ ) . 'js/common.js' );
+		wp_enqueue_script( 'signup_common_script', plugin_dir_url( __FILE__ ) . 'js/common.js', __FILE__, array( 'jquery' ), $ver_common_js, false, true );
 		$ver_js = filemtime( plugin_dir_path( __FILE__ ) . 'js/signups.js' );
 		wp_enqueue_script( 'signup_member_script', plugin_dir_url( __FILE__ ) . 'js/signups.js', __FILE__, array( 'jquery' ), $ver_js, false, true );
 		wp_enqueue_script( 'signup_cookie_script', plugin_dir_url( __FILE__ ) . 'cookie/node_modules/js-cookie/dist/js.cookie.min.js', array( 'jquery' ), '3.0.5', false, true );
@@ -237,8 +252,9 @@ class SignUpsPlugin extends SignUpsBase {
 			'signup_member_script',
 			'wpApiSettings',
 			array(
-				'root'  => esc_url_raw( rest_url() ),
-				'nonce' => wp_create_nonce( 'wp_rest' ),
+				'root'     => esc_url_raw( rest_url() ),
+				'nonce'    => wp_create_nonce( 'wp_rest' ),
+				'location' => 'Admin Scripts',
 			)
 		);
 	}
@@ -263,6 +279,8 @@ class SignUpsPlugin extends SignUpsBase {
 			return;
 		}
 
+		$keys = $this->getCaptchaKeys();
+
 		wp_register_style( 'signup_bs_style', plugin_dir_url( __FILE__ ) . 'bootstrap/css/bootstrap.min.css', array(), 1 );
 		wp_enqueue_style( 'signup_bs_style' );
 		$ver_user_styles = filemtime( plugin_dir_path( __FILE__ ) . 'css/users-styles.css' );
@@ -270,14 +288,18 @@ class SignUpsPlugin extends SignUpsBase {
 		wp_enqueue_style( 'signup_style' );
 		wp_enqueue_style( 'wp-jquery-ui-dialog' );
 		wp_enqueue_script( 'signup_cookie_script', plugin_dir_url( __FILE__ ) . 'cookie/node_modules/js-cookie/dist/js.cookie.min.js', array( 'jquery' ), '3.0.5', false, true );
+		wp_enqueue_script( 'recap', 'https://www.google.com/recaptcha/api.js?render=' . $keys->stripe_api_key, array(), '1.0.0.0', false, true );
+		$ver_common_js = filemtime( plugin_dir_path( __FILE__ ) . 'js/common.js' );
+		wp_enqueue_script( 'signup_common_script', plugin_dir_url( __FILE__ ) . 'js/common.js', __FILE__, array( 'jquery' ), $ver_common_js, false, true );
 		$ver_users_js = filemtime( plugin_dir_path( __FILE__ ) . 'js/users-signup.js' );
 		wp_enqueue_script( 'signup_member_script', plugin_dir_url( __FILE__ ) . 'js/users-signup.js', array( 'jquery', 'jquery-ui-dialog', 'signup_cookie_script' ), $ver_users_js, false, true );
 		wp_localize_script(
 			'signup_member_script',
 			'wpApiSettings',
 			array(
-				'root'  => esc_url_raw( rest_url() ),
-				'nonce' => wp_create_nonce( 'wp_rest' ),
+				'root'     => esc_url_raw( rest_url() ),
+				'nonce'    => wp_create_nonce( 'wp_rest' ),
+				'location' => 'Users Scripts' . $host,
 			)
 		);
 	}

@@ -28,19 +28,28 @@ class ShortCodes extends SignUpsBase {
 	 * An understanding of HTML forms is necessary to understanding this code. While the code is
 	 * written PHP it generates HTML.
 	 *
-	 * @param  bool $admin_view When true it shows all signups whether they are approved or not.
 	 * @return void
 	 */
-	public function user_signup( $admin_view = false ) {
+	public function user_signup( ) {
 		$post = wp_unslash( $_POST );
 		if ( 0 === count( $post ) ) {
 			$post = wp_unslash( $_GET );
 		}
-		if ( isset( $post['mynonce'] ) && wp_verify_nonce( $post['mynonce'], 'signups' ) ) {
+		if ( ( isset( $post['mynonce'] ) && 
+			 wp_verify_nonce( $post['mynonce'], 'signups' ) ) ||
+			 ( is_user_logged_in() && isset( $post['continue_signup'] ) ) ) {
 			if ( isset( $post['signup_home'] ) ) {
-				$this->create_select_signup( $admin_view );
+				$this->create_select_signup();
 			} elseif ( isset( $post['continue_signup'] ) ) {
-				$this->create_signup_form( $post['continue_signup'], $post['secret'] );
+				if ( ! is_user_logged_in() && ! $this->for_residents( $post['continue_signup'] ) ) {
+					$this->signin( $post['continue_signup'] );
+				} else {
+					if ( wp_verify_nonce( $post['mynonce'], 'signups' ) || $this->verifyReCap( $post['token'], $post, $post['badge_number'] ) ) {
+						$this->create_signup_form( $post['continue_signup'] );
+					} else {
+						$this->create_select_signup();
+					}
+				}
 			} elseif ( isset( $post['email_admin'] ) ) {
 				$this->create_email_form( $post );
 			} elseif ( isset( $post['email_session'] ) ) {
@@ -48,8 +57,8 @@ class ShortCodes extends SignUpsBase {
 			} elseif ( isset( $post['send_email'] ) ) {
 				$this->send_email( $post );
 			} elseif ( isset( $post['rolling_days_new'] ) ) {
-				$this->create_rolling_session( $post['add_attendee_session'], null, false, $post['rolling_days_new'] );
-			} elseif ( isset( $post['add_attendee_session'] ) ) {
+				$this->create_rolling_session( $post['add_attendee_session'], $post['rolling_days_new'] );
+			} elseif ( isset( $post['add_attendee_session'] ) && isset( $post['token'] ) && $this->verifyReCap( $post['token'], $post, $post['badge_number'] ) ) {
 				if ( isset( $post['attendee_identifier'] ) && wp_verify_nonce( $post['attendee_identifier'], 'signups_attendee' ) ) {
 					$this->add_attendee_rolling( $post );
 				} else {
@@ -62,16 +71,49 @@ class ShortCodes extends SignUpsBase {
 				$this->add_attendee_class( $post );
 			} elseif ( isset( $post['home'] ) ) {
 				$this->create_select_signup();
+			} elseif ( isset( $post['payment_success'] ) ) {
+				$payments = new StripePayments();
+				$payments->payment_success( $post );
+			} elseif ( isset( $post['payment_canceled'] ) ) {
+				$payments = new StripePayments();
+				$payments->payment_canceled( $post );
 			} elseif ( isset( $post['signup_id'] ) ) {
-				if ( '-1' === $post['signup_id'] ) {
+				if ( '-1' === $post['signup_id'] || 
+					! $this->verifyReCap( $post['token'],
+					$post,
+					is_user_logged_in() ? get_user_meta( get_current_user_id(), 'nickname' )[0] : '0000' )
+				) {
 					$this->create_select_signup();
 				} else {
-					$this->create_description_form( $post['signup_id'] );
+					$rolling_signup = $this->is_rolling_signup( $post['signup_id'] );
+					if ( $rolling_signup ) {
+						if ( ! is_user_logged_in() ) {
+							$this->signin( get_query_var( 'signup_id' ) );
+						} else {
+							$this->create_rolling_session( $post['signup_id'] );
+						}
+					} else {
+						$this->create_description_form( $post['signup_id'] );
+					}
 				}
+			} elseif ( isset( $post['all_done'] ) ) {
+				$this->unset_user();
+				$this->create_select_signup();
+			} elseif ( isset( $post['payment_success'] ) ) {
+				$payments = new StripePayments();
+				$payments->payment_success( $post );
+			} elseif ( isset( $post['payment_canceled'] ) ) {
+				$payments = new StripePayments();
+				$payments->payment_canceled( $post );
 			}
 		} elseif ( get_query_var( 'signup_id' ) ) {
-			if ( get_query_var( 'secret' ) ) {
-				$this->create_description_form( get_query_var( 'signup_id' ), get_query_var( 'secret' ) );
+			$rolling_signup = $this->is_rolling_signup( get_query_var( 'signup_id' ) );
+			if ( $rolling_signup ) {
+				if ( ! is_user_logged_in() ) {
+					$this->signin( get_query_var( 'signup_id' ) );
+				} else {
+					$this->create_rolling_session( get_query_var( 'signup_id' ) );
+				}
 			} else {
 				$this->create_description_form( get_query_var( 'signup_id' ) );
 			}
@@ -81,8 +123,30 @@ class ShortCodes extends SignUpsBase {
 			$mail_group = get_query_var( 'mail_group' );
 			$this->unsubscribe_nag_mailer( $key, $badge, $mail_group );
 		} else {
-			$this->create_select_signup( $admin_view );
+			$this->create_select_signup();
 		}
+	}
+	
+	/**
+	 * Is the signup open to the residents of SCW.
+	 *
+	 * @param  mixed $signup_id The signup id.
+	 * @return void
+	 */
+	private function for_residents( $signup_id ) {
+		global $wpdb;
+		$signup = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$wpdb->prepare(
+				'SELECT signup_group
+				FROM %1s
+				WHERE signup_id = %s',
+				self::SIGNUPS_TABLE,
+				$signup_id
+			),
+			OBJECT
+		);
+
+		return 'residents' === $signup->signup_group;
 	}
 
 	/**
@@ -184,15 +248,12 @@ class ShortCodes extends SignUpsBase {
 	 *
 	 * @see ShortCodes::create_select_signup_form()
 	 *
-	 * @param boolean $admin_view Set to true when this  is displayed from the administrator view.
-	 *
 	 * @return void
 	 */
-	private function create_select_signup( $admin_view = false ) {
+	private function create_select_signup( ) {
 		global $wpdb;
-		$admin_view = current_user_can( 'administrator' );
 		$signups    = null;
-		if ( $admin_view ) {
+		if ( current_user_can( 'edit_plugins' ) ) {
 			$signups = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 				$wpdb->prepare(
 					'SELECT signup_id,
@@ -242,7 +303,7 @@ class ShortCodes extends SignUpsBase {
 	 * @param string $secret A members secret key used to identify the member.
 	 * @return void
 	 */
-	private function create_signup_form( $signup_id, $secret = null ) {
+	private function create_signup_form( $signup_id ) {
 		global $wpdb;
 		$signups = $wpdb->get_results(
 			$wpdb->prepare(
@@ -261,7 +322,7 @@ class ShortCodes extends SignUpsBase {
 		$signup_contact_name = $signups[0]->signup_default_contact_name;
 
 		if ( $rolling ) {
-			$this->create_rolling_session( $signup_id, $secret );
+			$this->create_rolling_session( $signup_id );
 		} else {
 			$bad_debt = $wpdb->get_results(
 				$wpdb->prepare(
@@ -311,8 +372,8 @@ class ShortCodes extends SignUpsBase {
 				}
 			}
 
-			$signup_cost             = $signups[0]->signup_cost;
-			$sessions                = $wpdb->get_results(
+			$signup_cost = $signups[0]->signup_cost;
+			$sessions    = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT session_id,
 					session_start_formatted,
@@ -395,7 +456,7 @@ class ShortCodes extends SignUpsBase {
 			$result = $wpdb->update( self::ATTENDEES_TABLE, $data, $where );
 
 			?>
-			<form method="POST">
+			<form class="signup_only_form" method="POST">
 				<div class="text-center">
 					<?php
 					if ( 1 === $result ) {
@@ -413,22 +474,32 @@ class ShortCodes extends SignUpsBase {
 							OBJECT
 						);
 
-						$body         = '<p>Your session has been changed.</p>';
-						$body        .= $this->get_session_email_body( $new_session_id );
-						$sgm          = new SendGridMail();
-						$email_status = $sgm->send_mail( $attendee->attendee_email, 'Your session change.', $body, true );
+						$body  = '<p>Your session has been changed.</p>';
+						$body .= $this->get_session_email_body( $new_session_id );
+						$sgm   = new SendGridMail();
+						$sgm->send_mail( $attendee->attendee_email, 'Your session change.', $body, true );
 					} else {
 						?>
 						<h1 class=" mt-3">Failed moving session, did you pick another session to move to?</h1>
 						<?php
 					}
 					?>
-					<button class="mt-3 mr-3 btn btn-primary signup-submit" type="submit" name="signup_id" 
-						value="<?php echo esc_html( $post['session_signup_id'] ); ?>" >Return to Class</button>
-					<button class="mt-3 ml-3 btn btn-primary signup-submit" type="submit" name="signup_id" 
-						value="-1" >Class List</button>
+					<div class="return-or-logout">
+						<div></div>
+						<div class="text-center">
+								<button class="btn btn-primary signup-submit" type="submit" name="continue_signup" value="<?php echo esc_html( $post['session_signup_id'] ); ?>" >View Signup</button>
+						</div>
+							<div></div>
+						<div class="text-center">
+							<button class="btn btn-primary" type="submit" name="all_done" value="-1" >I'm Done</button>
+						</div>
+						<div></div>
+					</div>
 				</div>
 				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+				<input type="hidden" id="token" name="token" value="" >
+				<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html( $this->getCaptchaKeys()->stripe_api_key ); ?>" >
+				<input type="hidden" id="clicked_item" name="" value="">
 			</form>
 			<?php
 		}
@@ -467,7 +538,8 @@ class ShortCodes extends SignUpsBase {
 			}
 		}
 
-		$insert_id = 0;
+		$insert_id            = 0;
+		$attendee_phone_email = null;
 		if ( isset( $post['new_member_rec_card'] ) ) {
 			$new_member                        = array();
 			$new_member['new_member_rec_card'] = $post['new_member_rec_card'];
@@ -488,10 +560,13 @@ class ShortCodes extends SignUpsBase {
 					$body .= "Key: $key, Value: $value\n";
 				}
 
-				$email_status = $sgm->send_mail( 'ecsproull765@gmail.com', 'Failed New Member', 'Data: ' . $body );
+				$sgm->send_mail( 'ecsproull765@gmail.com', 'Failed New Member', 'Data: ' . $body );
 			}
+		} else {
+			$attendee_phone_email = $this->get_member_data();
 		}
 
+		
 		$qty                                    = 1;
 		$now                                    = new DateTime( 'now', $this->date_time_zone );
 		$slot_parts                             = explode( ',', $post['time_slots'][0] );
@@ -501,8 +576,8 @@ class ShortCodes extends SignUpsBase {
 		$cost                                   = $slot_parts[4];
 		$new_attendee                           = array();
 		$new_attendee['attendee_session_id']    = $slot_parts[3];
-		$new_attendee['attendee_email']         = $post['email'];
-		$new_attendee['attendee_phone']         = $post['phone'];
+		$new_attendee['attendee_email']         = $attendee_phone_email ? $attendee_phone_email->member_email : $post['email'];
+		$new_attendee['attendee_phone']         = $attendee_phone_email ? $attendee_phone_email->member_phone : $post['phone'];
 		$new_attendee['attendee_balance_owed']  = $cost;
 		$new_attendee['attendee_lastname']      = $post['lastname'];
 		$new_attendee['attendee_firstname']     = $post['firstname'];
@@ -639,7 +714,7 @@ class ShortCodes extends SignUpsBase {
 						}
 					}
 
-					$payments->collect_money( $description, $post['session_price_id'], $new_attendee['attendee_badge'], $last_id, $cost, $qty );
+					$payments->collect_money( $description, $post['session_price_id'], $new_attendee['attendee_badge'], $last_id, $cost, $qty, $post['session_signup_id'] );
 				}
 				?>
 				<tr class="attendee-row">
@@ -679,7 +754,7 @@ class ShortCodes extends SignUpsBase {
 	 */
 	private function create_select_signup_form( $signups, $categories ) {
 		?>
-		<form method="GET">
+		<form class='select_signup_form' method="GET">
 			<div id="usercontent">
 				<div id="signup-select" class="signup-category-list selection-font mb-100px mr-auto ml-auto mt-5">
 					<?php
@@ -719,6 +794,9 @@ class ShortCodes extends SignUpsBase {
 					}
 					?>
 				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+				<input type="hidden" id="token" name="token" value="" >
+				<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html( $this->getCaptchaKeys()->stripe_api_key ); ?>" >
+				<input type="hidden" id="signup_id" name="signup_id" value="">
 			</div>
 		</form>
 		<?php
@@ -1119,16 +1197,15 @@ class ShortCodes extends SignUpsBase {
 	 * Creates the form for sending the an email.
 	 *
 	 * @param mixed   $post  Data from the calling form.
-	 * @param boolean $admin Set to true if this is called from the administrator side.
 	 * @return void
 	 */
-	private function create_email_form( $post, $admin = true ) {
+	private function create_email_form( $post ) {
 		$contact_email = $post['contact_email'];
 		$contact_name  = $post['contact_name'];
 		$class_email   = false;
-		if ( ! $admin ) {
-			$contact_email = $post['session_email'];
-			$contact_name  = $post['session_name'];
+		if ( ! current_user_can( 'edit_plugins' ) ) {
+			$contact_email = isset( $post['session_email'] ) ? $post['session_email'] : $post['contact_email'];
+			$contact_name  = isset( $post['session_name'] ) ? $post['session_name'] : $post['contact_name'];
 			$class_email   = true;
 		}
 		?>

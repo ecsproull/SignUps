@@ -24,7 +24,7 @@ class SignupSettings extends SignUpsBase {
 	 */
 	public function signup_settings_page() {
 		$post = wp_unslash( $_POST );
-		if ( isset( $_POST['mynonce'] ) && wp_verify_nonce( $post['mynonce'], 'signups' ) && current_user_can( 'administrator' ) ) {
+		if ( isset( $_POST['mynonce'] ) && wp_verify_nonce( $post['mynonce'], 'signups' ) && current_user_can( 'edit_plugins' ) ) {
 			unset( $post['mynonce'] );
 			unset( $post['_wp_http_referer'] );
 			if ( isset( $post['submit_class'] ) ) {
@@ -932,7 +932,7 @@ class SignupSettings extends SignUpsBase {
 					WHERE si_session_id = %d AND si_signup_id = %d',
 					self::SESSION_INSTRUCTORS_TABLE,
 					$post['session_id'],
-					$post['session_signup_id']
+					$post['signup_id']
 				),
 				OBJECT
 			);
@@ -985,7 +985,7 @@ class SignupSettings extends SignUpsBase {
 		}
 
 		$sessions = null;
-		if ( '' != $query ) {
+		if ( '' !== $query ) {
 			$sessions = $wpdb->get_results( $wpdb->prepare( '%1s', $query ), OBJECT );
 		}
 
@@ -1022,12 +1022,14 @@ class SignupSettings extends SignUpsBase {
 				}
 			}
 
+			$member_data = $this->get_member_data( $post['badge_number'] );
+
 			$new_attendee = array(
 				'attendee_session_id'   => (int) $session->session_id,
-				'attendee_email'        => $post['email'],
+				'attendee_email'        => $member_data->member_email,
 				'attendee_firstname'    => $post['firstname'],
 				'attendee_lastname'     => $post['lastname'],
-				'attendee_phone'        => $post['phone'],
+				'attendee_phone'        => $member_data->member_phone,
 				'attendee_badge'        => $post['badge_number'],
 				'attendee_balance_owed' => 0,
 				'attendee_item'         => $session->session_item,
@@ -1035,10 +1037,10 @@ class SignupSettings extends SignUpsBase {
 
 			$rows = $wpdb->insert( self::ATTENDEES_TABLE, $new_attendee );
 			if ( 1 === $rows && isset( $post['email_attendee'] ) ) {
-				$body         = '<p>An adminstrator added you to a class.</p>';
-				$body        .= $this->get_session_email_body( (int) $session->session_id );
-				$sgm          = new SendGridMail();
-				$email_status = $sgm->send_mail( $post['email'], 'Woodshop Class Change', $body, true );
+				$body  = '<p>An adminstrator added you to a class.</p>';
+				$body .= $this->get_session_email_body( (int) $session->session_id );
+				$sgm   = new SendGridMail();
+				$sgm->send_mail( $member_data->member_email, 'Woodshop Class Change', $body, true );
 			}
 		}
 
@@ -1069,25 +1071,27 @@ class SignupSettings extends SignUpsBase {
 		);
 
 		$orientation = 'residents' === $signups[0]->signup_group;
-		foreach ( $post['selectedAttendee'] as $attendee ) {
-			$attendee_id = explode( ',', $attendee )[0];
-			if ( $orientation ) {
-				$attendee = $wpdb->get_results(
-					$wpdb->prepare(
-						'SELECT attendee_badge
-						FROM %1s
-						WHERE attendee_id = %s',
-						self::ATTENDEES_TABLE,
-						$attendee_id
-					),
-					OBJECT
-				);
+		if ( isset( $post['selectedAttendee'] ) ) {
+			foreach ( $post['selectedAttendee'] as $attendee ) {
+				$attendee_id = explode( ',', $attendee )[0];
+				if ( $orientation ) {
+					$attendee = $wpdb->get_results(
+						$wpdb->prepare(
+							'SELECT attendee_badge
+							FROM %1s
+							WHERE attendee_id = %s',
+							self::ATTENDEES_TABLE,
+							$attendee_id
+						),
+						OBJECT
+					);
 
-				$where = array( 'new_member_id' => $attendee[0]->attendee_badge );
-				$wpdb->delete( self::NEW_MEMBER_TABLE, $where );
+					$where = array( 'new_member_id' => $attendee[0]->attendee_badge );
+					$wpdb->delete( self::NEW_MEMBER_TABLE, $where );
+				}
+
+				$wpdb->delete( self::ATTENDEES_TABLE, array( 'attendee_id' => $attendee_id ) );
 			}
-
-			$wpdb->delete( self::ATTENDEES_TABLE, array( 'attendee_id' => $attendee_id ) );
 		}
 
 		$repost = array(
@@ -1123,10 +1127,10 @@ class SignupSettings extends SignUpsBase {
 			OBJECT
 		);
 
-		$body         = '<p>Your session has been changed by an administrator.</p>';
-		$body        .= $this->get_session_email_body( $post['move_to'] );
-		$sgm          = new SendGridMail();
-		$email_status = $sgm->send_mail( $attendee->attendee_email, 'Your session change.', $body, true );
+		$body  = '<p>Your session has been changed by an administrator.</p>';
+		$body .= $this->get_session_email_body( $post['move_to'] );
+		$sgm   = new SendGridMail();
+		$sgm->send_mail( $attendee->attendee_email, 'Your session change.', $body, true );
 
 		$this->load_session_selection( $repost );
 	}
@@ -1196,7 +1200,7 @@ class SignupSettings extends SignUpsBase {
 		}
 
 		if ( $rolling ) {
-			$this->create_rolling_session( $signup_id, null, true );
+			$this->create_rolling_session( $signup_id, null );
 		} else {
 			$sessions = $wpdb->get_results(
 				$wpdb->prepare(
@@ -2205,11 +2209,11 @@ class SignupSettings extends SignUpsBase {
 			$signup_id = $wpdb->insert_id;
 
 			$instructor_data = array();
-			$instructor_data['instructors_badge']      = $post['signup_contact_badge'];
-			$instructor_data['instructors_name']       = $post['signup_contact_firstname'] . ' ' . $post['signup_contact_lastname'];
-			$instructor_data['instructors_phone']      = $post['signup_contact_phone'];
-			$instructor_data['instructors_email']      = $post['signup_contact_email'];
-			$instructor_data['instructors_class_id']   = $signup_id;
+			$instructor_data['instructors_badge']       = $post['signup_contact_badge'];
+			$instructor_data['instructors_name']        = $post['signup_contact_firstname'] . ' ' . $post['signup_contact_lastname'];
+			$instructor_data['instructors_phone']       = $post['signup_contact_phone'];
+			$instructor_data['instructors_email']       = $post['signup_contact_email'];
+			$instructor_data['instructors_class_id']    = $signup_id;
 			$instructor_data['instructors_class_title'] = $post['description_title'];
 			$wpdb->insert( self::INSTRUCTORS_TABLE, $instructor_data );
 

@@ -2,78 +2,6 @@ jQuery(document).ready(function($){
 	var scw_submitting = 0;
 
 	/**
-	 * When the "Lookup" button is clicked on a signup form in order to 
-	 * look up the member, this function retrieves the member's data from the server.
-	 * Duplicate code is in signups.js
-	 */
-	$("#get_member_button").click(function(){
-		var req = $.ajax({
-			url: wpApiSettings.root + "scwmembers/v1/members",
-			method: "GET",
-			beforeSend: function (xhr) {
-				xhr.setRequestHeader("X-WP-Nonce", wpApiSettings.nonce);
-			},
-			data:{
-				"badge" : $("#badge-input").val(),
-				"user-groups" : $("#user_groups").val()
-			}
-		}).done(function (response) {
-			if (response.length > 0) {
-				$(".member-first-name").each(function () { $(this).val(response[0].member_firstname); });
-				$(".member-last-name").each(function () { $(this).val(response[0].member_lastname); });
-				$(".member-email").each(function () { $(this).val(response[0].member_email); });
-				$(".member-phone").each(function () { $(this).val(response[0].member_phone);  });
-				$(".member-badge").each(function () { $(this).val(response[0].member_badge);  });
-				$("#user-secret").val(response[0].member_secret);
-				$("#selection-table").prop("hidden", false);
-				$("button[type='submit']").each(function() {
-					$(this).removeAttr("disabled");
-				});
-
-				if ($("#remember_me").is(":checked")){
-					Cookies.set("signups_scw_badge", response[0].member_badge);
-					SetServerCookie(response[0].member_badge);
-				} else {
-					SetServerCookie("");
-					Cookies.set("signups_scw_badge");
-				}
-
-				$(".rolling-remove-chk").prop("hidden", true);
-				$(".move").prop("hidden", true);
-				$(".paid").prop("hidden", false);
-				$(".paid." + response[0].member_badge).prop("hidden", true);
-				$(".move." + response[0].member_badge).prop("hidden", false);
-				
-				var daysToCancel = $("#template_days_to_cancel").val();
-				var removeChkClass = ".rolling-remove-chk." + response[0].member_badge;
-				var currentDate = new Date();
-				var newDate = new Date(currentDate);
-				newDate.setDate(currentDate.getDate() + Number(daysToCancel));
-				$(removeChkClass).each(function() {
-					var items = $(this).val().trim().split(",");
-					var slotDate = Date.parse(items[0].substr(0,10));
-					var cutoffDate = Date.parse(newDate.toDateString());
-					if (slotDate > cutoffDate) {
-						$(this).prop("hidden", false);
-					}
-				});
-
-				$("badgeclass").prop("hidden", false);
-			} else {
-				alert("Badge number not found or Permission for signup denied.")
-			}
-		}).error(function (response) {
-			if (response.status == 400) {
-				alert("Error: " + response.status + " Badge Number Not Found.");
-			} else if (response.status == 401) {
-				alert("Error: " + response.status + " Permission Denied.");
-			} else {
-				alert("Error: " + response.status + " Unknown Error.");
-			}
-		});
-	});
-
-	/**
 	 * In the private Reports page there is a button to email the class.
 	 * This handles that click and copies the class emails to the clipboard.
 	 */
@@ -87,13 +15,6 @@ jQuery(document).ready(function($){
 		alert ("Email addresses were copied to the clipboard.");
 	})
 
-	/**
-	 * If the badge input TextBox looses focus it attempts to look up what is
-	 * in the edit box. 
-	 */
-	$("#badge-input").on("blur", (e) => {
-		$("#get_member_button").trigger("click");
-	});
 
 	/**
 	 * Pressing the enter key in the badge input TextBox triggers the lookup action.
@@ -140,6 +61,32 @@ jQuery(document).ready(function($){
 		$(".signup_form").submit();
 	});
 
+	$(".select_signup_form").submit(function(e) {
+		e.preventDefault();
+		var form = this;
+		grecaptcha.execute($("#token_key").val(), {action: "homepage"}).then(function(token) {
+			$("#token").val(token);
+			let val = document.activeElement.getAttribute('value');
+			$("#signup_id").val(val);
+			form.submit();
+		});
+
+	});
+
+	$(".signup_only_form").submit(function(e) {
+		e.preventDefault();
+		var form = this;
+		grecaptcha.execute($("#token_key").val(), {action: "homepage"}).then(function(token) {
+			$("#token").val(token);
+			if (document.activeElement.getAttribute('name') == 'continue_signup' ||
+			    document.activeElement.getAttribute('name') == 'all_done' ) {
+				$("#clicked_item").attr("name", document.activeElement.getAttribute('name'));
+				$("#clicked_item").val(document.activeElement.getAttribute('value'));
+			}
+			form.submit();
+		});
+	});
+
 	/**
 	 * The submit button on signup forms (Class and Rolling) is handled here to  display
 	 * a confirmation popup before the actual submit is done. There are several special 
@@ -151,156 +98,123 @@ jQuery(document).ready(function($){
 		//debugger;
 		e.preventDefault();
 		var form = this;
-		if (document.activeElement.getAttribute('name') == 'login' ||
-	        document.activeElement.getAttribute('name') == 'badge_number') {
-			$("#email").append('<input type="hidden" name="login" value="1" />');
-			$("<input />").attr("type", "hidden")
-				.attr("name", "continue_signup")
-				.attr("value", $("#update-butt").val())
-				.appendTo(".signup_form");
-			form.submit();
-			return;
-		}
-
-		if (document.activeElement.getAttribute('name') == 'logout') {
-			$("#email").append('<input type="hidden" name="logout" value="1" />');
-			form.submit();
-			return;
-		}
-
-		if (document.activeElement.getAttribute('name') == 'email_admin') {
-			$("#email").append('<input type="hidden" name="email_admin" value="1" />');
-			form.submit();
-			return;
-		}
-		
-		if (document.activeElement.getAttribute('name') == 'email_session') {
-			$("#email").append('<input type="hidden" name="email_session" value="1" />');
-			form.submit();
-			return;
-		}
-
-		if (document.activeElement.getAttribute('name') == 'signup_home') {
-			$("#cancel").append('<input type="hidden" name="signup_home" value="1" />');
-			form.submit();
-			return;
-		}
-
-		if ($("#rolling-days-id").val()) {
-			form.submit();
-			return;
-		}
-
-		if ($('.remove-chk:checkbox:checked').length > 0 ) {
-			form.submit();
-			return;
-		}
-
-		if ($("#update-butt").attr("clicked")) {
-			$("#update-butt").removeAttr("clicked")
-			$("<input />").attr("type", "hidden")
-				.attr("name", "continue_signup")
-				.attr("value", $("#update-butt").val())
-				.appendTo(".signup_form");
-		    form.submit();
-			return;
-		}
-		
-		var selectedValues = $("input[name='time_slots[]']:checked:enabled").map(function() {
-			return this.value;
-		}).get();
-
-		var deletedValues = $("input[name='remove_slots[]']:checked:enabled").map(function() {
-			return this.value;
-		}).get();
-
-		if (selectedValues.length == 0 && deletedValues.length == 0 ) {
-			alert("Please select a session!");
-			return;
-		}
-		var selectedSessionsTable = "<table><tr class='text-center font-weight-bold'><td>Start</td><td>End</td><td>Item</td><td>Cost</td></tr>";
-		selectedValues.forEach((item) => {
-			var arr = item.split(",");
-			var inputName = "comment-" + arr[3];
-
-			if ($("input[name=" + inputName + "]").val()) {
-				selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>" + $("input[name=" + inputName + "]").val() + "</td></tr>";
-			} else {
-				if (arr[4] && arr[4] != "0") {
-					selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>Cost: $" + arr[4] + "</td></tr>";
-				} else {
-					selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>NA</td></tr>";
-				}
-			}
-
-		});
-
-		deletedValues.forEach((item) => {
-			var arr = item.split(",");
-				selectedSessionsTable += "<tr style='background-color:#FFCCCB;'><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>DELETE</td></tr>";
-		});
-		selectedSessionsTable += "</table>"
-
-		scw_submitting = 1;
-		$("<div style='padding: 10px; max-width: 800px; word-wrap: break-word;'>" + selectedSessionsTable + "</div>").dialog({
-			draggable: true,
-			modal: true,
-			resizable: false,
-			width: "auto",
-			title: "Confirm Times",
-			minHeight: 75,
-			buttons: {
-			  Submit: function () {
+		grecaptcha.execute($("#token_key").val(), {action: "homepage"}).then(function(token) {
+			$("#token").val(token);
+			if (document.activeElement.getAttribute('name') == 'login' ||
+				document.activeElement.getAttribute('name') == 'badge_number') {
+				$("#email").append('<input type="hidden" name="login" value="1" />');
+				$("<input />").attr("type", "hidden")
+					.attr("name", "continue_signup")
+					.attr("value", $("#update-butt").val())
+					.appendTo(".signup_form");
 				form.submit();
-				$(this).dialog("destroy");
-			  },
-			  Change: function () {
-				$(this).dialog("destroy");
-			  }
+				return;
 			}
-		  });
+
+			if (document.activeElement.getAttribute('name') == 'logout') {
+				$("#email").append('<input type="hidden" name="logout" value="1" />');
+				form.submit();
+				return;
+			}
+
+			if (document.activeElement.getAttribute('name') == 'email_admin') {
+				$("#email").append('<input type="hidden" name="email_admin" value="1" />');
+				form.submit();
+				return;
+			}
+			
+			if (document.activeElement.getAttribute('name') == 'email_session') {
+				$("#email").append('<input type="hidden" name="email_session" value="1" />');
+				form.submit();
+				return;
+			}
+
+			if (document.activeElement.getAttribute('name') == 'signup_home') {
+				$("#cancel").append('<input type="hidden" name="signup_home" value="1" />');
+				form.submit();
+				return;
+			}
+
+			if ($("#rolling-days-id").val()) {
+				form.submit();
+				return;
+			}
+
+			if ($('.remove-chk:checkbox:checked').length > 0 ) {
+				form.submit();
+				return;
+			}
+
+			if ($("#update-butt").attr("clicked")) {
+				$("#update-butt").removeAttr("clicked")
+				$("<input />").attr("type", "hidden")
+					.attr("name", "continue_signup")
+					.attr("value", $("#update-butt").val())
+					.appendTo(".signup_form");
+				form.submit();
+				return;
+			}
+			
+			var selectedValues = $("input[name='time_slots[]']:checked:enabled").map(function() {
+				return this.value;
+			}).get();
+
+			var deletedValues = $("input[name='remove_slots[]']:checked:enabled").map(function() {
+				return this.value;
+			}).get();
+
+			if (selectedValues.length == 0 && deletedValues.length == 0 ) {
+				alert("Please select a session!");
+				return;
+			}
+			var selectedSessionsTable = "<table><tr class='text-center font-weight-bold'><td>Start</td><td>End</td><td>Item</td><td>Cost</td></tr>";
+			selectedValues.forEach((item) => {
+				var arr = item.split(",");
+				var inputName = "comment-" + arr[3];
+
+				if ($("input[name=" + inputName + "]").val()) {
+					selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>" + $("input[name=" + inputName + "]").val() + "</td></tr>";
+				} else {
+					if (arr[4] && arr[4] != "0") {
+						selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>Cost: $" + arr[4] + "</td></tr>";
+					} else {
+						selectedSessionsTable += "<tr><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>NA</td></tr>";
+					}
+				}
+
+			});
+
+			deletedValues.forEach((item) => {
+				var arr = item.split(",");
+					selectedSessionsTable += "<tr style='background-color:#FFCCCB;'><td>" + arr[0] + "</td><td>" + arr[1] + "</td><td>" + arr[2] + "</td><td>DELETE</td></tr>";
+			});
+			selectedSessionsTable += "</table>"
+
+			scw_submitting = 1;
+			$("<div style='padding: 10px; max-width: 800px; word-wrap: break-word;'>" + selectedSessionsTable + "</div>").dialog({
+				draggable: true,
+				modal: true,
+				resizable: false,
+				width: "auto",
+				title: "Confirm Times",
+				minHeight: 75,
+				buttons: {
+				Submit: function () {
+					form.submit();
+					$(this).dialog("destroy");
+				},
+				Change: function () {
+					$(this).dialog("destroy");
+				}
+				}
+			});
+		});
 	});
 
 	/**
-	 * Stores a cookie with the users badge number.
-	 * This functionality is on both the admin and user side.
-	 * The also contacts the server to store that information there also.
-	 */
-	$("#remember_me").click(function() {
-		var badgeToSet = "";
-		if ($("#remember_me").is(":checked")){
-			if ($("#badge-input").val()) {
-				Cookies.set("signups_scw_badge", $("#badge-input").val());
-				badgeToSet = $("#badge-input").val();
-			}
-		} else {
-			Cookies.remove("signups_scw_badge");
-		}
-
-		SetServerCookie( badgeToSet );
-	})
-
-	/**
-	 * Helper function to set a cookie on the server.
-	 * @param {*} badgeToSet Badge to set.
-	 */
-	function SetServerCookie( badgeToSet ) {
-		$.ajax({
-			url: wpApiSettings.root + "scwmembers/v1/cookies",
-			method: "GET",
-			beforeSend: function (xhr) {
-				xhr.setRequestHeader("X-WP-Nonce", wpApiSettings.nonce);
-			},
-			data:{
-				"badge" : badgeToSet
-			}
-		});
-	}
-
-	/**
-	 * This was meant to enforce rules for signing for various machines.
+	 * This was meant to enforce rules for signing up for various machines.
 	 * The goal was to limit someone from hogging a machine by signing up
-	 * all of the slots in one day. That plan in currently on hold but the code
+	 * all of the slots in one day. That plan in is currently on hold but the code
 	 * remains done and test it we want to enable it again.
 	 */
 	$(".rolling-add-chk").click(function(x) {
@@ -367,6 +281,7 @@ jQuery(document).ready(function($){
 	$(".back-button").click(function() {
 		window.location.href = "https://" + location.hostname;
 	});
+
 
 	/**
 	 * Hides or shows the Submit buttons based on session selection.
@@ -553,7 +468,6 @@ jQuery(document).ready(function($){
 			}
 		}
 	};
-
 	var options = {
 		custom_style: custom_style,
 		show_labels: true,

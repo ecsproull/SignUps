@@ -194,54 +194,6 @@ jQuery( document ).ready( function($){
 	});
 
 	/**
-	 * When the "Lookup" button is clicked on a signup form in order to 
-	 * look up the member, this function retrieves the member's data from the server.
-	 * Duplicate code is in users-signups.js
-	 */
-	$("#get_member_button").click(function(){
-		var req = $.ajax({
-			url: wpApiSettings.root + 'scwmembers/v1/members',
-			method: 'GET',
-			beforeSend: function (xhr) {
-				xhr.setRequestHeader('X-WP-Nonce', wpApiSettings.nonce);
-			},
-			data:{
-				'badge' : $("#badge-input").val(),
-				'user-groups' : $("#user_groups").val()
-			}
-		}).done(function (response) {
-			if (response.length > 0) {
-				$('.member-first-name').each(function () { $(this).val(response[0].member_firstname); });
-				$('.member-last-name').each(function () { $(this).val(response[0].member_lastname); });
-				$('.member-email').each(function () { $(this).val(response[0].member_email); });
-				$('.member-phone').each(function () { $(this).val(response[0].member_phone);  });
-				$('.member-badge').each(function () { $(this).val(response[0].member_badge);  });
-				$('#user-secret').val(response[0].member_secret);
-				$("#selection-table").prop("hidden", false);
-				$('button[type="submit"]').each(function() {
-					$(this).removeAttr('disabled');
-				});
-
-				if ($("#remember_me").is(":checked")){
-					Cookies.set('signups_scw_badge', response[0].badge);
-				}
-				$('.rolling-remove-chk').prop("hidden", true);
-				$('badgeclass').prop("hidden", false);
-			} else {
-				alert('Badge number not found or Permission for signup denied.')
-			}
-		}).error(function (response) {
-			if (response.status == 400) {
-				alert('Error: ' + response.status + ' Badge Number Not Found.');
-			} else if (response.status == 401) {
-				alert('Error: ' + response.status + ' Permission Denied.');
-			} else {
-				alert('Error: ' + response.status + ' Unknown Error.');
-			}
-		});
-	});
-
-	/**
 	 * When an administrator wishes to search for a member, this function 
 	 * contacts the sever for a results set and then displays that set for
 	 * the administrator to choose from. 
@@ -279,9 +231,7 @@ jQuery( document ).ready( function($){
 					$(this).removeAttr('disabled');
 				});
 
-				if ($("#remember_me").is(":checked")){
-					Cookies.set('signups_scw_badge', response[0].badge);
-				}
+	
 				$('.rolling-remove-chk').prop("hidden", true);
 				$('badgeclass').prop("hidden", false);
 			} else if (response.length > 1) {
@@ -330,34 +280,6 @@ jQuery( document ).ready( function($){
 			}
 		});
 	});
-
-	/**
-	 * Stores a cookie with the users badge number.
-	 * This functionality is on both the admin and user side.
-	 * It also contacts the server to store that information there also.
-	 */
-	$("#remember_me").click(function() {
-		var badgeToSet = "";
-		if ($("#remember_me").is(":checked")){
-			if ($("#badge-input").val()) {
-				Cookies.set("signups_scw_badge", $("#badge-input").val());
-				badgeToSet = $("#badge-input").val();
-			}
-		} else {
-			Cookies.remove("signups_scw_badge");
-		}
-
-		$.ajax({
-			url: wpApiSettings.root + 'scwmembers/v1/cookies',
-			method: 'GET',
-			beforeSend: function (xhr) {
-				xhr.setRequestHeader('X-WP-Nonce', wpApiSettings.nonce);
-			},
-			data:{
-				"badge" : badgeToSet
-			}
-		});
-	})
 
 	/**
 	 * This captures the ENTER key within the badge input edit box

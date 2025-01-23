@@ -154,6 +154,12 @@ class SignUpsBase {
 	protected const NEW_MEMBER_TABLE = 'wp_scw_new_member';
 
 	/**
+	 * Recaptcha log.
+	 * Records badge, score, calling ip address, post data and time.
+	 */
+	protected const RECAPTCHA_LOG = 'wp_scw_recaptcha_log';
+
+	/**
 	 * Log table.
 	 * Although not heavily used, there are a set of logging functions
 	 * that write to this table. This is mostly used for debugging purposes.
@@ -319,7 +325,7 @@ class SignUpsBase {
 	 */
 	protected function get_signup_html( $signup_id ) {
 		global $wpdb;
-		$results = $wpdb->get_results(
+		$result = $wpdb->get_row(
 			$wpdb->prepare(
 				'SELECT *
 				FROM %1s
@@ -330,8 +336,8 @@ class SignUpsBase {
 			OBJECT
 		);
 
-		if ( $results ) {
-			return $results[0];
+		if ( $result ) {
+			return $result;
 		} else {
 			return null;
 		}
@@ -345,9 +351,9 @@ class SignUpsBase {
 	 * @param  mixed $signup_id The ID of the signup.
 	 * @return boolean True for rolling, else false.
 	 */
-	private function is_rolling_signup( $signup_id ) {
+	protected function is_rolling_signup( $signup_id ) {
 		global $wpdb;
-		$signup = $wpdb->get_results(
+		$signup = $wpdb->get_row(
 			$wpdb->prepare(
 				'SELECT *
 				FROM %1s
@@ -358,7 +364,7 @@ class SignUpsBase {
 			OBJECT
 		);
 
-		return $signup[0]->signup_rolling_template > '0';
+		return $signup->signup_rolling_template > '0';
 	}
 
 	/**
@@ -438,6 +444,8 @@ class SignUpsBase {
 				<div id="email" style="height:0px"></div>
 			</h3>
 		</div>
+		<input type="hidden" id="token" name="token">
+		<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html( $this->getCaptchaKeys()->stripe_api_key ); ?>" >
 		<?php
 	}
 
@@ -498,17 +506,12 @@ class SignUpsBase {
 	 *
 	 * @param string $user_group The required group for this signup. Normally "member".
 	 * @param string $signup_id The id for the signup.
-	 * @param string $secret Secret supplied by member to edit their signups.
 	 * @return boolean
 	 */
-	protected function create_user_table( $user_group, $signup_id, $secret = null ) {
+	protected function create_user_table( $user_group, $signup_id ) {
 		global $wpdb;
-		$return_val  = null;
-		$results     = array( 1 );
-		$remember_me = false;
-		$user_secret = null;
-
-		$rolling_signup = $this->is_rolling_signup( $signup_id );
+		$return_val = null;
+		$results    = array( 1 );
 
 		$signup = $wpdb->get_row(
 			$wpdb->prepare(
@@ -521,43 +524,33 @@ class SignUpsBase {
 			OBJECT
 		);
 
-		if ( $secret ) {
-			$attendees_rolling = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT *
-					FROM %1s
-					WHERE attendee_secret = %s',
-					self::ATTENDEES_ROLLING_TABLE,
-					$secret
-				),
-				OBJECT
-			);
-
-			if ( $attendees_rolling ) {
-				$badge   = $attendees_rolling[0]->attendee_badge;
-				$results = $wpdb->get_results(
-					$wpdb->prepare(
-						'SELECT *
-						FROM %1s
-						WHERE member_badge = %s',
-						self::MEMBERS_TABLE,
-						$badge
-					),
-					OBJECT
-				);
-
-				$user_secret = $results[0]->member_secret;
-				$return_val  = $badge;
+		if ( ! isset( $_COOKIE['signups_scw_badge'] ) && is_user_logged_in() && ! current_user_can( 'edit_plugins' ) ) {
+			$this->unset_user();
+			echo '<script>location.reload();</script>';
+		} elseif ( is_user_logged_in() ) {
+			$badge       = null;
+			if ( is_user_logged_in() ) {
+				if ( current_user_can( 'edit_plugins' ) ) {
+					$badge_meta = get_user_meta( is_user_logged_in(), 'nickname' );
+					if ( $badge_meta ) {
+						$badge = $this->get_badge_number( $badge_meta[0] );
+					}
+				} else {
+					$member = $wpdb->get_row(
+						$wpdb->prepare(
+							'SELECT *
+							FROM %1s
+							WHERE member_user_id = %s',
+							self::MEMBERS_TABLE,
+							get_current_user_id()
+						),
+						OBJECT
+					);
+					$badge = $member->member_badge;
+				}
 			}
-			?>
-			<?php
-		}
 
-		if ( ! $return_val && isset( $_COOKIE['signups_scw_badge'] ) && sanitize_key( $_COOKIE['signups_scw_badge'] ) !== 'undefined' ) {
-			$remember_me = true;
-			$cookie      = wp_unslash( $_COOKIE );
-			$badge       = sanitize_key( $_COOKIE['signups_scw_badge'] );
-			$results     = $wpdb->get_results(
+			$results = $wpdb->get_row(
 				$wpdb->prepare(
 					'SELECT *
 					FROM %1s
@@ -583,15 +576,20 @@ class SignUpsBase {
 			}
 
 			if ( $results && $permission ) {
-				$return_val = $results[0]->member_badge;
+				$return_val = $results->member_badge;
+				if ( ! current_user_can( 'edit_plugins' ) ) {
+					$this->set_user( $results->member_user_id, $results->member_badge );
+				}
 			} else {
 				$return_val = null;
 				$results    = array( 1 );
 			}
 
-			$user_secret = $results[0]->member_secret;
 		} else {
-			$remember_me = isset( $_COOKIE['signups_scw_badge'] ) && sanitize_key( $_COOKIE['signups_scw_badge'] ) !== 'undefined';
+			if ( is_user_logged_in() ) {
+				$this->unset_user();
+				echo '<script>location.reload();</script>';
+			}
 		}
 		?>
 
@@ -599,26 +597,27 @@ class SignUpsBase {
 			<tr>
 				<td class="text-right">Enter Badge#</td>
 				<td class="text-left"><input id="badge-input" class="member-badge" type="number" name="badge_number" 
-					value="<?php echo $return_val ? esc_html( $results[0]->member_badge ) : ''; ?>">
-				<button type="button" id="get_member_button" class="btn btn-primary rounded">Lookup</button></td>
+					value="<?php echo $return_val ? esc_html( $results->member_badge ) : ''; ?>">
+					<?php
+					if ( ! current_user_can( 'edit_plugins' ) ) {
+						?>
+						<button id="logout-button" class="btn btn-danger rounded"	type="button" name="logout-button"
+						<?php echo is_user_logged_in() ? '' : 'hidden'; ?> >Logout User</button>
+						<button type="button" id="get_member_button" class="btn btn-primary rounded"
+						<?php echo is_user_logged_in() ? 'hidden' : ''; ?> >Lookup</button></td>
+						<?php
+					} else {
+						?>
+						<button type="button" id="get_member_button" class="btn btn-primary rounded" >Lookup</button></td>
+						<?php
+					}
+					?>
 				<td></td>
 			</tr>
 			<tr>
-				<td class="text-right"><input id="first-name" class=" member-first-name" type="text" name="firstname" value=<?php echo $return_val ? esc_html( $results[0]->member_firstname ) : 'First'; ?> required readonly></td>
-				<td  class="text-left"><input id="last-name" class="member-last-name" type="text" name="lastname" value=<?php echo $return_val ? esc_html( $results[0]->member_lastname ) : 'Last'; ?> required readonly></td>
-				<td><button type="button" class="btn bth-md mr-auto ml-auto mt-2 bg-primary back-button" value="-1" name="signup_id" hidden>Cancel</button></td>
-			</tr>
-			<tr>
-				<td class="text-center" colspan="2">
-					<span class="mr-1">Remember Badge</span>
-					<input id="remember_me" class="position-relative remember-me-chk mr-1" 
-						type="checkbox" name="remember_me" value='' <?php echo $remember_me ? 'checked' : ''; ?>></td>
-				<td class="text-left"><input id="user-edit-id" class="user-edit-id" 
-					type="text" name="secret" value="<?php echo esc_html( $secret ); ?>" placeholder="Enter secret to edit"
-					<?php echo $rolling_signup ? 'hidden' : 'hidden'; ?>></td>
-				<td><button id="update-butt" type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary" 
-					value=<?php echo esc_html( $signup_id ); ?> name="continue_signup" disabled
-					<?php echo $rolling_signup ? 'hidden' : 'hidden'; ?> >Reload</button></td>
+				<td class="text-right"><input id="first-name" class=" member-first-name" type="text" name="firstname" value=<?php echo $return_val ? esc_html( $results->member_firstname ) : 'First'; ?> required readonly></td>
+				<td  class="text-left"><input id="last-name" class="member-last-name" type="text" name="lastname" value=<?php echo $return_val ? esc_html( $results->member_lastname ) : 'Last'; ?> required readonly></td>
+				<td></td>
 			</tr>
 			<tr>
 				<td colspan=3>
@@ -629,15 +628,8 @@ class SignUpsBase {
 					</h3>
 				</td>
 			</tr>
-			<tr hidden>
-				<td><input id="phone" class="member-phone" type="text" name="phone"
-					value=<?php echo $return_val ? esc_html( $results[0]->member_phone ) : '888-888-8888'; ?> placeholder="888-888-8888" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required readonly></td>
-				<td><input id="email" class="member-email" type="email" name="email"
-					value="<?php echo $return_val ? esc_html( $results[0]->member_email ) : ''; ?>" placeholder="foo@bar.com" required readonly></td>
-				<td></td>
-			</tr>
 			<?php
-			if ( $signup->signup_guests_allowed ) {
+			if ( $signup->signup_guests_allowed && is_user_logged_in() ) {
 				?>
 				<tr>
 					<td colspan=3><h1 style="color:red;">Will you bring a Guest
@@ -650,24 +642,54 @@ class SignUpsBase {
 		</table>
 		<div id="email"></div>
 		<input id="user_groups" type="hidden" name="user_groups" value="<?php echo esc_html( $user_group ); ?>">
-		<input id="user-secret" type="hidden" name="user_secret" value="<?php echo esc_html( $user_secret ); ?>">
-		<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+		<input type="hidden" id="token" name="token">
+		<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html( $this->getCaptchaKeys()->stripe_api_key ); ?>" >
 		<?php
 
 		return $return_val;
 	}
 
 	/**
+	 * Set the current user.
+	 *
+	 * @param  int $user_id The id of the user to set.
+	 * @return void
+	 */
+	protected function set_user( $user_id, $badge ) {
+		$user = wp_get_current_user();
+		if ( $user && (int) $user_id === $user->ID ) {
+			return;
+		}
+
+		clean_user_cache( $user_id );
+		wp_clear_auth_cookie();
+		wp_set_current_user( $user_id );
+		wp_set_auth_cookie( $user_id, true, false );
+
+		$user = get_user_by( 'id', $user_id );
+		update_user_caches( $user );
+	}
+
+	/**
+	 * Logs out the current users unless the user is an administator.
+	 *
+	 * @return void
+	 */
+	protected function unset_user() {
+		if ( ! current_user_can( 'edit_plugins' ) ) {
+			wp_logout();
+		}
+	}
+
+	/**
 	 * Creates a rolling signup based on a template
 	 *
 	 * @param  int    $rolling_signup_id The id for the signup.
-	 * @param  string $secret A secret key used to identify a user. Obsolete.
-	 * @param  bool   $admin Set to true if an admin is using this function.
 	 * @param  int    $rolling_days The number of rolling days to create.
 	 *
 	 * @return void
 	 */
-	protected function create_rolling_session( $rolling_signup_id, $secret, $admin = false, $rolling_days = null ) {
+	protected function create_rolling_session( $rolling_signup_id, $rolling_days = null ) {
 		global $wpdb;
 		$today = new DateTime( 'now', $this->date_time_zone );
 		$today->SetTime( 5, 0 );
@@ -776,8 +798,6 @@ class SignUpsBase {
 			$template[0],
 			$template_items,
 			$signups[0]->signup_group,
-			$admin,
-			$secret,
 			$description_html,
 			$template_items2,
 			$rolling_days
@@ -813,11 +833,10 @@ class SignUpsBase {
 	 * @return array
 	 */
 	private function is_attendee_free( $attendees, $start_date, $badge ) {
-		$slot_attendees = array();
 		foreach ( $attendees as $attendee ) {
 			if ( $attendee->attendee_start_time === $start_date->format( 'U' ) &&
 				$badge === $attendee->attendee_badge ) {
-				return true;
+				return false;
 			}
 		}
 
@@ -876,8 +895,6 @@ class SignUpsBase {
 	 * @param  object $template The template for the rolling class.
 	 * @param  array  $template_items Each one describe a signup for that day.
 	 * @param  string $user_group The group that is allowed to sign up.
-	 * @param  bool   $admin This being accessed by an administrator.
-	 * @param  string $secret Unique id for a member.
 	 * @param  string $description Description of the signup.
 	 * @param  mixed  $template_items2 The template items for template2. Used when a template is changed at a predetermined date.
 	 * @param  mixed  $rolling_days Overrides the standard number of rolling days.
@@ -890,8 +907,6 @@ class SignUpsBase {
 		$template,
 		$template_items,
 		$user_group,
-		$admin,
-		$secret,
 		$description,
 		$template_items2,
 		$rolling_days = null
@@ -913,10 +928,6 @@ class SignUpsBase {
 		}
 		$one_day_interval = new DateInterval( 'P1D' );
 		$time_exceptions  = $this->create_meeting_exceptions( $start_date, $end_date );
-
-		if ( ! $secret && get_query_var( 'secret' ) ) {
-			$secret = get_query_var( 'secret' );
-		}
 		?>
 		<div id="session_select" class="text-center mw-800px">
 			<h1 class="mb-2"><b><?php echo esc_html( $signup_name ); ?></b></h1>
@@ -925,16 +936,25 @@ class SignUpsBase {
 					<form class="signup_form" method="POST">
 						<?php
 						$user_badge = null;
-						wp_nonce_field( 'signups', 'mynonce' );
-						wp_nonce_field( 'signups_attendee', 'attendee_identifier' );
-						if ( ! $admin ) {
-							$user_badge = $this->create_user_table( $user_group, $signup_id, $secret );
+						if ( ! current_user_can( 'edit_plugins' ) ) {
+							$user_badge = $this->create_user_table( $user_group, $signup_id );
 							?>
 							<div class="text-left mb-2 html-font"><?php echo html_entity_decode( $description ); ?></div>
 							<?php
 						}
-						?>
 
+						if ( null === $user_badge && ! current_user_can( 'edit_plugins' ) ) {
+							?>
+							</form>
+							</div>
+							</div>
+							</div>
+							<?php
+							return;
+						}
+						wp_nonce_field( 'signups', 'mynonce' );
+						wp_nonce_field( 'signups_attendee', 'attendee_identifier' );
+						?>
 						<div class="rolling-days-select">
 							<label for="rolling-days-sel">Days</label>
 							<select id="rolling-days" name="rolling_days">
@@ -946,12 +966,11 @@ class SignUpsBase {
 						</div>
 
 						<table id="selection-table" class="table-bordered mr-auto ml-auto selection-font"
-							<?php echo null === $user_badge && ! $admin ? 'hidden' : ''; ?> >
+							<?php echo null === $user_badge && ! current_user_can( 'edit_plugins' ) ? 'hidden' : ''; ?> >
 							<?php
 							$current_day    = '2000-07-01';
 							$comment_index  = 0;
 							$comment_name   = 'comment-';
-							$comment_row_id = 'comment-row-';
 							while ( $start_date <= $end_date ) {
 								$datetime = new DateTime( '09/23/2024 12:00 AM' );
 								if ( $start_date > $datetime && '1' === $signup_id ) {
@@ -1045,7 +1064,7 @@ class SignUpsBase {
 														<?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?>
 														<input class="form-check-input ml-2 rolling-remove-chk mt-2 <?php echo esc_html( $attendee->attendee_badge ); ?>" 
 															type="checkbox" name="remove_slots[]" 
-															<?php echo $this->add_remove_chk( $start_date, $user_badge, $attendee, $secret, $template ) || $admin ? '' : 'hidden'; ?>
+															<?php echo $this->add_remove_chk( $start_date, $user_badge, $attendee, $template ) || current_user_can( 'edit_plugins' ) ? '' : 'hidden'; ?>
 															value="<?php echo esc_html(
 																$start_date->format( self::DATETIME_FORMAT ) . ',' .
 																$temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $item->template_item_title . ',' .
@@ -1086,7 +1105,7 @@ class SignUpsBase {
 															<?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?>
 															<input class="form-check-input ml-2 rolling-remove-chk mt-2 <?php echo esc_html( $attendee->attendee_badge ); ?>" 
 																type="checkbox" name="remove_slots[]" 
-																<?php echo $this->add_remove_chk( $start_date, $user_badge, $attendee, $secret, $template ) || $admin ? '' : 'hidden'; ?>
+																<?php echo $this->add_remove_chk( $start_date, $user_badge, $attendee, $template ) || current_user_can( 'edit_plugins' ) ? '' : 'hidden'; ?>
 																value="<?php echo esc_html(
 																	$start_date->format( self::DATETIME_FORMAT ) . ',' .
 																	$temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $item->template_item_title . ',' .
@@ -1171,7 +1190,7 @@ class SignUpsBase {
 							<input id="template_days_to_cancel" type="hidden" name="template_days_to_cancel" 
 								value="<?php echo esc_html( $template->template_days_to_cancel ); ?>">
 							<?php
-							if ( $admin ) {
+							if ( current_user_can( 'edit_plugins' ) ) {
 								?>
 								<input type="hidden" name="is_admin" value="true">
 								<?php
@@ -1204,11 +1223,10 @@ class SignUpsBase {
 	 * @param  mixed $start_date The date of the signup.
 	 * @param  mixed $user_badge The users badge.
 	 * @param  mixed $attendee Current attendee for the slot.
-	 * @param  mixed $secret Current users secret to be able to unsubscribe.
 	 * @param  mixed $template The template for the signup.
 	 * @return boolean True if it is ok to cancel the session, false if not.
 	 */
-	private function add_remove_chk( $start_date, $user_badge, $attendee, $secret, $template ) {
+	private function add_remove_chk( $start_date, $user_badge, $attendee, $template ) {
 		$sd  = clone $start_date;
 		$now = date_create( 'now' );
 		date_sub( $sd, date_interval_create_from_date_string( $template->template_days_to_cancel . 'days' ) );
@@ -1227,9 +1245,10 @@ class SignUpsBase {
 	 */
 	protected function add_attendee_rolling( $post ) {
 		global $wpdb;
-		$send_mail = false;
-		$body      = '<h2>' . $post['signup_name'] . '</h2><br>';
-		$body     .= '<b><pre>      Date           Time           Name             Item         Status</pre></b>';
+		$send_mail   = false;
+		$member_data = $this->get_member_data();
+		$body        = '<h2>' . $post['signup_name'] . '</h2><br>';
+		$body       .= '<b><pre>      Date           Time           Name             Item         Status</pre></b>';
 		?>
 		<table class="mb-100px mr-auto ml-auto">
 			<tr class="attendee-row">
@@ -1241,19 +1260,19 @@ class SignUpsBase {
 			</tr>
 		<?php
 
-		if ( ! isset( $post['is_admin'] ) ) {
+		if ( ! current_user_can( 'edit_plugins' ) ) {
 			$member = $wpdb->get_row(
 				$wpdb->prepare(
 					'SELECT *
 					FROM %1s
-					WHERE member_email = %s',
+					WHERE member_badge = %s',
 					self::MEMBERS_TABLE,
-					$post['email']
+					$post['badge_number']
 				),
 				OBJECT
 			);
 
-			$hacker = false;
+			$hacker_message = null;
 			if ( $member ) {
 				if ( isset( $post['remove_slots'] ) ) {
 					foreach ( $post['remove_slots'] as $slot ) {
@@ -1270,17 +1289,17 @@ class SignUpsBase {
 							OBJECT
 						);
 
-						if ( $attendee_row->attendee_email != $post['email'] ) {
-							$hacker = true;
+						if ( $attendee_row->attendee_email !== $member_data->member_email ) {
+							$hacker_message = "Emails don't match";
 						}
 					}
 				}
 			} else {
-				$hacker = true;
+				$hacker_message = 'Member not found';
 			}
 
-			if ( $hacker ) {
-				$this->send_alert_email( $post, 'Attn HACKER: Woodshop Signup delete' );
+			if ( $hacker_message ) {
+				$this->send_alert_email( $post, 'Attn HACKER: ' . $hacker_message );
 				?>
 				<h2>Your request could not be completed due to security issues. Please contact the system admin if you feel this should work.</h>
 				<?php
@@ -1307,11 +1326,11 @@ class SignUpsBase {
 				<tr class="attendee-row" style="background-color:#FFCCCB;">
 					<td><?php echo esc_html( $slot_start->format( self::DATE_FORMAT ) ); ?></td>
 					<td><?php echo esc_html( $slot_start->format( self::TIME_FORMAT ) . ' - ' . $slot_end->format( self::TIME_FORMAT ) ); ?></td>
-					<td><?php echo esc_html( $post['firstname'] . ' ' . $post['lastname'] ); ?></td>
+					<td><?php echo esc_html( $member_data->member_firstname . ' ' . $member_data->member_lastname ); ?></td>
 					<td><?php echo esc_html( $slot_parts[2] ); ?></td>
 					<?php
 					$body     .= '<pre>' . $slot_start->format( self::DATE_FORMAT ) . ' ' . $slot_start->format( self::TIME_FORMAT ) . ' - ' . $slot_end->format( self::TIME_FORMAT );
-					$body     .= '  ' . $post['firstname'] . ' ' . $post['lastname'] . '    ' . $slot_parts[2];
+					$body     .= '  ' . $member_data->member_firstname . ' ' . $member_data->member_lastname . '    ' . $slot_parts[2];
 					$send_mail = true;
 					if ( ! $delete_return_value ) {
 						?>
@@ -1330,7 +1349,7 @@ class SignUpsBase {
 			}
 		}
 
-		if ( isset( $post['is_admin'] ) ) {
+		if ( current_user_can( 'edit_plugins' ) ) {
 			?>
 			</table>
 			<?php
@@ -1338,7 +1357,7 @@ class SignUpsBase {
 			$sgm          = new SendGridMail();
 			$ip_address   = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : 'No Ip Address';
 			$url          = get_site_url();
-			$link         = "<a href='$url/signups/?signup_id=" . $post['add_attendee_session'] . '&secret=' . $post['user_secret'] . "'>Edit Signup</a>";
+			$link         = "<a href='$url/signups/?signup_id=" . $post['add_attendee_session'] . "'>Edit Signup</a>";
 			$body        .= '<br><br> IP Address: ' . $ip_address . '<br>' . $link . '<br>' . esc_html( $current_user->user_login ) . '<br>' . esc_html( $current_user->user_email ) . '<br>';
 			$sgm->send_mail( 'ecsproull765@gmail.com', 'ADMIN Woodshop Signup', $body );
 			return;
@@ -1372,16 +1391,15 @@ class SignUpsBase {
 
 		$new_attendee                       = array();
 		$new_attendee['attendee_signup_id'] = $post['add_attendee_session'];
-		$new_attendee['attendee_email']     = $post['email'];
-		$new_attendee['attendee_phone']     = $post['phone'];
+		$new_attendee['attendee_email']     = $member_data->member_email;
+		$new_attendee['attendee_phone']     = $member_data->member_phone;
 		$new_attendee['attendee_lastname']  = $post['lastname'];
 		$new_attendee['attendee_firstname'] = $post['firstname'];
 		$new_attendee['attendee_badge']     = $post['badge_number'];
-		$new_attendee['attendee_secret']    = $post['user_secret'];
 		$insert_return_value                = false;
 		?>
 		<div class="container">
-			<form method="POST">
+			<form class="signup_only_form" method="POST">
 				<?php
 				if ( isset( $post['time_slots'] ) ) {
 					foreach ( $post['time_slots'] as $slot ) {
@@ -1405,12 +1423,8 @@ class SignUpsBase {
 							)
 						);
 
-						$insert_id = -1;
 						if ( count( $dup_rows ) < $slot_count ) {
 							$insert_return_value = $wpdb->insert( self::ATTENDEES_ROLLING_TABLE, $new_attendee );
-							if ( $insert_return_value ) {
-								$insert_id = $wpdb->insert_id;
-							}
 						} else {
 							?>
 							<h2 class="text-danger">Timeslot is already taken, refresh page and reselect another time.</h2>
@@ -1448,22 +1462,24 @@ class SignUpsBase {
 				<tr class="attendee-row">
 					<td></td>
 					<td class="text-center">
-						<button class="btn btn-primary signup-submit" type="submit" name="signup_id" value="<?php echo esc_html( $post['add_attendee_session'] ); ?>" >Return</button>
+						<button class="btn btn-primary signup-submit" type="submit" name="continue_signup" value="<?php echo esc_html( $post['add_attendee_session'] ); ?>" >View Signup</button>
 					</td>
 					<td></td>
-					<td class="text-center"><button class="btn btn-primary back-button" type="button" name="signup_id" value="-1" >Cancel</button></td>
+					<td class="text-center"><button class="btn btn-primary" type="submit" name="all_done" value="-1" >I'm Done</button></td>
 					<td></td>
 				</tr>
 				</table>
 				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+				<input type="hidden" id="token" name="token" value="">
+				<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html( $this->getCaptchaKeys()->stripe_api_key ); ?>" >
+				<input type="hidden" id="clicked_item" name="" value="">
 			</form>
 			<h2>Signup complete</h2>
 			<br>
 			<div class="fs-3 text-dark">
-				<a href="<?php echo esc_html( get_site_url() ); ?>/signups/?signup_id=<?php echo esc_html( $post['add_attendee_session'] ); ?>&secret=<?php echo esc_html( $post['user_secret'] ); ?>" >Change Signup</a><br>
+				<a href="<?php echo esc_html( get_site_url() ); ?>/signups/?signup_id=<?php echo esc_html( $post['add_attendee_session'] ); ?>" >Change Signup</a><br>
 				<br>
-				<!--<p>Your key to edit this signup is: &emsp; &emsp; <?php echo esc_html( $post['user_secret'] ); ?> </p> -->
-				<p>ALSO: An email has been sent to <b><i><?php echo esc_html( $post['email'] ); ?></i></b> with a link to edit this signup.<p>
+				<p>ALSO: An email has been sent to <b><i><?php echo esc_html( $member_data->member_email ); ?></i></b> with a link to edit this signup.<p>
 			</div>
 			
 		</div>
@@ -1471,9 +1487,9 @@ class SignUpsBase {
 		if ( $send_mail ) {
 			$sgm   = new SendGridMail();
 			$url   = get_site_url();
-			$link  = "<a href='$url/signups/?signup_id=" . $post['add_attendee_session'] . '&secret=' . $post['user_secret'] . "'>Edit Signup</a>";
+			$link  = "<a href='$url/signups/?signup_id=" . $post['add_attendee_session'] . "'>Edit Signup</a>";
 			$body .= '<br><br>' . $link . '<br>';
-			$sgm->send_mail( $post['email'], 'Woodshop Signup', $body );
+			$sgm->send_mail( $member_data->member_email, 'Woodshop Signup', $body );
 		}
 
 		clean_post_cache( $post );
@@ -1955,5 +1971,194 @@ class SignUpsBase {
 		$body .= '<p>For technical questions about the signup website: <a href=\"mailto:ecsproull765@gmail.com\">Ed Sproull</a></p>';
 
 		return $body;
+	}
+	
+	/**
+	 * Get the reCAPATCHA keys from the database.
+	 *
+	 * @return void
+	 */
+	protected function getCaptchaKeys() {
+		global $wpdb;
+		$capatcha_keys = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE stripe_endpoint_secret = %s',
+				self::STRIPE_TABLE,
+				'capatcha'
+			),
+			OBJECT
+		);
+
+		return $capatcha_keys;
+	}
+	
+	/**
+	 * Verify the reCAPATCHA token passed from the user. Also logs 
+	 * the result into the datbase.
+	 *
+	 * @param  mixed $token
+	 * @param  mixed $post
+	 * @param  mixed $badge
+	 * @return void
+	 */
+	protected function verifyReCap( $token, $post, $badge ) {
+		global $wpdb;
+		$url  = 'https://www.google.com/recaptcha/api/siteverify';
+		$data = array(
+			'secret'   => $this->getCaptchaKeys()->stripe_api_secret,
+			'response' => $token,
+			'remoteip' => $_SERVER['REMOTE_ADDR'],
+		);
+		
+		$options = array(
+			'http' => array(
+				'header'  => 'Content-type: application/x-www-form-urlencoded\r\n',
+				'method'  => 'POST',
+				'content' => http_build_query( $data ),
+			),
+		);
+
+		$return_value = false;
+		$context      = stream_context_create( $options );
+		$response     = file_get_contents( $url, false, $context );
+		$res          = json_decode( $response, true );
+		if ( true === $res['success'] && $res['score'] >= 0.5 ) {
+			$return_value = true;
+		} else {
+			$this->send_alert_email( $post, "reCAPACHA Failed, Score: " . isset( $res['score'] ) ? $res['score'] : wp_json_encode( $res ) );
+			if ( true === $res['success'] && $res['score'] >= 0.3 ) {
+				$return_value = true;
+			}
+		}
+
+		if ( isset( $post['token'] ) ) {
+			$post['token'] = 'removed';
+		}
+		$date = new DateTimeImmutable( 'now', new DateTimeZone( 'America/Phoenix' ) );
+		$data = array(
+			'captcha_badge'      => $badge,
+			'captcha_score'      => isset( $res['score'] ) ? $res['score'] : wp_json_encode( $res ),
+			'captcha_post'       => wp_json_encode( $post ),
+			'captcha_ip_address' => $_SERVER['REMOTE_ADDR'],
+			'captcha_time'       => $date->format( self::DATETIME_FORMAT ),
+		);
+
+		$wpdb->insert( self::RECAPTCHA_LOG, $data );
+		return $return_value;
+	}
+
+	/**
+	 * Accumulate the data needed for the signin form.
+	 *
+	 * @param  mixed $signup_id The id of the signup.
+	 * @return void
+	 */
+	protected function signin( $signup_id ) {
+		global $wpdb;
+		$signup = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT signup_id,
+					signup_name,
+					signup_group
+				FROM %1s
+				WHERE signup_id = %s',
+				self::SIGNUPS_TABLE,
+				$signup_id
+			),
+			OBJECT
+		);
+
+		$this->create_signin_form( $signup->signup_name, $signup_id, $signup->signup_group );
+	}
+	
+	/**
+	 * Creates the sign in form.
+	 *
+	 * @return void
+	 */
+	protected function create_signin_form(
+		$signup_name,
+		$signup_id,
+		$user_group
+	) {
+		?>
+		<div id="session_select" class="text-center mw-800px">
+			<h1 class="mb-2"><b><?php echo esc_html( $signup_name ); ?></b></h1>
+			<div>
+				<div>
+					<form class="signup_only_form" method="POST">
+						<?php
+						$this->create_user_table( $user_group, $signup_id, null );
+						if ( $this->is_rolling_signup( $signup_id ) ) {
+						?>
+						<button id="continue-to-signup" class="btn btn-success rounded ml-auto mr-auto" type="submit" name="continue_signup" value="<?php echo esc_html( $signup_id ); ?>" hidden>Continue To Signup</button>
+						<?php
+						} else {
+							?>
+							<button id="continue-to-signup" class="btn btn-success rounded ml-auto mr-auto" type="submit" name="continue_signup" value="<?php echo esc_html( $signup_id ); ?>" hidden>Continue To Signup</button>
+							<?php
+						}
+						wp_nonce_field( 'signups', 'mynonce' );
+						?>
+						<input type="hidden" id="clicked_item" name="" value="">
+					</form>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Retrieves basic data for a member.
+	 *
+	 * @param  mixed $badge Badge number for the member.
+	 * @return void
+	 */
+	protected function get_member_data( $badge = null ) {
+		global $wpdb;
+		if ( ! $badge ) {
+			$badge_meta = get_user_meta( get_current_user_id(), 'nickname' );
+			$badge      = $this->get_badge_number( $badge_meta[0] );
+		}
+
+		$member = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT member_phone, member_email, member_firstname, member_lastname
+				FROM %1s
+				WHERE member_badge = %s',
+				self::MEMBERS_TABLE,
+				$badge
+			),
+			OBJECT
+		);
+
+		return $member;
+	}
+
+	/**
+	 * Gets the badge number for an administrator.
+	 *
+	 * @param  mixed $nickname The administrator's user name.
+	 * @return void
+	 */
+	private function get_badge_number( $nickname ) {
+		$badge = $nickname;
+		switch ( $nickname ) {
+			case 'ecsproull':
+				$badge = '4038';
+				break;
+			case 'Jcasey':
+				$badge = '4431';
+				break;
+			case 'dcoulthart':
+				$badge = '4286';
+				break;
+			default:
+				break;
+		}
+
+		return $badge;
 	}
 }

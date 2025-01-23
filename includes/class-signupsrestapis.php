@@ -290,7 +290,7 @@ class SignUpsRestApis extends SignUpsBase {
 	public function search_members( $request ) {
 		global $wpdb;
 		$key      = '9523a157-8ee7-5401-9f91-abccea39fe2f';
-		if ( $request['key'] !== $key || ! current_user_can( 'administrator' ) ) {
+		if ( $request['key'] !== $key || ! current_user_can( 'edit_plugins' ) ) {
 			return new WP_REST_Response( 'Unauthorized.', 401 );
 		}
 
@@ -649,7 +649,7 @@ class SignUpsRestApis extends SignUpsBase {
 
 				if ( $member ) {
 					if ( ! $member->member_user_id ) {
-						$user_id = wp_create_user( $member->member_badge, $member->member_secret, $member->member_email );
+						$user_id = wp_create_user( $member->member_badge, $member->member_secret );
 						$data['member_user_id'] = $user_id;
 					}
 					$where = array( 'member_badge' => $member->member_badge );
@@ -807,7 +807,8 @@ class SignUpsRestApis extends SignUpsBase {
 	 */
 	public function get_member( $request ) {
 		$nonce    = $request->get_header( 'X-WP-Nonce' );
-		$verified = wp_verify_nonce( $nonce, 'wp_rest' );
+		$verified = wp_verify_nonce( $nonce, 'wp_rest' ) &&
+			( current_user_can( 'edit_plugins' ) || $this->verifyReCap( $request['token'], wp_json_encode( $request->get_query_params() ), $request['badge'] ) );
 		$pattern  = '/^[0-9]{4}$/ms';
 		if ( $verified && preg_match( $pattern, $request['badge'] ) ) {
 			try {
@@ -822,7 +823,14 @@ class SignUpsRestApis extends SignUpsBase {
 					OBJECT
 				);
 
-				if ( $results ) {
+				if ( $results ) {					
+					if ( ! current_user_can( 'edit_plugins' ) ) {
+						$this->set_user( $results[0]->member_user_id, $results[0]->member_badge );
+						$results[1] = 1;
+					} else {
+						$results[1] = 0;
+					}
+					
 					if ( $request['user-groups'] ) {
 						$permission = $wpdb->get_results(
 							$wpdb->prepare(
@@ -846,9 +854,6 @@ class SignUpsRestApis extends SignUpsBase {
 				} else {
 					return new WP_REST_Response( array( 'message' => 'Badge not found.' ), 400 );
 				}
-
-				return $results;
-
 			} catch ( Exception $e ) {
 				return $e->getMessage();
 			}
