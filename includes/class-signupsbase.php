@@ -2024,6 +2024,15 @@ class SignUpsBase {
 		$context      = stream_context_create( $options );
 		$response     = file_get_contents( $url, false, $context );
 		$res          = json_decode( $response, true );
+		
+		if ( isset( $post['token'] ) ) {
+			$post['token'] = 'removed';
+		}
+
+		if ( isset( $post['token_key'] ) ) {
+			$post['token_key'] = 'removed';
+		}
+
 		if ( true === $res['success'] && $res['score'] >= 0.5 ) {
 			$return_value = true;
 		} else {
@@ -2033,9 +2042,6 @@ class SignUpsBase {
 			}
 		}
 
-		if ( isset( $post['token'] ) ) {
-			$post['token'] = 'removed';
-		}
 		$date = new DateTimeImmutable( 'now', new DateTimeZone( 'America/Phoenix' ) );
 		$data = array(
 			'captcha_badge'      => $badge,

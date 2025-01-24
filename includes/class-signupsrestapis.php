@@ -808,7 +808,7 @@ class SignUpsRestApis extends SignUpsBase {
 	public function get_member( $request ) {
 		$nonce    = $request->get_header( 'X-WP-Nonce' );
 		$verified = wp_verify_nonce( $nonce, 'wp_rest' ) &&
-			( current_user_can( 'edit_plugins' ) || $this->verifyReCap( $request['token'], wp_json_encode( $request->get_query_params() ), $request['badge'] ) );
+			( current_user_can( 'edit_plugins' ) || $this->verifyReCap( $request['token'], $request->get_query_params(), $request['badge'] ) );
 		$pattern  = '/^[0-9]{4}$/ms';
 		if ( $verified && preg_match( $pattern, $request['badge'] ) ) {
 			try {
