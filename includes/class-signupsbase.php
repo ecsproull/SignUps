@@ -1320,6 +1320,14 @@ class SignUpsBase {
 				$delete_return_value = $wpdb->delete( self::ATTENDEES_ROLLING_TABLE, $where );
 
 				if ( $delete_return_value ) {
+					if ( isset( $post['token'] ) ) {
+						$post['token'] = 'removed';
+					}
+
+					if ( isset( $post['token_key'] ) ) {
+						$post['token_key'] = 'removed';
+					}
+
 					$this->send_alert_email( $post, 'Attn Ed: Woodshop Signup delete' );
 				}
 				?>
@@ -2038,7 +2046,7 @@ class SignUpsBase {
 		} else {
 			$this->send_alert_email( $post, "reCAPACHA Failed, Score: " . isset( $res['score'] ) ? $res['score'] : wp_json_encode( $res ) );
 			if ( true === $res['success'] && $res['score'] >= 0.3 ) {
-				$return_value = true;
+				//$return_value = true;
 			}
 		}
 
