@@ -2001,7 +2001,7 @@ class SignUpsBase {
 
 		return $capatcha_keys;
 	}
-	
+
 	/**
 	 * Verify the reCAPATCHA token passed from the user. Also logs 
 	 * the result into the datbase.

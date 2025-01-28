@@ -78,10 +78,12 @@ class ShortCodes extends SignUpsBase {
 				$payments = new StripePayments();
 				$payments->payment_canceled( $post );
 			} elseif ( isset( $post['signup_id'] ) ) {
-				if ( '-1' === $post['signup_id'] || 
+				if ( '-1' === $post['signup_id'] ||
+				    '' === $post['signup_id'] ||
 					! $this->verifyReCap( $post['token'],
-					$post,
-					is_user_logged_in() ? get_user_meta( get_current_user_id(), 'nickname' )[0] : '0000' )
+						$post,
+						is_user_logged_in() ? get_user_meta( get_current_user_id(), 'nickname' )[0] : '0000'
+					)
 				) {
 					$this->create_select_signup();
 				} else {
