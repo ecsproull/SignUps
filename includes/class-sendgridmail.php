@@ -67,8 +67,8 @@ class SendGridMail extends SignUpsBase {
 		try {
 			$ret        = $sendgrid->send( $email );
 			$ret_string = $ret ? 'Sent' : 'Failed';
-			$this->write_log( __FUNCTION__, basename( __FILE__ ), $ret_string . ' TO: ' . $email_address . ' Subject: ' . $subject . ' Msg: ' . $message );
-			return  $ret;
+			//$this->write_log( __FUNCTION__, basename( __FILE__ ), $ret_string . ' TO: ' . $email_address . ' Subject: ' . $subject . ' Msg: ' . $message );
+			return $ret;
 		} catch ( Exception $e ) {
 			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Caught exception: ' . esc_html( $e->getMessage() ) . ' TO: ' . $email_address . ' Subject: ' . $subject . ' Msg: ' . $message );
 				return false;

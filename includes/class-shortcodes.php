@@ -394,6 +394,7 @@ class ShortCodes extends SignUpsBase {
 				OBJECT
 			);
 
+			$attendee_guests_count = $signups[0]->signup_guests_allowed ? array() : null;
 			foreach ( $sessions as $session ) {
 				$attendees[ $session->session_id ] = $wpdb->get_results(
 					$wpdb->prepare(
@@ -406,6 +407,22 @@ class ShortCodes extends SignUpsBase {
 					),
 					OBJECT
 				);
+
+				if ( $signups[0]->signup_guests_allowed ) {
+					$attendee_guests = $wpdb->get_results(
+						$wpdb->prepare(
+							'SELECT *
+							FROM %1s
+							WHERE attendee_session_id = %s && attendee_plus_guest = 1
+							AND attendee_email != ""',
+							self::ATTENDEES_TABLE,
+							$session->session_id
+						),
+						OBJECT
+					);
+
+					$attendee_guests_count[ $session->session_id ] = count( $attendee_guests );
+				}
 			}
 
 			$this->create_session_select_form(
@@ -416,7 +433,8 @@ class ShortCodes extends SignUpsBase {
 				$signup_id,
 				$signups[0]->signup_group,
 				$signup_email,
-				$signup_contact_name
+				$signup_contact_name,
+				$attendee_guests_count
 			);
 		}
 	}
@@ -536,6 +554,7 @@ class ShortCodes extends SignUpsBase {
 				?>
 				<h2>Member removed</h2>
 				<?php
+				$this->create_done_or_logout( $post['session_signup_id'] );
 				return;
 			}
 		}
@@ -743,6 +762,7 @@ class ShortCodes extends SignUpsBase {
 			</table>
 		</form>
 		<?php
+		$this->create_done_or_logout( $post['session_signup_id'] );
 	}
 
 	/**
@@ -831,7 +851,8 @@ class ShortCodes extends SignUpsBase {
 		$signup_id,
 		$user_group,
 		$signup_email,
-		$signup_contact_name
+		$signup_contact_name,
+		$guests_coming
 	) {
 		?>
 			<div id="session_select" class="text-center mw-800px">
@@ -912,7 +933,17 @@ class ShortCodes extends SignUpsBase {
 								?>
 								<tr class="attendee-row bg-lg">
 									<td></td>
-									<td><b><?php echo esc_html( $available_slots . ' slots open - ' . count( $attendees[ $session->session_id ] ) . ' filled' ); ?></b></td>
+									<?php
+									if ( $guests_coming ) {
+										?>
+										<td><b><?php echo esc_html( $available_slots . ' slots open - ' . count( $attendees[ $session->session_id ] ) . ' filled, plus ' . $guests_coming[ $session->session_id ] . ' guests'  ); ?></b></td>
+										<?php
+									} else {
+										?>
+										<td><b><?php echo esc_html( $available_slots . ' slots open - ' . count( $attendees[ $session->session_id ] ) . ' filled' ); ?></b></td>
+										<?php
+									}
+									?>
 									<td></td>
 								</tr>
 								<?php
@@ -927,8 +958,8 @@ class ShortCodes extends SignUpsBase {
 											<?php
 											if ( '0' === $attendee->attendee_balance_owed ) {
 												$can_move = $attendee->attendee_badge === $user_badge;
-												$paid     = '1' === $attendee->attendee_plus_guest ? 'Paid + Guest' : 'Paid';
-												$action   = '0' === $cost ? 'Remove' : 'Move';
+												$paid     = '1' === $attendee->attendee_plus_guest ? 'Member + Guest' : 'Paid';
+												$action   = '0' === $cost ? $paid : 'Move';
 												?>
 												<td class="move <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? '' : 'hidden'; ?> ><?php echo esc_html( $action ); ?>
 													<?php

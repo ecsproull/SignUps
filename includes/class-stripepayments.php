@@ -420,31 +420,6 @@ class StripePayments extends SignUpsBase {
 	}
 	
 	/**
-	 * Creates the block that contains the buttons to continue once a payment is complete.
-	 *
-	 * @param  mixed $signup_id The signup id.
-	 * @return void
-	 */
-	private function create_done_or_logout( $signup_id ) {
-		?>
-		<form method="POST">
-			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
-			<div class="return-or-logout">
-				<div></div>
-				<div class="text-center">
-						<button class="btn btn-primary signup-submit" type="submit" name="continue_signup" value="<?php echo esc_html( $signup_id ); ?>" >View Signup</button>
-				</div>
-					<div></div>
-				<div class="text-center">
-					<button class="btn btn-primary" type="submit" name="all_done" value="-1" >I'm Done</button>
-				</div>
-				<div></div>
-			</div>
-		</form>
-		<?php
-	}
-
-	/**
 	 * Payment canceled message.
 	 *
 	 * @param  mixed $post Url parameters.
