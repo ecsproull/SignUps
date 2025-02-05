@@ -602,7 +602,7 @@ class SignUpsBase {
 					if ( ! current_user_can( 'edit_plugins' ) ) {
 						?>
 						<button id="logout-button" class="btn btn-danger rounded"	type="button" name="logout-button"
-						<?php echo is_user_logged_in() ? '' : 'hidden'; ?> >Logout User</button>
+						<?php echo is_user_logged_in() ? '' : 'hidden'; ?> >Logout</button>
 						<button type="button" id="get_member_button" class="btn btn-primary rounded"
 						<?php echo is_user_logged_in() ? 'hidden' : ''; ?> >Lookup</button></td>
 						<?php
@@ -2041,16 +2041,19 @@ class SignUpsBase {
 			$post['token_key'] = 'removed';
 		}
 
-		if ( true === $res['success'] && $res['score'] >= 0.5 ) {
+		$success_threshold = 0.5;
+		if ( true === $res['success'] && $res['score'] >= $success_threshold ) {
 			$return_value = true;
-		} else {
-			$this->send_alert_email( $post, "reCAPACHA Failed, Score: " . isset( $res['score'] ) ? $res['score'] : wp_json_encode( $res ) );
+		} elseif ( true === $res['success'] && $res['score'] < $success_threshold ) {
+			$this->send_alert_email( $post, 'reCAPACHA Failed, Score: ' . $res['score'], '');
+		} elseif ( false === $res['success'] && 'timeout-or-duplicate' !== $res['error-codes'][0] ) {
+			$this->send_alert_email( $post, 'reCAPACHA Error', $res['error-codes'][0] );
 		}
 
 		$date = new DateTimeImmutable( 'now', new DateTimeZone( 'America/Phoenix' ) );
 		$data = array(
 			'captcha_badge'      => $badge,
-			'captcha_score'      => isset( $res['score'] ) ? $res['score'] : wp_json_encode( $res ),
+			'captcha_score'      => isset( $res['score'] ) ? $res['score'] : -1,
 			'captcha_post'       => wp_json_encode( $post ),
 			'captcha_ip_address' => $_SERVER['REMOTE_ADDR'],
 			'captcha_time'       => $date->format( self::DATETIME_FORMAT ),

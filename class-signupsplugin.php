@@ -53,11 +53,6 @@ class SignUpsPlugin extends SignUpsBase {
 	private $short_codes;
 
 	/**
-	 * Reference to the DescriptionEditor object.
-	 */
-	private $description_editor;
-
-	/**
 	 * Reference to the StripePayments object.
 	 */
 	private $stripe_payments;
@@ -67,11 +62,6 @@ class SignUpsPlugin extends SignUpsBase {
 	 */
 	private $reports;
 
-		
-	/**
-	 * Reference to the MemberRoster object.
-	 */
-	private $roster;
 
 
 	/**

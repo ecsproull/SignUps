@@ -44,7 +44,8 @@ class ShortCodes extends SignUpsBase {
 				if ( ! is_user_logged_in() && ! $this->for_residents( $post['continue_signup'] ) ) {
 					$this->signin( $post['continue_signup'] );
 				} else {
-					if ( wp_verify_nonce( $post['mynonce'], 'signups' ) || $this->verifyReCap( $post['token'], $post, $post['badge_number'] ) ) {
+					if ( wp_verify_nonce( $post['mynonce'], 'signups' ) || 
+					     ( isset( $post['token'] ) ) && $this->verifyReCap( $post['token'], $post, $post['badge_number'] ) ) {
 						$this->create_signup_form( $post['continue_signup'] );
 					} else {
 						$this->create_select_signup();
