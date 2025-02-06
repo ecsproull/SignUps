@@ -445,7 +445,7 @@ class SignUpsBase {
 			</h3>
 		</div>
 		<input type="hidden" id="token" name="token">
-		<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html( $this->getCaptchaKeys()->stripe_api_key ); ?>" >
+		<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html(  get_option( 'signups_captcha' )['captcha_api_key'] ); ?>" >
 		<?php
 	}
 
@@ -643,7 +643,7 @@ class SignUpsBase {
 		<div id="email"></div>
 		<input id="user_groups" type="hidden" name="user_groups" value="<?php echo esc_html( $user_group ); ?>">
 		<input type="hidden" id="token" name="token">
-		<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html( $this->getCaptchaKeys()->stripe_api_key ); ?>" >
+		<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html( get_option( 'signups_captcha' )['captcha_api_key'] ); ?>" >
 		<?php
 
 		return $return_val;
@@ -1479,7 +1479,7 @@ class SignUpsBase {
 				</table>
 				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 				<input type="hidden" id="token" name="token" value="">
-				<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html( $this->getCaptchaKeys()->stripe_api_key ); ?>" >
+				<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html( get_option( 'signups_captcha' )['captcha_api_key'] ); ?>" >
 				<input type="hidden" id="clicked_item" name="" value="">
 			</form>
 			<h2>Signup complete</h2>
@@ -1982,27 +1982,6 @@ class SignUpsBase {
 	}
 	
 	/**
-	 * Get the reCAPATCHA keys from the database.
-	 *
-	 * @return void
-	 */
-	protected function getCaptchaKeys() {
-		global $wpdb;
-		$capatcha_keys = $wpdb->get_row(
-			$wpdb->prepare(
-				'SELECT *
-				FROM %1s
-				WHERE stripe_endpoint_secret = %s',
-				self::STRIPE_TABLE,
-				'capatcha'
-			),
-			OBJECT
-		);
-
-		return $capatcha_keys;
-	}
-
-	/**
 	 * Verify the reCAPATCHA token passed from the user. Also logs 
 	 * the result into the datbase.
 	 *
@@ -2015,7 +1994,7 @@ class SignUpsBase {
 		global $wpdb;
 		$url  = 'https://www.google.com/recaptcha/api/siteverify';
 		$data = array(
-			'secret'   => $this->getCaptchaKeys()->stripe_api_secret,
+			'secret'   => get_option( 'signups_captcha' )['captcha_api_secret'],
 			'response' => $token,
 			'remoteip' => $_SERVER['REMOTE_ADDR'],
 		);

@@ -49,20 +49,11 @@ class StripePayments extends SignUpsBase {
 	 * Constructor
 	 */
 	public function __construct() {
-		global $wpdb;
-		$stripe_row = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT *
-				FROM %1s',
-				self::STRIPE_TABLE,
-			),
-			OBJECT
-		);
-
-		$this->stripe_endpoint_secret = $stripe_row[0]->stripe_endpoint_secret;
-		$this->stripe_api_key         = $stripe_row[0]->stripe_api_key;
-		$this->stripe_api_secret      = $stripe_row[0]->stripe_api_secret;
-		$this->stripe_root_url        = $stripe_row[0]->stripe_root_url;
+		$options                      = get_option( 'signups_stripe' );
+		$this->stripe_endpoint_secret = $options['endpoint_secret'];
+		$this->stripe_api_key         = $options['api_key'];
+		$this->stripe_api_secret      = $options['api_secret'];
+		$this->stripe_root_url        = get_site_url();
 	}
 
 	/**

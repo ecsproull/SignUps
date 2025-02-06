@@ -298,3 +298,7 @@ tr > td > div.bg-danger {
   #toplevel_page_sign_ups > ul > li.wp-first-item.current {
     height:0px;
   }
+
+  .key_name {
+    width: 400px;
+  }

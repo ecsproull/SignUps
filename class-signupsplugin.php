@@ -22,28 +22,29 @@
  */
 declare(strict_types=1);
 require_once 'vendor/autoload.php';
-require 'includes/class-signupsbase.php';
-require 'includes/class-signupsrestapis.php';
-require 'includes/class-dbsignuptables.php';
-require 'includes/class-signupsettings.php';
-require 'includes/class-classitem.php';
-require 'includes/class-sessionitem.php';
-require 'includes/class-shortcodes.php';
-require 'includes/class-timeexception.php';
-require 'includes/class-htmleditor.php';
-require 'includes/class-stripepayments.php';
-require 'includes/class-rollingtemplateseditor.php';
-require 'includes/class-rollingexceptionseditor.php';
-require 'includes/class-sendgridmail.php';
-require 'includes/class-reports.php';
-require 'includes/class-paymentsreview.php';
-require 'includes/class-rollingslot.php';
-require 'includes/class-instructorseditor.php';
-require 'includes/class-sessionemaildata.php';
+require_once 'includes/class-signupsbase.php';
+require_once 'includes/class-signupsrestapis.php';
+require_once 'includes/class-dbsignuptables.php';
+require_once 'includes/class-signupsettings.php';
+require_once 'includes/class-classitem.php';
+require_once 'includes/class-sessionitem.php';
+require_once 'includes/class-shortcodes.php';
+require_once 'includes/class-timeexception.php';
+require_once 'includes/class-htmleditor.php';
+require_once 'includes/class-stripepayments.php';
+require_once 'includes/class-rollingtemplateseditor.php';
+require_once 'includes/class-rollingexceptionseditor.php';
+require_once 'includes/class-sendgridmail.php';
+require_once 'includes/class-reports.php';
+require_once 'includes/class-paymentsreview.php';
+require_once 'includes/class-rollingslot.php';
+require_once 'includes/class-instructorseditor.php';
+require_once 'includes/class-sessionemaildata.php';
+require_once 'includes/class-settings.php';
 
 /**
  * Main SignUps class. This is the entry point for the plugin.
- * Several other classes are required in this file and all are instantiated here.
+ * Several other classes are require_onced in this file and all are instantiated here.
  */
 class SignUpsPlugin extends SignUpsBase {
 
@@ -66,7 +67,7 @@ class SignUpsPlugin extends SignUpsBase {
 
 	/**
 	 * The constructor does a lot of work by instantiated several objects that
-	 * are required for various ShortCodes. The ShortCodes are also registered here.
+	 * are require_onced for various ShortCodes. The ShortCodes are also registered here.
 	 *
 	 * It is important to understand that this plugin is one big ShortCode. The ShortCodes
 	 * class in the root of the public user interface. SignupSettings class is the root of the
@@ -194,6 +195,10 @@ class SignUpsPlugin extends SignUpsBase {
 		add_submenu_page( 'sign_ups', 'Rolling Exceptions Editor', 'Exceptions', 'manage_options', 'exceptions_editor', array( new RollingExceptionsEditor(), 'load_exceptions_editor' ) );
 		add_submenu_page( 'sign_ups', 'Payments Report', 'Payments Report', 'manage_options', 'payments_report', array( new PaymentsReview(), 'review_payments' ) );
 		add_submenu_page( 'sign_ups', 'Instructors', 'Instructors', 'manage_options', 'instructors_editor', array( new InstructorsEditor(), 'instructors_editor' ) );
+
+		$settings_editor = new SettingsEditor();
+		add_submenu_page( 'sign_ups', 'Settings', 'Settings', 'manage_options', 'signups_settings_editor', array( $settings_editor, 'signups_plugin_option_page' ) );
+		$settings_editor->signups_register_settings();
 	}
 
 	/**
@@ -216,11 +221,12 @@ class SignUpsPlugin extends SignUpsBase {
 		$user_pages[] = 'signups_page_test_page';
 		$user_pages[] = 'signups_page_payments_report';
 		$user_pages[] = 'signups_page_instructors_editor';
+		$user_pages[] = 'signups_page_signups_settings_editor';
 		if ( ! in_array( $host, $user_pages, true ) ) {
 			return;
 		}
 
-		$keys = $this->getCaptchaKeys();
+		$stripe_keys = get_option( 'signups_stripe' );
 
 		wp_register_style( 'signup_bs_style', plugin_dir_url( __FILE__ ) . 'bootstrap/css/bootstrap.min.css', array(), 1 );
 		wp_enqueue_style( 'signup_bs_style' );
@@ -231,7 +237,7 @@ class SignUpsPlugin extends SignUpsBase {
 		wp_register_style( 'user_signup_style', plugin_dir_url( __FILE__ ) . 'css/users-styles.css', array(), $ver_user_styles );
 		wp_enqueue_style( 'user_signup_style' );
 		wp_enqueue_script( 'jquery' );
-		wp_enqueue_script( 'recap', 'https://www.google.com/recaptcha/api.js?render=' . $keys->stripe_api_key, array(), '1.0.0.0', false, true );
+		wp_enqueue_script( 'recap', 'https://www.google.com/recaptcha/api.js?render=' . $stripe_keys['api_key'], array(), '1.0.0.0', false, true );
 		$ver_common_js = filemtime( plugin_dir_path( __FILE__ ) . 'js/common.js' );
 		wp_enqueue_script( 'signup_common_script', plugin_dir_url( __FILE__ ) . 'js/common.js', __FILE__, array( 'jquery' ), $ver_common_js, false, true );
 		$ver_js = filemtime( plugin_dir_path( __FILE__ ) . 'js/signups.js' );
@@ -269,7 +275,7 @@ class SignUpsPlugin extends SignUpsBase {
 			return;
 		}
 
-		$keys = $this->getCaptchaKeys();
+		$stripe_keys = get_option( 'signups_stripe' );
 
 		wp_register_style( 'signup_bs_style', plugin_dir_url( __FILE__ ) . 'bootstrap/css/bootstrap.min.css', array(), 1 );
 		wp_enqueue_style( 'signup_bs_style' );
@@ -278,7 +284,7 @@ class SignUpsPlugin extends SignUpsBase {
 		wp_enqueue_style( 'signup_style' );
 		wp_enqueue_style( 'wp-jquery-ui-dialog' );
 		wp_enqueue_script( 'signup_cookie_script', plugin_dir_url( __FILE__ ) . 'cookie/node_modules/js-cookie/dist/js.cookie.min.js', array( 'jquery' ), '3.0.5', false, true );
-		wp_enqueue_script( 'recap', 'https://www.google.com/recaptcha/api.js?render=' . $keys->stripe_api_key, array(), '1.0.0.0', false, true );
+		wp_enqueue_script( 'recap', 'https://www.google.com/recaptcha/api.js?render=' . $stripe_keys['api_key'], array(), '1.0.0.0', false, true );
 		$ver_common_js = filemtime( plugin_dir_path( __FILE__ ) . 'js/common.js' );
 		wp_enqueue_script( 'signup_common_script', plugin_dir_url( __FILE__ ) . 'js/common.js', __FILE__, array( 'jquery' ), $ver_common_js, false, true );
 		$ver_users_js = filemtime( plugin_dir_path( __FILE__ ) . 'js/users-signup.js' );

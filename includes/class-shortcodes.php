@@ -519,7 +519,7 @@ class ShortCodes extends SignUpsBase {
 				</div>
 				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 				<input type="hidden" id="token" name="token" value="" >
-				<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html( $this->getCaptchaKeys()->stripe_api_key ); ?>" >
+				<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html(  get_option( 'signups_captcha' )['captcha_api_key'] ); ?>" >
 				<input type="hidden" id="clicked_item" name="" value="">
 			</form>
 			<?php
@@ -818,7 +818,7 @@ class ShortCodes extends SignUpsBase {
 					?>
 				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 				<input type="hidden" id="token" name="token" value="" >
-				<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html( $this->getCaptchaKeys()->stripe_api_key ); ?>" >
+				<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html( get_option( 'signups_captcha' )['captcha_api_key'] ); ?>" >
 				<input type="hidden" id="signup_id" name="signup_id" value="">
 			</div>
 		</form>
