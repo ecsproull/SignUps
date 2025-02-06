@@ -226,7 +226,7 @@ class SignUpsPlugin extends SignUpsBase {
 			return;
 		}
 
-		$stripe_keys = get_option( 'signups_stripe' );
+		$captcha_keys = get_option( 'signups_captcha' );
 
 		wp_register_style( 'signup_bs_style', plugin_dir_url( __FILE__ ) . 'bootstrap/css/bootstrap.min.css', array(), 1 );
 		wp_enqueue_style( 'signup_bs_style' );
@@ -237,7 +237,7 @@ class SignUpsPlugin extends SignUpsBase {
 		wp_register_style( 'user_signup_style', plugin_dir_url( __FILE__ ) . 'css/users-styles.css', array(), $ver_user_styles );
 		wp_enqueue_style( 'user_signup_style' );
 		wp_enqueue_script( 'jquery' );
-		wp_enqueue_script( 'recap', 'https://www.google.com/recaptcha/api.js?render=' . $stripe_keys['api_key'], array(), '1.0.0.0', false, true );
+		wp_enqueue_script( 'recap', 'https://www.google.com/recaptcha/api.js?render=' . $captcha_keys['captcha_api_key'], array(), '1.0.0.0', false, true );
 		$ver_common_js = filemtime( plugin_dir_path( __FILE__ ) . 'js/common.js' );
 		wp_enqueue_script( 'signup_common_script', plugin_dir_url( __FILE__ ) . 'js/common.js', __FILE__, array( 'jquery' ), $ver_common_js, false, true );
 		$ver_js = filemtime( plugin_dir_path( __FILE__ ) . 'js/signups.js' );
@@ -275,7 +275,7 @@ class SignUpsPlugin extends SignUpsBase {
 			return;
 		}
 
-		$stripe_keys = get_option( 'signups_stripe' );
+		$captcha_keys = get_option( 'signups_captcha' );
 
 		wp_register_style( 'signup_bs_style', plugin_dir_url( __FILE__ ) . 'bootstrap/css/bootstrap.min.css', array(), 1 );
 		wp_enqueue_style( 'signup_bs_style' );
@@ -284,7 +284,7 @@ class SignUpsPlugin extends SignUpsBase {
 		wp_enqueue_style( 'signup_style' );
 		wp_enqueue_style( 'wp-jquery-ui-dialog' );
 		wp_enqueue_script( 'signup_cookie_script', plugin_dir_url( __FILE__ ) . 'cookie/node_modules/js-cookie/dist/js.cookie.min.js', array( 'jquery' ), '3.0.5', false, true );
-		wp_enqueue_script( 'recap', 'https://www.google.com/recaptcha/api.js?render=' . $stripe_keys['api_key'], array(), '1.0.0.0', false, true );
+		wp_enqueue_script( 'recap', 'https://www.google.com/recaptcha/api.js?render=' . $captcha_keys['captcha_api_key'], array(), '1.0.0.0', false, true );
 		$ver_common_js = filemtime( plugin_dir_path( __FILE__ ) . 'js/common.js' );
 		wp_enqueue_script( 'signup_common_script', plugin_dir_url( __FILE__ ) . 'js/common.js', __FILE__, array( 'jquery' ), $ver_common_js, false, true );
 		$ver_users_js = filemtime( plugin_dir_path( __FILE__ ) . 'js/users-signup.js' );
