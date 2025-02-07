@@ -60,14 +60,6 @@ class SignUpsBase {
 	protected const PAYMENTS_TABLE = 'wp_scw_payments';
 
 	/**
-	 * Stripe settings table.
-	 * This table has evolved into a settings table.
-	 * It started as the settings for the Stripe.com api credentials
-	 * but now holds additional data. Should be converted to a key/value pair table.
-	 */
-	protected const STRIPE_TABLE = 'wp_scw_stripe';
-
-	/**
 	 * Signup descriptions table.
 	 * Descriptions have three parts. Descriptions, Calendar Description and Instructions.
 	 * All three are held in this table.
@@ -283,10 +275,7 @@ class SignUpsBase {
 	 * @return void
 	 */
 	protected function set_clear_cache( $value ) {
-		global $wpdb;
-		$where = array( 'stripe_api_key' => 'cache' );
-		$data  = array( 'stripe_api_secret' => $value );
-		$wpdb->update( self::STRIPE_TABLE, $data, $where );
+		update_option( 'signups_clear_cache', $value, '', false );
 	}
 
 	/**

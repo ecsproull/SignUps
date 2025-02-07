@@ -92,6 +92,8 @@ class SignUpsPlugin extends SignUpsBase {
 		add_filter( 'nonce_user_logged_out', array( $this, 'wpdocs_modify_nonce_for_logged_out_users' ), 10, 2 );
 		add_filter( 'nonce_life', array( $this, 'modify_nonce_life' ), 10, 2 );
 		add_filter( 'show_admin_bar', array( $this, 'restrict_admin_bar' ) );
+		update_option( 'signups_clear_cache', '0', '', false );
+
 	}
 
 	/**
@@ -146,19 +148,7 @@ class SignUpsPlugin extends SignUpsBase {
 	 * @return void
 	 */
 	public function plugins_loaded() {
-		global $wpdb;
-		// The stripe table is now being used for settings.
-		$stripe_row = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT *
-				FROM %1s
-				WHERE stripe_api_key = 'cache'",
-				self::STRIPE_TABLE,
-			),
-			OBJECT
-		);
-		
-		if ( $stripe_row->stripe_api_secret === '1' ) {
+		if ( '1' === get_option( 'signups_clear_cache' ) ) {
 			WP_Optimize()->get_page_cache()->purge();
 			$this->set_clear_cache( '0' );
 		}

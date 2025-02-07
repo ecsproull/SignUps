@@ -25,6 +25,13 @@ class SettingsEditor {
 				submit_button( 'Save Capatcha Changes', 'primary' );
 				?>
 			</form>
+			<form action="options.php" method="post">
+				<?php
+				settings_fields( 'signups_sendgrid' );
+				do_settings_sections( 'signups_sendgrid_settings_editor' );
+				submit_button( 'Save SendGrid Changes', 'primary' );
+				?>
+			</form>
 		</div>
 	<?php
 	}
@@ -38,20 +45,19 @@ class SettingsEditor {
 
 		register_setting( 'signups_stripe', 'signups_stripe', $args );
 		register_setting( 'signups_captcha', 'signups_captcha', $args );
-	
+		register_setting( 'signups_sendgrid', 'signups_sendgrid', $args );
 
-		 add_settings_section(
+		add_settings_section(
 			'signups_plugin_main',
 			'Signups Plugin Settings',
-			 array( $this, 'signups_stripe_section_text' ),
+			array( $this, 'signups_stripe_section_text' ),
 			'signups_stripe_settings_editor'
 		);
-		
 
 		add_settings_field(
 			'signups_plugin_api_key',
 			'Stripe API Key',
-			 array( $this, 'signups_stripe_api_key' ),
+			array( $this, 'signups_stripe_api_key' ),
 			'signups_stripe_settings_editor',
 			'signups_plugin_main'
 		);
@@ -59,7 +65,7 @@ class SettingsEditor {
 		add_settings_field(
 			'signups_plugin_api_secret',
 			'Stripe API Secret',
-			 array( $this, 'signups_stripe_api_secret' ),
+			array( $this, 'signups_stripe_api_secret' ),
 			'signups_stripe_settings_editor',
 			'signups_plugin_main'
 		);
@@ -67,7 +73,7 @@ class SettingsEditor {
 		add_settings_field(
 			'signups_plugin_endpoint_secret',
 			'Stripe API Endpoint Secret',
-			 array( $this, 'signups_stripe_endpoint_secret' ),
+			array( $this, 'signups_stripe_endpoint_secret' ),
 			'signups_stripe_settings_editor',
 			'signups_plugin_main'
 		);
@@ -75,14 +81,14 @@ class SettingsEditor {
 		add_settings_section(
 			'signups_plugin_captcha',
 			'Signups reCaptcha Settings',
-			 array( $this, 'signups_captcha_section_text' ),
+			array( $this, 'signups_captcha_section_text' ),
 			'signups_captcha_settings_editor'
 		);
 
 		add_settings_field(
 			'signups_captcha_api_key',
 			'reCapatcha API Key',
-			 array( $this, 'signups_captcha_api_key' ),
+			array( $this, 'signups_captcha_api_key' ),
 			'signups_captcha_settings_editor',
 			'signups_plugin_captcha'
 		);
@@ -90,9 +96,24 @@ class SettingsEditor {
 		add_settings_field(
 			'signups_captcha_api_secret',
 			'reCapatcha API Secret',
-			 array( $this, 'signups_captcha_api_secret' ),
+			array( $this, 'signups_captcha_api_secret' ),
 			'signups_captcha_settings_editor',
 			'signups_plugin_captcha'
+		);
+
+		add_settings_section(
+			'signups_plugin_sendgrid',
+			'Signups Sendgrid Settings',
+			array( $this, 'signups_sendgrid_section_text' ),
+			'signups_sendgrid_settings_editor'
+		);
+
+		add_settings_field(
+			'signups_sendgrid_api_key',
+			'SendGrid API Key',
+			array( $this, 'signups_sendgrid_api_key' ),
+			'signups_sendgrid_settings_editor',
+			'signups_plugin_sendgrid'
 		);
 	}
 
@@ -103,6 +124,10 @@ class SettingsEditor {
 	
 	public function signups_captcha_section_text() {
 		echo '<p>Enter the reCapatcha API keys here.</p>';
+	}
+
+	public function signups_sendgrid_section_text() {
+		echo '<p>Enter the SendGrid API key here.</p>';
 	}
 
 	public function signups_stripe_api_key() {
@@ -177,6 +202,21 @@ class SettingsEditor {
 
 		// echo the field
 		echo "<input id='captcha_api_secret' class='key_name' name='signups_captcha[captcha_api_secret]'
+			type='text' value='" . esc_attr( $name ) . "' />";
+	}
+	
+	public function signups_sendgrid_api_key() {
+
+		// get option 'text_string' value from the database
+		$options = get_option( 'signups_sendgrid' );
+		if ( isset( $options['sendgrid_api_key'] ) ) {
+			$name = $options['sendgrid_api_key'];
+		} else {
+			$name = '';
+		}
+
+		// echo the field
+		echo "<input id='sendgrid_api_key' class='key_name' name='signups_sendgrid[sendgrid_api_key]'
 			type='text' value='" . esc_attr( $name ) . "' />";
 	}
 
