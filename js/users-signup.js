@@ -6,7 +6,7 @@ jQuery(document).ready(function($){
 	 * This handles that click and copies the class emails to the clipboard.
 	 */
 	$(".instructors-email-class").click( function(e) {
-		var email_elements = $("." + $(document.activeElement).val());
+		var email_elements = $("." + $(e.target).val());
 		var email_list = "";
 		email_elements.each((i, ele) => {
 			email_list += ele.innerText + ";";
@@ -64,10 +64,10 @@ jQuery(document).ready(function($){
 	$(".select_signup_form").submit(function(e) {
 		e.preventDefault();
 		var form = this;
+		var submitValue = $(e.originalEvent.submitter).val();
 		grecaptcha.execute($("#token_key").val(), {action: "homepage"}).then(function(token) {
 			$("#token").val(token);
-			let val = document.activeElement.getAttribute('value');
-			$("#signup_id").val(val);
+			$("#signup_id").val(submitValue);
 			form.submit();
 		});
 
@@ -76,12 +76,14 @@ jQuery(document).ready(function($){
 	$(".signup_only_form").submit(function(e) {
 		e.preventDefault();
 		var form = this;
+		var buttonName= $(e.originalEvent.submitter).attr("name");
+		var buttonValue = $(e.originalEvent.submitter).val();
 		grecaptcha.execute($("#token_key").val(), {action: "homepage"}).then(function(token) {
 			$("#token").val(token);
-			if (document.activeElement.getAttribute('name') == 'continue_signup' ||
-			    document.activeElement.getAttribute('name') == 'all_done' ) {
-				$("#clicked_item").attr("name", document.activeElement.getAttribute('name'));
-				$("#clicked_item").val(document.activeElement.getAttribute('value'));
+			if (buttonName == 'continue_signup' ||
+			    buttonName == 'all_done' ) {
+				$("#clicked_item").attr("name", buttonName);
+				$("#clicked_item").val(buttonValue);
 			}
 			form.submit();
 		});
@@ -98,10 +100,11 @@ jQuery(document).ready(function($){
 		//debugger;
 		e.preventDefault();
 		var form = this;
+		var buttonName= $(e.originalEvent.submitter).attr("name");
 		grecaptcha.execute($("#token_key").val(), {action: "homepage"}).then(function(token) {
 			$("#token").val(token);
-			if (document.activeElement.getAttribute('name') == 'login' ||
-				document.activeElement.getAttribute('name') == 'badge_number') {
+			if (buttonName == 'login' ||
+				buttonName == 'badge_number') {
 				$("#email").append('<input type="hidden" name="login" value="1" />');
 				$("<input />").attr("type", "hidden")
 					.attr("name", "continue_signup")
@@ -111,25 +114,25 @@ jQuery(document).ready(function($){
 				return;
 			}
 
-			if (document.activeElement.getAttribute('name') == 'logout') {
+			if (buttonName == 'logout') {
 				$("#email").append('<input type="hidden" name="logout" value="1" />');
 				form.submit();
 				return;
 			}
 
-			if (document.activeElement.getAttribute('name') == 'email_admin') {
+			if (buttonName == 'email_admin') {
 				$("#email").append('<input type="hidden" name="email_admin" value="1" />');
 				form.submit();
 				return;
 			}
 			
-			if (document.activeElement.getAttribute('name') == 'email_session') {
+			if (buttonName == 'email_session') {
 				$("#email").append('<input type="hidden" name="email_session" value="1" />');
 				form.submit();
 				return;
 			}
 
-			if (document.activeElement.getAttribute('name') == 'signup_home') {
+			if (buttonName == 'signup_home') {
 				$("#cancel").append('<input type="hidden" name="signup_home" value="1" />');
 				form.submit();
 				return;
@@ -199,13 +202,13 @@ jQuery(document).ready(function($){
 				title: "Confirm Times",
 				minHeight: 75,
 				buttons: {
-				Submit: function () {
-					form.submit();
-					$(this).dialog("destroy");
-				},
-				Change: function () {
-					$(this).dialog("destroy");
-				}
+					Submit: function () {
+						form.submit();
+						$(this).dialog("destroy");
+					},
+					Change: function () {
+						$(this).dialog("destroy");
+					}
 				}
 			});
 		});
@@ -215,7 +218,7 @@ jQuery(document).ready(function($){
 	 * This was meant to enforce rules for signing up for various machines.
 	 * The goal was to limit someone from hogging a machine by signing up
 	 * all of the slots in one day. That plan in is currently on hold but the code
-	 * remains done and test it we want to enable it again.
+	 * remains done and tested if we want to enable it again.
 	 */
 	$(".rolling-add-chk").click(function(x) {
 		var val = x.currentTarget.value;
