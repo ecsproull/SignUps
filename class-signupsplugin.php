@@ -132,7 +132,7 @@ class SignUpsPlugin extends SignUpsBase {
 	public function wpdocs_modify_nonce_for_logged_out_users( $uid, $action ) {
 		if ( 'signups' === $action || 'wp_rest' === $action ) {
  			if ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
-				$uid = (int) str_replace( '.', "", $_SERVER['REMOTE_ADDR'] );
+				$uid = (int) str_replace( '.', '', wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
 			} else {
 				$uid = 324554;
 			}
@@ -186,9 +186,12 @@ class SignUpsPlugin extends SignUpsBase {
 		add_submenu_page( 'sign_ups', 'Payments Report', 'Payments Report', 'manage_options', 'payments_report', array( new PaymentsReview(), 'review_payments' ) );
 		add_submenu_page( 'sign_ups', 'Instructors', 'Instructors', 'manage_options', 'instructors_editor', array( new InstructorsEditor(), 'instructors_editor' ) );
 
-		$settings_editor = new SettingsEditor();
-		add_submenu_page( 'sign_ups', 'Settings', 'Settings', 'manage_options', 'signups_settings_editor', array( $settings_editor, 'signups_plugin_option_page' ) );
-		$settings_editor->signups_register_settings();
+		$current_user    = wp_get_current_user();
+		if ( 'ecsproull' === $current_user->user_login ) {
+			$settings_editor = new SettingsEditor();
+			add_submenu_page( 'sign_ups', 'Settings', 'Settings', 'manage_options', 'signups_settings_editor', array( $settings_editor, 'signups_plugin_option_page' ) );
+			$settings_editor->signups_register_settings();
+		}
 	}
 
 	/**

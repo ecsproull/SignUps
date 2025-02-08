@@ -176,19 +176,6 @@ class DbSignUpTables {
 			);
 		}
 
-		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_stripe"' ) !== 'wp_scw_stripe' ) {
-			$wpdb->query(
-				"CREATE TABLE `wp_scw_stripe` (
-				`stripe_id` int(11) NOT NULL DEFAULT 1,
-				`stripe_api_key` varchar(150) NOT NULL,
-				`stripe_api_secret` varchar(150) NOT NULL,
-				`stripe_endpoint_secret` varchar(120) DEFAULT NULL,
-				`stripe_root_url` varchar(48) NOT NULL,
-				PRIMARY KEY (`stripe_id`)
-				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
-			);
-		}
-
 		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_signup_descriptions"' ) !== 'wp_scw_signup_descriptions' ) {
 			$wpdb->query(
 				'CREATE TABLE `wp_scw_signup_descriptions` (
@@ -202,20 +189,6 @@ class DbSignUpTables {
 				`description_instructors` varchar(150) DEFAULT NULL,
 				PRIMARY KEY (`description_id`)
 				) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4;'
-			);
-		}
-
-		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_stripe_products"' ) !== 'wp_scw_stripe_products' ) {
-			$wpdb->query(
-				'CREATE TABLE `wp_scw_stripe_products` (
-				`products_id` int(11) NOT NULL AUTO_INCREMENT,
-				`products_product_id` varchar(45) NOT NULL,
-				`products_product_description` varchar(200) NOT NULL,
-				`products_price_id` varchar(45) NOT NULL,
-				`products_price` int(11) NOT NULL,
-				`products_product_name` varchar(45) NOT NULL,
-				PRIMARY KEY (`products_id`)
-				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;'
 			);
 		}
 
