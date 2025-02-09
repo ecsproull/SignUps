@@ -44,9 +44,9 @@ class ShortCodes extends SignUpsBase {
 				if ( ! is_user_logged_in() && ! $this->for_residents( $post['continue_signup'] ) ) {
 					$this->signin( $post['continue_signup'] );
 				} else {
-					if ( wp_verify_nonce( $post['mynonce'], 'signups' ) || 
-					     ( isset( $post['token'] ) ) && $this->verifyReCap( $post['token'], $post, $post['badge_number'] ) ) {
-						$this->create_signup_form( $post['continue_signup'] );
+					if ( wp_verify_nonce( $post['mynonce'], 'signups' ) ||
+					     ( isset( $post['token'] ) && $this->verifyReCap( $post['token'], $post, $post['badge_number'] ) ) ) {
+							$this->create_signup_form( $post['continue_signup'] );
 					} else {
 						$this->create_select_signup();
 					}
@@ -59,8 +59,11 @@ class ShortCodes extends SignUpsBase {
 				$this->send_email( $post );
 			} elseif ( isset( $post['rolling_days_new'] ) ) {
 				$this->create_rolling_session( $post['add_attendee_session'], $post['rolling_days_new'] );
-			} elseif ( isset( $post['add_attendee_session'] ) && isset( $post['token'] ) && $this->verifyReCap( $post['token'], $post, $post['badge_number'] ) ) {
-				if ( isset( $post['attendee_identifier'] ) && wp_verify_nonce( $post['attendee_identifier'], 'signups_attendee' ) ) {
+			} elseif ( isset( $post['add_attendee_session'] ) ) {
+				if ( ! isset( $post['token'] ) || ! $this->verifyReCap( $post['token'], $post, $post['badge_number'] ) ) {
+					// Handle the failed case
+					$this->create_select_signup();
+				} elseif ( isset( $post['attendee_identifier'] ) && wp_verify_nonce( $post['attendee_identifier'], 'signups_attendee' ) ) {
 					$this->add_attendee_rolling( $post );
 				} else {
 					$this->send_alert_email( $post, 'Attn HACKER: Woodshop Signup POST FAILED' );
@@ -81,7 +84,8 @@ class ShortCodes extends SignUpsBase {
 			} elseif ( isset( $post['signup_id'] ) ) {
 				if ( '-1' === $post['signup_id'] ||
 				    '' === $post['signup_id'] ||
-					! $this->verifyReCap( $post['token'],
+					! $this->verifyReCap(
+						$post['token'],
 						$post,
 						is_user_logged_in() ? get_user_meta( get_current_user_id(), 'nickname' )[0] : '0000'
 					)
@@ -303,7 +307,6 @@ class ShortCodes extends SignUpsBase {
 	 * @see ShortCodes::create_session_select_form()
 	 *
 	 * @param string $signup_id The id of the signup to create a form for.
-	 * @param string $secret A members secret key used to identify the member.
 	 * @return void
 	 */
 	private function create_signup_form( $signup_id ) {

@@ -122,7 +122,7 @@ Inheritance diagram for SignUpsBase:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a095c5d389db211932136b53f25f39685" id="r_a095c5d389db211932136b53f25f39685"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a095c5d389db211932136b53f25f39685">__construct</a> ()</td></tr>
-<tr class="memdesc:a095c5d389db211932136b53f25f39685"><td class="mdescLeft">&#160;</td><td class="mdescRight">__construct  <br /></td></tr>
+<tr class="memdesc:a095c5d389db211932136b53f25f39685"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <br /></td></tr>
 <tr class="separator:a095c5d389db211932136b53f25f39685"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac7a92cffda446e096226980283b02c0a" id="r_ac7a92cffda446e096226980283b02c0a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac7a92cffda446e096226980283b02c0a">create_meeting_exceptions</a> ( $start_date, $end_date)</td></tr>
 <tr class="memdesc:ac7a92cffda446e096226980283b02c0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves a list of meeting exceptions between a start and end date.  <br /></td></tr>
@@ -130,9 +130,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a92a2b65b95d42953c023599efc79e252" id="r_a92a2b65b95d42953c023599efc79e252"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a92a2b65b95d42953c023599efc79e252">write_log</a> ( $log_text)</td></tr>
-<tr class="memdesc:a92a2b65b95d42953c023599efc79e252"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes a string to the log table in the database.  <br /></td></tr>
-<tr class="separator:a92a2b65b95d42953c023599efc79e252"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4622d7598733c5b7a5e4bce3b32f9b0f" id="r_a4622d7598733c5b7a5e4bce3b32f9b0f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4622d7598733c5b7a5e4bce3b32f9b0f">write_log</a> ( $calling_function, $file, $text,)</td></tr>
+<tr class="memdesc:a4622d7598733c5b7a5e4bce3b32f9b0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes a string to the log table in the database.  <br /></td></tr>
+<tr class="separator:a4622d7598733c5b7a5e4bce3b32f9b0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a478482540870816aa01abe430a295760" id="r_a478482540870816aa01abe430a295760"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a478482540870816aa01abe430a295760">session_attendee_string</a> ( $attendee_id, $session_id)</td></tr>
 <tr class="memdesc:a478482540870816aa01abe430a295760"><td class="mdescLeft">&#160;</td><td class="mdescRight">Formats a string to be passed back in form data.  <br /></td></tr>
 <tr class="separator:a478482540870816aa01abe430a295760"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -148,51 +148,36 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a6e695993b625a86b0a1c4869067ddaea" id="r_a6e695993b625a86b0a1c4869067ddaea"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6e695993b625a86b0a1c4869067ddaea">set_clear_cache</a> ( $value)</td></tr>
 <tr class="memdesc:a6e695993b625a86b0a1c4869067ddaea"><td class="mdescLeft">&#160;</td><td class="mdescRight">When an administrator makes changes to a signup the change will not appear immediately unless you clear the cache.  <br /></td></tr>
 <tr class="separator:a6e695993b625a86b0a1c4869067ddaea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adfb88f28645bbfbd296303f4b88a66c7" id="r_adfb88f28645bbfbd296303f4b88a66c7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adfb88f28645bbfbd296303f4b88a66c7">register_route</a> ( $namespace, $route, $func, $class_inst, $args, $method)</td></tr>
-<tr class="memdesc:adfb88f28645bbfbd296303f4b88a66c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function for registering RestFul API routes.  <br /></td></tr>
-<tr class="separator:adfb88f28645bbfbd296303f4b88a66c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae7c21503d430fd21ad6d975251339b4d" id="r_ae7c21503d430fd21ad6d975251339b4d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae7c21503d430fd21ad6d975251339b4d">get_signup_html</a> ( $signup_id)</td></tr>
 <tr class="memdesc:ae7c21503d430fd21ad6d975251339b4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the HTML description for a signup.  <br /></td></tr>
 <tr class="separator:ae7c21503d430fd21ad6d975251339b4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f07832c148649c129532575bd8622c7" id="r_a5f07832c148649c129532575bd8622c7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f07832c148649c129532575bd8622c7">is_rolling_signup</a> ( $signup_id)</td></tr>
+<tr class="memdesc:a5f07832c148649c129532575bd8622c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is this a rolling signup is the question this function answers.  <br /></td></tr>
+<tr class="separator:a5f07832c148649c129532575bd8622c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a98e7cce01fbc0bd6ae52d1f5c163a838" id="r_a98e7cce01fbc0bd6ae52d1f5c163a838"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a98e7cce01fbc0bd6ae52d1f5c163a838">create_new_member_form</a> ()</td></tr>
 <tr class="memdesc:a98e7cce01fbc0bd6ae52d1f5c163a838"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a form for new users to apply for membership.  <br /></td></tr>
 <tr class="separator:a98e7cce01fbc0bd6ae52d1f5c163a838"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a373f728873f5c00aca17b5f58bd1ea99" id="r_a373f728873f5c00aca17b5f58bd1ea99"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a373f728873f5c00aca17b5f58bd1ea99">create_lookup_member_table</a> ( $center=false, $badge='', $firstname='', $lastname='', $email='', $phone='')</td></tr>
 <tr class="memdesc:a373f728873f5c00aca17b5f58bd1ea99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a member search box used in administrative pages.  <br /></td></tr>
 <tr class="separator:a373f728873f5c00aca17b5f58bd1ea99"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a263c8eafb8fd49ba1fc6823a237eb676" id="r_a263c8eafb8fd49ba1fc6823a237eb676"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a263c8eafb8fd49ba1fc6823a237eb676">create_user_table</a> ( $user_group, $signup_id, $secret=null)</td></tr>
-<tr class="memdesc:a263c8eafb8fd49ba1fc6823a237eb676"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a section of HTML for the user to identify themselves using their badge number.  <br /></td></tr>
-<tr class="separator:a263c8eafb8fd49ba1fc6823a237eb676"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a55220d44257b88a5872c0dec484cfc6d" id="r_a55220d44257b88a5872c0dec484cfc6d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a55220d44257b88a5872c0dec484cfc6d">create_rolling_session</a> ( $rolling_signup_id, $secret, $admin=false, $rolling_days=null)</td></tr>
-<tr class="memdesc:a55220d44257b88a5872c0dec484cfc6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a rolling signup based on a template.  <br /></td></tr>
-<tr class="separator:a55220d44257b88a5872c0dec484cfc6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae56bdd10a40f3d85ed1e62eb8ee8d136" id="r_ae56bdd10a40f3d85ed1e62eb8ee8d136"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae56bdd10a40f3d85ed1e62eb8ee8d136">create_rolling_session_select_form2</a> ( $signup_name, $attendees, $signup_id, $template, $template_items, $user_group, $admin, $secret, $description, $template_items2, $rolling_days=null)</td></tr>
-<tr class="memdesc:ae56bdd10a40f3d85ed1e62eb8ee8d136"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a form that displays the rolling sessions along with their attendees.  <br /></td></tr>
-<tr class="separator:ae56bdd10a40f3d85ed1e62eb8ee8d136"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2953ba412d11ef6e0a1d41ae630add05" id="r_a2953ba412d11ef6e0a1d41ae630add05"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2953ba412d11ef6e0a1d41ae630add05">create_user_table</a> ( $user_group, $signup_id)</td></tr>
+<tr class="memdesc:a2953ba412d11ef6e0a1d41ae630add05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a section of HTML for the user to identify themselves using their badge number.  <br /></td></tr>
+<tr class="separator:a2953ba412d11ef6e0a1d41ae630add05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee97c693ee2bb38ddf74033636a9d9ec" id="r_aee97c693ee2bb38ddf74033636a9d9ec"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aee97c693ee2bb38ddf74033636a9d9ec">set_user</a> ( $user_id, $badge)</td></tr>
+<tr class="memdesc:aee97c693ee2bb38ddf74033636a9d9ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the current user.  <br /></td></tr>
+<tr class="separator:aee97c693ee2bb38ddf74033636a9d9ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab595a362705139e2b7060e385c88140e" id="r_ab595a362705139e2b7060e385c88140e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab595a362705139e2b7060e385c88140e">unset_user</a> ()</td></tr>
+<tr class="memdesc:ab595a362705139e2b7060e385c88140e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Logs out the current users unless the user is an administator.  <br /></td></tr>
+<tr class="separator:ab595a362705139e2b7060e385c88140e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2ef24a718a6b4ba77ba28474cd4cad4" id="r_af2ef24a718a6b4ba77ba28474cd4cad4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af2ef24a718a6b4ba77ba28474cd4cad4">create_rolling_session</a> ( $rolling_signup_id, $rolling_days=null)</td></tr>
+<tr class="memdesc:af2ef24a718a6b4ba77ba28474cd4cad4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a rolling signup based on a template.  <br /></td></tr>
+<tr class="separator:af2ef24a718a6b4ba77ba28474cd4cad4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2f6cdcb33e072e851a0f88ffba73add" id="r_af2f6cdcb33e072e851a0f88ffba73add"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af2f6cdcb33e072e851a0f88ffba73add">create_rolling_session_select_form2</a> ( $signup_name, $attendees, $signup_id, $template, $template_items, $user_group, $description, $template_items2, $rolling_days=null)</td></tr>
+<tr class="memdesc:af2f6cdcb33e072e851a0f88ffba73add"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a form that displays the rolling sessions along with their attendees.  <br /></td></tr>
+<tr class="separator:af2f6cdcb33e072e851a0f88ffba73add"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa5a4899833a4a352850eead3cbf36f85" id="r_aa5a4899833a4a352850eead3cbf36f85"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa5a4899833a4a352850eead3cbf36f85">add_attendee_rolling</a> ( $post)</td></tr>
 <tr class="memdesc:aa5a4899833a4a352850eead3cbf36f85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add attendee for the selected spots.  <br /></td></tr>
 <tr class="separator:aa5a4899833a4a352850eead3cbf36f85"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a48d0251d44fa8c47714fb9806f95f64f" id="r_a48d0251d44fa8c47714fb9806f95f64f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a48d0251d44fa8c47714fb9806f95f64f">load_template_selection</a> ( $template_id, $add_new, $template_id_name, $select_id='template-select', $default_title='None')</td></tr>
-<tr class="memdesc:a48d0251d44fa8c47714fb9806f95f64f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads the template selection dropdown list.  <br /></td></tr>
-<tr class="separator:a48d0251d44fa8c47714fb9806f95f64f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab40563eddab356a2339a42106dbafd0e" id="r_ab40563eddab356a2339a42106dbafd0e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab40563eddab356a2339a42106dbafd0e">update_sessions_price_id</a> ( $signup_id, $new_price_id)</td></tr>
-<tr class="memdesc:ab40563eddab356a2339a42106dbafd0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the price id of all sessions for a signup.  <br /></td></tr>
-<tr class="separator:ab40563eddab356a2339a42106dbafd0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8ec61b095c2817c3ec8771ddc5045a51" id="r_a8ec61b095c2817c3ec8771ddc5045a51"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8ec61b095c2817c3ec8771ddc5045a51">create_description_section</a> ( $description_object)</td></tr>
-<tr class="memdesc:a8ec61b095c2817c3ec8771ddc5045a51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates the description, short description and instructions input block.  <br /></td></tr>
-<tr class="separator:a8ec61b095c2817c3ec8771ddc5045a51"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a396564cb5b18c327d64ca66811342ead" id="r_a396564cb5b18c327d64ca66811342ead"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a396564cb5b18c327d64ca66811342ead">add_remove_from_calendar</a> ( $signup_id, $signup_name, $add)</td></tr>
-<tr class="memdesc:a396564cb5b18c327d64ca66811342ead"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes items from the calendar in response to removing admin approval from a signup.  <br /></td></tr>
-<tr class="separator:a396564cb5b18c327d64ca66811342ead"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a17bf20463bd03567a844c7f65b6ae9cb" id="r_a17bf20463bd03567a844c7f65b6ae9cb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a17bf20463bd03567a844c7f65b6ae9cb">update_calendar</a> ( $post)</td></tr>
-<tr class="memdesc:a17bf20463bd03567a844c7f65b6ae9cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the clubs calendar.  <br /></td></tr>
-<tr class="separator:a17bf20463bd03567a844c7f65b6ae9cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a855d366ee44471f1f9416b4bdabac984" id="r_a855d366ee44471f1f9416b4bdabac984"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a855d366ee44471f1f9416b4bdabac984">get_session_email_data</a> ( $session_id=null)</td></tr>
-<tr class="memdesc:a855d366ee44471f1f9416b4bdabac984"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the data to create a pre-class email.  <br /></td></tr>
-<tr class="separator:a855d366ee44471f1f9416b4bdabac984"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab950ed130c89466a8df516e4334590fa" id="r_ab950ed130c89466a8df516e4334590fa"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab950ed130c89466a8df516e4334590fa">get_session_email_body</a> ( $session_id)</td></tr>
-<tr class="memdesc:ab950ed130c89466a8df516e4334590fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Formats the body of a session email to an attendee.  <br /></td></tr>
-<tr class="separator:ab950ed130c89466a8df516e4334590fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -217,9 +202,6 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:af729bf989944b4a6359775813d404df3" id="r_af729bf989944b4a6359775813d404df3"><td class="memItemLeft" align="right" valign="top">const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af729bf989944b4a6359775813d404df3">PAYMENTS_TABLE</a> = 'wp_scw_payments'</td></tr>
 <tr class="memdesc:af729bf989944b4a6359775813d404df3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Payments table.  <br /></td></tr>
 <tr class="separator:af729bf989944b4a6359775813d404df3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a823647b3966e627db7282500fab3032a" id="r_a823647b3966e627db7282500fab3032a"><td class="memItemLeft" align="right" valign="top">const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a823647b3966e627db7282500fab3032a">STRIPE_TABLE</a> = 'wp_scw_stripe'</td></tr>
-<tr class="memdesc:a823647b3966e627db7282500fab3032a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stripe settings table.  <br /></td></tr>
-<tr class="separator:a823647b3966e627db7282500fab3032a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d8a24237e9653f5821861e6ce3b3520" id="r_a7d8a24237e9653f5821861e6ce3b3520"><td class="memItemLeft" align="right" valign="top">const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7d8a24237e9653f5821861e6ce3b3520">DESCRIPTIONS_TABLE</a> = 'wp_scw_signup_descriptions'</td></tr>
 <tr class="memdesc:a7d8a24237e9653f5821861e6ce3b3520"><td class="mdescLeft">&#160;</td><td class="mdescRight">Signup descriptions table.  <br /></td></tr>
 <tr class="separator:a7d8a24237e9653f5821861e6ce3b3520"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -256,6 +238,9 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:a6faacd47093237674f68a11934384cd6" id="r_a6faacd47093237674f68a11934384cd6"><td class="memItemLeft" align="right" valign="top">const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6faacd47093237674f68a11934384cd6">NEW_MEMBER_TABLE</a> = 'wp_scw_new_member'</td></tr>
 <tr class="memdesc:a6faacd47093237674f68a11934384cd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">New members table.  <br /></td></tr>
 <tr class="separator:a6faacd47093237674f68a11934384cd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5d6b2f205dc873fe02297b5a9525088" id="r_aa5d6b2f205dc873fe02297b5a9525088"><td class="memItemLeft" align="right" valign="top">const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa5d6b2f205dc873fe02297b5a9525088">RECAPTCHA_LOG</a> = 'wp_scw_recaptcha_log'</td></tr>
+<tr class="memdesc:aa5d6b2f205dc873fe02297b5a9525088"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recaptcha log.  <br /></td></tr>
+<tr class="separator:aa5d6b2f205dc873fe02297b5a9525088"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a824ede96a8df5d238a720a1772c804cd" id="r_a824ede96a8df5d238a720a1772c804cd"><td class="memItemLeft" align="right" valign="top">const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a824ede96a8df5d238a720a1772c804cd">LOG_TABLE</a> = 'wp_scw_logs'</td></tr>
 <tr class="memdesc:a824ede96a8df5d238a720a1772c804cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Log table.  <br /></td></tr>
 <tr class="separator:a824ede96a8df5d238a720a1772c804cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -278,23 +263,19 @@ Protected Attributes</h2></td></tr>
 <tr class="memdesc:ac6f6c79de31bf82c14b3b724793c9024"><td class="mdescLeft">&#160;</td><td class="mdescRight">Format Date as 2020-08-13.  <br /></td></tr>
 <tr class="separator:ac6f6c79de31bf82c14b3b724793c9024"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1fbdccaf409550551968e6b7ba31df1" id="r_aa1fbdccaf409550551968e6b7ba31df1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa1fbdccaf409550551968e6b7ba31df1">$date_time_zone</a></td></tr>
-<tr class="memdesc:aa1fbdccaf409550551968e6b7ba31df1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Date timezone.  <br /></td></tr>
 <tr class="separator:aa1fbdccaf409550551968e6b7ba31df1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
-<tr class="memitem:a5f07832c148649c129532575bd8622c7" id="r_a5f07832c148649c129532575bd8622c7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f07832c148649c129532575bd8622c7">is_rolling_signup</a> ( $signup_id)</td></tr>
-<tr class="memdesc:a5f07832c148649c129532575bd8622c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is this a rolling signup is the question this function answers.  <br /></td></tr>
-<tr class="separator:a5f07832c148649c129532575bd8622c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acba720aca7fa86a58d9ddfe1121e84f8" id="r_acba720aca7fa86a58d9ddfe1121e84f8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acba720aca7fa86a58d9ddfe1121e84f8">get_slot_attendees</a> ( $attendees, $start_date, $template_item_title)</td></tr>
 <tr class="memdesc:acba720aca7fa86a58d9ddfe1121e84f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the attendees for a rolling signup slot.  <br /></td></tr>
 <tr class="separator:acba720aca7fa86a58d9ddfe1121e84f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a08c07b4842f4c56cded0bcf9e08aa302" id="r_a08c07b4842f4c56cded0bcf9e08aa302"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a08c07b4842f4c56cded0bcf9e08aa302">is_attendee_free</a> ( $attendees, $start_date, $badge)</td></tr>
 <tr class="memdesc:a08c07b4842f4c56cded0bcf9e08aa302"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the attendees based on start time.  <br /></td></tr>
 <tr class="separator:a08c07b4842f4c56cded0bcf9e08aa302"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aec7f78971584ed67f81123b9fb77c1f7" id="r_aec7f78971584ed67f81123b9fb77c1f7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aec7f78971584ed67f81123b9fb77c1f7">add_remove_chk</a> ( $start_date, $user_badge, $attendee, $secret, $template)</td></tr>
-<tr class="memdesc:aec7f78971584ed67f81123b9fb77c1f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines if the remove checkbox should be added.  <br /></td></tr>
-<tr class="separator:aec7f78971584ed67f81123b9fb77c1f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a828561d659e3ad8340ff8ea7e019002d" id="r_a828561d659e3ad8340ff8ea7e019002d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a828561d659e3ad8340ff8ea7e019002d">add_remove_chk</a> ( $start_date, $user_badge, $attendee, $template)</td></tr>
+<tr class="memdesc:a828561d659e3ad8340ff8ea7e019002d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines if the remove checkbox should be added.  <br /></td></tr>
+<tr class="separator:a828561d659e3ad8340ff8ea7e019002d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="class_sign_ups_base.html" title="SignUpsBase is the base class for most other classes.">SignUpsBase</a> is the base class for most other classes. </p>
@@ -315,7 +296,7 @@ Private Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>__construct </p>
+<p>Constructor. </p>
 
 <p>Reimplemented in <a class="el" href="class_html_editor.html#a095c5d389db211932136b53f25f39685">HtmlEditor</a>, <a class="el" href="class_instructors_editor.html#a095c5d389db211932136b53f25f39685">InstructorsEditor</a>, <a class="el" href="class_rolling_exceptions_editor.html#a095c5d389db211932136b53f25f39685">RollingExceptionsEditor</a>, <a class="el" href="class_rolling_templates_editor.html#a095c5d389db211932136b53f25f39685">RollingTemplatesEditor</a>, <a class="el" href="class_sign_ups_plugin.html#a095c5d389db211932136b53f25f39685">SignUpsPlugin</a>, <a class="el" href="class_sign_ups_rest_apis.html#a095c5d389db211932136b53f25f39685">SignUpsRestApis</a>, and <a class="el" href="class_stripe_payments.html#a095c5d389db211932136b53f25f39685">StripePayments</a>.</p>
 
@@ -357,8 +338,8 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="aec7f78971584ed67f81123b9fb77c1f7" name="aec7f78971584ed67f81123b9fb77c1f7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aec7f78971584ed67f81123b9fb77c1f7">&#9670;&#160;</a></span>add_remove_chk()</h2>
+<a id="a828561d659e3ad8340ff8ea7e019002d" name="a828561d659e3ad8340ff8ea7e019002d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a828561d659e3ad8340ff8ea7e019002d">&#9670;&#160;</a></span>add_remove_chk()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -384,11 +365,6 @@ Private Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$secret</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$template</em></span>&#160;)</td>
         </tr>
       </table>
@@ -406,93 +382,11 @@ Private Member Functions</h2></td></tr>
     <tr><td class="paramtype">mixed</td><td class="paramname">$start_date</td><td>The date of the signup. </td></tr>
     <tr><td class="paramtype">mixed</td><td class="paramname">$user_badge</td><td>The users badge. </td></tr>
     <tr><td class="paramtype">mixed</td><td class="paramname">$attendee</td><td>Current attendee for the slot. </td></tr>
-    <tr><td class="paramtype">mixed</td><td class="paramname">$secret</td><td>Current users secret to be able to unsubscribe. </td></tr>
     <tr><td class="paramtype">mixed</td><td class="paramname">$template</td><td>The template for the signup. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>boolean True if it is ok to cancel the session, false if not. </dd></dl>
-
-</div>
-</div>
-<a id="a396564cb5b18c327d64ca66811342ead" name="a396564cb5b18c327d64ca66811342ead"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a396564cb5b18c327d64ca66811342ead">&#9670;&#160;</a></span>add_remove_from_calendar()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">add_remove_from_calendar </td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$signup_id</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$signup_name</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$add</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Removes items from the calendar in response to removing admin approval from a signup. </p>
-<p>The calendar is another plugin called the Spider Calendar. We are just inputting rows into their database.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramtype">int</td><td class="paramname">$signup_id</td><td>The signup id that owns the sessions. </td></tr>
-    <tr><td class="paramtype">string</td><td class="paramname">$signup_name</td><td>The sighup name. </td></tr>
-    <tr><td class="paramtype">bool</td><td class="paramname">$add</td><td>To add or remove from the calendar. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
-
-</div>
-</div>
-<a id="a8ec61b095c2817c3ec8771ddc5045a51" name="a8ec61b095c2817c3ec8771ddc5045a51"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8ec61b095c2817c3ec8771ddc5045a51">&#9670;&#160;</a></span>create_description_section()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">create_description_section </td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$description_object</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Creates the description, short description and instructions input block. </p>
-<p>JS is used to convert the textareas to the HTML editor, CKEditor. See <a class="el" href="signups_8js.html">SignUps.js</a>.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramtype">mixed</td><td class="paramname">$description_object</td><td>Object that holds the description, instructions and calendar description. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
 </div>
 </div>
@@ -620,8 +514,8 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a55220d44257b88a5872c0dec484cfc6d" name="a55220d44257b88a5872c0dec484cfc6d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a55220d44257b88a5872c0dec484cfc6d">&#9670;&#160;</a></span>create_rolling_session()</h2>
+<a id="af2ef24a718a6b4ba77ba28474cd4cad4" name="af2ef24a718a6b4ba77ba28474cd4cad4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af2ef24a718a6b4ba77ba28474cd4cad4">&#9670;&#160;</a></span>create_rolling_session()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -633,16 +527,6 @@ Private Member Functions</h2></td></tr>
           <td class="memname">create_rolling_session </td>
           <td>(</td>
           <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$rolling_signup_id</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$secret</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$admin</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -661,8 +545,6 @@ Private Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramtype">int</td><td class="paramname">$rolling_signup_id</td><td>The id for the signup. </td></tr>
-    <tr><td class="paramtype">string</td><td class="paramname">$secret</td><td>A secret key used to identify a user. Obsolete. </td></tr>
-    <tr><td class="paramtype">bool</td><td class="paramname">$admin</td><td>Set to true if an admin is using this function. </td></tr>
     <tr><td class="paramtype">int</td><td class="paramname">$rolling_days</td><td>The number of rolling days to create.</td></tr>
   </table>
   </dd>
@@ -671,8 +553,8 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ae56bdd10a40f3d85ed1e62eb8ee8d136" name="ae56bdd10a40f3d85ed1e62eb8ee8d136"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae56bdd10a40f3d85ed1e62eb8ee8d136">&#9670;&#160;</a></span>create_rolling_session_select_form2()</h2>
+<a id="af2f6cdcb33e072e851a0f88ffba73add" name="af2f6cdcb33e072e851a0f88ffba73add"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af2f6cdcb33e072e851a0f88ffba73add">&#9670;&#160;</a></span>create_rolling_session_select_form2()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -713,16 +595,6 @@ Private Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$admin</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$secret</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$description</em></span>, </td>
         </tr>
         <tr>
@@ -754,8 +626,6 @@ Private Member Functions</h2></td></tr>
     <tr><td class="paramtype">object</td><td class="paramname">$template</td><td>The template for the rolling class. </td></tr>
     <tr><td class="paramtype">array</td><td class="paramname">$template_items</td><td>Each one describe a signup for that day. </td></tr>
     <tr><td class="paramtype">string</td><td class="paramname">$user_group</td><td>The group that is allowed to sign up. </td></tr>
-    <tr><td class="paramtype">bool</td><td class="paramname">$admin</td><td>This being accessed by an administrator. </td></tr>
-    <tr><td class="paramtype">string</td><td class="paramname">$secret</td><td>Unique id for a member. </td></tr>
     <tr><td class="paramtype">string</td><td class="paramname">$description</td><td>Description of the signup. </td></tr>
     <tr><td class="paramtype">mixed</td><td class="paramname">$template_items2</td><td>The template items for template2. Used when a template is changed at a predetermined date. </td></tr>
     <tr><td class="paramtype">mixed</td><td class="paramname">$rolling_days</td><td>Overrides the standard number of rolling days. </td></tr>
@@ -766,8 +636,8 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a263c8eafb8fd49ba1fc6823a237eb676" name="a263c8eafb8fd49ba1fc6823a237eb676"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a263c8eafb8fd49ba1fc6823a237eb676">&#9670;&#160;</a></span>create_user_table()</h2>
+<a id="a2953ba412d11ef6e0a1d41ae630add05" name="a2953ba412d11ef6e0a1d41ae630add05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2953ba412d11ef6e0a1d41ae630add05">&#9670;&#160;</a></span>create_user_table()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -783,12 +653,7 @@ Private Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$signup_id</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$secret</em></span><span class="paramdefsep"> = </span><span class="paramdefval">null</span>&#160;)</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$signup_id</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -804,7 +669,6 @@ Private Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramtype">string</td><td class="paramname">$user_group</td><td>The required group for this signup. Normally "member". </td></tr>
     <tr><td class="paramtype">string</td><td class="paramname">$signup_id</td><td>The id for the signup. </td></tr>
-    <tr><td class="paramtype">string</td><td class="paramname">$secret</td><td>Secret supplied by member to edit their signups. </td></tr>
   </table>
   </dd>
 </dl>
@@ -914,73 +778,6 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ab950ed130c89466a8df516e4334590fa" name="ab950ed130c89466a8df516e4334590fa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab950ed130c89466a8df516e4334590fa">&#9670;&#160;</a></span>get_session_email_body()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">get_session_email_body </td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$session_id</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Formats the body of a session email to an attendee. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramtype">mixed</td><td class="paramname">$session_id</td><td>The id of the session to send. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Body for the email. </dd></dl>
-
-</div>
-</div>
-<a id="a855d366ee44471f1f9416b4bdabac984" name="a855d366ee44471f1f9416b4bdabac984"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a855d366ee44471f1f9416b4bdabac984">&#9670;&#160;</a></span>get_session_email_data()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">get_session_email_data </td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$session_id</em></span><span class="paramdefsep"> = </span><span class="paramdefval">null</span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Retrieves the data to create a pre-class email. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramtype">int</td><td class="paramname">$session_id</td><td>If requested a particular session. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="ae7c21503d430fd21ad6d975251339b4d" name="ae7c21503d430fd21ad6d975251339b4d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae7c21503d430fd21ad6d975251339b4d">&#9670;&#160;</a></span>get_signup_html()</h2>
 
@@ -1011,7 +808,7 @@ Private Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>array </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>object </dd></dl>
 
 </div>
 </div>
@@ -1125,7 +922,7 @@ Private Member Functions</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -1139,127 +936,6 @@ Private Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>boolean True for rolling, else false. </dd></dl>
-
-</div>
-</div>
-<a id="a48d0251d44fa8c47714fb9806f95f64f" name="a48d0251d44fa8c47714fb9806f95f64f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a48d0251d44fa8c47714fb9806f95f64f">&#9670;&#160;</a></span>load_template_selection()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">load_template_selection </td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$template_id</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$add_new</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$template_id_name</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$select_id</em></span><span class="paramdefsep"> = </span><span class="paramdefval">'template-select'</span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$default_title</em></span><span class="paramdefsep"> = </span><span class="paramdefval">'None'</span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Loads the template selection dropdown list. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramtype">int</td><td class="paramname">$template_id</td><td>The id of the selected template. </td></tr>
-    <tr><td class="paramtype">boolean</td><td class="paramname">$add_new</td><td>Adds an option to add a new template. </td></tr>
-    <tr><td class="paramtype">string</td><td class="paramname">$template_id_name</td><td>The name of the template. </td></tr>
-    <tr><td class="paramtype">string</td><td class="paramname">$select_id</td><td>The name of the selected template. </td></tr>
-    <tr><td class="paramtype">boolean</td><td class="paramname">$default_title</td><td>Default title. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
-
-</div>
-</div>
-<a id="adfb88f28645bbfbd296303f4b88a66c7" name="adfb88f28645bbfbd296303f4b88a66c7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adfb88f28645bbfbd296303f4b88a66c7">&#9670;&#160;</a></span>register_route()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">register_route </td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$namespace</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$route</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$func</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$class_inst</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$args</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$method</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Helper function for registering RestFul API routes. </p>
-<p>The routes are the URL used to call the API.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramtype">string</td><td class="paramname">$namespace</td><td>The namespace. </td></tr>
-    <tr><td class="paramtype">string</td><td class="paramname">$route</td><td>End of the route. </td></tr>
-    <tr><td class="paramtype">object</td><td class="paramname">$func</td><td>The endpoint function. </td></tr>
-    <tr><td class="paramtype">string</td><td class="paramname">$class_inst</td><td>Instance of the class containing the function. </td></tr>
-    <tr><td class="paramtype">array</td><td class="paramname">$args</td><td>Arguments to the api call. </td></tr>
-    <tr><td class="paramtype">string</td><td class="paramname">$method</td><td>POST, GET....etc. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
 </div>
 </div>
@@ -1328,7 +1004,7 @@ Private Member Functions</h2></td></tr>
 <p>That is, the cache holds on to the old data. You can only clear the cache at plugin load/reload. Upon load the plugin looks at the entry to decide if the cache needs cleared.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramtype">int</td><td class="paramname">$value</td><td></td></tr>
+    <tr><td class="paramtype">int</td><td class="paramname">$value</td><td>The stripe api secret. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1336,8 +1012,8 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a17bf20463bd03567a844c7f65b6ae9cb" name="a17bf20463bd03567a844c7f65b6ae9cb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a17bf20463bd03567a844c7f65b6ae9cb">&#9670;&#160;</a></span>update_calendar()</h2>
+<a id="aee97c693ee2bb38ddf74033636a9d9ec" name="aee97c693ee2bb38ddf74033636a9d9ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee97c693ee2bb38ddf74033636a9d9ec">&#9670;&#160;</a></span>set_user()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1346,47 +1022,14 @@ Private Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">update_calendar </td>
+          <td class="memname">set_user </td>
           <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$post</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Updates the clubs calendar. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramtype">int</td><td class="paramname">$post</td><td>The posted data from the form. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ab40563eddab356a2339a42106dbafd0e" name="ab40563eddab356a2339a42106dbafd0e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab40563eddab356a2339a42106dbafd0e">&#9670;&#160;</a></span>update_sessions_price_id()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">update_sessions_price_id </td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$signup_id</em></span>, </td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$user_id</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$new_price_id</em></span>&#160;)</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$badge</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -1396,11 +1039,10 @@ Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Updates the price id of all sessions for a signup. </p>
+<p>Set the current user. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramtype">mixed</td><td class="paramname">$signup_id</td><td>The id of the parent signup to the sessions. </td></tr>
-    <tr><td class="paramtype">mixed</td><td class="paramname">$new_price_id</td><td>The new price id. </td></tr>
+    <tr><td class="paramtype">int</td><td class="paramname">$user_id</td><td>The id of the user to set. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1408,8 +1050,36 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a92a2b65b95d42953c023599efc79e252" name="a92a2b65b95d42953c023599efc79e252"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a92a2b65b95d42953c023599efc79e252">&#9670;&#160;</a></span>write_log()</h2>
+<a id="ab595a362705139e2b7060e385c88140e" name="ab595a362705139e2b7060e385c88140e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab595a362705139e2b7060e385c88140e">&#9670;&#160;</a></span>unset_user()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">unset_user </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Logs out the current users unless the user is an administator. </p>
+<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
+
+</div>
+</div>
+<a id="a4622d7598733c5b7a5e4bce3b32f9b0f" name="a4622d7598733c5b7a5e4bce3b32f9b0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4622d7598733c5b7a5e4bce3b32f9b0f">&#9670;&#160;</a></span>write_log()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1420,8 +1090,17 @@ Private Member Functions</h2></td></tr>
         <tr>
           <td class="memname">write_log </td>
           <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$log_text</em></span></td><td>)</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$calling_function</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$file</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$text</em></span>&#160;)</td>
         </tr>
       </table>
   </td>
@@ -1434,7 +1113,9 @@ Private Member Functions</h2></td></tr>
 <p>Writes a string to the log table in the database. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramtype">mixed</td><td class="paramname">$log_text</td><td>The string to write to the log. </td></tr>
+    <tr><td class="paramtype">mixed</td><td class="paramname">$calling_function</td><td>The calling function name. </td></tr>
+    <tr><td class="paramtype">mixed</td><td class="paramname">$file</td><td>The file that the calling function is in. </td></tr>
+    <tr><td class="paramtype">mixed</td><td class="paramname">$text</td><td>The text to log. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1462,8 +1143,6 @@ Private Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-
-<p>Date timezone. </p>
 
 </div>
 </div>
@@ -1814,6 +1493,31 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="aa5d6b2f205dc873fe02297b5a9525088" name="aa5d6b2f205dc873fe02297b5a9525088"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5d6b2f205dc873fe02297b5a9525088">&#9670;&#160;</a></span>RECAPTCHA_LOG</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const RECAPTCHA_LOG = 'wp_scw_recaptcha_log'</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Recaptcha log. </p>
+<p>Records badge, score, calling ip address, post data and time. </p>
+
+</div>
+</div>
 <a id="a3d7067e8f7fd1f04cbff3c3729f2e604" name="a3d7067e8f7fd1f04cbff3c3729f2e604"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3d7067e8f7fd1f04cbff3c3729f2e604">&#9670;&#160;</a></span>ROLLING_EXCEPTIONS_TABLE</h2>
 
@@ -2036,31 +1740,6 @@ Private Member Functions</h2></td></tr>
 
 <p>Spider Calendar Event table. </p>
 <p>The Signups Plugin uses the Spider Calendar Plugin to help members visualize when signups are scheduled. </p>
-
-</div>
-</div>
-<a id="a823647b3966e627db7282500fab3032a" name="a823647b3966e627db7282500fab3032a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a823647b3966e627db7282500fab3032a">&#9670;&#160;</a></span>STRIPE_TABLE</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const STRIPE_TABLE = 'wp_scw_stripe'</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Stripe settings table. </p>
-<p>This table has evolved into a settings table. It started as the settings for the Stripe.com api credentials but now holds additional data. Should be converted to a key/value pair table. </p>
 
 </div>
 </div>

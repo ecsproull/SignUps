@@ -17,21 +17,21 @@ class User {
 	/**
 	 * Member Badge
 	 *
-	 *  string
+	 *  @var string
 	 */
 	public $badge;
-	
+
 	/**
 	 * First Name
 	 *
-	 *  string
+	 *  @var string
 	 */
 	public $first;
 
 	/**
 	 * Last Name
 	 *
-	 *  string
+	 * @var string
 	 */
 	public $last;
 }
@@ -91,7 +91,7 @@ class SignUpsRestApis extends SignUpsBase {
 					'/text',
 					'receive_text',
 					$this,
-					array (
+					array(
 						'description'       => esc_html( 'Endpoint for text messages' ),
 						'type'              => 'string',
 						'validate_callback' => array( $this, 'verify_phone_number' ),
@@ -220,7 +220,44 @@ class SignUpsRestApis extends SignUpsBase {
 
 		add_action(
 			'rest_api_init',
-			array( $this, 'register_payment_route' )
+			function() {
+				$this->register_route(
+					'scwmembers/v1',
+					'/payments',
+					'payment_event',
+					$this->stripe_payments,
+					array(),
+					WP_REST_Server::CREATABLE
+				);
+			}
+		);
+	}
+
+	/**
+	 * Helper function for registering RestFul API routes.
+	 * The routes are the URL used to call the API.
+	 *
+	 * @param  string $namespace The namespace.
+	 * @param  string $route End of the route.
+	 * @param  object $func The endpoint function.
+	 * @param  string $class_inst Instance of the class containing the function.
+	 * @param  array  $args Arguments to the api call.
+	 * @param  string $method POST, GET....etc.
+	 * @return void
+	 */
+	private function register_route( $namespace, $route, $func, $class_inst, $args, $method ) {
+		$basic_args = array(
+			'methods'             => $method,
+			'callback'            => array( $class_inst, $func ),
+			'permission_callback' => array( $class_inst, 'permissions_check' ),
+		);
+
+		array_merge( $basic_args, $args );
+
+		register_rest_route(
+			$namespace,
+			$route,
+			$basic_args
 		);
 	}
 
@@ -394,23 +431,6 @@ class SignUpsRestApis extends SignUpsBase {
 		return $results;
 	}
 
-	/**
-	 * Registers the route used for Stripe.com callback.
-	 *
-	 * @return void
-	 */
-	public function register_payment_route() {
-		register_rest_route(
-			'scwmembers/v1',
-			'/payments',
-			array(
-				'methods'             => 'POST',
-				'callback'            => array( $this->stripe_payments, 'payment_event' ),
-				'permission_callback' => array( $this->stripe_payments, 'permissions_check' ),
-			)
-		);
-	}
-	
 	/**
 	 * Get the list of members wishing to unsubscribe from the nag mailer.
 	 * This function is also used to clear the list after they have been unsubscribed.
@@ -635,7 +655,7 @@ class SignUpsRestApis extends SignUpsBase {
 					$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Member not found : ' .  $data_obj->members[ $i ]->badge );
 				}
 
-				$data = array();
+				$data                        = array();
 				$data['member_badge']        = $data_obj->members[ $i ]->badge;
 				$data['member_lastname']     = $data_obj->members[ $i ]->last;
 				$data['member_firstname']    = $data_obj->members[ $i ]->first;
@@ -649,7 +669,7 @@ class SignUpsRestApis extends SignUpsBase {
 
 				if ( $member ) {
 					if ( ! $member->member_user_id ) {
-						$user_id = wp_create_user( $member->member_badge, $member->member_secret );
+						$user_id                = wp_create_user( $member->member_badge, $member->member_secret );
 						$data['member_user_id'] = $user_id;
 					}
 					$where = array( 'member_badge' => $member->member_badge );
@@ -662,7 +682,7 @@ class SignUpsRestApis extends SignUpsBase {
 						}
 					}
 				} else {
-					$user_id = wp_create_user( $data['member_badge'], $data['member_secret'], $data['member_email'] );
+					$user_id                = wp_create_user( $data['member_badge'], $data['member_secret'], $data['member_email'] );
 					$data['member_user_id'] = $user_id;
 					$wpdb->insert( self::MEMBERS_TABLE, $data );
 				}
@@ -681,7 +701,7 @@ class SignUpsRestApis extends SignUpsBase {
 			for ( $i = 0; $i < $length; $i++ ) {
 				$machine_badge = trim( $data_obj->permissions[ $i ]->badge );
 				$machine_name  = trim( $data_obj->permissions[ $i ]->machine_name );
-				$permission = $wpdb->get_results(
+				$permission    = $wpdb->get_results(
 					$wpdb->prepare(
 						'SELECT *
 						FROM %1s

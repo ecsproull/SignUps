@@ -1,12 +1,17 @@
 <?php
-/**
+/*
  * Settings Editor class.
  */
 
 /**
  * Settings Editor
  */
-class SettingsEditor {
+class Settings {
+	/**
+	 * Sets up the input fields on the settings page.
+	 *
+	 * @return void
+	 */
 	public function signups_plugin_option_page() {
 		?>
 		<div class="wrap">
@@ -33,9 +38,14 @@ class SettingsEditor {
 				?>
 			</form>
 		</div>
-	<?php
+		<?php
 	}
 
+	/**
+	 * Register the settins.
+	 *
+	 * @return void
+	 */
 	public function signups_register_settings() {
 		$args = array(
 			'type'              => 'string',
@@ -117,22 +127,39 @@ class SettingsEditor {
 		);
 	}
 
-
+	/**
+	 * Create the Stripe settings section text.
+	 *
+	 * @return void
+	 */
 	public function signups_stripe_section_text() {
 		echo '<p>Enter the Stripe API keys here.</p>';
 	}
-	
+
+	/**
+	 * Create the reCaptcha settings section text.
+	 *
+	 * @return void
+	 */
 	public function signups_captcha_section_text() {
 		echo '<p>Enter the reCapatcha API keys here.</p>';
 	}
 
+	/**
+	 * Create the Sendgrid settings section text.
+	 *
+	 * @return void
+	 */
 	public function signups_sendgrid_section_text() {
 		echo '<p>Enter the SendGrid API key here.</p>';
 	}
 
+	/**
+	 * Generate the Stripe api key setting.
+	 *
+	 * @return void
+	 */
 	public function signups_stripe_api_key() {
-
-		// get option 'text_string' value from the database
 		$options = get_option( 'signups_stripe' );
 		if ( isset( $options['api_key'] ) ) {
 			$name = $options['api_key'];
@@ -140,14 +167,16 @@ class SettingsEditor {
 			$name = '';
 		}
 
-		// echo the field
 		echo "<input id='api_key' class='key_name' name='signups_stripe[api_key]'
 			type='text' value='" . esc_attr( $name ) . "' />";
 	}
 
+	/**
+	 * Generate the Stripe api secret setting.
+	 *
+	 * @return void
+	 */
 	public function signups_stripe_api_secret() {
-
-		// get option 'text_string' value from the database
 		$options = get_option( 'signups_stripe' );
 		if ( isset( $options['api_secret'] ) ) {
 			$name = $options['api_secret'];
@@ -155,14 +184,16 @@ class SettingsEditor {
 			$name = '';
 		}
 
-		// echo the field
 		echo "<input id='api_secret' class='key_name' name='signups_stripe[api_secret]'
 			type='text' value='" . esc_attr( $name ) . "' />";
 	}
 
+	/**
+	 * Generate the Stripe endpoint secret setting.
+	 *
+	 * @return void
+	 */
 	public function signups_stripe_endpoint_secret() {
-
-		// get option 'text_string' value from the database
 		$options = get_option( 'signups_stripe' );
 		if ( isset ( $options['endpoint_secret'] ) ) {
 			$name = $options['endpoint_secret'];
@@ -175,9 +206,12 @@ class SettingsEditor {
 			type='text' value='" . esc_attr( $name ) . "' />";
 	}
 
+	/**
+	 * Generate the reCaptcha api key setting.
+	 *
+	 * @return void
+	 */
 	public function signups_captcha_api_key() {
-
-		// get option 'text_string' value from the database
 		$options = get_option( 'signups_captcha' );
 		if ( isset( $options['captcha_api_key'] ) ) {
 			$name = $options['captcha_api_key'];
@@ -185,14 +219,16 @@ class SettingsEditor {
 			$name = '';
 		}
 
-		// echo the field
 		echo "<input id='captcha_api_key' class='key_name' name='signups_captcha[captcha_api_key]'
 			type='text' value='" . esc_attr( $name ) . "' />";
 	}
 
+	/**
+	 * Generate the reCaptcha api secret setting.
+	 *
+	 * @return void
+	 */
 	public function signups_captcha_api_secret() {
-
-		// get option 'text_string' value from the database
 		$options = get_option( 'signups_captcha' );
 		if ( isset( $options['captcha_api_secret'] ) ) {
 			$name = $options['captcha_api_secret'];
@@ -204,10 +240,13 @@ class SettingsEditor {
 		echo "<input id='captcha_api_secret' class='key_name' name='signups_captcha[captcha_api_secret]'
 			type='text' value='" . esc_attr( $name ) . "' />";
 	}
-	
-	public function signups_sendgrid_api_key() {
 
-		// get option 'text_string' value from the database
+	/**
+	 * Generate the SendGrid api key setting.
+	 *
+	 * @return void
+	 */
+	public function signups_sendgrid_api_key() {
 		$options = get_option( 'signups_sendgrid' );
 		if ( isset( $options['sendgrid_api_key'] ) ) {
 			$name = $options['sendgrid_api_key'];
@@ -215,13 +254,17 @@ class SettingsEditor {
 			$name = '';
 		}
 
-		// echo the field
 		echo "<input id='sendgrid_api_key' class='key_name' name='signups_sendgrid[sendgrid_api_key]'
 			type='text' value='" . esc_attr( $name ) . "' />";
 	}
 
-
-	function signups_validate_options( $input ) {
+	/**
+	 * These are entered by an admin so we aren't validating them.
+	 *
+	 * @param  mixed $input The input.
+	 * @return string Returing the input as is.
+	 */
+	public function signups_validate_options( $input ) {
 		return $input;
 	}
 }

@@ -109,8 +109,17 @@ Inheritance diagram for SignUpsPlugin:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a095c5d389db211932136b53f25f39685" id="r_a095c5d389db211932136b53f25f39685"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a095c5d389db211932136b53f25f39685">__construct</a> ()</td></tr>
-<tr class="memdesc:a095c5d389db211932136b53f25f39685"><td class="mdescLeft">&#160;</td><td class="mdescRight">The constructor does a lot of work by instantiated several objects that are required for various <a class="el" href="class_short_codes.html" title="The ShortCodes class is the main class for generating the web pages that the user can see.">ShortCodes</a>.  <br /></td></tr>
+<tr class="memdesc:a095c5d389db211932136b53f25f39685"><td class="mdescLeft">&#160;</td><td class="mdescRight">The constructor does a lot of work by instantiated several objects that are require_onced for various <a class="el" href="class_short_codes.html" title="The ShortCodes class is the main class for generating the web pages that the user can see.">ShortCodes</a>.  <br /></td></tr>
 <tr class="separator:a095c5d389db211932136b53f25f39685"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a451ccb3a569d1c71bc25210a358cf6d2" id="r_a451ccb3a569d1c71bc25210a358cf6d2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a451ccb3a569d1c71bc25210a358cf6d2">restrict_admin_bar</a> ( $show)</td></tr>
+<tr class="memdesc:a451ccb3a569d1c71bc25210a358cf6d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Don't show the admin bar unless an admin is logged in.  <br /></td></tr>
+<tr class="separator:a451ccb3a569d1c71bc25210a358cf6d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace7fab462415e0bfd42cc5158c54f3a5" id="r_ace7fab462415e0bfd42cc5158c54f3a5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ace7fab462415e0bfd42cc5158c54f3a5">modify_nonce_life</a> ( $lifespan, $action)</td></tr>
+<tr class="memdesc:ace7fab462415e0bfd42cc5158c54f3a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modify the life time of the nounce.  <br /></td></tr>
+<tr class="separator:ace7fab462415e0bfd42cc5158c54f3a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a781ec6e9a679c5876095b7efc5f4573f" id="r_a781ec6e9a679c5876095b7efc5f4573f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a781ec6e9a679c5876095b7efc5f4573f">wpdocs_modify_nonce_for_logged_out_users</a> ( $uid, $action)</td></tr>
+<tr class="memdesc:a781ec6e9a679c5876095b7efc5f4573f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Custom function to modify the nonce value for logged-out users.  <br /></td></tr>
+<tr class="separator:a781ec6e9a679c5876095b7efc5f4573f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1203dc9c70a07e3c79b2806822be0dc0" id="r_a1203dc9c70a07e3c79b2806822be0dc0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1203dc9c70a07e3c79b2806822be0dc0">plugins_loaded</a> ()</td></tr>
 <tr class="memdesc:a1203dc9c70a07e3c79b2806822be0dc0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called when all of the WordPress plugins have been loaded This the only time that the WP-Optimize object is available to clear the cache.  <br /></td></tr>
 <tr class="separator:a1203dc9c70a07e3c79b2806822be0dc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -120,9 +129,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a7fe9c87ff2c4d889a2f60bc5e82e8f0e" id="r_a7fe9c87ff2c4d889a2f60bc5e82e8f0e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7fe9c87ff2c4d889a2f60bc5e82e8f0e">signup_plugin_top_menu</a> ()</td></tr>
 <tr class="memdesc:a7fe9c87ff2c4d889a2f60bc5e82e8f0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds the main menu item and set of submenu items for the plugin.  <br /></td></tr>
 <tr class="separator:a7fe9c87ff2c4d889a2f60bc5e82e8f0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a88a92bac793e9d8e58d660b788559d3f" id="r_a88a92bac793e9d8e58d660b788559d3f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a88a92bac793e9d8e58d660b788559d3f">add_scripts_and_css</a> ( $host)</td></tr>
-<tr class="memdesc:a88a92bac793e9d8e58d660b788559d3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds the CSS that is used to style the admin side plug-in.  <br /></td></tr>
-<tr class="separator:a88a92bac793e9d8e58d660b788559d3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab486b81dfa51cd59a9728f8f9585fc91" id="r_ab486b81dfa51cd59a9728f8f9585fc91"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab486b81dfa51cd59a9728f8f9585fc91">add_admin_scripts_and_css</a> ( $host)</td></tr>
+<tr class="memdesc:ab486b81dfa51cd59a9728f8f9585fc91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds the CSS that is used to style the admin side plug-in.  <br /></td></tr>
+<tr class="separator:ab486b81dfa51cd59a9728f8f9585fc91"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a43a24c30a7b65cc13af4d11b24cfe970" id="r_a43a24c30a7b65cc13af4d11b24cfe970"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a43a24c30a7b65cc13af4d11b24cfe970">add_users_scripts_and_css</a> ( $host)</td></tr>
 <tr class="memdesc:a43a24c30a7b65cc13af4d11b24cfe970"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds the JS adn CSS that is used to style the users side of the plug-in.  <br /></td></tr>
 <tr class="separator:a43a24c30a7b65cc13af4d11b24cfe970"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -136,25 +145,19 @@ Private Attributes</h2></td></tr>
 <tr class="memitem:a32bf5234d36052e3cdd001ba8b36a087" id="r_a32bf5234d36052e3cdd001ba8b36a087"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a32bf5234d36052e3cdd001ba8b36a087">$short_codes</a></td></tr>
 <tr class="memdesc:a32bf5234d36052e3cdd001ba8b36a087"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference to the ShortCode object.  <br /></td></tr>
 <tr class="separator:a32bf5234d36052e3cdd001ba8b36a087"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aab69200a13d23193f5b315afd1d484c8" id="r_aab69200a13d23193f5b315afd1d484c8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aab69200a13d23193f5b315afd1d484c8">$description_editor</a></td></tr>
-<tr class="memdesc:aab69200a13d23193f5b315afd1d484c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference to the DescriptionEditor object.  <br /></td></tr>
-<tr class="separator:aab69200a13d23193f5b315afd1d484c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab129b950cd334465ab0d2723bb51d5e8" id="r_ab129b950cd334465ab0d2723bb51d5e8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab129b950cd334465ab0d2723bb51d5e8">$stripe_payments</a></td></tr>
 <tr class="memdesc:ab129b950cd334465ab0d2723bb51d5e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference to the <a class="el" href="class_stripe_payments.html" title="Class for managing Stripe.com payments.">StripePayments</a> object.  <br /></td></tr>
 <tr class="separator:ab129b950cd334465ab0d2723bb51d5e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a13fe20ad4e32a7f82a42a1ed618d6d06" id="r_a13fe20ad4e32a7f82a42a1ed618d6d06"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a13fe20ad4e32a7f82a42a1ed618d6d06">$reports</a></td></tr>
 <tr class="memdesc:a13fe20ad4e32a7f82a42a1ed618d6d06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference to the <a class="el" href="class_reports.html" title="Reports generates reports such as cnc signup histor.">Reports</a> object.  <br /></td></tr>
 <tr class="separator:a13fe20ad4e32a7f82a42a1ed618d6d06"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9de34d4f2d5523e6ba2d38bbc01f09d8" id="r_a9de34d4f2d5523e6ba2d38bbc01f09d8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9de34d4f2d5523e6ba2d38bbc01f09d8">$roster</a></td></tr>
-<tr class="memdesc:a9de34d4f2d5523e6ba2d38bbc01f09d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference to the MemberRoster object.  <br /></td></tr>
-<tr class="separator:a9de34d4f2d5523e6ba2d38bbc01f09d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
 <tr class="inherit_header pro_methods_class_sign_ups_base"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_class_sign_ups_base')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_sign_ups_base.html">SignUpsBase</a></td></tr>
-<tr class="memitem:a92a2b65b95d42953c023599efc79e252 inherit pro_methods_class_sign_ups_base" id="r_a92a2b65b95d42953c023599efc79e252"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a92a2b65b95d42953c023599efc79e252">write_log</a> ( $log_text)</td></tr>
-<tr class="memdesc:a92a2b65b95d42953c023599efc79e252 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes a string to the log table in the database.  <br /></td></tr>
-<tr class="separator:a92a2b65b95d42953c023599efc79e252 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4622d7598733c5b7a5e4bce3b32f9b0f inherit pro_methods_class_sign_ups_base" id="r_a4622d7598733c5b7a5e4bce3b32f9b0f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a4622d7598733c5b7a5e4bce3b32f9b0f">write_log</a> ( $calling_function, $file, $text,)</td></tr>
+<tr class="memdesc:a4622d7598733c5b7a5e4bce3b32f9b0f inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes a string to the log table in the database.  <br /></td></tr>
+<tr class="separator:a4622d7598733c5b7a5e4bce3b32f9b0f inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a478482540870816aa01abe430a295760 inherit pro_methods_class_sign_ups_base" id="r_a478482540870816aa01abe430a295760"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a478482540870816aa01abe430a295760">session_attendee_string</a> ( $attendee_id, $session_id)</td></tr>
 <tr class="memdesc:a478482540870816aa01abe430a295760 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Formats a string to be passed back in form data.  <br /></td></tr>
 <tr class="separator:a478482540870816aa01abe430a295760 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -170,51 +173,36 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memitem:a6e695993b625a86b0a1c4869067ddaea inherit pro_methods_class_sign_ups_base" id="r_a6e695993b625a86b0a1c4869067ddaea"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a6e695993b625a86b0a1c4869067ddaea">set_clear_cache</a> ( $value)</td></tr>
 <tr class="memdesc:a6e695993b625a86b0a1c4869067ddaea inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">When an administrator makes changes to a signup the change will not appear immediately unless you clear the cache.  <br /></td></tr>
 <tr class="separator:a6e695993b625a86b0a1c4869067ddaea inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adfb88f28645bbfbd296303f4b88a66c7 inherit pro_methods_class_sign_ups_base" id="r_adfb88f28645bbfbd296303f4b88a66c7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#adfb88f28645bbfbd296303f4b88a66c7">register_route</a> ( $namespace, $route, $func, $class_inst, $args, $method)</td></tr>
-<tr class="memdesc:adfb88f28645bbfbd296303f4b88a66c7 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function for registering RestFul API routes.  <br /></td></tr>
-<tr class="separator:adfb88f28645bbfbd296303f4b88a66c7 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae7c21503d430fd21ad6d975251339b4d inherit pro_methods_class_sign_ups_base" id="r_ae7c21503d430fd21ad6d975251339b4d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#ae7c21503d430fd21ad6d975251339b4d">get_signup_html</a> ( $signup_id)</td></tr>
 <tr class="memdesc:ae7c21503d430fd21ad6d975251339b4d inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the HTML description for a signup.  <br /></td></tr>
 <tr class="separator:ae7c21503d430fd21ad6d975251339b4d inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f07832c148649c129532575bd8622c7 inherit pro_methods_class_sign_ups_base" id="r_a5f07832c148649c129532575bd8622c7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a5f07832c148649c129532575bd8622c7">is_rolling_signup</a> ( $signup_id)</td></tr>
+<tr class="memdesc:a5f07832c148649c129532575bd8622c7 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is this a rolling signup is the question this function answers.  <br /></td></tr>
+<tr class="separator:a5f07832c148649c129532575bd8622c7 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a98e7cce01fbc0bd6ae52d1f5c163a838 inherit pro_methods_class_sign_ups_base" id="r_a98e7cce01fbc0bd6ae52d1f5c163a838"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a98e7cce01fbc0bd6ae52d1f5c163a838">create_new_member_form</a> ()</td></tr>
 <tr class="memdesc:a98e7cce01fbc0bd6ae52d1f5c163a838 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a form for new users to apply for membership.  <br /></td></tr>
 <tr class="separator:a98e7cce01fbc0bd6ae52d1f5c163a838 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a373f728873f5c00aca17b5f58bd1ea99 inherit pro_methods_class_sign_ups_base" id="r_a373f728873f5c00aca17b5f58bd1ea99"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a373f728873f5c00aca17b5f58bd1ea99">create_lookup_member_table</a> ( $center=false, $badge='', $firstname='', $lastname='', $email='', $phone='')</td></tr>
 <tr class="memdesc:a373f728873f5c00aca17b5f58bd1ea99 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a member search box used in administrative pages.  <br /></td></tr>
 <tr class="separator:a373f728873f5c00aca17b5f58bd1ea99 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a263c8eafb8fd49ba1fc6823a237eb676 inherit pro_methods_class_sign_ups_base" id="r_a263c8eafb8fd49ba1fc6823a237eb676"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a263c8eafb8fd49ba1fc6823a237eb676">create_user_table</a> ( $user_group, $signup_id, $secret=null)</td></tr>
-<tr class="memdesc:a263c8eafb8fd49ba1fc6823a237eb676 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a section of HTML for the user to identify themselves using their badge number.  <br /></td></tr>
-<tr class="separator:a263c8eafb8fd49ba1fc6823a237eb676 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a55220d44257b88a5872c0dec484cfc6d inherit pro_methods_class_sign_ups_base" id="r_a55220d44257b88a5872c0dec484cfc6d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a55220d44257b88a5872c0dec484cfc6d">create_rolling_session</a> ( $rolling_signup_id, $secret, $admin=false, $rolling_days=null)</td></tr>
-<tr class="memdesc:a55220d44257b88a5872c0dec484cfc6d inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a rolling signup based on a template.  <br /></td></tr>
-<tr class="separator:a55220d44257b88a5872c0dec484cfc6d inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae56bdd10a40f3d85ed1e62eb8ee8d136 inherit pro_methods_class_sign_ups_base" id="r_ae56bdd10a40f3d85ed1e62eb8ee8d136"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#ae56bdd10a40f3d85ed1e62eb8ee8d136">create_rolling_session_select_form2</a> ( $signup_name, $attendees, $signup_id, $template, $template_items, $user_group, $admin, $secret, $description, $template_items2, $rolling_days=null)</td></tr>
-<tr class="memdesc:ae56bdd10a40f3d85ed1e62eb8ee8d136 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a form that displays the rolling sessions along with their attendees.  <br /></td></tr>
-<tr class="separator:ae56bdd10a40f3d85ed1e62eb8ee8d136 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2953ba412d11ef6e0a1d41ae630add05 inherit pro_methods_class_sign_ups_base" id="r_a2953ba412d11ef6e0a1d41ae630add05"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a2953ba412d11ef6e0a1d41ae630add05">create_user_table</a> ( $user_group, $signup_id)</td></tr>
+<tr class="memdesc:a2953ba412d11ef6e0a1d41ae630add05 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a section of HTML for the user to identify themselves using their badge number.  <br /></td></tr>
+<tr class="separator:a2953ba412d11ef6e0a1d41ae630add05 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee97c693ee2bb38ddf74033636a9d9ec inherit pro_methods_class_sign_ups_base" id="r_aee97c693ee2bb38ddf74033636a9d9ec"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#aee97c693ee2bb38ddf74033636a9d9ec">set_user</a> ( $user_id, $badge)</td></tr>
+<tr class="memdesc:aee97c693ee2bb38ddf74033636a9d9ec inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the current user.  <br /></td></tr>
+<tr class="separator:aee97c693ee2bb38ddf74033636a9d9ec inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab595a362705139e2b7060e385c88140e inherit pro_methods_class_sign_ups_base" id="r_ab595a362705139e2b7060e385c88140e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#ab595a362705139e2b7060e385c88140e">unset_user</a> ()</td></tr>
+<tr class="memdesc:ab595a362705139e2b7060e385c88140e inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Logs out the current users unless the user is an administator.  <br /></td></tr>
+<tr class="separator:ab595a362705139e2b7060e385c88140e inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2ef24a718a6b4ba77ba28474cd4cad4 inherit pro_methods_class_sign_ups_base" id="r_af2ef24a718a6b4ba77ba28474cd4cad4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#af2ef24a718a6b4ba77ba28474cd4cad4">create_rolling_session</a> ( $rolling_signup_id, $rolling_days=null)</td></tr>
+<tr class="memdesc:af2ef24a718a6b4ba77ba28474cd4cad4 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a rolling signup based on a template.  <br /></td></tr>
+<tr class="separator:af2ef24a718a6b4ba77ba28474cd4cad4 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2f6cdcb33e072e851a0f88ffba73add inherit pro_methods_class_sign_ups_base" id="r_af2f6cdcb33e072e851a0f88ffba73add"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#af2f6cdcb33e072e851a0f88ffba73add">create_rolling_session_select_form2</a> ( $signup_name, $attendees, $signup_id, $template, $template_items, $user_group, $description, $template_items2, $rolling_days=null)</td></tr>
+<tr class="memdesc:af2f6cdcb33e072e851a0f88ffba73add inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a form that displays the rolling sessions along with their attendees.  <br /></td></tr>
+<tr class="separator:af2f6cdcb33e072e851a0f88ffba73add inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa5a4899833a4a352850eead3cbf36f85 inherit pro_methods_class_sign_ups_base" id="r_aa5a4899833a4a352850eead3cbf36f85"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#aa5a4899833a4a352850eead3cbf36f85">add_attendee_rolling</a> ( $post)</td></tr>
 <tr class="memdesc:aa5a4899833a4a352850eead3cbf36f85 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add attendee for the selected spots.  <br /></td></tr>
 <tr class="separator:aa5a4899833a4a352850eead3cbf36f85 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a48d0251d44fa8c47714fb9806f95f64f inherit pro_methods_class_sign_ups_base" id="r_a48d0251d44fa8c47714fb9806f95f64f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a48d0251d44fa8c47714fb9806f95f64f">load_template_selection</a> ( $template_id, $add_new, $template_id_name, $select_id='template-select', $default_title='None')</td></tr>
-<tr class="memdesc:a48d0251d44fa8c47714fb9806f95f64f inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads the template selection dropdown list.  <br /></td></tr>
-<tr class="separator:a48d0251d44fa8c47714fb9806f95f64f inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab40563eddab356a2339a42106dbafd0e inherit pro_methods_class_sign_ups_base" id="r_ab40563eddab356a2339a42106dbafd0e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#ab40563eddab356a2339a42106dbafd0e">update_sessions_price_id</a> ( $signup_id, $new_price_id)</td></tr>
-<tr class="memdesc:ab40563eddab356a2339a42106dbafd0e inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the price id of all sessions for a signup.  <br /></td></tr>
-<tr class="separator:ab40563eddab356a2339a42106dbafd0e inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8ec61b095c2817c3ec8771ddc5045a51 inherit pro_methods_class_sign_ups_base" id="r_a8ec61b095c2817c3ec8771ddc5045a51"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a8ec61b095c2817c3ec8771ddc5045a51">create_description_section</a> ( $description_object)</td></tr>
-<tr class="memdesc:a8ec61b095c2817c3ec8771ddc5045a51 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates the description, short description and instructions input block.  <br /></td></tr>
-<tr class="separator:a8ec61b095c2817c3ec8771ddc5045a51 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a396564cb5b18c327d64ca66811342ead inherit pro_methods_class_sign_ups_base" id="r_a396564cb5b18c327d64ca66811342ead"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a396564cb5b18c327d64ca66811342ead">add_remove_from_calendar</a> ( $signup_id, $signup_name, $add)</td></tr>
-<tr class="memdesc:a396564cb5b18c327d64ca66811342ead inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes items from the calendar in response to removing admin approval from a signup.  <br /></td></tr>
-<tr class="separator:a396564cb5b18c327d64ca66811342ead inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a17bf20463bd03567a844c7f65b6ae9cb inherit pro_methods_class_sign_ups_base" id="r_a17bf20463bd03567a844c7f65b6ae9cb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a17bf20463bd03567a844c7f65b6ae9cb">update_calendar</a> ( $post)</td></tr>
-<tr class="memdesc:a17bf20463bd03567a844c7f65b6ae9cb inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the clubs calendar.  <br /></td></tr>
-<tr class="separator:a17bf20463bd03567a844c7f65b6ae9cb inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a855d366ee44471f1f9416b4bdabac984 inherit pro_methods_class_sign_ups_base" id="r_a855d366ee44471f1f9416b4bdabac984"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a855d366ee44471f1f9416b4bdabac984">get_session_email_data</a> ( $session_id=null)</td></tr>
-<tr class="memdesc:a855d366ee44471f1f9416b4bdabac984 inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the data to create a pre-class email.  <br /></td></tr>
-<tr class="separator:a855d366ee44471f1f9416b4bdabac984 inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab950ed130c89466a8df516e4334590fa inherit pro_methods_class_sign_ups_base" id="r_ab950ed130c89466a8df516e4334590fa"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#ab950ed130c89466a8df516e4334590fa">get_session_email_body</a> ( $session_id)</td></tr>
-<tr class="memdesc:ab950ed130c89466a8df516e4334590fa inherit pro_methods_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Formats the body of a session email to an attendee.  <br /></td></tr>
-<tr class="separator:ab950ed130c89466a8df516e4334590fa inherit pro_methods_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_class_sign_ups_base"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_class_sign_ups_base')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_sign_ups_base.html">SignUpsBase</a></td></tr>
 <tr class="memitem:ae68023bd4fe0e3fd1d06dbe91836ed41 inherit pro_attribs_class_sign_ups_base" id="r_ae68023bd4fe0e3fd1d06dbe91836ed41"><td class="memItemLeft" align="right" valign="top">const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#ae68023bd4fe0e3fd1d06dbe91836ed41">ATTENDEES_TABLE</a> = 'wp_scw_attendees'</td></tr>
 <tr class="memdesc:ae68023bd4fe0e3fd1d06dbe91836ed41 inherit pro_attribs_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Database attendees table.  <br /></td></tr>
@@ -237,9 +225,6 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memitem:af729bf989944b4a6359775813d404df3 inherit pro_attribs_class_sign_ups_base" id="r_af729bf989944b4a6359775813d404df3"><td class="memItemLeft" align="right" valign="top">const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#af729bf989944b4a6359775813d404df3">PAYMENTS_TABLE</a> = 'wp_scw_payments'</td></tr>
 <tr class="memdesc:af729bf989944b4a6359775813d404df3 inherit pro_attribs_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Payments table.  <br /></td></tr>
 <tr class="separator:af729bf989944b4a6359775813d404df3 inherit pro_attribs_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a823647b3966e627db7282500fab3032a inherit pro_attribs_class_sign_ups_base" id="r_a823647b3966e627db7282500fab3032a"><td class="memItemLeft" align="right" valign="top">const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a823647b3966e627db7282500fab3032a">STRIPE_TABLE</a> = 'wp_scw_stripe'</td></tr>
-<tr class="memdesc:a823647b3966e627db7282500fab3032a inherit pro_attribs_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stripe settings table.  <br /></td></tr>
-<tr class="separator:a823647b3966e627db7282500fab3032a inherit pro_attribs_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d8a24237e9653f5821861e6ce3b3520 inherit pro_attribs_class_sign_ups_base" id="r_a7d8a24237e9653f5821861e6ce3b3520"><td class="memItemLeft" align="right" valign="top">const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a7d8a24237e9653f5821861e6ce3b3520">DESCRIPTIONS_TABLE</a> = 'wp_scw_signup_descriptions'</td></tr>
 <tr class="memdesc:a7d8a24237e9653f5821861e6ce3b3520 inherit pro_attribs_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Signup descriptions table.  <br /></td></tr>
 <tr class="separator:a7d8a24237e9653f5821861e6ce3b3520 inherit pro_attribs_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -276,6 +261,9 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memitem:a6faacd47093237674f68a11934384cd6 inherit pro_attribs_class_sign_ups_base" id="r_a6faacd47093237674f68a11934384cd6"><td class="memItemLeft" align="right" valign="top">const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a6faacd47093237674f68a11934384cd6">NEW_MEMBER_TABLE</a> = 'wp_scw_new_member'</td></tr>
 <tr class="memdesc:a6faacd47093237674f68a11934384cd6 inherit pro_attribs_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">New members table.  <br /></td></tr>
 <tr class="separator:a6faacd47093237674f68a11934384cd6 inherit pro_attribs_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5d6b2f205dc873fe02297b5a9525088 inherit pro_attribs_class_sign_ups_base" id="r_aa5d6b2f205dc873fe02297b5a9525088"><td class="memItemLeft" align="right" valign="top">const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#aa5d6b2f205dc873fe02297b5a9525088">RECAPTCHA_LOG</a> = 'wp_scw_recaptcha_log'</td></tr>
+<tr class="memdesc:aa5d6b2f205dc873fe02297b5a9525088 inherit pro_attribs_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recaptcha log.  <br /></td></tr>
+<tr class="separator:aa5d6b2f205dc873fe02297b5a9525088 inherit pro_attribs_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a824ede96a8df5d238a720a1772c804cd inherit pro_attribs_class_sign_ups_base" id="r_a824ede96a8df5d238a720a1772c804cd"><td class="memItemLeft" align="right" valign="top">const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#a824ede96a8df5d238a720a1772c804cd">LOG_TABLE</a> = 'wp_scw_logs'</td></tr>
 <tr class="memdesc:a824ede96a8df5d238a720a1772c804cd inherit pro_attribs_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Log table.  <br /></td></tr>
 <tr class="separator:a824ede96a8df5d238a720a1772c804cd inherit pro_attribs_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -298,12 +286,11 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memdesc:ac6f6c79de31bf82c14b3b724793c9024 inherit pro_attribs_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Format Date as 2020-08-13.  <br /></td></tr>
 <tr class="separator:ac6f6c79de31bf82c14b3b724793c9024 inherit pro_attribs_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1fbdccaf409550551968e6b7ba31df1 inherit pro_attribs_class_sign_ups_base" id="r_aa1fbdccaf409550551968e6b7ba31df1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_sign_ups_base.html#aa1fbdccaf409550551968e6b7ba31df1">$date_time_zone</a></td></tr>
-<tr class="memdesc:aa1fbdccaf409550551968e6b7ba31df1 inherit pro_attribs_class_sign_ups_base"><td class="mdescLeft">&#160;</td><td class="mdescRight">Date timezone.  <br /></td></tr>
 <tr class="separator:aa1fbdccaf409550551968e6b7ba31df1 inherit pro_attribs_class_sign_ups_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Main SignUps class. </p>
-<p>This is the entry point for the plugin. Several other classes are required in this file and all are instantiated here. </p>
+<p>This is the entry point for the plugin. Several other classes are require_onced in this file and all are instantiated here. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a095c5d389db211932136b53f25f39685" name="a095c5d389db211932136b53f25f39685"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a095c5d389db211932136b53f25f39685">&#9670;&#160;</a></span>__construct()</h2>
@@ -320,7 +307,7 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>The constructor does a lot of work by instantiated several objects that are required for various <a class="el" href="class_short_codes.html" title="The ShortCodes class is the main class for generating the web pages that the user can see.">ShortCodes</a>. </p>
+<p>The constructor does a lot of work by instantiated several objects that are require_onced for various <a class="el" href="class_short_codes.html" title="The ShortCodes class is the main class for generating the web pages that the user can see.">ShortCodes</a>. </p>
 <p>The <a class="el" href="class_short_codes.html" title="The ShortCodes class is the main class for generating the web pages that the user can see.">ShortCodes</a> are also registered here.</p>
 <p>It is important to understand that this plugin is one big ShortCode. The <a class="el" href="class_short_codes.html" title="The ShortCodes class is the main class for generating the web pages that the user can see.">ShortCodes</a> class in the root of the public user interface. <a class="el" href="class_signup_settings.html" title="Admin page for the signups plugin.">SignupSettings</a> class is the root of the administration interface. </p>
 
@@ -329,14 +316,14 @@ Additional Inherited Members</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a88a92bac793e9d8e58d660b788559d3f" name="a88a92bac793e9d8e58d660b788559d3f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a88a92bac793e9d8e58d660b788559d3f">&#9670;&#160;</a></span>add_scripts_and_css()</h2>
+<a id="ab486b81dfa51cd59a9728f8f9585fc91" name="ab486b81dfa51cd59a9728f8f9585fc91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab486b81dfa51cd59a9728f8f9585fc91">&#9670;&#160;</a></span>add_admin_scripts_and_css()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">add_scripts_and_css </td>
+          <td class="memname">add_admin_scripts_and_css </td>
           <td>(</td>
           <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$host</em></span></td><td>)</td>
           <td></td>
@@ -381,6 +368,37 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
+<a id="ace7fab462415e0bfd42cc5158c54f3a5" name="ace7fab462415e0bfd42cc5158c54f3a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace7fab462415e0bfd42cc5158c54f3a5">&#9670;&#160;</a></span>modify_nonce_life()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">modify_nonce_life </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$lifespan</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$action</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Modify the life time of the nounce. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramtype">mixed</td><td class="paramname">$lifespan</td><td>Normally set to 24 hours but we want to shorten it to an hour. </td></tr>
+    <tr><td class="paramtype">mixed</td><td class="paramname">$action</td><td>The nonce by name. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The life span. </dd></dl>
+
+</div>
+</div>
 <a id="a1203dc9c70a07e3c79b2806822be0dc0" name="a1203dc9c70a07e3c79b2806822be0dc0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1203dc9c70a07e3c79b2806822be0dc0">&#9670;&#160;</a></span>plugins_loaded()</h2>
 
@@ -397,6 +415,32 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Called when all of the WordPress plugins have been loaded This the only time that the WP-Optimize object is available to clear the cache. </p>
+<dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
+
+</div>
+</div>
+<a id="a451ccb3a569d1c71bc25210a358cf6d2" name="a451ccb3a569d1c71bc25210a358cf6d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a451ccb3a569d1c71bc25210a358cf6d2">&#9670;&#160;</a></span>restrict_admin_bar()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">restrict_admin_bar </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$show</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Don't show the admin bar unless an admin is logged in. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramtype">mixed</td><td class="paramname">$show</td><td>Unused in our case. </td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section return"><dt>Returns</dt><dd>void </dd></dl>
 
 </div>
@@ -418,6 +462,37 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Adds the main menu item and set of submenu items for the plugin. </p>
 <p>This menu is available only to the administrators. </p>
+
+</div>
+</div>
+<a id="a781ec6e9a679c5876095b7efc5f4573f" name="a781ec6e9a679c5876095b7efc5f4573f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a781ec6e9a679c5876095b7efc5f4573f">&#9670;&#160;</a></span>wpdocs_modify_nonce_for_logged_out_users()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">wpdocs_modify_nonce_for_logged_out_users </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$uid</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>$action</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Custom function to modify the nonce value for logged-out users. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramtype">int</td><td class="paramname">$uid</td><td>The user ID (0 for logged-out users). </td></tr>
+    <tr><td class="paramtype">string</td><td class="paramname">$action</td><td>The nonce action.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>int The modified user ID. </dd></dl>
 
 </div>
 </div>
@@ -449,30 +524,6 @@ Additional Inherited Members</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
-<a id="aab69200a13d23193f5b315afd1d484c8" name="aab69200a13d23193f5b315afd1d484c8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aab69200a13d23193f5b315afd1d484c8">&#9670;&#160;</a></span>$description_editor</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">$description_editor</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Reference to the DescriptionEditor object. </p>
-
-</div>
-</div>
 <a id="a13fe20ad4e32a7f82a42a1ed618d6d06" name="a13fe20ad4e32a7f82a42a1ed618d6d06"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a13fe20ad4e32a7f82a42a1ed618d6d06">&#9670;&#160;</a></span>$reports</h2>
 
@@ -494,30 +545,6 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Reference to the <a class="el" href="class_reports.html" title="Reports generates reports such as cnc signup histor.">Reports</a> object. </p>
-
-</div>
-</div>
-<a id="a9de34d4f2d5523e6ba2d38bbc01f09d8" name="a9de34d4f2d5523e6ba2d38bbc01f09d8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9de34d4f2d5523e6ba2d38bbc01f09d8">&#9670;&#160;</a></span>$roster</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">$roster</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Reference to the MemberRoster object. </p>
 
 </div>
 </div>

@@ -279,34 +279,6 @@ class SignUpsBase {
 	}
 
 	/**
-	 * Helper function for registering RestFul API routes.
-	 * The routes are the URL used to call the API.
-	 *
-	 * @param  string $namespace The namespace.
-	 * @param  string $route End of the route.
-	 * @param  object $func The endpoint function.
-	 * @param  string $class_inst Instance of the class containing the function.
-	 * @param  array  $args Arguments to the api call.
-	 * @param  string $method POST, GET....etc.
-	 * @return void
-	 */
-	protected function register_route( $namespace, $route, $func, $class_inst, $args, $method ) {
-		$basic_args = array(
-			'methods'             => $method,
-			'callback'            => array( $class_inst, $func ),
-			'permission_callback' => array( $class_inst, 'permissions_check' ),
-		);
-
-		array_merge( $basic_args, $args );
-
-		register_rest_route(
-			$namespace,
-			$route,
-			$basic_args
-		);
-	}
-
-	/**
 	 * Returns the HTML description for a signup.
 	 *
 	 * @param int $signup_id The signup id.
@@ -1969,7 +1941,7 @@ class SignUpsBase {
 
 		return $body;
 	}
-	
+
 	/**
 	 * Verify the reCAPATCHA token passed from the user. Also logs 
 	 * the result into the datbase.
@@ -1987,7 +1959,7 @@ class SignUpsBase {
 			'response' => $token,
 			'remoteip' => $_SERVER['REMOTE_ADDR'],
 		);
-		
+
 		$options = array(
 			'http' => array(
 				'header'  => 'Content-type: application/x-www-form-urlencoded\r\n',
@@ -2000,7 +1972,7 @@ class SignUpsBase {
 		$context      = stream_context_create( $options );
 		$response     = file_get_contents( $url, false, $context );
 		$res          = json_decode( $response, true );
-		
+
 		if ( isset( $post['token'] ) ) {
 			$post['token'] = 'removed';
 		}
@@ -2054,7 +2026,7 @@ class SignUpsBase {
 
 		$this->create_signin_form( $signup->signup_name, $signup_id, $signup->signup_group );
 	}
-	
+
 	/**
 	 * Creates the sign in form.
 	 *

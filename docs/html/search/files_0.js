@@ -13,11 +13,13 @@ var searchData=
   ['class_2dsendgridmail_2ephp_10',['class-sendgridmail.php',['../class-sendgridmail_8php.html',1,'']]],
   ['class_2dsessionemaildata_2ephp_11',['class-sessionemaildata.php',['../class-sessionemaildata_8php.html',1,'']]],
   ['class_2dsessionitem_2ephp_12',['class-sessionitem.php',['../class-sessionitem_8php.html',1,'']]],
-  ['class_2dshortcodes_2ephp_13',['class-shortcodes.php',['../class-shortcodes_8php.html',1,'']]],
-  ['class_2dsignupsbase_2ephp_14',['class-signupsbase.php',['../class-signupsbase_8php.html',1,'']]],
-  ['class_2dsignupsettings_2ephp_15',['class-signupsettings.php',['../class-signupsettings_8php.html',1,'']]],
-  ['class_2dsignupsplugin_2ephp_16',['class-signupsplugin.php',['../class-signupsplugin_8php.html',1,'']]],
-  ['class_2dsignupsrestapis_2ephp_17',['class-signupsrestapis.php',['../class-signupsrestapis_8php.html',1,'']]],
-  ['class_2dstripepayments_2ephp_18',['class-stripepayments.php',['../class-stripepayments_8php.html',1,'']]],
-  ['class_2dtimeexception_2ephp_19',['class-timeexception.php',['../class-timeexception_8php.html',1,'']]]
+  ['class_2dsettings_2ephp_13',['class-settings.php',['../class-settings_8php.html',1,'']]],
+  ['class_2dshortcodes_2ephp_14',['class-shortcodes.php',['../class-shortcodes_8php.html',1,'']]],
+  ['class_2dsignupsbase_2ephp_15',['class-signupsbase.php',['../class-signupsbase_8php.html',1,'']]],
+  ['class_2dsignupsettings_2ephp_16',['class-signupsettings.php',['../class-signupsettings_8php.html',1,'']]],
+  ['class_2dsignupsplugin_2ephp_17',['class-signupsplugin.php',['../class-signupsplugin_8php.html',1,'']]],
+  ['class_2dsignupsrestapis_2ephp_18',['class-signupsrestapis.php',['../class-signupsrestapis_8php.html',1,'']]],
+  ['class_2dstripepayments_2ephp_19',['class-stripepayments.php',['../class-stripepayments_8php.html',1,'']]],
+  ['class_2dtimeexception_2ephp_20',['class-timeexception.php',['../class-timeexception_8php.html',1,'']]],
+  ['common_2ejs_21',['common.js',['../common_8js.html',1,'']]]
 ];

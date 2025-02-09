@@ -11,7 +11,6 @@ var searchData=
   ['load_5fsignup_5fselection_8',['load_signup_selection',['../class_html_editor.html#ac9d5c3dc71a0f6a2d1877620e255c3f1',1,'HtmlEditor\load_signup_selection()'],['../class_reports.html#a7212fee0eb452858f60ed5951e4f5494',1,'Reports\load_signup_selection()'],['../class_signup_settings.html#a7212fee0eb452858f60ed5951e4f5494',1,'SignupSettings\load_signup_selection()']]],
   ['load_5fsignup_5fsessions_9',['load_signup_sessions',['../class_reports.html#a5c502f32b1d23aa8bdfd67614e8bab5f',1,'Reports']]],
   ['load_5ftemplate_5fform_10',['load_template_form',['../class_rolling_templates_editor.html#af689bbdfbff8f3f993273e3a5a406385',1,'RollingTemplatesEditor']]],
-  ['load_5ftemplate_5fselection_11',['load_template_selection',['../class_sign_ups_base.html#a48d0251d44fa8c47714fb9806f95f64f',1,'SignUpsBase']]],
-  ['load_5ftemplates_5feditor_12',['load_templates_editor',['../class_rolling_templates_editor.html#a25a733ca3ebb1194002b7fa0e6ebf78c',1,'RollingTemplatesEditor']]],
-  ['log_5ftable_13',['LOG_TABLE',['../class_sign_ups_base.html#a824ede96a8df5d238a720a1772c804cd',1,'SignUpsBase']]]
+  ['load_5ftemplates_5feditor_11',['load_templates_editor',['../class_rolling_templates_editor.html#a25a733ca3ebb1194002b7fa0e6ebf78c',1,'RollingTemplatesEditor']]],
+  ['log_5ftable_12',['LOG_TABLE',['../class_sign_ups_base.html#a824ede96a8df5d238a720a1772c804cd',1,'SignUpsBase']]]
 ];

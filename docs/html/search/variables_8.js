@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['rolling_5fexceptions_5ftable_0',['ROLLING_EXCEPTIONS_TABLE',['../class_sign_ups_base.html#a3d7067e8f7fd1f04cbff3c3729f2e604',1,'SignUpsBase']]],
-  ['rolling_5ftable_1',['ROLLING_TABLE',['../class_sign_ups_base.html#a9b6eb5d2fbd55eebf85a48196072a860',1,'SignUpsBase']]]
+  ['recaptcha_5flog_0',['RECAPTCHA_LOG',['../class_sign_ups_base.html#aa5d6b2f205dc873fe02297b5a9525088',1,'SignUpsBase']]],
+  ['rolling_5fexceptions_5ftable_1',['ROLLING_EXCEPTIONS_TABLE',['../class_sign_ups_base.html#a3d7067e8f7fd1f04cbff3c3729f2e604',1,'SignUpsBase']]],
+  ['rolling_5ftable_2',['ROLLING_TABLE',['../class_sign_ups_base.html#a9b6eb5d2fbd55eebf85a48196072a860',1,'SignUpsBase']]]
 ];
