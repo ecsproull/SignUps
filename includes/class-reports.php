@@ -6,20 +6,10 @@
  * @package SignUps
  */
 
- /**
-  * Reports generates reports such as cnc signup histor
-  */
- class Reports extends SignUpsBase {
-
-	/**
-	 * All usage query.
-	 *
-	 *  mixed
-	 */
-	private $users_report = 'SELECT * from CncSignUpHistory ORDER BY Machine, StartTime';
-
-	private $users_report_where = 'SELECT * from CncSignUpHistory WHERE %s ORDER BY Machine, StartTime';
-
+/**
+ * Reports generates reports such as cnc signup histor
+ */
+class Reports extends SignUpsBase {
 	/**
 	 * Add the select class shortcode
 	 */
@@ -50,6 +40,7 @@
 	 */
 	private function load_signup_sessions( $signup_id ) {
 		global $wpdb;
+
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT wp_scw_attendees.attendee_firstname,
@@ -63,7 +54,7 @@
 				FROM wp_scw_sessions
 				LEFT JOIN wp_scw_attendees 
 				ON wp_scw_attendees.attendee_session_id = wp_scw_sessions.session_id
-				WHERE wp_scw_sessions.session_signup_id = %d AND wp_scw_attendees.attendee_firstname IS NOT NULL
+				WHERE wp_scw_sessions.session_signup_id = %d
 				ORDER BY wp_scw_sessions.session_start_time',
 				$signup_id
 			),
@@ -125,10 +116,20 @@
 						<?php
 					}
 				}
+				if ( ! $attendee->attendee_firstname && ! $attendee->attendee_lastname ) {
+					?>
+					<div class="bg-warning">
+					 No Attendees for this session.
+					</div>
+					<?php
+				} else {
+					?>
+					<div>
+						<?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?>
+					</div>
+					<?php
+				}
 				?>
-				<div>
-					<?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?>
-				</div>
 				<div class="<?php echo esc_html( $current_session_id ); ?>">
 					<?php echo esc_html( $attendee->attendee_email ); ?>
 				</div>
