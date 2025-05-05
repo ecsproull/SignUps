@@ -146,6 +146,18 @@ class SignUpsBase {
 	protected const NEW_MEMBER_TABLE = 'wp_scw_new_member';
 
 	/**
+	 * WordPress users table. 
+	 * Used to remove users that aren't active.
+	 */
+	protected const WP_USERS = 'wp_users';
+
+	/**
+	 * WordPress users metadata table.
+	 * Used to remove users that aren't active.
+	 */
+	protected const WP_USER_META = 'wp_usermeta';
+
+	/**
 	 * Recaptcha log.
 	 * Records badge, score, calling ip address, post data and time.
 	 */
@@ -645,8 +657,8 @@ class SignUpsBase {
 	/**
 	 * Creates a rolling signup based on a template
 	 *
-	 * @param  int    $rolling_signup_id The id for the signup.
-	 * @param  int    $rolling_days The number of rolling days to create.
+	 * @param  int $rolling_signup_id The id for the signup.
+	 * @param  int $rolling_days The number of rolling days to create.
 	 *
 	 * @return void
 	 */
@@ -811,14 +823,16 @@ class SignUpsBase {
 	 * @param  mixed $end_date Date to end creating exceptions.
 	 * @return array
 	 */
-	public function create_meeting_exceptions( $start_date, $end_date ) {
+	public function create_meeting_exceptions( $start_date, $end_date, $template_id ) {
 		global $wpdb;
 		$exceptions = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
 				FROM %1s
-				WHERE exc_start >= %s AND exc_start <= %s',
+				WHERE exc_start >= %s AND exc_start <= %s || exc_end >= %s AND exc_end <= %s ',
 				self::ROLLING_EXCEPTIONS_TABLE,
+				$start_date->format( 'Y-m-d' ),
+				$end_date->format( 'Y-m-d' ),
 				$start_date->format( 'Y-m-d' ),
 				$end_date->format( 'Y-m-d' )
 			),
@@ -827,6 +841,10 @@ class SignUpsBase {
 
 		$time_exceptions = array();
 		foreach ( $exceptions as $exc ) {
+			if ( $exc->exc_template_id > 0 && $exc->exc_template_id != $template_id ) {
+				continue;
+			}
+
 			$dte               = new TimeException();
 			$dte->template     = $exc->exc_template_id;
 			$dte->begin        = new DateTime( $exc->exc_start, $this->date_time_zone );
@@ -888,7 +906,7 @@ class SignUpsBase {
 			$start_date->add( $date_interval );
 		}
 		$one_day_interval = new DateInterval( 'P1D' );
-		$time_exceptions  = $this->create_meeting_exceptions( $start_date, $end_date );
+		$time_exceptions  = $this->create_meeting_exceptions( $start_date, $end_date, $template->template_id );
 		?>
 		<div id="session_select" class="text-center mw-800px">
 			<h1 class="mb-2"><b><?php echo esc_html( $signup_name ); ?></b></h1>
@@ -1039,6 +1057,7 @@ class SignUpsBase {
 													<?php
 													if ( count( $slot_attendees ) < $item->template_item_slots ) {
 														?>
+														<span class='text-primary'><i><?php echo esc_html( $item->template_item_title ); ?> </i></span><br>
 														<input class="form-check-input position-relative rolling-add-chk ml-auto <?php echo esc_html( str_replace( ' ', '', $item->template_item_title ) ); ?>" 
 														type="checkbox" name="time_slots[]" 
 														value="
@@ -1094,7 +1113,7 @@ class SignUpsBase {
 												foreach ( $time_exceptions as $exception ) {
 													if ( $start_date >= $exception->begin &&
 														$start_date < $exception->end &&
-														( $exception->template === $template ||
+														( $exception->template === $template->template_id ||
 														'0' === $exception->template ) ) {
 														$reason         = $exception->reason;
 														$skip_time_slot = true;
@@ -1981,7 +2000,7 @@ class SignUpsBase {
 			$post['token_key'] = 'removed';
 		}
 
-		$success_threshold = 0.5;
+		$success_threshold = 0.3;
 		if ( true === $res['success'] && $res['score'] >= $success_threshold ) {
 			$return_value = true;
 		} elseif ( true === $res['success'] && $res['score'] < $success_threshold ) {

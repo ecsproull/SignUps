@@ -231,6 +231,24 @@ class SignUpsRestApis extends SignUpsBase {
 				);
 			}
 		);
+
+		add_action(
+			'rest_api_init',
+			function () {
+				$this->register_route(
+					'scwmembers/v1',
+					'/test',
+					'testing',
+					$this,
+					array(),
+					WP_REST_Server::READABLE
+				);
+			}
+		);
+	}
+
+	public function testing( $request ) {
+		return array ('message' => 'hello');
 	}
 
 	/**
@@ -724,7 +742,13 @@ class SignUpsRestApis extends SignUpsBase {
 			foreach ( $all_members as $extra_member ) {
 				if ( $extra_member->member_user_id ) {
 					if ( get_user_by( 'id', $extra_member->member_user_id ) ) {
-						$this->write_log( __FUNCTION__, basename( __FILE__ ), 'User Needs deleted, ID : ' . $extra_member->member_user_id );
+						try {
+							//wp_delete_user( $extra_member->member_user_id );
+							$this->delete_user( $extra_member->member_user_id );
+							$this->write_log( __FUNCTION__, basename( __FILE__ ), 'User deleted, ID : ' . $extra_member->member_user_id );
+						} catch ( Exception $ex ) {
+							$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Failed deleting user, ID : ' . $extra_member->member_user_id . ' Exception: ' . $ex->getMessage() );
+						}
 					}
 				}
 
@@ -735,6 +759,34 @@ class SignUpsRestApis extends SignUpsBase {
 				$wpdb->delete( self::MACHINE_PERMISSIONS_TABLE, $where );
 			}
 
+			$all_users = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT *
+					FROM %1s',
+					self::WP_USERS,
+				),
+				OBJECT
+			);
+
+			foreach ( $all_users as $user ) {
+				if ( preg_match( '/^[0-9]{4}$/', $user->user_login ) ) {
+					$member = $wpdb->get_row(
+						$wpdb->prepare(
+							'SELECT *
+							FROM %1s
+							WHERE member_badge = %s',
+							self::MEMBERS_TABLE,
+							$user->user_login
+						),
+						OBJECT
+					);
+
+					if ( ! $member ) {
+						$this->delete_user( $user->ID );
+					}
+				}
+			}
+
 		} catch ( Exception $e ) {
 			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Exception Msg : ' . $e->getMessage() );
 		}
@@ -742,6 +794,16 @@ class SignUpsRestApis extends SignUpsBase {
 		if ( $log ) {
 			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Member update complete' );
 		}
+	}
+
+	private function delete_user ( $user_id ) {
+		global $wpdb;
+		$where = array( 'user_id' => $user_id );
+		$count = $wpdb->delete( SELF::WP_USER_META, $where );
+
+		$where = array( 'ID' => $user_id );
+		$count = $wpdb->delete( SELF::WP_USERS, $where );
+
 	}
 
 	/**

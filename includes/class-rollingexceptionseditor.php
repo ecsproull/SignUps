@@ -110,7 +110,7 @@ class RollingExceptionsEditor extends SignUpsBase {
 			$count = 1;
 			foreach ( $exceptions as $exc ) {
 				?>
-				<div><?php $this->load_template_selection( $exc->exc_template_id, false, 'exc_template_id', 'exception_select_id', 'All' ); ?></div>
+				<div><?php $this->load_template_selection( $exc->exc_template_id, false, 'exc_template_id[]', 'exception_select_id', 'All' ); ?></div>
 				<div><input class="datetime-picker-start" type='datetime-local' key="<?php echo esc_html( $count ); ?>"
 					name="exc_start[]" value='<?php echo esc_html( $exc->exc_start ); ?>' required></div>
 				<div><input class="datetime-picker-end" type='datetime-local' key="<?php echo esc_html( $count++ ); ?>"
@@ -121,7 +121,7 @@ class RollingExceptionsEditor extends SignUpsBase {
 				<?php
 			}
 			?>
-			<div><?php $this->load_template_selection( 0, false, 'exc_template_id', 'exception_select_id', 'All' ); ?></div>
+			<div><?php $this->load_template_selection( 0, false, 'exc_template_id[]', 'exception_select_id', 'All' ); ?></div>
 			<div><input class="datetime-picker-start" type='datetime-local' name="exc_start[]" value='' key="<?php echo esc_html( $count ); ?>"></div>
 			<div><input class="datetime-picker-end" type='datetime-local' name="exc_end[]" value='' key="<?php echo esc_html( $count++ ); ?>"></div>
 			<div><input type='text' name="exc_reason[]" value='Shop Closed'></div>
