@@ -511,10 +511,14 @@ class SignUpsRestApis extends SignUpsBase {
 		$pattern     = '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/ms';
 		if ( preg_match( $pattern, $date ) ) {
 			$date_time = new DateTime( $date );
-			$temp_id = 1;
+			$temp_id = 4;
 
-			// When this is in use it should be checking the request date.
-			if ( $date_time > new Datetime( "9/21/2024") ) {
+			///////////////////////////////////////////////////////////////////
+			// Template Date Change Logic. Use this to change templates at a //
+			// predetermined date. Example: Summer and Winter templates.     //
+			// ALSO change this in the SignupsBase code                      //
+			///////////////////////////////////////////////////////////////////
+			if ( $date_time > new Datetime( "9/21/2025") ) {
 				$temp_id = 1;
 			}
 			$templates  = $wpdb->get_results(
@@ -529,7 +533,7 @@ class SignUpsRestApis extends SignUpsBase {
 			);
 
 			$exc_end_date    = clone $date_time;
-			$time_exceptions = $this->create_meeting_exceptions( $date_time, $exc_end_date->add( new DateInterval( 'P1D' ) ) );
+			$time_exceptions = $this->create_meeting_exceptions( $date_time, $exc_end_date->add( new DateInterval( 'P1D' ) ), $temp_id );
 			$attendees       = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT wp_scw_rolling_attendees.attendee_badge,

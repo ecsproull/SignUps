@@ -177,7 +177,7 @@ class ShortCodes extends SignUpsBase {
 		?>
 		<form class="email_form" method="POST">
 			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
-			<div class="text-center"><h2>Email Sent</h2</div>
+			<div class="text-center"><h2>Email Sent</h2></div>
 			<div class="text-center submit-block mt-4">
 				<div class="text-right">
 					<button class="btn btn-primary" type="submit" name="continue_signup" 

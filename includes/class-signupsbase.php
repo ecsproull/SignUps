@@ -951,7 +951,12 @@ class SignUpsBase {
 							$comment_index  = 0;
 							$comment_name   = 'comment-';
 							while ( $start_date <= $end_date ) {
-								$datetime = new DateTime( '09/23/2024 12:00 AM' );
+								///////////////////////////////////////////////////////////////////
+								// Template Date Change Logic. Use this to change templates at a //
+								// predetermined date. Example: Summer and Winter templates.     //
+								// ALSO change this in the REST API code in signups.php.         //
+								///////////////////////////////////////////////////////////////////
+								$datetime = new DateTime( '09/22/2025 12:00 AM' );
 								if ( $start_date > $datetime && '1' === $signup_id ) {
 									$template_items = $template_items2;
 								}
@@ -1006,7 +1011,7 @@ class SignUpsBase {
 								<tr class="submit-row" colspan='<?php echo esc_html( $col_span ); ?>'>
 								<td colspan='<?php echo esc_html( $col_span ); ?>'><button type="submit" class="btn btn-md mr-auto ml-auto bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee_session">Submit</button></td>
 								</tr>
-								<tr class="date-row">
+				 				<tr class="date-row">
 									<td colspan='<?php echo esc_html( $col_span ); ?>'><span class='mt-3'><?php echo esc_html( $current_day ); ?></span></td>
 								</tr>
 								<?php
@@ -1021,6 +1026,18 @@ class SignUpsBase {
 									$temp_end_date->Add( $duration );
 
 									for ( $s = 0; $s < $group_item[0]->template_item_shifts; $s++ ) {
+										$array = [
+											'2025-06-28',
+											'2025-07-12',
+											'2025-07-26',
+											'2025-08-09',
+											'2025-08-23',
+											'2025-09-06'
+										];
+										if ( $group_item[0]->template_item_title === 'Cleaning' && 
+										     in_array( $start_date->format('Y-m-d'), $array ) ) {
+											continue;
+										}
 										?>
 										<tr  class="attendee-row"  style=<?php echo $s % 2 ? 'background:#cfcfcf;' : 'background:#efefef;'; ?> >
 											<td><?php echo esc_html( $start_date->format( self::TIME_FORMAT ) . ' - ' . $temp_end_date->format( self::TIME_FORMAT ) ); ?></td>
