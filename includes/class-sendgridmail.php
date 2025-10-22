@@ -56,18 +56,38 @@ class SendGridMail extends SignUpsBase {
 
 		$sendgrid = new \SendGrid( $sendgrid_api_key );
 
+
 		try {
-			$ret        = $sendgrid->send( $email );
-			$ret_string = $ret ? 'Sent' : 'Failed';
-			
-			if ( ! $ret ) {
-				$this->write_log( __FUNCTION__, basename( __FILE__ ), $ret_string . ' TO: ' . $email_address . ' Subject: ' . $subject . ' Msg: ' . $message );
-			}
-			
-			return $ret;
-		} catch ( Exception $e ) {
-			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Caught exception: ' . esc_html( $e->getMessage() ) . ' TO: ' . $email_address . ' Subject: ' . $subject . ' Msg: ' . $message );
+			$response = $sendgrid->send($email);
+			$status   = (int) $response->statusCode();
+			$body     = (string) $response->body();
+
+			if ($status !== 202) {
+				// Extract SendGrid error details (if JSON)
+				$errors = $body;
+				$json   = json_decode($body, true);
+				if (json_last_error() === JSON_ERROR_NONE && isset($json['errors'])) {
+					$errors = implode('; ', array_map(function ($e) {
+						$parts = [];
+						if (!empty($e['message'])) $parts[] = $e['message'];
+						if (!empty($e['field']))   $parts[] = 'field: '.$e['field'];
+						if (!empty($e['help']))    $parts[] = 'help: '.$e['help'];
+						return implode(' | ', $parts);
+					}, $json['errors']));
+				}
+
+				$this->write_log(
+					__FUNCTION__,
+					basename(__FILE__),
+					"SendGrid error status {$status}. TO: {$email_address} Subject: {$subject} Errors: {$errors}"
+				);
 				return false;
+			}
+
+			return true;
+		} catch (\Throwable $e) {
+			$this->write_log(__FUNCTION__, basename(__FILE__), 'Exception sending mail: '.$e->getMessage());
+			return false;
 		}
 	}
 }

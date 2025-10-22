@@ -932,7 +932,7 @@ class SignupSettings extends SignUpsBase {
 					WHERE si_session_id = %d AND si_signup_id = %d',
 					self::SESSION_INSTRUCTORS_TABLE,
 					$post['session_id'],
-					$post['signup_id']
+					$post['session_signup_id']
 				),
 				OBJECT
 			);
