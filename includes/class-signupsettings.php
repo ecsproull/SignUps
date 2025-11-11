@@ -374,33 +374,36 @@ class SignupSettings extends SignUpsBase {
 			unset( $post['save_session_settings'] );
 		}
 
-		$wpdb->get_results(
-			$wpdb->prepare(
-				'DELETE
-				FROM %1s
-				WHERE si_session_id = %s',
-				self::SESSION_INSTRUCTORS_TABLE,
-				$post['id']
-			)
-		);
+		if ( isset( $post['id'] ) && $post['id'] ) {
+			$wpdb->get_results(
+				$wpdb->prepare(
+					'DELETE
+					FROM %1s
+					WHERE si_session_id = %s',
+					self::SESSION_INSTRUCTORS_TABLE,
+					$post['id']
+				)
+			);
 
-		$count_instructors = 0;
-		if ( isset( $post['instructors'] ) ) {
-			foreach ( $post['instructors'] as $instructor_id ) {
-				$data                     = array();
-				$data['si_signup_id']     = (int) $post['session_signup_id'];
-				$data['si_session_id']   = (int) $post['id'];
-				$data['si_instructor_id'] = (int) $instructor_id;
-				$wpdb->insert( self::SESSION_INSTRUCTORS_TABLE, $data );
-				$count_instructors++;
+			$count_instructors = 0;
+			if ( isset( $post['instructors'] ) ) {
+				foreach ( $post['instructors'] as $instructor_id ) {
+					$data                     = array();
+					$data['si_signup_id']     = (int) $post['session_signup_id'];
+					$data['si_session_id']   = (int) $post['id'];
+					$data['si_instructor_id'] = (int) $instructor_id;
+					$wpdb->insert( self::SESSION_INSTRUCTORS_TABLE, $data );
+					$count_instructors++;
+				}
+
+				unset( $post['instructors'] );
 			}
 
-			unset( $post['instructors'] );
+			?>
+			<h2 class="text-center"><?php echo esc_html( $count_instructors . ' instructors were updated.' ); ?></h2>
+			<?php
 		}
 
-		?>
-		<h2 class="text-center"><?php echo esc_html( $count_instructors . ' instructors were updated.' ); ?></h2>
-		<?php
 		unset( $post['instructors_id'] );
 		unset( $post['instructors_badge'] );
 		unset( $post['instructors_name'] );
@@ -483,10 +486,32 @@ class SignupSettings extends SignUpsBase {
 								$this->update_calendar( $mini_post );
 							}
 
+							// Add default instructor for class to session.
+							$contact_badge = $wpdb->get_var(
+								$wpdb->prepare(
+									'SELECT signup_contact_badge FROM ' . self::SIGNUPS_TABLE . ' WHERE signup_id = %d',
+									(int) $post['session_signup_id'] // or $post['edit_sessions_signup_id']
+								)
+							);
+
+							$instructor_id = $wpdb->get_var(
+								$wpdb->prepare(
+									'SELECT instructors_id FROM ' . self::INSTRUCTORS_TABLE . ' WHERE instructors_badge = %s AND instructors_class_id = %d LIMIT 1',
+									$contact_badge,
+									(int) $post['session_signup_id']
+								)
+							);
+
 							$data                     = array();
 							$data['si_signup_id']     = $signup[0]->signup_id;
 							$data['si_session_id']    = $session_id;
-							$wpdb->insert( self::SESSION_INSTRUCTORS_TABLE, $data );
+
+							if ( $instructor_id ) {
+								$data['si_instructor_id'] = (int) $instructor_id;
+								$wpdb->insert( self::SESSION_INSTRUCTORS_TABLE, $data );
+							} else {
+								$this->write_log(__FUNCTION__, basename(__FILE__), 'No instructor found for badge '.$contact_badge.' class '.$post['session_signup_id']);
+							}
 						}
 					}
 

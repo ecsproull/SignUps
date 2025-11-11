@@ -15,6 +15,49 @@ jQuery(document).ready(function($){
 		alert ("Email addresses were copied to the clipboard.");
 	})
 
+	// Helper to safely render plain text
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+	/**
+	 * In the private Reports page there is a button to print the class.
+	 * This handles that click and copies the class emails to the clipboard.
+	 */
+	$(".instructors-print-class").click( function(e) {
+		$.ajax({
+			url: wpApiSettings.root + 'scwmembers/v1/attendees',
+			method: 'POST',
+			beforeSend: function (xhr) {
+				xhr.setRequestHeader('X-WP-Nonce', wpApiSettings.nonce);
+			},
+			data:{
+				'session_id' : $(e.target).val()
+			}
+		}).done(function (response) {
+			if (Array.isArray(response) && response.length > 0) {
+                const lines = response.map((item) => {
+                    const last  = item.attendee_lastname ?? '';
+                    const first = item.attendee_firstname ?? '';
+                    const badge = item.attendee_badge ?? '';
+                    const guest = item.attendee_plus_guest ?? 0;
+                    return `${last}, ${first}, ${badge}, ${guest}`;
+                }).join('\n');
+
+                // Open a simple print view
+                const win = window.open('', '_blank', 'width=800,height=600');
+                win.document.write(`<pre style="font:14px/1.4 monospace; white-space:pre-wrap;">${escapeHtml(lines)}</pre>`);
+                win.document.close();
+                win.focus();
+                win.print();
+
+                // Optional: also copy to clipboard
+                navigator.clipboard.writeText(lines);
+				alert("This has been copied to the Clipboard\n\n " + lines);
+			}
+		});
+	});
+
 
 	/**
 	 * Pressing the enter key in the badge input TextBox triggers the lookup action.

@@ -543,7 +543,6 @@ jQuery( document ).ready( function($){
 		document.location.href = "mailto:" + emailAddresses + "?subject=" +  $("#signup_name").text();
 	});
 
-
 	/**
 	 * When the signup selection is changed the form saves changes
 	 * and then reloads with the data for the newly selected signup.

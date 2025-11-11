@@ -1365,6 +1365,7 @@ class SignUpsBase {
 			$link         = "<a href='$url/signups/?signup_id=" . $post['add_attendee_session'] . "'>Edit Signup</a>";
 			$body        .= '<br><br> IP Address: ' . $ip_address . '<br>' . $link . '<br>' . esc_html( $current_user->user_login ) . '<br>' . esc_html( $current_user->user_email ) . '<br>';
 			$sgm->send_mail( 'ecsproull765@gmail.com', 'ADMIN Woodshop Signup', $body );
+			$sgm->send_mail( 'tschmidtsw@gmail.com', 'ADMIN Woodshop Signup', $body );
 			return;
 		}
 
@@ -1514,6 +1515,7 @@ class SignUpsBase {
 		$body1     .= 'Host Root : ' . get_site_url() . '<br>';
 		$body1     .= '<pre>' . htmlspecialchars( wp_json_encode( $post, JSON_PRETTY_PRINT ), ENT_QUOTES, 'UTF-8' ) . '</pre>';
 		$sgm->send_mail( 'ecsproull765@gmail.com', $subject, $body1 );
+		$sgm->send_mail( 'tschmidtsw@gmail.com', $subject, $body1 );
 	}
 
 	/**

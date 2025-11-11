@@ -86,11 +86,12 @@ class Reports extends SignUpsBase {
 					);
 			
 					?>
-					<div class="mt-2 font-weight-bold bg-lg text-right">
-						Session:
-					</div>
+					
 					<div class="mt-2 font-weight-bold bg-lg">
-						<?php echo esc_html( $attendee->session_start_formatted ); ?>
+						<?php echo esc_html( 'Session:' . $attendee->session_start_formatted ); ?>
+					</div>
+					<div class="mt-2 font-weight-bold bg-lg text-center">
+						<button class="print-button instructors-print-class" value="<?php echo esc_html( $attendee->session_id ); ?>" >Print</button>
 					</div>
 					<div class="mt-2 font-weight-bold bg-lg">
 						<button class="email-button instructors-email-class" value="<?php echo esc_html( $current_session_id ); ?>" >Copy Email Addresses</button>

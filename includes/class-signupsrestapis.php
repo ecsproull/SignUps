@@ -374,40 +374,34 @@ class SignUpsRestApis extends SignUpsBase {
 	}
 
 	/**
-	 * Get the attendees for an upcoming class. This is used for sending the 
-	 * email reminders to class attendees.
+	 * Used to get the list of attendees of a class or social signup for printing.
 	 *
-	 * @param  mixed $data Posted data that tells the date for the classes.
+	 * @param  mixed $request Posted data that tells the signup session id.
 	 * @return void
 	 */
-	public function get_attendee_list( $data ) {
+	public function get_attendee_list( $request ) {
+		//Check for nonce, if exists then the call in internal to print the class list.
 		global $wpdb;
-		$key      = '8c52a157-8ee7-5401-9f91-930cea39fe2f';
-		$data_obj = json_decode( $data->get_body(), false );
-		if ( $data_obj->key !== $key ) {
-			return;
+		$nonce    = $request->get_header( 'X-WP-Nonce' );
+		$verified = wp_verify_nonce( $nonce, 'wp_rest' );
+		if ( $verified ) {
+			$data_obj = $request->get_body_params();
+			$results = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT attendee_firstname,
+						attendee_lastname,
+						attendee_badge,
+						attendee_plus_guest
+					FROM wp_scw_attendees
+					WHERE attendee_session_id = %d
+					ORDER BY attendee_lastname, attendee_firstname',
+					$data_obj['session_id']
+				),
+				OBJECT
+			);
+
+			return $results;
 		}
-
-		$results = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT wp_scw_attendees.attendee_email,
-					wp_scw_attendees.attendee_firstname,
-					wp_scw_attendees.attendee_lastname,
-					wp_scw_signups.signup_name,
-					wp_scw_sessions.session_start_formatted
-				FROM wp_scw_attendees
-				LEFT JOIN wp_scw_sessions
-				ON wp_scw_sessions.session_id = wp_scw_attendees.attendee_session_id
-				LEFT JOIN wp_scw_signups
-				ON wp_scw_signups.signup_id =  wp_scw_sessions.session_signup_id
-				WHERE wp_scw_sessions.session_start_time > %s AND wp_scw_sessions.session_start_time < %s',
-				$data_obj->start_date,
-				$data_obj->end_date
-			),
-			OBJECT
-		);
-
-		return $results;
 	}
 
 	/**

@@ -221,6 +221,7 @@ input[type='radio'] {
 	color: blue;
 }
 
+.print-button,
 .report-form button,
 .email-button {
 	background: none!important;
