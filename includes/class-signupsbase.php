@@ -158,6 +158,15 @@ class SignUpsBase {
 	protected const WP_USER_META = 'wp_usermeta';
 
 	/**
+	 * Multiple day session, calendar items.
+	 */
+	protected const MULTI_CAL_ITEMS_TABLE = 'wp_scw_multiday_cal_items';
+	
+	/**
+	 * Multiple day session, template items for a class.
+	 */
+	protected const MULTI_TEMPLATE_ITEMS_TABLE = 'wp_scw_multiday_template_items';
+	/**
 	 * Recaptcha log.
 	 * Records badge, score, calling ip address, post data and time.
 	 */
@@ -1695,7 +1704,7 @@ class SignUpsBase {
 	 *
 	 * @param int $post The posted data from the form.
 	 */
-	protected function update_calendar( $post ) {
+	protected function update_calendar( $post, $additional_dates_data = null ) {
 		global $wpdb;
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
@@ -1707,6 +1716,19 @@ class SignUpsBase {
 			),
 			OBJECT
 		);
+
+		if ( ! $additional_dates_data ) {
+			$additional_dates_data = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT *
+					FROM %1s
+					WHERE multiday_signup_id = %d',
+					self::MULTI_TEMPLATE_ITEMS_TABLE,
+					$post['signup_id']
+				),
+				OBJECT
+			);
+		}
 
 		$description = $wpdb->get_results(
 			$wpdb->prepare(
@@ -1724,6 +1746,7 @@ class SignUpsBase {
 		if ( $session->session_calendar_id > 0 && ! isset( $post['update'] ) ) {
 			$where_session = array( 'id' => $session->session_calendar_id );
 			$wpdb->delete( self::SPIDER_CALENDAR_EVENT_TABLE, $where_session );
+			$this->delete_additional_calendar_dates( $post['session_id'] );
 		} else {
 			$datetime   = new DateTime( $session->session_start_formatted );
 			$date       = $datetime->format( 'Y-m-d' );
@@ -1766,12 +1789,16 @@ class SignUpsBase {
 				$rows  = $wpdb->update( self::SPIDER_CALENDAR_EVENT_TABLE, $data, $where );
 				if ( false === $rows ) {
 					echo '<h1>Failed to update Calendar id: </h1)' . esc_html( $post['session_calendar_id'] . ' with error : ' . $wpdb->last_error );
+				} else {
+					$this->delete_additional_calendar_dates( $post['session_id'] );
+					$this->add_additional_calendar_dates( $datetime, $data, $additional_dates_data, $post['session_id'] );
 				}
 				return;
 
 			} else {
 				$rows            = $wpdb->insert( self::SPIDER_CALENDAR_EVENT_TABLE, $data );
 				$new_calendar_id = $wpdb->insert_id;
+				$this->add_additional_calendar_dates( $datetime, $data, $additional_dates_data, $post['session_id'] );
 			}
 		}
 
@@ -1784,6 +1811,72 @@ class SignUpsBase {
 			$update,
 			$where
 		);
+	}
+
+	function add_additional_calendar_dates( $initial_datetime, $calendar_data, $additinal_dates_data, $session_id ){
+		global $wpdb;
+		foreach ( $additinal_dates_data as $date_data ) {
+			$interval = 'P' . $date_data->multiday_days_after . 'D';
+			$new_datetime   = ( clone $initial_datetime)->add( new DateInterval( $interval ) );
+			
+			$parts = explode(':', $date_data->multiday_start_time );
+			$h     = $parts[0];
+			$m     = $parts[1];
+			//list($h, $m, $s) = array_map('intval', explode(':', $date_data->multiday_start_time ) );
+			$new_datetime->setTime($h, $m);
+			$date       = $new_datetime->format( 'Y-m-d' );
+			$start_time = $new_datetime->format( 'g:iA' );
+
+			$parts = explode( ':', $date_data->multiday_duration );
+			$h     = $parts[0];
+			$m     = $parts[1];
+			//list($h, $m, $s) = array_map('intval', explode( ':', $date_data->multiday_duration ) );
+			$new_datetime->add(new DateInterval(sprintf('PT%dH%dM', $h, $m)));
+			$end_time   = $new_datetime->format( 'g:iA' );
+
+			$calendar_data['date']     = $date;
+			$calendar_data['date_end'] = $date;
+			$calendar_data['time']     = $start_time . '-' . $end_time;
+			$result                    = $wpdb->insert( self::SPIDER_CALENDAR_EVENT_TABLE, $calendar_data );
+			if ( $result === false ) {
+				echo '<h1>Failed to insert additional days Calendar item';
+			}
+			$new_calendar_id = $wpdb->insert_id;
+
+			$data = array( 'multiday_cal_session_id' => $session_id, 'multiday_cal_calendar_id' => $new_calendar_id );
+			$wpdb->insert( SELF::MULTI_CAL_ITEMS_TABLE, $data );
+			if ( $result === false ) {
+				echo '<h1>Failed to insert calendar id into the wp_scw_multiday_cal_items table</h1';
+			}
+		}
+	}
+
+	function delete_additional_calendar_dates( $session_id ) {
+		global $wpdb;
+		$additional_dates = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %1s
+				WHERE multiday_cal_session_id = %d',
+				self::MULTI_CAL_ITEMS_TABLE,
+				$session_id
+			),
+			OBJECT
+		);
+
+		foreach ( $additional_dates as $add_date ) {
+			$where_session = array( 'id' => $add_date->multiday_cal_calendar_id );
+			$rows = $wpdb->delete( self::SPIDER_CALENDAR_EVENT_TABLE, $where_session );
+			if ( $rows === 1 ) {
+				$where = array('multiday_cal_calendar_id' => $add_date->multiday_cal_calendar_id );
+				$rows = $wpdb->delete( self::MULTI_CAL_ITEMS_TABLE, $where );
+				if ( $rows === false ) {
+					echo '<h1>Failed to remove item from the multi-cal-items table.</h1';
+				}
+			} else {
+				echo '<h1>Failed to delete calendar item.</h1';
+			}
+		}
 	}
 
 	/**
@@ -2175,6 +2268,224 @@ class SignUpsBase {
 				</div>
 				<div></div>
 			</div>
+		</form>
+		<?php
+	}
+
+	protected function render_multiday_form( $post, $signup_id_init = null ) {
+		global $wpdb;
+		$signup_id     = -1;
+		$signup_name   = "";
+		$session_id    = null;
+		$session_start = null;
+		$signups       = null;
+		$defaults      = null;
+		$multiday_rows = null;
+		if ( $post === null ) {
+			$signups = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT signup_id,
+					signup_name
+					FROM %1s
+					ORDER BY signup_name',
+					self::SIGNUPS_TABLE
+				),
+				OBJECT
+			);
+			
+			if ( 1 <= count( $signups ) ) {
+				$signup_id = $signup_id_init ? $signup_id_init : $signups[0]->signup_id;
+				$signup_name = $signups[0]->signup_name;
+			}
+
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT multiday_signup_id,
+							multiday_days_after,
+							multiday_start_time,
+							multiday_duration
+					FROM %1s',
+					self::MULTI_TEMPLATE_ITEMS_TABLE
+				),
+				ARRAY_A
+			);
+
+			$md_map = [];
+			foreach ($rows as $r) {
+				$id = (string) $r['multiday_signup_id'];
+				if (!isset($md_map[$id])) $md_map[$id] = [];
+				$md_map[$id][] = [
+					'days_after' => (int) $r['multiday_days_after'],
+					'time_of_day'=> (string) $r['multiday_start_time'], // "HH:MM" or "HH:MM:SS"
+					'duration'   => (string) $r['multiday_duration'],   // "HH:MM" or "HH:MM:SS"
+				];
+			}
+
+			?>
+			<script id="md-items-json" type="application/json">
+				<?php echo wp_json_encode( $md_map, JSON_UNESCAPED_UNICODE ); ?>
+			</script>
+			<?php
+		} else {
+			$signup_name = $post['signup_name'];
+			$signup_id   = $post['signup_id'];
+			$session_id  = $post['session_id'];
+
+			$session = $wpdb->get_row(
+				$wpdb->prepare(
+					'SELECT session_start_formatted
+					FROM %1s
+					WHERE session_id = %s',
+					self::SESSIONS_TABLE,
+					$post['session_id']
+				),
+				OBJECT
+			);
+
+			$multiday_rows = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT multiday_days_after,
+						DATE_FORMAT(multiday_start_time, "%%H:%%i")  AS multiday_start_time,
+						DATE_FORMAT(multiday_duration,   "%%H:%%i")  AS multiday_duration
+				FROM %1s
+				WHERE multiday_signup_id = %d',
+				self::MULTI_TEMPLATE_ITEMS_TABLE,
+				$signup_id
+			),
+			OBJECT
+		);
+			
+		}
+
+		// Simple form to capture a variable list of items: days_after, time_of_day, duration
+		// This page is intended for administrators while creating/editing a class.
+		?>
+		<form method="POST" class="mr-auto ml-auto mt-5" style="max-width: 900px;">
+			<h1 class="text-center mt-3 mb-3">Multi-day Class Schedule</h1>
+			<?php
+			if ( $post ) {
+				?>
+				<h2 class="text-center mt-3 mb-3"><?php echo esc_html( $signup_name ) ?></h2>
+				<?php
+			} else {
+				?>
+				<div class="text-center mt-3 mb-3">
+					<select id="signup-select" title="Select SignUp" name="signup" id="signup">
+					<?php
+					foreach ( $signups as $signup ) {
+						if ( $signup_id == $signup->signup_id ) {
+							?>
+							<option value="<?php echo esc_html( $signup->signup_id ); ?>" selected><?php echo esc_html( $signup->signup_name ); ?></option>
+							<?php
+						} else {
+							?>
+							<option value="<?php echo esc_html( $signup->signup_id ); ?>"><?php echo esc_html( $signup->signup_name ); ?></option>
+							<?php
+						}
+					}
+					?>
+					</select>
+				</div>
+				<?php
+			}
+			if ( $session_start ) {
+				?>
+				<h2 class="text-center mt-3 mb-3">First Class: <?php echo $session->session_start_formatted; ?></h2>
+				<?php
+			}
+			?>
+			
+			<div class="text-center m-auto">
+				<table class="table table-bordered w-100 variable-items-table">
+					<thead>
+						<tr>
+							<th style="width: 140px;">Days After</th>
+							<th style="width: 180px;">Time of Day</th>
+							<th style="width: 180px;">Duration</th>
+							<th style="width: 100px;">Actions</th>
+						</tr>
+					</thead>
+					<tbody id="md-items-body">
+						<?php
+						if ( $multiday_rows && count( $multiday_rows ) ) {
+							foreach( $multiday_rows as $row ) {
+								?>
+								<tr class="md-item-row">
+									<td>
+										<input type="number" name="md_days_after[]" class="w-125px" min="0" step="1" value="<?php echo esc_html( $row->multiday_days_after ); ?>" required />
+									</td>
+									<td>
+										<?php
+										$dt = DateTime::createFromFormat('H:i:s', (string) $row->multiday_start_time)
+											?: DateTime::createFromFormat('H:i', (string) $row->multiday_start_time);
+										$display12 = $dt ? $dt->format('g:i A') : $row->multiday_start_time;
+										?>
+										<input type="time" name="md_time_of_day[]" class="w-150px" step="60"
+											value="<?php echo esc_attr($dt ? $dt->format('H:i') : $row->multiday_start_time); ?>" required />
+										<small class="ml-1 text-muted"><?php echo esc_html($display12); ?></small>
+									</td>
+									<td>
+										<input type="time" name="md_duration[]" class="w-150px without_ampm" step="60" 
+											value="<?php echo esc_html( $row->multiday_duration ); ?>" required />
+									</td>
+									<td class="text-center">
+										<button type="button" class="btn btn-danger md-remove-row" title="Remove">&minus;</button>
+									</td>
+								</tr>
+								<?php
+							}
+
+						} else {
+							?>
+							<tr class="md-item-row">
+								<td>
+									<input type="number" name="md_days_after[]" class="w-125px" min="0" step="1" value="0" required />
+								</td>
+								<td>
+									<input type="time" name="md_time_of_day[]" class="w-150px" step="60" value="08:00" required />
+								</td>
+								<td>
+									<input type="time" name="md_duration[]" class="w-150px without_ampm" step="60" value="01:00" required />
+								</td>
+								<td class="text-center">
+									<button type="button" class="btn btn-danger md-remove-row" title="Remove">&minus;</button>
+								</td>
+							</tr>
+							<?php
+						}
+						?>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="text-center">
+				<button type="button" class="btn btn-success md-add-row" title="Add"><b>+</b></button>
+			</div>
+
+			<?php
+			if ( $post ) {
+				?>
+				<div class="mt-3 mb-3 text-center">
+					<label class="mr-2">
+						<input type="checkbox" name="md_set_defaults" value="<?php echo $signup_id; ?>" /> Save these items as defaults
+					</label>
+				</div>
+				<?php
+			} else {
+				?>
+				<input type="hidden" name="md_set_defaults" value="true" />
+				<?php
+			}
+			?>
+
+			<div class="text-center">
+				<button type="button" class="btn btn-secondary mr-2" onclick="window.history.back();">Cancel</button>
+				<button type="submit" name="submit_multiday" value="1" class="btn btn-primary">Submit</button>
+			</div>
+
+			<input type="hidden" name="session_id" value="<?php echo esc_html( $session_id ); ?>" />
+			<input type="hidden" name="signup_id" value="<?php echo esc_html( $signup_id ); ?>" />
+			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 		</form>
 		<?php
 	}

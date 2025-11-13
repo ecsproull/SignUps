@@ -664,3 +664,54 @@ jQuery( document ).ready( function($){
 		}
 	});
 });
+
+jQuery(function ($) {
+  // Read preloaded JSON
+  var mdMap = {};
+  var el = document.getElementById('md-items-json');
+  if (el && el.textContent) {
+    try { mdMap = JSON.parse(el.textContent); } catch (e) { mdMap = {}; }
+  }
+
+  var $body = $('#md-items-body');
+
+  function addRow(prefill) {
+    prefill = prefill || {};
+    var daysAfter = (typeof prefill.days_after !== 'undefined') ? prefill.days_after : 0;
+    var timeOfDay = prefill.time_of_day || '08:00';
+    var duration  = prefill.duration  || '01:00';
+
+    var rowHtml =
+      '<tr class="md-item-row">' +
+        '<td><input type="number" name="md_days_after[]" class="w-125px" min="0" step="1" value="' + daysAfter + '" required /></td>' +
+        '<td><input type="time" name="md_time_of_day[]" class="w-150px" step="60" value="' + timeOfDay + '" required /></td>' +
+        '<td><input type="time" name="md_duration[]" class="w-150px without_ampm" step="60" value="' + duration + '" required /></td>' +
+        '<td class="text-center"><button type="button" class="btn btn-danger md-remove-row" title="Remove">&minus;</button></td>' +
+      '</tr>';
+
+    $body.append(rowHtml);
+  }
+
+  // Populate rows when dropdown changes
+  $(document).on('change', '#signup-select', function () {
+    var id = String($(this).val() || '');
+    var items = mdMap[id] || [];
+
+    $body.empty();
+    if (items.length === 0) {
+      addRow(); // default single row
+    } else {
+      items.forEach(function (it) { addRow(it); });
+    }
+  });
+
+  // Add/remove handlers (if not already present)
+  $(document).on('click', '.md-add-row', function (e) {
+    e.preventDefault();
+    addRow();
+  });
+  $(document).on('click', '.md-remove-row', function (e) {
+    e.preventDefault();
+    if ($body.children().length > 1) $(this).closest('tr').remove();
+  });
+});

@@ -41,6 +41,7 @@ require_once 'includes/class-rollingslot.php';
 require_once 'includes/class-instructorseditor.php';
 require_once 'includes/class-sessionemaildata.php';
 require_once 'includes/class-settings.php';
+require_once 'includes/class-multidaytemplates.php';
 
 /**
  * Main SignUps class. This is the entry point for the plugin.
@@ -184,6 +185,7 @@ class SignUpsPlugin extends SignUpsBase {
 		add_submenu_page( 'sign_ups', 'Rolling Exceptions Editor', 'Exceptions', 'manage_options', 'exceptions_editor', array( new RollingExceptionsEditor(), 'load_exceptions_editor' ) );
 		add_submenu_page( 'sign_ups', 'Payments Report', 'Payments Report', 'manage_options', 'payments_report', array( new PaymentsReview(), 'review_payments' ) );
 		add_submenu_page( 'sign_ups', 'Instructors', 'Instructors', 'manage_options', 'instructors_editor', array( new InstructorsEditor(), 'instructors_editor' ) );
+		add_submenu_page( 'sign_ups', 'Multi Day Templates', 'Multi Day Templates', 'manage_options', 'multi-session-templates', array( new MultiDayTemplates, 'render_admin_page' ) );
 
 		$current_user    = wp_get_current_user();
 		if ( 'ecsproull' === $current_user->user_login ) {
@@ -214,6 +216,8 @@ class SignUpsPlugin extends SignUpsBase {
 		$user_pages[] = 'signups_page_payments_report';
 		$user_pages[] = 'signups_page_instructors_editor';
 		$user_pages[] = 'signups_page_signups_settings_editor';
+		$user_pages[] = 'signups_page_multi-session-templates';
+		
 		if ( ! in_array( $host, $user_pages, true ) ) {
 			return;
 		}

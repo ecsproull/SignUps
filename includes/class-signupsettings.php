@@ -71,12 +71,96 @@ class SignupSettings extends SignUpsBase {
 				$this->submit_new_class( $post );
 			} elseif ( isset( $post['load_create_class_form'] ) ) {
 				$this->load_create_class_form();
+			} elseif ( isset( $post['multi_day'] ) ) {
+				$this->load_create_multiday( $post );
+			} elseif ( isset( $post['submit_multiday'] ) ) {
+				$this->submit_multiday( $post );
 			} else {
 				$this->load_signup_selection();
 			}
 		} else {
 			$this->load_signup_selection();
 		}
+	}
+
+	private function submit_multiday( $post ) {
+		$days_after    = $post['md_days_after'];
+        $start_times   = $post['md_time_of_day'];
+        $durations     = $post['md_duration'];
+        $signup_id     = $post['signup_id'];
+		$session_id    = $post['session_id'];
+		$save_defaults = isset( $post['md_set_defaults'] );
+        $max = count( $days_after );
+
+		global $wpdb;
+		$result = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT session_calendar_id
+				FROM %1s
+				WHERE session_id = %s',
+				self::SESSIONS_TABLE,
+				$session_id
+			),
+			OBJECT
+		);
+
+		$calendar_id = $result->session_calendar_id;
+
+		global $wpdb;
+		$result = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT signup_name
+				FROM %1s
+				WHERE signup_id = %s',
+				self::SIGNUPS_TABLE,
+				$signup_id
+			),
+			OBJECT
+		);
+        
+		$signup_name = $result->signup_name;
+
+		$items = [];
+        for ($i = 0; $i < $max; $i++) {
+			$items[] = (object) [
+				'multiday_signup_id'  => $signup_id,
+				'multiday_days_after' => (int) $days_after[$i],
+				'multiday_start_time' => $start_times[$i],
+				'multiday_duration'   => $durations[$i],
+        	];
+		}
+
+		if ( $save_defaults )
+		{
+			$where['multiday_signup_id'] = $signup_id;
+       		$wpdb->delete( SELF::MULTI_TEMPLATE_ITEMS_TABLE, $where ); 
+
+			for ($i = 0; $i < $max; $i++) {
+				$data['multiday_signup_id']  = $signup_id;
+				$data['multiday_days_after'] = (int) $days_after[$i];
+				$data['multiday_start_time'] = $start_times[$i];
+				$data['multiday_duration']   = $durations[$i];
+
+				$rows = $wpdb->insert( self::MULTI_TEMPLATE_ITEMS_TABLE, $data );
+				if ( $rows !== 1 ) {
+					throw( "Failed to insert row in the multiday template table." );
+				}
+			}
+		}
+
+		$mini_post = array(
+			'signup_id'           => $signup_id,
+			'session_id'          => $session_id,
+			'signup_name'         => $signup_name,
+			'session_calendar_id' => $calendar_id,
+			'update'              => true
+		);
+
+		$this->update_calendar( $mini_post, $items );
+	}
+
+	private function load_create_multiday( $post ) {
+		$this->render_multiday_form($post);
 	}
 
 	/**
@@ -941,6 +1025,7 @@ class SignupSettings extends SignUpsBase {
 			$rows = $wpdb->delete( self::SPIDER_CALENDAR_EVENT_TABLE, $where_calendar );
 			if ( $rows ) {
 				$rows_updated += $rows;
+				$this->delete_additional_calendar_dates( $post['session_id'] );
 			} else {
 				echo '<h1>Failed to delete calendar entry, id: ' . esc_html( $post['session_calendar_id'] ) . '</h1><br>';
 				$last_errors .= $wpdb->last_error;
@@ -957,7 +1042,7 @@ class SignupSettings extends SignUpsBase {
 					WHERE si_session_id = %d AND si_signup_id = %d',
 					self::SESSION_INSTRUCTORS_TABLE,
 					$post['session_id'],
-					$post['session_signup_id']
+					$post['signup_id']
 				),
 				OBJECT
 			);
@@ -1557,7 +1642,12 @@ class SignupSettings extends SignUpsBase {
 												?>
 												<input class="btn btn-success w-90" type="submit" name="add_attendee" value="Add Attendee">
 												<?php
+											} else {
+												?>
+												<input class="btn btn-success w-90" type="submit" name="add_attendee" value="Add Attendee" disabled>
+												<?php
 											}
+
 											?>
 											<input  id=<?php echo esc_html( 'move' . $session->session_id ); ?>
 												class="btn btn-primary w-90 mb-1 mt-2"
@@ -1584,7 +1674,11 @@ class SignupSettings extends SignUpsBase {
 											<button class="btn btn-primary w-90 mb-1 email-butt" 
 												type="button"
 												name="email_session"
-												value="<?php echo esc_html( $email_id ); ?>">Email Session</button> 
+												value="<?php echo esc_html( $email_id ); ?>">Email Session</button>
+											<input class="btn btn-primary w-90 mb-1" 
+												type="submit"
+												name="multi_day"
+												value="Add Multi Days"/>  
 										</span>
 									</div>
 									<div id="<?php echo 'email-session-' . esc_html( $session->session_id ); ?>" class="email-body text-left" hidden>
