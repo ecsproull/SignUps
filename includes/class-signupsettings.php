@@ -82,7 +82,14 @@ class SignupSettings extends SignUpsBase {
 			$this->load_signup_selection();
 		}
 	}
-
+	
+	/**
+	 * Submit the multiday form. This saves the parameters for adding additional
+	 * days to the calendar.
+	 *
+	 * @param  mixed $post Data from the submitted form.
+	 * @return void
+	 */
 	private function submit_multiday( $post ) {
 		$days_after    = $post['md_days_after'];
         $start_times   = $post['md_time_of_day'];
@@ -158,7 +165,14 @@ class SignupSettings extends SignUpsBase {
 
 		$this->update_calendar( $mini_post, $items );
 	}
-
+	
+	/**
+	 * Load the multiday class form. The renderer is in the base class as it used in 
+	 * the settings file and also from the base class.
+	 *
+	 * @param  mixed $post Data used to populate the form.
+	 * @return void
+	 */
 	private function load_create_multiday( $post ) {
 		$this->render_multiday_form($post);
 	}

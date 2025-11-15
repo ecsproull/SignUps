@@ -2271,7 +2271,14 @@ class SignUpsBase {
 		</form>
 		<?php
 	}
-
+	
+	/**
+	 * A form for adding additional calendar entries for class.
+	 *
+	 * @param  mixed $post This is not null when adding days to an existing session.
+	 * @param  mixed $signup_id_init, this isn't null when addign a set of parameters for a class.
+	 * @return void
+	 */
 	protected function render_multiday_form( $post, $signup_id_init = null ) {
 		global $wpdb;
 		$signup_id     = -1;
@@ -2281,6 +2288,7 @@ class SignUpsBase {
 		$signups       = null;
 		$defaults      = null;
 		$multiday_rows = null;
+		$session       = null;
 		if ( $post === null ) {
 			$signups = $wpdb->get_results(
 				$wpdb->prepare(
@@ -2366,6 +2374,7 @@ class SignUpsBase {
 			if ( $post ) {
 				?>
 				<h2 class="text-center mt-3 mb-3"><?php echo esc_html( $signup_name ) ?></h2>
+				<h2 id="orig-date" class="text-center mb-3"><?php echo esc_html( $session->session_start_formatted ); ?></h2>
 				<?php
 			} else {
 				?>
@@ -2402,12 +2411,14 @@ class SignUpsBase {
 							<th style="width: 140px;">Days After</th>
 							<th style="width: 180px;">Time of Day</th>
 							<th style="width: 180px;">Duration</th>
+							<?php if ( $post ) echo '<th style="width: 180px;">Start Time</th>' ?>
 							<th style="width: 100px;">Actions</th>
 						</tr>
 					</thead>
 					<tbody id="md-items-body">
 						<?php
 						if ( $multiday_rows && count( $multiday_rows ) ) {
+							
 							foreach( $multiday_rows as $row ) {
 								?>
 								<tr class="md-item-row">
@@ -2422,19 +2433,26 @@ class SignUpsBase {
 										?>
 										<input type="time" name="md_time_of_day[]" class="w-150px" step="60"
 											value="<?php echo esc_attr($dt ? $dt->format('H:i') : $row->multiday_start_time); ?>" required />
-										<small class="ml-1 text-muted"><?php echo esc_html($display12); ?></small>
 									</td>
 									<td>
 										<input type="time" name="md_duration[]" class="w-150px without_ampm" step="60" 
 											value="<?php echo esc_html( $row->multiday_duration ); ?>" required />
 									</td>
+									<?php
+									if ( $post ) {
+										?>
+										<td>
+											<div class="md-start-display font-weight-bold mt-1"></div>
+										</td>
+										<?php
+									}
+									?>
 									<td class="text-center">
 										<button type="button" class="btn btn-danger md-remove-row" title="Remove">&minus;</button>
 									</td>
 								</tr>
 								<?php
 							}
-
 						} else {
 							?>
 							<tr class="md-item-row">
@@ -2447,6 +2465,15 @@ class SignUpsBase {
 								<td>
 									<input type="time" name="md_duration[]" class="w-150px without_ampm" step="60" value="01:00" required />
 								</td>
+								<?php
+								if ( $post ) {
+									?>
+									<td>
+										<div class="md-start-display font-weight-bold mt-1"></div>
+									</td>
+									<?php
+								}
+								?>
 								<td class="text-center">
 									<button type="button" class="btn btn-danger md-remove-row" title="Remove">&minus;</button>
 								</td>

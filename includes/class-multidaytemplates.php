@@ -48,11 +48,11 @@ class MultiDayTemplates extends SignUpsBase {
 
     public function submit_multiday_template( $post ) {
         global $wpdb;
-        $days_after  = $post['md_days_after'];
-        $start_times = $post['md_time_of_day'];
-        $durations   = $post['md_duration'];
+        $days_after  = isset( $post['md_days_after'] ) ? $post['md_days_after'] : null;
+        $start_times = isset( $post['md_time_of_day'] ) ? $post['md_time_of_day'] : null;
+        $durations   = isset( $post['md_duration'] ) ? $post['md_duration']  : null;
         $signup_id   = $post['signup'];
-        $max = count( $days_after );
+        $max = $days_after ? count( $days_after ) : 0;
 
         $where['multiday_signup_id'] = $signup_id;
         $wpdb->delete( SELF::MULTI_TEMPLATE_ITEMS_TABLE, $where ); 
@@ -69,6 +69,6 @@ class MultiDayTemplates extends SignUpsBase {
             }
         }
 
-        //$this->load_signup_selection();
+        $this->render_page();
     }
 }

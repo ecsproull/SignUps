@@ -681,15 +681,28 @@ jQuery(function ($) {
     var timeOfDay = prefill.time_of_day || '08:00';
     var duration  = prefill.duration  || '01:00';
 
-    var rowHtml =
-      '<tr class="md-item-row">' +
-        '<td><input type="number" name="md_days_after[]" class="w-125px" min="0" step="1" value="' + daysAfter + '" required /></td>' +
-        '<td><input type="time" name="md_time_of_day[]" class="w-150px" step="60" value="' + timeOfDay + '" required /></td>' +
-        '<td><input type="time" name="md_duration[]" class="w-150px without_ampm" step="60" value="' + duration + '" required /></td>' +
-        '<td class="text-center"><button type="button" class="btn btn-danger md-remove-row" title="Remove">&minus;</button></td>' +
-      '</tr>';
+	if ($('#orig-date').length) {
+		var rowHtml =
+		'<tr class="md-item-row">' +
+			'<td><input type="number" name="md_days_after[]" class="w-125px" min="0" step="1" value="' + daysAfter + '" required /></td>' +
+			'<td><input type="time" name="md_time_of_day[]" class="w-150px" step="60" value="' + timeOfDay + '" required /></td>' +
+			'<td><input type="time" name="md_duration[]" class="w-150px without_ampm" step="60" value="' + duration + '" required /></td>' +
+			'<td><div class="md-start-display font-weight-bold mt-1"></div></td>' +
+			'<td class="text-center"><button type="button" class="btn btn-danger md-remove-row" title="Remove">&minus;</button></td>' +
+		'</tr>';
 
-    $body.append(rowHtml);
+		$body.append(rowHtml);
+	} else {
+		var rowHtml =
+		'<tr class="md-item-row">' +
+			'<td><input type="number" name="md_days_after[]" class="w-125px" min="0" step="1" value="' + daysAfter + '" required /></td>' +
+			'<td><input type="time" name="md_time_of_day[]" class="w-150px" step="60" value="' + timeOfDay + '" required /></td>' +
+			'<td><input type="time" name="md_duration[]" class="w-150px without_ampm" step="60" value="' + duration + '" required /></td>' +
+			'<td class="text-center"><button type="button" class="btn btn-danger md-remove-row" title="Remove">&minus;</button></td>' +
+		'</tr>';
+
+		$body.append(rowHtml);
+	}
   }
 
   // Populate rows when dropdown changes
@@ -712,6 +725,73 @@ jQuery(function ($) {
   });
   $(document).on('click', '.md-remove-row', function (e) {
     e.preventDefault();
-    if ($body.children().length > 1) $(this).closest('tr').remove();
+    $(this).closest('tr').remove();
   });
+
+  var $baseEl = $('#orig-date');
+    var baseStr = ($baseEl.length ? $baseEl.text().trim() : '').replace(/\s+/g,' ');
+    // Parse "YYYY-MM-DD h:mm AM/PM"
+    function parseBase(str) {
+        var m = str.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+        if (!m) return null;
+        var Y = +m[1], Mo = +m[2]-1, D = +m[3], h = +m[4], mi = +m[5], ap = m[6].toUpperCase();
+        if (ap === 'PM' && h < 12) h += 12;
+        if (ap === 'AM' && h === 12) h = 0;
+        return new Date(Y, Mo, D, h, mi, 0, 0);
+    }
+    var baseDate = parseBase(baseStr);
+
+    function format12(dt) {
+        var Y = dt.getFullYear();
+        var M = String(dt.getMonth()+1).padStart(2,'0');
+        var D = String(dt.getDate()).padStart(2,'0');
+        var h24 = dt.getHours();
+        var ap = h24 >= 12 ? 'PM' : 'AM';
+        var h12 = h24 % 12; if (h12 === 0) h12 = 12;
+        var mi = String(dt.getMinutes()).padStart(2,'0');
+        return Y + '-' + M + '-' + D + ' ' + h12 + ':' + mi + ' ' + ap;
+    }
+
+    function computeRow($tr) {
+        if (!baseDate) return;
+        var daysVal = parseInt($tr.find('input[name="md_days_after[]"]').val(), 10);
+        if (isNaN(daysVal)) daysVal = 0;
+        var timeVal = $tr.find('input[name="md_time_of_day[]"]').val(); // "HH:MM"
+        if (!timeVal || !/^\d{2}:\d{2}$/.test(timeVal)) {
+            $tr.find('.md-start-display').text('');
+            return;
+        }
+        var parts = timeVal.split(':');
+        var h = +parts[0], m = +parts[1];
+        var dt = new Date(baseDate.getTime());
+        dt.setDate(dt.getDate() + daysVal);
+        dt.setHours(h, m, 0, 0);
+        $tr.find('.md-start-display').text(format12(dt));
+    }
+
+    function computeAll() {
+        $('#md-items-body tr.md-item-row').each(function(){ computeRow($(this)); });
+    }
+
+    // Initial compute
+    computeAll();
+
+    // Recompute on changes
+    $(document).on('input change', 'input[name="md_days_after[]"], input[name="md_time_of_day[]"]', function () {
+        computeRow($(this).closest('tr.md-item-row'));
+    });
+
+    // When adding a new row (hook your existing add-row logic)
+    $(document).on('click', '.md-add-row', function () {
+        // Defer to allow the row to be appended by existing code
+        setTimeout(function () {
+            var $last = $('#md-items-body tr.md-item-row').last();
+            computeRow($last);
+        }, 0);
+    });
+
+    // When removing rows, you might optionally recompute others (not required)
+    $(document).on('click', '.md-remove-row', function () {
+        setTimeout(computeAll, 0);
+    });
 });
