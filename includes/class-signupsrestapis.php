@@ -245,6 +245,20 @@ class SignUpsRestApis extends SignUpsBase {
 				);
 			}
 		);
+
+		add_action(
+			'rest_api_init',
+			function () {
+				$this->register_route(
+					'scwmembers/v1',
+					'/photos',
+					'photo_upload',
+					$this,
+					array(),
+					WP_REST_Server::CREATABLE
+				);
+			}
+		);
 	}
 
 	public function testing( $request ) {
@@ -277,6 +291,49 @@ class SignUpsRestApis extends SignUpsBase {
 			$route,
 			$basic_args
 		);
+	}
+
+	function photo_upload( $request ) {
+		    $expected_key = '8c62a157-7ee8-4104-9f91-930eac39fe2f';
+    $key = $request->get_param( 'key' );
+    if ( $key !== $expected_key ) {
+        return new WP_REST_Response( array( 'error' => 'Invalid key' ), 403 );
+    }
+
+    $badge = sanitize_text_field( $request->get_param( 'badge' ) );
+    if ( empty( $badge ) ) {
+        return new WP_REST_Response( array( 'error' => 'Missing badge' ), 400 );
+    }
+
+    $files = $request->get_file_params();
+    if ( empty( $files['photo'] ) || $files['photo']['error'] !== UPLOAD_ERR_OK ) {
+        return new WP_REST_Response( array( 'error' => 'Missing or invalid photo' ), 400 );
+    }
+
+    $tmp = $files['photo']['tmp_name'];
+    $data = @file_get_contents( $tmp );
+    if ( $data === false ) {
+        return new WP_REST_Response( array( 'error' => 'Failed reading uploaded file' ), 500 );
+    }
+
+    global $wpdb;
+    $table = $wpdb->prefix . 'member_rosters'; // adjust to your actual table name
+
+    $updated = $wpdb->update( SELF::PHOTO_TABLE,  array( 'photo_image' => $data ), array('photo_badge' => $badge ) );
+
+    if ( $updated === 0 ) {
+		$updated = $wpdb->insert( SELF::PHOTO_TABLE,  array( 'photo_image' => $data, 'photo_badge' => $badge ) );
+		if ( $updated === false ) {
+        	error_log( 'wcpu_store_member_photo_minimal DB error: ' . $wpdb->last_error );
+        	return new WP_REST_Response( array( 'error' => 'Database update failed' ), 500 );
+		}
+    }
+
+    if ( $updated === 0 ) {
+        return new WP_REST_Response( array( 'error' => 'Badge not found' ), 404 );
+    }
+
+    return new WP_REST_Response( array( 'status' => 'ok' ), 200 );
 	}
 
 	/**

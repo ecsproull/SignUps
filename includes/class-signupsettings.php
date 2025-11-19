@@ -75,9 +75,27 @@ class SignupSettings extends SignUpsBase {
 				$this->load_create_multiday( $post );
 			} elseif ( isset( $post['submit_multiday'] ) ) {
 				$this->submit_multiday( $post );
+			} elseif ( isset( $post['send_notifications'] ) ) {
+				$this->send_notifications( $post );
 			} else {
 				$this->load_signup_selection();
 			}
+		} else {
+			$this->load_signup_selection();
+		}
+	}
+
+	function send_notifications( $post ) {
+		$sgm = new SendGridMail();
+		foreach( $post['notify_recipients'] as $email ) {
+			$sgm->send_mail( $email, $post['subject'], $post['notify_message'], true);
+		}
+
+		if ( isset( $post['repost_signup_id'] ) && $post['repost_signup_id'] ) {
+			$repost = array(
+				'edit_sessions_signup_id' => $post['repost_signup_id'],
+			);
+			$this->load_session_selection( $repost );
 		} else {
 			$this->load_signup_selection();
 		}
@@ -264,6 +282,7 @@ class SignupSettings extends SignUpsBase {
 		$post['signup_group']                = 'member' === $post['signup_group'] ? '' : $post['signup_group'];
 		$post['signup_default_contact_name'] = $post['signup_contact_firstname'] . ' ' . $post['signup_contact_lastname'];
 		$post['signup_guests_allowed']       = isset( $post['signup_guests_allowed'] );
+		$post['signup_block_self_move']      = isset( $post['signup_block_self_move'] );
 
 		if ( isset( $post['signup_default_duration'] ) ) {
 			$duration_parts = explode( ':', $post['signup_default_duration'] );
@@ -496,10 +515,6 @@ class SignupSettings extends SignUpsBase {
 
 				unset( $post['instructors'] );
 			}
-
-			?>
-			<h2 class="text-center"><?php echo esc_html( $count_instructors . ' instructors were updated.' ); ?></h2>
-			<?php
 		}
 
 		unset( $post['instructors_id'] );
@@ -511,6 +526,9 @@ class SignupSettings extends SignUpsBase {
 		$preclass_email_days = (int) $signup[0]->signup_preclass_email;
 		$add_to_calendar     = $signup[0]->signup_admin_approved;
 		$total_rows_updated  = 0;
+		$notify_member_list  = array();
+		$notify_message      = '';
+		$notify_subject      = '';
 		array_map(
 			function (
 				$start,
@@ -521,7 +539,10 @@ class SignupSettings extends SignUpsBase {
 				$signup,
 				$add_to_calendar,
 				$preclass_email_days,
-				&$total_rows_updated
+				&$total_rows_updated,
+				&$notify_member_list,
+				&$notify_message,
+				&$notify_subject
 			) {
 				global $wpdb;
 				if ( $start && $end ) {
@@ -558,6 +579,52 @@ class SignupSettings extends SignUpsBase {
 					}
 
 					if ( $where['session_id'] && 0 === $keys ) {
+						$send_attendee_email = false;
+						$attendees = $wpdb->get_results(
+							$wpdb->prepare(
+								'SELECT attendee_firstname, attendee_lastname, attendee_email
+								FROM %1s
+								WHERE attendee_session_id = %d',
+								self::ATTENDEES_TABLE,
+								$where['session_id']
+							),
+							OBJECT
+						);
+
+						if ( count( $attendees ) > 0 ) {
+							$original_session = $wpdb->get_results(
+								$wpdb->prepare(
+									'SELECT session_start_time, session_start_formatted
+									FROM %1s
+									WHERE session_id = %d',
+									self::SESSIONS_TABLE,
+									$where['session_id']
+								),
+								OBJECT
+							);
+
+							$s1 = $post['session_start_formatted'][0];
+							$s2 = $original_session[0]->session_start_formatted;
+
+							$tz = $this->date_time_zone;
+
+							$d1 = DateTime::createFromFormat('Y-m-d\TH:i', $s1, $tz);
+							$d2 = DateTime::createFromFormat('Y-m-d g:i A', $s2, $tz);
+
+							$now_ts = (new DateTime('now', $tz))->getTimestamp();
+							$d1_ts  = $d1 ? $d1->getTimestamp() : null;
+							$d2_ts  = $d2 ? $d2->getTimestamp() : null;
+
+							// Require: times differ AND (new OR original is in the future)
+							if (
+								$d1 && $d2 &&
+								($d1_ts !== $d2_ts) &&
+								( ($d1_ts !== null && $d1_ts >= $now_ts) || ($d2_ts !== null && $d2_ts >= $now_ts) )
+							) {
+								$send_attendee_email = true;
+							}
+						}
+
 						$rows_updated = $wpdb->update( 'wp_scw_sessions', $session, $where );
 						if ( 1 === $rows_updated && $post['session_calendar_id'] ) {
 							$mini_post = array(
@@ -569,6 +636,34 @@ class SignupSettings extends SignUpsBase {
 							);
 
 							$this->update_calendar( $mini_post );
+							if ( $send_attendee_email ) {
+								$instructors = $wpdb->get_results(
+									$wpdb->prepare(
+										'SELECT wp_scw_instructors.instructors_name, wp_scw_instructors.instructors_email
+										FROM wp_scw_instructors
+										LEFT JOIN wp_scw_session_instructors
+										ON wp_scw_instructors.instructors_id = wp_scw_session_instructors.si_instructor_id
+										WHERE wp_scw_session_instructors.si_session_id = %d',
+										$where['session_id']
+									),
+									OBJECT
+								);
+
+								$new_dt = new DateTime($post['session_start_formatted'][0]);
+								$new_dt_formatted = $new_dt->format( self::DATETIME_FORMAT );
+								$notify_subject = $signup_name . ' Schedule Updated';
+								$body           = '<p>The class schedule has changed.</p>';
+								$body          .= '<p>New start time: ' . esc_html( $new_dt_formatted ) . '</p>';
+								$body          .= '<p>Please review your upcoming session dates.</p>';
+								$notify_message = $body;
+								foreach ( $instructors as $instructor ) {
+									$notify_member_list[] = array( 'title' => 'Instructor', 'name' => $instructor->instructors_name, 'email' => $instructor->instructors_email );
+								}
+								foreach ( $attendees as $attendee ) {
+									$name = $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname;
+									$notify_member_list[] = array( 'title' => 'Attendee', 'name' => $name, 'email' => $attendee->attendee_email );
+								}
+							}
 						}
 					} else {
 						$rows_updated = $wpdb->insert( 'wp_scw_sessions', $session );
@@ -622,7 +717,81 @@ class SignupSettings extends SignUpsBase {
 			array_keys( $post['session_start_formatted'] )
 		);
 
-		$this->update_message( $total_rows_updated, $wpdb->last_error, 'Sessions' );
+		if ( count( $notify_member_list ) ) {
+			$this->create_notify_form( $notify_message, $notify_member_list, $notify_subject );
+		} else {
+			$this->update_message( $total_rows_updated, $wpdb->last_error, 'Sessions' );
+		}
+	}
+
+	function create_notify_form( $notify_message, $notify_member_list, $subject, $repost_id = null ) {
+		$notify_member_list[] = array( 'title' => 'Administrator', 'name' => 'Jim Casey', 'email' => 'jcasey1245@msn.com' );
+		$notify_member_list[] = array( 'title' => 'Administrator', 'name' => 'Ed Sproull', 'email' => 'ecsproull765@gmail.com' );
+		?>
+		<form method="POST">
+			<div class="container mt-4">
+				<h2 class="text-center mb-3">Notify Attendees and Instructors</h2>
+
+				<div class="mb-3">
+					<label for="notify_message"><strong>Subject</strong></label>
+					<input id="notify_subject" name="subject" class="w-100" value="<?php echo esc_textarea( $subject ); ?>" >
+				</div>
+
+				<div class="mb-3">
+					<label for="notify_message"><strong>Message</strong></label>
+					<input id="notify_message" type hidden name="notify_message" value="<?php echo esc_attr( $notify_message ); ?>" >
+					<div class='border'>
+						 <?php echo  $notify_message; ?>
+	                </div>
+				</div>
+
+				<div class="mb-2 d-flex justify-content-between align-items-center">
+					<strong>Recipients</strong>
+					<label class="mb-0">
+						<input type="checkbox" id="notify_toggle_all" checked>
+						<span>Toggle all</span>
+					</label>
+				</div>
+
+				<table class="table table-striped mr-auto ml-auto w-90">
+					<thead>
+						<tr>
+							<th style="width: 140px;">Role</th>
+							<th style="width: 240px;">Name</th>
+							<th>Email</th>
+							<th style="width: 80px; text-align:center;">Send</th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach ( (array) $notify_member_list as $idx => $person ) :
+							$title = is_array( $person ) ? ( $person['title'] ?? '' ) : ( $person->title ?? '' );
+							$name  = is_array( $person ) ? ( $person['name']  ?? '' ) : ( $person->name  ?? '' );
+							$email = is_array( $person ) ? ( $person['email'] ?? '' ) : ( $person->email ?? '' );
+							?>
+							<tr>
+								<td><?php echo esc_html( $title ); ?></td>
+								<td><?php echo esc_html( $name ); ?></td>
+								<td><?php echo esc_html( $email ); ?></td>
+								<td class="text-center">
+									<input type="checkbox" class="notify-recipient" name="notify_recipients[]" value="<?php echo esc_attr( $email ); ?>" checked>
+									<input type="hidden" name="notify_names[<?php echo esc_attr( $email ); ?>]" value="<?php echo esc_attr( $name ); ?>">
+									<input type="hidden" name="notify_titles[<?php echo esc_attr( $email ); ?>]" value="<?php echo esc_attr( $title ); ?>">
+								</td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+			    <input type="hidden" name="subject" value="<?php echo esc_attr( $subject ); ?>">
+				<input type="hidden" name="repost_signup_id" value="<?php echo esc_attr( $repost_id ); ?>">
+				<div class="text-center mt-3">
+					<button type="button" class="btn btn-danger mr-3" onclick="window.history.back()">Cancel</button>
+					<button type="submit" class="btn btn-success" name="send_notifications" value="1">Continue</button>
+				</div>
+
+				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+			</div>
+		</form>
+		<?php
 	}
 
 	/**
@@ -1046,6 +1215,41 @@ class SignupSettings extends SignUpsBase {
 			}
 		}
 
+		$time_name = $wpdb->get_row(
+			$wpdb->prepare(
+					'SELECT wp_scw_sessions.session_start_time, wp_scw_sessions.session_start_formatted, wp_scw_signups.signup_name  FROM wp_scw_sessions
+					LEFT JOIN wp_scw_signups ON wp_scw_sessions.session_signup_id = wp_scw_signups.signup_id
+					WHERE wp_scw_sessions.session_id = %d',
+					$post['session_id']
+			),
+			OBJECT
+		);
+
+		$now_ts = (new DateTime('now', $this->date_time_zone ) )->getTimestamp();
+		$send_email = $now_ts <= (int) $time_name->session_start_time;
+		if ( $send_email ) {
+			$attendees = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT * FROM %1s
+					WHERE attendee_session_id = %d',
+					self::ATTENDEES_TABLE,
+					$post['session_id']
+				),
+				OBJECT
+			);
+
+			$instructors = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT wp_scw_instructors.instructors_name, wp_scw_instructors.instructors_email  FROM wp_scw_session_instructors
+					LEFT JOIN wp_scw_instructors ON wp_scw_session_instructors.si_instructor_id = wp_scw_instructors.instructors_id
+					WHERE si_session_id = %d AND si_signup_id = %d',
+					$post['session_id'],
+					$post['signup_id']
+				),
+				OBJECT
+			);
+		}
+
 		$where_session = array( 'session_id' => $post['session_id'] );
 		$rows          = $wpdb->delete( self::SESSIONS_TABLE, $where_session );
 		if ( $rows ) {
@@ -1076,6 +1280,18 @@ class SignupSettings extends SignUpsBase {
 
 		if ( $last_errors ) {
 			$this->update_message( $rows_updated, $last_errors, 'Session and Attendees Deleted' );
+		} elseif ( $send_email && ( count( $instructors ) || count ( $attendees ) ) ) {
+			foreach ( $instructors as $instructor ) {
+				$notify_member_list[] = array( 'title' => 'Instructor', 'name' => $instructor->instructors_name, 'email' => $instructor->instructors_email );
+			}
+			foreach ( $attendees as $attendee ) {
+				$name = $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname;
+				$notify_member_list[] = array( 'title' => 'Attendee', 'name' => $name, 'email' => $attendee->attendee_email );
+			}
+			
+			$notify_subject = "Your " . $time_name->signup_name . " session has been deleted.";
+			$notify_message = "The " . $time_name->session_start_formatted . " session has been canceled by an administrator.";
+			$this->create_notify_form( $notify_message, $notify_member_list, $notify_subject, $repost ? $post['signup_id'] : null );
 		} elseif ( $repost ) {
 			$repost = array(
 				'edit_sessions_signup_id' => $post['signup_id'],
@@ -1194,34 +1410,37 @@ class SignupSettings extends SignUpsBase {
 			OBJECT
 		);
 
+		$notify_member_list = array();
 		$orientation = 'residents' === $signups[0]->signup_group;
 		if ( isset( $post['selectedAttendee'] ) ) {
 			foreach ( $post['selectedAttendee'] as $attendee ) {
 				$attendee_id = explode( ',', $attendee )[0];
-				if ( $orientation ) {
-					$attendee = $wpdb->get_results(
-						$wpdb->prepare(
-							'SELECT attendee_badge
-							FROM %1s
-							WHERE attendee_id = %s',
-							self::ATTENDEES_TABLE,
-							$attendee_id
-						),
-						OBJECT
-					);
+				$attendee = $wpdb->get_row(
+					$wpdb->prepare(
+						'SELECT attendee_badge, attendee_firstname, attendee_lastname, attendee_email
+						FROM %1s
+						WHERE attendee_id = %s',
+						self::ATTENDEES_TABLE,
+						$attendee_id
+					),
+					OBJECT
+				);
 
+				$notify_name  = $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname;
+				if ( $orientation ) {
 					$where = array( 'new_member_id' => $attendee[0]->attendee_badge );
 					$wpdb->delete( self::NEW_MEMBER_TABLE, $where );
+					$notify_member_list[] = array( 'title' => 'New Member', 'name' => $notify_name, 'email' => $attendee->attendee_email );
+				} else {
+					$wpdb->delete( self::ATTENDEES_TABLE, array( 'attendee_id' => $attendee_id ) );
+					$notify_member_list[] = array( 'title' => 'Member', 'name' => $notify_name, 'email' => $attendee->attendee_email );
 				}
-
-				$wpdb->delete( self::ATTENDEES_TABLE, array( 'attendee_id' => $attendee_id ) );
 			}
 		}
 
-		$repost = array(
-			'edit_sessions_signup_id' => $post['signup_id'],
-		);
-		$this->load_session_selection( $repost );
+		$notify_subject = 'Your ' . $post['signup_name'] . ' Session has Changed';
+		$notify_message  = '<p>You have been deleted from your session by an administrator.</p>';
+		$this->create_notify_form( $notify_message, $notify_member_list, $notify_subject, $post['signup_id'] );
 	}
 
 	/**
@@ -1236,13 +1455,9 @@ class SignupSettings extends SignUpsBase {
 		$where = array( 'attendee_id' => $ids[0] );
 		$wpdb->update( self::ATTENDEES_TABLE, $data, $where );
 
-		$repost = array(
-			'edit_sessions_signup_id' => $post['signup_id'],
-		);
-
 		$attendee = $wpdb->get_row(
 			$wpdb->prepare(
-				'SELECT attendee_email
+				'SELECT attendee_email, attendee_firstname, attendee_lastname
 				FROM %1s
 				WHERE attendee_id = %s',
 				self::ATTENDEES_TABLE,
@@ -1251,12 +1466,13 @@ class SignupSettings extends SignUpsBase {
 			OBJECT
 		);
 
-		$body  = '<p>Your session has been changed by an administrator.</p>';
-		$body .= $this->get_session_email_body( $post['move_to'] );
-		$sgm   = new SendGridMail();
-		$sgm->send_mail( $attendee->attendee_email, 'Your session change.', $body, true );
-
-		$this->load_session_selection( $repost );
+		$notify_subject = 'Your ' . $post['signup_name'] . ' Session has Changed';
+		$notify_message  = '<p>Your session has been changed by an administrator.</p>';
+		$notify_message .= $this->get_session_email_body( $post['move_to'] );
+		$notify_name  = $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname;
+		$notify_member_list = array();
+		$notify_member_list[] = array( 'title' => 'Member', 'name' => $notify_name, 'email' => $attendee->attendee_email );
+		$this->create_notify_form( $notify_message, $notify_member_list, $notify_subject, $post['signup_id'] );
 	}
 
 	/**
@@ -1902,9 +2118,17 @@ class SignupSettings extends SignUpsBase {
 				</div>
 
 				<div class="text-right mr-2">
-					<label class="label-margin-top mr-2" for="description_preclass_mail">Guests Allowed:</label>
+					<label class="label-margin-top mr-2" for="description_block_moves">Block Moves:</label>
 				</div>
 				<div class="text-left pt-2 mt-1">
+					<input type="checkbox" id="description_block_moves" title="Remove the self move option from a signup."
+						value="" <?php echo esc_html( $data->signup_block_self_move ) === '1' ? 'checked' : ''; ?> name="signup_block_self_move">
+				</div>
+
+				<div class="text-right mr-2">
+					<label class="label-margin-top mr-1" for="description_preclass_mail">Guests Allowed:</label>
+				</div>
+				<div class="text-left pt-2">
 					<input type="checkbox" id="description_guests_allowed" title="Are members allowed to bring a guest."
 						value="" <?php echo esc_html( $data->signup_guests_allowed ) === '1' ? 'checked' : ''; ?> name="signup_guests_allowed">
 				</div>
@@ -1961,19 +2185,19 @@ class SignupSettings extends SignUpsBase {
 			<div class="session-box mr-auto ml-auto mb-1">
 				<div class="text-right mr-2"><label>Slots:</label></div>
 				<div><input class="w-125px session-setting" type="number" name="session_slots" 
-					value="<?php echo esc_html( $data->session_slots ); ?>" />
+					value="<?php echo esc_attr( $data->session_slots ); ?>" />
 				</div>
 			</div>
 			<div id="session-table" class="session-box mr-auto ml-auto" <?php echo $session_id ? 'hidden' : ''; ?> >
 				<div class="text-right mr-2"><label>Start Time: </label></div>
 				<div><input id="default-time-of-day" class="w-250px session-setting" type="time" name="session_time_of_day" 
-					value="<?php echo esc_html( $data->session_time_of_day ); ?>" 
+					value="<?php echo esc_attr( $data->session_time_of_day ); ?>" 
 					<?php echo $session_id ? 'disabled' : ''; ?> /> </div>
 
 				<div class="text-right mr-2"><label>Duration: </label></div>
 				<div><input id="default-minutes" class="w-250px without_ampm session-setting" type="text" 
 					name="session_duration" placeholder="--:--" pattern="[0-9]{2}:[0-9]{2}"
-					value="<?php echo esc_html( $data->session_duration ); ?>" 
+					value="<?php echo esc_attr( $data->session_duration ); ?>" 
 					<?php echo $session_id ? 'disabled' : ''; ?> /> </div>
 
 				<div class="text-right mr-2">
@@ -1991,7 +2215,7 @@ class SignupSettings extends SignUpsBase {
 
 				<div class="text-right mr-2"><label>Day of Month:</label></div>
 				<div><input id="day-of-month" class="w-250px session-setting" type="text" name="session_day_of_month" 
-					value="<?php echo '0' === $data->session_days_between_sessions ? esc_html( $data->session_day_of_month ) : ''; ?>" 
+					value="<?php echo '0' === $data->session_days_between_sessions ? esc_attr( $data->session_day_of_month ) : ''; ?>" 
 					<?php echo $session_id ? 'disabled' : ''; ?> 
 					pattern="\b(First|Second|Third|Fourth|Last)\b \b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b" 
 					title="Only First, Second, Third, Fourth or Last plus the day of the week. Both MUST be capitolized"
@@ -1999,11 +2223,11 @@ class SignupSettings extends SignUpsBase {
 
 					<div class="text-right mr-2"><label>Start Time:</label></div>
 					<div><input id="start-time" class="w-250px start-time" type="datetime-local" 
-						value="<?php echo esc_html( $data->session_start_formatted[0] ); ?>" /> </div>
+						value="<?php echo esc_attr( $data->session_start_formatted[0] ); ?>" /> </div>
 
 				<div class="text-right mr-2"><label>End Repeat Date:</label></div>
 				<div><input type="date" class="w-250px" name="session_end_repeat"
-					value="<?php echo esc_html( $data->session_end_repeat ); ?>"></div>
+					value="<?php echo esc_attr( $data->session_end_repeat ); ?>"></div>
 
 				<div class="text-right mr-2"><label>Save Settings:</label></div>
 				<div><input type="checkbox" class="save-settings" name="save_session_settings"
@@ -2018,12 +2242,12 @@ class SignupSettings extends SignUpsBase {
 				for ( $i = 0; $i < $data_items_count; $i++ ) {
 					?>
 					<div class="text-right mr-2"><label>Start Time:</label></div>
-					<div><input id="start-time-<?php echo esc_html( $i ); ?>" class="w-250px start-time" type="datetime-local" name="session_start_formatted[]" 
-						value="<?php echo esc_html( $data->session_start_formatted[ $i ] ); ?>" /> </div>
+					<div><input id="start-time-<?php echo esc_attr( $i ); ?>" class="w-250px start-time" type="datetime-local" name="session_start_formatted[]" 
+						value="<?php echo esc_attr( $data->session_start_formatted[ $i ] ); ?>" /> </div>
 
 					<div class="text-right mr-2"><label>End Time:</label></div>
-					<div><input id="end-time-<?php echo esc_html( $i ); ?>" class="w-250px" type="datetime-local" name="session_end_formatted[]" 
-						value="<?php echo esc_html( $data->session_end_formatted[ $i ] ); ?>" /></div>
+					<div><input id="end-time-<?php echo esc_attr( $i ); ?>" class="w-250px" type="datetime-local" name="session_end_formatted[]" 
+						value="<?php echo esc_attr( $data->session_end_formatted[ $i ] ); ?>" /></div>
 					<?php
 				}
 				?>
@@ -2040,10 +2264,10 @@ class SignupSettings extends SignUpsBase {
 				<?php
 				foreach ( $class_instructors as $instructor ) {
 					?>
-					<div><input class="w-99" type="text" name="instructors_badge[]" value="<?php echo esc_html( $instructor->instructors_badge ); ?>"></div>
-					<div><input class="w-99" type="text" name="instructors_name[]" value="<?php echo esc_html( $instructor->instructors_name ); ?>"></div>
-					<div><input class="w-99" type="text" name="instructors_email[]" value="<?php echo esc_html( $instructor->instructors_email ); ?>"></div>
-					<div><input class="w-99" type="text" name="instructors_phone[]" value="<?php echo esc_html( $instructor->instructors_phone ); ?>"></div>
+					<div><input class="w-99" type="text" name="instructors_badge[]" value="<?php echo esc_attr( $instructor->instructors_badge ); ?>"></div>
+					<div><input class="w-99" type="text" name="instructors_name[]" value="<?php echo esc_attr( $instructor->instructors_name ); ?>"></div>
+					<div><input class="w-99" type="text" name="instructors_email[]" value="<?php echo esc_attr( $instructor->instructors_email ); ?>"></div>
+					<div><input class="w-99" type="text" name="instructors_phone[]" value="<?php echo esc_attr( $instructor->instructors_phone ); ?>"></div>
 					<?php
 					$si_checked = false;
 					foreach ( $session_instructors as $si ) {
@@ -2053,8 +2277,8 @@ class SignupSettings extends SignUpsBase {
 					}6
 					?>
 					<div><input class="form-check-input ml-2 add-chk mt-2" type="checkbox" name="instructors[]" 
-						value="<?php echo esc_html( $instructor->instructors_id ); ?>" <?php echo $si_checked ? 'checked' : ''; ?>></div>
-					<input class="w-99" type="hidden" name="instructors_id[]" value="<?php echo esc_html( $instructor->instructors_id ); ?>">
+						value="<?php echo esc_attr( $instructor->instructors_id ); ?>" <?php echo $si_checked ? 'checked' : ''; ?>></div>
+					<input class="w-99" type="hidden" name="instructors_id[]" value="<?php echo esc_attr( $instructor->instructors_id ); ?>">
 					<?php
 				}
 				?>
@@ -2074,15 +2298,15 @@ class SignupSettings extends SignUpsBase {
 				</tr>
 				<tr>
 					<td class="text-center"><button class="btn bt-md btn-danger mt-2 mr-5" style="cursor:pointer;" type="submit" name="edit_sessions_signup_id"
-					value="<?php echo esc_html( $data->session_signup_id ); ?>">Back</button></td>
+					value="<?php echo esc_attr( $data->session_signup_id ); ?>">Back</button></td>
 					<td class="text-left"><input class="btn bt-md btn-success mr-auto ml-auto ml-2" type="submit" value="Submit Session" name="submit_session"></td>
 				</tr>
 			</table>
 			<input class="w-75px" type="hidden" name="session_add_slots_count" value="1" />
-			<input type="hidden" name="session_signup_id" value="<?php echo esc_html( $data->session_signup_id ); ?>">
-			<input type="hidden" name="session_calendar_id" value="<?php echo esc_html( $data->session_calendar_id ); ?>">
-			<input type="hidden" name="id" value="<?php echo esc_html( $session_id ); ?>">
-			<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
+			<input type="hidden" name="session_signup_id" value="<?php echo esc_attr( $data->session_signup_id ); ?>">
+			<input type="hidden" name="session_calendar_id" value="<?php echo esc_attr( $data->session_calendar_id ); ?>">
+			<input type="hidden" name="id" value="<?php echo esc_attr( $session_id ); ?>">
+			<input type="hidden" name="signup_name" value="<?php echo esc_attr( $signup_name ); ?>">
 			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 		</form>
 		<?php
@@ -2126,7 +2350,7 @@ class SignupSettings extends SignUpsBase {
 
 					foreach ( $categories as $category ) {
 						?>
-						<option value=<?php	echo esc_html( $category->category_id ); ?> ><?php echo esc_html( $category->category_title ); ?></option>
+						<option value="<?php echo esc_attr( $category->category_id ); ?>" ><?php echo esc_attr( $category->category_title ); ?></option>
 						<?php
 					}
 					?>

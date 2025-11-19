@@ -326,6 +326,7 @@ class ShortCodes extends SignUpsBase {
 		$signup_name         = $signups[0]->signup_name;
 		$signup_email        = $signups[0]->signup_contact_email;
 		$signup_contact_name = $signups[0]->signup_default_contact_name;
+		$signup_block_moves  = $signups[0]->signup_block_self_move;
 
 		if ( $rolling ) {
 			$this->create_rolling_session( $signup_id );
@@ -438,7 +439,8 @@ class ShortCodes extends SignUpsBase {
 				$signups[0]->signup_group,
 				$signup_email,
 				$signup_contact_name,
-				$attendee_guests_count
+				$attendee_guests_count,
+				$signup_block_moves
 			);
 		}
 	}
@@ -856,7 +858,8 @@ class ShortCodes extends SignUpsBase {
 		$user_group,
 		$signup_email,
 		$signup_contact_name,
-		$guests_coming
+		$guests_coming,
+		$block_self_move
 	) {
 		?>
 			<div id="session_select" class="text-center mw-800px">
@@ -961,7 +964,7 @@ class ShortCodes extends SignUpsBase {
 											<td><?php echo esc_html( $attendee->attendee_item ); ?></td>
 											<?php
 											if ( '0' === $attendee->attendee_balance_owed ) {
-												$can_move = $attendee->attendee_badge === $user_badge;
+												$can_move = $attendee->attendee_badge === $user_badge && ! $block_self_move;
 												$paid     = '1' === $attendee->attendee_plus_guest ? 'Member + Guest' : 'Paid';
 												$action   = '0' === $cost ? $paid : 'Move';
 												?>

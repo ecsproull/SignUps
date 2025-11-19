@@ -794,4 +794,9 @@ jQuery(function ($) {
     $(document).on('click', '.md-remove-row', function () {
         setTimeout(computeAll, 0);
     });
+
+	 $(document).on('change', '#notify_toggle_all', function (e) {
+		var checked = $(this).is(':checked');
+    	$('input.notify-recipient').prop('checked', checked);
+	});
 });

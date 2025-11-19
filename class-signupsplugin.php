@@ -42,6 +42,7 @@ require_once 'includes/class-instructorseditor.php';
 require_once 'includes/class-sessionemaildata.php';
 require_once 'includes/class-settings.php';
 require_once 'includes/class-multidaytemplates.php';
+require_once 'includes/class-displayimage.php';
 
 /**
  * Main SignUps class. This is the entry point for the plugin.
@@ -186,6 +187,7 @@ class SignUpsPlugin extends SignUpsBase {
 		add_submenu_page( 'sign_ups', 'Payments Report', 'Payments Report', 'manage_options', 'payments_report', array( new PaymentsReview(), 'review_payments' ) );
 		add_submenu_page( 'sign_ups', 'Instructors', 'Instructors', 'manage_options', 'instructors_editor', array( new InstructorsEditor(), 'instructors_editor' ) );
 		add_submenu_page( 'sign_ups', 'Multi Day Templates', 'Multi Day Templates', 'manage_options', 'multi-session-templates', array( new MultiDayTemplates, 'render_admin_page' ) );
+		add_submenu_page( 'sign_ups', 'Display Image', 'Display Image', 'manage_options', 'display-image', array( new DisplayImage, 'render_image_page' ) );
 
 		$current_user    = wp_get_current_user();
 		if ( 'ecsproull' === $current_user->user_login ) {

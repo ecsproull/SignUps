@@ -166,11 +166,17 @@ class SignUpsBase {
 	 * Multiple day session, template items for a class.
 	 */
 	protected const MULTI_TEMPLATE_ITEMS_TABLE = 'wp_scw_multiday_template_items';
+	
 	/**
 	 * Recaptcha log.
 	 * Records badge, score, calling ip address, post data and time.
 	 */
 	protected const RECAPTCHA_LOG = 'wp_scw_recaptcha_log';
+
+	/**
+	 * Table to hold member photos.
+	 */
+	protected const PHOTO_TABLE = 'wp_scw_member_photos';
 
 	/**
 	 * Log table.
@@ -1576,8 +1582,8 @@ class SignUpsBase {
 			<?php
 		}
 		?>
-		<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 		</select>
+		<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 		<?php
 	}
 
