@@ -99,4 +99,51 @@ jQuery(document).ready(function($){
 		Cookies.remove("signups_scw_badge");
 		location.reload();
 	})
+	
+	const route = wpApiSettings.root + 'scwmembers/v1/get-photo?badge=';
+	let openPhotoPopupId = null;
+    $(document).on('click', '.member-photo-btn', async function(){
+        const $btn    = $(this);
+        const badge   = $btn.data('badge');
+        const session = $btn.data('session');
+        const popupId = $btn.data('popup-id');
+        const $popup  = $('#' + popupId);
+        if(!$popup.length) return;
+
+         if (openPhotoPopupId && openPhotoPopupId !== popupId) {
+			$('#' + openPhotoPopupId).prop('hidden', true).empty();
+			openPhotoPopupId = null;
+		}
+
+		// Toggle same popup
+		if(!$popup.prop('hidden')){
+			$popup.prop('hidden', true).empty();
+			openPhotoPopupId = null;
+			return;
+		}
+
+        $popup.prop('hidden', false).html('<em>Loading...</em>');
+		openPhotoPopupId = popupId;
+        try {
+            const resp = await fetch(route + encodeURIComponent(badge), {
+                credentials: 'same-origin',
+                headers: { 'X-WP-Nonce': (window.wpApiSettings && wpApiSettings.nonce) ? wpApiSettings.nonce : '' }
+            });
+            if(!resp.ok){ $popup.html('<span style="color:red;">Not found</span>'); return; }
+            const blob = await resp.blob();
+            const url  = URL.createObjectURL(blob);
+            $popup.html('<img alt="Photo '+badge+'" src="'+url+'">');
+        } catch(e){
+            $popup.html('<span style="color:red;">Error</span>');
+        }
+    });
+
+   $(document).on('click', function(e){
+		if(!$(e.target).closest('.member-photo-btn, .member-photo-popup').length){
+			if (openPhotoPopupId) {
+				$('#' + openPhotoPopupId).prop('hidden', true).empty();
+				openPhotoPopupId = null;
+			}
+		}
+	});
 });

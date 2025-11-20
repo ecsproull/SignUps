@@ -102,8 +102,25 @@ class Reports extends SignUpsBase {
 					<?php
 					foreach ( $instructors as $instructor ) {
 						?>
-						<div class="instructor">
-							<b>Instructor:</b> <?php echo esc_html( $instructor->instructors_name ); ?>
+						<div class="instructor position-relative">
+							<?php
+							if ( $instructor->instructors_name ) {
+								?>
+								<?php echo esc_html( $instructor->instructors_name ); ?>
+								<button type="button"
+									class="member-photo-btn dashicons dashicons-format-image"
+									title="Photo"
+									data-role="instructor"
+									data-badge="<?php echo esc_attr( $instructor->instructors_badge ); ?>"
+									data-session="<?php echo esc_attr( $attendee->session_id ); ?>"
+									data-popup-id="photo-popup-<?php echo esc_attr( $attendee->session_id . '-' . $instructor->instructors_badge ); ?>">
+								</button>
+								<div id="photo-popup-<?php echo esc_attr( $attendee->session_id . '-' . $instructor->instructors_badge ); ?>"
+									class="member-photo-popup"
+									hidden></div>
+								<?php
+							}
+							?>
 						</div>
 						<div class="instructor <?php echo esc_html( $current_session_id ); ?>">
 							<?php echo esc_html( $instructor->instructors_email ); ?>
@@ -125,8 +142,20 @@ class Reports extends SignUpsBase {
 					<?php
 				} else {
 					?>
-					<div>
+					<div class="position-relative">
 						<?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?>
+							<button type="button"
+								class="member-photo-btn dashicons dashicons-format-image"
+								title="Photo"
+								data-role="attendee"
+								data-badge="<?php echo esc_attr( $attendee->attendee_badge ); ?>"
+								data-session="<?php echo esc_attr( $attendee->session_id ); ?>"
+								data-popup-id="photo-popup-<?php echo esc_attr( $attendee->session_id . '-' . $attendee->attendee_badge ); ?>">
+							</button>
+							<div id="photo-popup-<?php echo esc_attr( $attendee->session_id . '-' . $attendee->attendee_badge ); ?>"
+								class="member-photo-popup"
+								hidden>
+							</div>
 					</div>
 					<?php
 				}

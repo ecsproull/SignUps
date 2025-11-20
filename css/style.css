@@ -136,7 +136,7 @@ button {
   display: grid;
   width: 80%;
   max-width: 700px;
-  grid-template-columns: 10% 30% 30% 30% 10%;
+  grid-template-columns: 10% 25% 5% 25% 25% 10%;
   align-items: start;
   justify-content: space-between;
 }

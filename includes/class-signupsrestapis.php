@@ -259,6 +259,20 @@ class SignUpsRestApis extends SignUpsBase {
 				);
 			}
 		);
+
+		add_action(
+			'rest_api_init',
+			function () {
+				$this->register_route(
+					'scwmembers/v1',
+					'/get-photo',
+					'get_photo',
+					$this,
+					array(),
+					WP_REST_Server::READABLE
+				);
+			}
+		);
 	}
 
 	public function testing( $request ) {
@@ -293,47 +307,129 @@ class SignUpsRestApis extends SignUpsBase {
 		);
 	}
 
+	function get_photo( $request ) {
+        global $wpdb;
+
+        $nonce    = $request->get_header( 'X-WP-Nonce' );
+        $verified = wp_verify_nonce( $nonce, 'wp_rest' );
+        if ( ! $verified ) {
+            return new WP_REST_Response( array( 'error' => 'Unauthorized' ), 401 );
+        }
+
+        $badge = sanitize_text_field( $request->get_param( 'badge' ) );
+        if ( empty( $badge ) || ! preg_match( '/^[0-9]{4}$/', $badge ) ) {
+            return new WP_REST_Response( array( 'error' => 'Invalid badge' ), 400 );
+        }
+
+        $sql = 'SELECT photo_image FROM ' . self::PHOTO_TABLE . ' WHERE photo_badge = %s LIMIT 1';
+        $image_data = $wpdb->get_var( $wpdb->prepare( $sql, $badge ) );
+        if ( null === $image_data ) {
+            return new WP_REST_Response( array( 'error' => 'Badge Not found' ), 404 );
+        }
+
+        // Normalize to raw binary
+        $raw = $image_data;
+
+        // Handle data URLs: data:image/...;base64,XXXX
+        if ( strncmp( $raw, 'data:image', 10 ) === 0 ) {
+            if ( preg_match( '/^data:(.*?);base64,(.*)$/s', $raw, $m ) ) {
+                $maybe = base64_decode( $m[2], true );
+                if ( $maybe !== false ) {
+                    $raw  = $maybe;
+                    $mime = $m[1];
+                }
+            }
+        }
+
+        // If not a valid image as-is, try base64-decode then re-check
+        if ( ! @getimagesizefromstring( $raw ) ) {
+            $maybe = base64_decode( $raw, true );
+            if ( $maybe !== false && @getimagesizefromstring( $maybe ) ) {
+                $raw = $maybe;
+            }
+        }
+
+        // From here on, serve $raw
+        $image_data = $raw;
+
+        // Determine MIME last
+        $mime = 'image/jpeg';
+        if ( function_exists( 'finfo_open' ) ) {
+            $finfo = finfo_open( FILEINFO_MIME_TYPE );
+            if ( $finfo ) {
+                $detected = @finfo_buffer( $finfo, $image_data );
+                if ( $detected ) { $mime = $detected; }
+                finfo_close( $finfo );
+            }
+        } else {
+            $info = @getimagesizefromstring( $image_data );
+            if ( ! empty( $info['mime'] ) ) { $mime = $info['mime']; }
+        }
+
+        add_filter(
+            'rest_pre_serve_request',
+            function( $served, $result, $req, $server ) use ( $image_data, $mime, $badge ) {
+                // Clean any previous output to avoid corrupting the binary
+                if ( function_exists('ob_get_length') && ob_get_length() ) {
+                    while ( ob_get_level() ) { @ob_end_clean(); }
+                }
+                nocache_headers();
+                header( 'X-Content-Type-Options: nosniff' );
+                header( 'Content-Type: ' . $mime );
+                // Optionally omit Content-Length to avoid gzip mismatch issues
+                // header( 'Content-Length: ' . strlen( $image_data ) );
+                header( 'Content-Disposition: inline; filename="' . $badge . '"' );
+                echo $image_data;
+                return true;
+            },
+            10,
+            4
+        );
+
+		 return new WP_REST_Response( null, 200 );
+    }
+
 	function photo_upload( $request ) {
-		    $expected_key = '8c62a157-7ee8-4104-9f91-930eac39fe2f';
-    $key = $request->get_param( 'key' );
-    if ( $key !== $expected_key ) {
-        return new WP_REST_Response( array( 'error' => 'Invalid key' ), 403 );
-    }
-
-    $badge = sanitize_text_field( $request->get_param( 'badge' ) );
-    if ( empty( $badge ) ) {
-        return new WP_REST_Response( array( 'error' => 'Missing badge' ), 400 );
-    }
-
-    $files = $request->get_file_params();
-    if ( empty( $files['photo'] ) || $files['photo']['error'] !== UPLOAD_ERR_OK ) {
-        return new WP_REST_Response( array( 'error' => 'Missing or invalid photo' ), 400 );
-    }
-
-    $tmp = $files['photo']['tmp_name'];
-    $data = @file_get_contents( $tmp );
-    if ( $data === false ) {
-        return new WP_REST_Response( array( 'error' => 'Failed reading uploaded file' ), 500 );
-    }
-
-    global $wpdb;
-    $table = $wpdb->prefix . 'member_rosters'; // adjust to your actual table name
-
-    $updated = $wpdb->update( SELF::PHOTO_TABLE,  array( 'photo_image' => $data ), array('photo_badge' => $badge ) );
-
-    if ( $updated === 0 ) {
-		$updated = $wpdb->insert( SELF::PHOTO_TABLE,  array( 'photo_image' => $data, 'photo_badge' => $badge ) );
-		if ( $updated === false ) {
-        	error_log( 'wcpu_store_member_photo_minimal DB error: ' . $wpdb->last_error );
-        	return new WP_REST_Response( array( 'error' => 'Database update failed' ), 500 );
+		$expected_key = '8c62a157-7ee8-4104-9f91-930eac39fe2f';
+		$key = $request->get_param( 'key' );
+		if ( $key !== $expected_key ) {
+			return new WP_REST_Response( array( 'error' => 'Invalid key' ), 403 );
 		}
-    }
 
-    if ( $updated === 0 ) {
-        return new WP_REST_Response( array( 'error' => 'Badge not found' ), 404 );
-    }
+		$badge = sanitize_text_field( $request->get_param( 'badge' ) );
+		if ( empty( $badge ) ) {
+			return new WP_REST_Response( array( 'error' => 'Missing badge' ), 400 );
+		}
 
-    return new WP_REST_Response( array( 'status' => 'ok' ), 200 );
+		$files = $request->get_file_params();
+		if ( empty( $files['photo'] ) || $files['photo']['error'] !== UPLOAD_ERR_OK ) {
+			return new WP_REST_Response( array( 'error' => 'Missing or invalid photo' ), 400 );
+		}
+
+		$tmp = $files['photo']['tmp_name'];
+		$data = @file_get_contents( $tmp );
+		if ( $data === false ) {
+			return new WP_REST_Response( array( 'error' => 'Failed reading uploaded file' ), 500 );
+		}
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'member_rosters'; // adjust to your actual table name
+
+		$updated = $wpdb->update( SELF::PHOTO_TABLE,  array( 'photo_image' => $data ), array('photo_badge' => $badge ) );
+
+		if ( $updated === 0 ) {
+			$updated = $wpdb->insert( SELF::PHOTO_TABLE,  array( 'photo_image' => $data, 'photo_badge' => $badge ) );
+			if ( $updated === false ) {
+				error_log( 'wcpu_store_member_photo_minimal DB error: ' . $wpdb->last_error );
+				return new WP_REST_Response( array( 'error' => 'Database update failed' ), 500 );
+			}
+		}
+
+		if ( $updated === 0 ) {
+			return new WP_REST_Response( array( 'error' => 'Badge not found' ), 404 );
+		}
+
+		return new WP_REST_Response( array( 'status' => 'ok' ), 200 );
 	}
 
 	/**

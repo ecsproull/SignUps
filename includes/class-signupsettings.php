@@ -1576,6 +1576,7 @@ class SignupSettings extends SignUpsBase {
 					$wpdb->prepare(
 						'SELECT wp_scw_instructors.instructors_name,
 						wp_scw_instructors.instructors_email,
+						wp_scw_instructors.instructors_badge,
 						wp_scw_session_instructors.si_session_id
 						FROM wp_scw_session_instructors
 						LEFT JOIN wp_scw_instructors ON wp_scw_session_instructors.si_instructor_id = wp_scw_instructors.instructors_id
@@ -1924,10 +1925,25 @@ class SignupSettings extends SignUpsBase {
 							<?php
 							wp_nonce_field( 'signups', 'mynonce' );
 
+							$count = 0;
 							foreach ( $attendees[ $session->session_id ] as $attendee ) {
 								?>
 								<tr class="drag-row" draggable="true" data-dragable="<?php $this->session_attendee_string( $attendee->attendee_id, $session->session_id ); ?>" >
-									<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
+									<td td class="position-relative">
+										<?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?>
+										<button type="button"
+											class="member-photo-btn dashicons dashicons-format-image"
+											title="Photo"
+											data-role="attendee"
+											data-badge="<?php echo esc_attr( $attendee->attendee_badge ); ?>"
+											data-session="<?php echo esc_attr( $session->session_id ); ?>"
+											data-popup-id="photo-popup-<?php echo esc_attr( $session->session_id . '-' . $attendee->attendee_badge ); ?>">
+										</button>
+										<div id="photo-popup-<?php echo esc_attr( $session->session_id . '-' . $attendee->attendee_badge ); ?>"
+											class="member-photo-popup"
+											hidden>
+										</div>
+									</td>
 									<td>Attendee</td>
 									<td><span class="<?php echo esc_html( $email_id ); ?>"><?php echo esc_html( $attendee->attendee_email ); ?></span></td>
 									<td class="centerCheckBox"> <input class="form-check-input position-relative selChk" type="checkbox" name="selectedAttendee[]"
@@ -1951,7 +1967,27 @@ class SignupSettings extends SignUpsBase {
 								foreach ( $instructors[ $session->session_id ] as $instructor ) {
 									?>
 									<tr class="drag-row bk-lg fw-bold instructor">
-										<td class="fw-bold"><?php echo esc_html( $instructor->instructors_name ); ?></td>
+										<td class="fw-bold position-relative">
+											<?php
+											if ( $instructor->instructors_name ) {
+												?>
+												<?php echo esc_html( $instructor->instructors_name ); ?>
+												<button type="button"
+													class="member-photo-btn dashicons dashicons-format-image"
+													title="Photo"
+													data-role="instructor"
+													data-badge="<?php echo esc_attr( $instructor->instructors_badge ); ?>"
+													data-session="<?php echo esc_attr( $session->session_id ); ?>"
+													data-popup-id="photo-popup-<?php echo esc_attr( $session->session_id . '-' . $instructor->instructors_badge ); ?>">
+												</button>
+												<div id="photo-popup-<?php echo esc_attr( $session->session_id . '-' . $instructor->instructors_badge ); ?>"
+													class="member-photo-popup"
+													hidden>
+												</div>
+												<?php
+											}
+											?>
+										</td>
 										<td>Instructor</td>
 										<td><span class="<?php echo esc_html( $email_id ); ?>"><?php echo esc_html( $instructor->instructors_email ); ?></span></td>
 										<td></td>
@@ -2258,23 +2294,38 @@ class SignupSettings extends SignUpsBase {
 				<div id="inst-list" class="instructor-list mt-3 ml-auto mr-auto">
 				<div>Badge</div>
 				<div>Name</div>
+				<div></div>
 				<div>Email</div>
 				<div>Phone</div>
 				<div>Add</div>
 				<?php
 				foreach ( $class_instructors as $instructor ) {
 					?>
-					<div><input class="w-99" type="text" name="instructors_badge[]" value="<?php echo esc_attr( $instructor->instructors_badge ); ?>"></div>
-					<div><input class="w-99" type="text" name="instructors_name[]" value="<?php echo esc_attr( $instructor->instructors_name ); ?>"></div>
-					<div><input class="w-99" type="text" name="instructors_email[]" value="<?php echo esc_attr( $instructor->instructors_email ); ?>"></div>
-					<div><input class="w-99" type="text" name="instructors_phone[]" value="<?php echo esc_attr( $instructor->instructors_phone ); ?>"></div>
+					<div><input class="w-99" type="text" name="instructors_badge[]" value="<?php echo esc_attr( $instructor->instructors_badge ); ?>" readonly></div>
+					<div><input class="w-99" type="text" name="instructors_name[]" value="<?php echo esc_attr( $instructor->instructors_name ); ?>" readonly></div>
+					<div class="position-relative">
+						<button type="button"
+							class="member-photo-btn dashicons dashicons-format-image"
+							title="Photo"
+							data-role="instructor"
+							data-badge="<?php echo esc_attr( $instructor->instructors_badge ); ?>"
+							data-session="<?php echo esc_attr( '9999' ); ?>"
+							data-popup-id="photo-popup-<?php echo esc_attr( '9999-' . $instructor->instructors_badge ); ?>">
+						</button>
+						<div id="photo-popup-<?php echo esc_attr( '9999-' . $instructor->instructors_badge ); ?>"
+							class="member-photo-popup"
+							hidden>
+						</div>
+					</div>
+					<div><input class="w-99" type="text" name="instructors_email[]" value="<?php echo esc_attr( $instructor->instructors_email ); ?>" readonly></div>
+					<div><input class="w-99" type="text" name="instructors_phone[]" value="<?php echo esc_attr( $instructor->instructors_phone ); ?>" readonly></div>
 					<?php
 					$si_checked = false;
 					foreach ( $session_instructors as $si ) {
 						if ( $si->si_instructor_id === $instructor->instructors_id ) {
 							$si_checked = true;
 						}
-					}6
+					}
 					?>
 					<div><input class="form-check-input ml-2 add-chk mt-2" type="checkbox" name="instructors[]" 
 						value="<?php echo esc_attr( $instructor->instructors_id ); ?>" <?php echo $si_checked ? 'checked' : ''; ?>></div>
