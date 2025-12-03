@@ -908,6 +908,9 @@ class SignUpsRestApis extends SignUpsBase {
 
 				$where = array( 'badge' => $extra_member->member_badge );
 				$wpdb->delete( self::MACHINE_PERMISSIONS_TABLE, $where );
+
+				$where = array( 'photo_badge' => $extra_member->member_badge );
+				$wpdb->delete( self::PHOTO_TABLE, $where );
 			}
 
 			$all_users = $wpdb->get_results(

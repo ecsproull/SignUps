@@ -166,6 +166,7 @@ class InstructorsEditor extends SignUpsBase {
 			<div id="inst-list" class="instructor-list mt-3 ml-auto mr-auto">
 				<div>Badge</div>
 				<div>Name</div>
+				<div></div>
 				<div>Email</div>
 				<div>Phone</div>
 				<div>Remove</div>
@@ -174,6 +175,20 @@ class InstructorsEditor extends SignUpsBase {
 					?>
 					<div><input class="w-99" type="text" name="instructors_badge[]" value="<?php echo esc_html( $instructor->instructors_badge ); ?>"></div>
 					<div><input class="w-99" type="text" name="instructors_name[]" value="<?php echo esc_html( $instructor->instructors_name ); ?>"></div>
+					<div class="position-relative">
+						<button type="button"
+							class="member-photo-btn dashicons dashicons-format-image"
+							title="Photo"
+							data-role="instructor"
+							data-badge="<?php echo esc_attr( $instructor->instructors_badge ); ?>"
+							data-session="<?php echo esc_attr( '9999' ); ?>"
+							data-popup-id="photo-popup-<?php echo esc_attr( '9999-' . $instructor->instructors_badge ); ?>">
+						</button>
+						<div id="photo-popup-<?php echo esc_attr( '9999-' . $instructor->instructors_badge ); ?>"
+							class="member-photo-popup"
+							hidden>
+						</div>
+					</div>
 					<div><input class="w-99" type="text" name="instructors_email[]" value="<?php echo esc_html( $instructor->instructors_email ); ?>"></div>
 					<div><input class="w-99" type="text" name="instructors_phone[]" value="<?php echo esc_html( $instructor->instructors_phone ); ?>"></div>
 					<div><input class="form-check-input ml-2 remove-chk mt-2" type="checkbox" name="instructors_remove[]" 
