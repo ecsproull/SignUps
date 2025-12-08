@@ -1410,6 +1410,8 @@ class SignupSettings extends SignUpsBase {
 			OBJECT
 		);
 
+		$instructors = $this->get_session_instructors( $post['session_id'] );
+
 		$notify_member_list = array();
 		$orientation = 'residents' === $signups[0]->signup_group;
 		if ( isset( $post['selectedAttendee'] ) ) {
@@ -1436,11 +1438,15 @@ class SignupSettings extends SignUpsBase {
 					$notify_member_list[] = array( 'title' => 'Member', 'name' => $notify_name, 'email' => $attendee->attendee_email );
 				}
 			}
-		}
 
-		$notify_subject = 'Your ' . $post['signup_name'] . ' Session has Changed';
-		$notify_message  = '<p>You have been deleted from your session by an administrator.</p>';
-		$this->create_notify_form( $notify_message, $notify_member_list, $notify_subject, $post['signup_id'] );
+			foreach ( $instructors as $instructor ) {
+				$notify_member_list[] = array( 'title' => 'Instructor', 'name' => $instructor->instructors_name, 'email' => $instructor->instructors_email );
+			}	
+
+			$notify_subject = 'Your ' . $post['signup_name'] . ' Session has Changed';
+			$notify_message  = '<p>You have been deleted from your session by an administrator.</p>';
+			$this->create_notify_form( $notify_message, $notify_member_list, $notify_subject, $post['signup_id'] );
+		}
 	}
 
 	/**

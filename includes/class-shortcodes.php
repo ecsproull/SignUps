@@ -460,17 +460,20 @@ class ShortCodes extends SignUpsBase {
 			$parts          = explode( ',', $post['time_slots'][0] );
 			$new_session_id = $parts[3];
 
-			$result = $wpdb->get_results(
+			$attendee_result = $wpdb->get_results(
 				$wpdb->prepare(
-					'SELECT * FROM %1s 
-					WHERE attendee_session_id = %s && attendee_badge = %s',
+					'SELECT * FROM %1s as A
+					LEFT JOIN %1s as S ON A.attendee_session_id = S.session_id
+					WHERE S.session_signup_id = %d && A.attendee_badge = %s;',
 					self::ATTENDEES_TABLE,
-					$new_session_id,
+					self::SESSIONS_TABLE,
+					$post['session_signup_id'],
 					$post['badge_number']
 				)
 			);
 
-			if ( $result ) {
+			$old_session_id = $attendee_result ? $attendee_result[0]->attendee_session_id : 0;
+			if ( $old_session_id === intval( $new_session_id ) ) {
 				?>
 					<h1 class=" mt-3">Failed moving session, You are already signed up for that session.</h1>
 				<?php
@@ -479,13 +482,51 @@ class ShortCodes extends SignUpsBase {
 
 			$where  = array( 'attendee_id' => $post['move_me'][0] );
 			$data   = array( 'attendee_session_id' => $new_session_id );
-			$result = $wpdb->update( self::ATTENDEES_TABLE, $data, $where );
+			$update_result = $wpdb->update( self::ATTENDEES_TABLE, $data, $where );
+
+			if ( $update_result !== false ) {
+				$old_instructors = $this->get_session_instructors( $old_session_id );
+				$new_instructors = $this->get_session_instructors( $new_session_id );
+				$instructor_body   = $this->get_session_instructors_email_body( $new_session_id );
+
+				if ( $old_session_id ) {
+					$old_session = $wpdb->get_row(
+						$wpdb->prepare(
+							'SELECT session_start_formatted
+							FROM %1s
+							WHERE session_id = %d',
+							self::SESSIONS_TABLE,
+							$old_session_id
+						),
+						OBJECT
+					);
+
+					$instructor_body .= '<p>This attendee has moved from your ' . $old_session->session_start_formatted . ' session.</p>';
+				}
+
+				foreach ( $new_instructors as $instructor ) {
+					$sgm = new SendGridMail();
+					$sgm->send_mail( $instructor->instructors_email, 'Attendee Moved to your class', $instructor_body, true );
+				}
+
+				if ( $old_instructors != $new_instructors ) {
+					$instructor_body   = $this->get_session_instructors_email_body( $old_session_id );
+					if ( $old_session_id ) {
+						$instructor_body .= '<p>This attendee has moved to another session from your ' . $old_session->session_start_formatted . ' session.</p>';
+					}
+
+					foreach ( $old_instructors as $instructor ) {
+						$sgm = new SendGridMail();
+						$sgm->send_mail( $instructor->instructors_email, 'Attendee Moved from your class', $instructor_body, true );
+					}
+				}
+			}
 
 			?>
 			<form class="signup_only_form" method="POST">
 				<div class="text-center">
 					<?php
-					if ( 1 === $result ) {
+					if ( 1 === $update_result ) {
 						?>
 						<h1 class=" mt-3">Successfully moved to session starting at <?php echo esc_html( $parts[0] ); ?></h1>
 						<?php
@@ -742,6 +783,21 @@ class ShortCodes extends SignUpsBase {
 					}
 
 					$payments->collect_money( $description, $post['session_price_id'], $new_attendee['attendee_badge'], $last_id, $cost, $qty, $post['session_signup_id'] );
+				} else {
+					// we need to email the member and the instructors. This was a free signup.
+					if ( $signed_up_already ) {
+						// Do nothing, we already signed up.
+					} elseif ( $insert_return_value ) {
+						$sgm  = new SendGridMail();
+						$body = $this->get_session_email_body( $new_attendee['attendee_session_id'] );
+						$sgm->send_mail( $new_attendee['attendee_email'], 'Signup Confirmation: ' . $signup_name, $body, true );
+
+						$instructors_email = $this->get_session_instructors( $new_attendee['attendee_session_id'] );
+						$instructor_body   = $this->get_session_instructors_email_body( $new_attendee['attendee_session_id'] );
+						foreach ( $instructors_email as $instructor ) {
+							$sgm->send_mail( $instructor->instructors_email, 'New Signup for your class: ' . $signup_name, $instructor_body, true );
+						}
+					}
 				}
 				?>
 				<tr class="attendee-row">
@@ -782,7 +838,7 @@ class ShortCodes extends SignUpsBase {
 	 */
 	private function create_select_signup_form( $signups, $categories ) {
 		?>
-		<form class='select_signup_form' method="GET">
+		<form class='select_signup_form' method="POST">
 			<div id="usercontent">
 				<div id="signup-select" class="signup-category-list selection-font mb-100px mr-auto ml-auto mt-5">
 					<?php
@@ -865,7 +921,7 @@ class ShortCodes extends SignUpsBase {
 			<div id="session_select" class="text-center mw-800px">
 			<h1 class="mb-2"><?php echo esc_html( $signup_name ); ?></h1>
 			<div>
-				<form class="signup_form" method="GET">
+				<form class="signup_form" method="POST">
 					<div id="usercontent">
 						<?php
 						if ( 'none' === $user_group || 'residents' === $user_group ) {
@@ -1200,7 +1256,7 @@ class ShortCodes extends SignUpsBase {
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Description: </div>
 				<div class="instruct"><?php echo html_entity_decode( $description_object->description_html ); ?></div>
 			</div>
-			<form class="ml-auto mr-auto" method="GET">
+			<form class="ml-auto mr-auto" method="POST">
 				<div class="submit-row-grid mt-4">
 					<div>
 						<button type="submit" class="btn btn-md bg-primary mr-2" value="-1" name="signup_home">Cancel</button>

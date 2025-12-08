@@ -322,7 +322,7 @@ jQuery(document).ready(function($){
 	});
 
 	/**
-	 * Returns the user to https://scwwoodshop.com
+	 * Returns the user to root of Signups when the Back button is clicked.
 	 */
 	$(".back-button").click(function() {
 		window.location.href = "https://" + location.hostname;

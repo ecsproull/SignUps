@@ -194,7 +194,7 @@ class Reports extends SignUpsBase {
 		);
 
 		?>
-		<form class="report-form" method="GET">
+		<form class="report-form" method="POST">
 		<?php
 		foreach ( $results as $signup ) {
 			?>

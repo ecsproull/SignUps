@@ -396,6 +396,13 @@ class StripePayments extends SignUpsBase {
 				$body        .= $this->get_session_email_body( $attendee->attendee_session_id );
 				$sgm          = new SendGridMail();
 				$email_status = $sgm->send_mail( $email, 'You are signed up for ' . $signup_parts[0], $body, true );
+				
+				$instructors_email = $this->get_session_instructors( $attendee->attendee_session_id );
+				$instructor_body   = $this->get_session_instructors_email_body( $attendee->attendee_session_id );
+				foreach ( $instructors_email as $instructor ) {
+					$sgm->send_mail( $instructor->instructors_email, 'New Signup for your class: ' . $signup_name, $instructor_body, true );
+				}
+
 				if ( $email_status ) {
 					$data  = array( 'payments_email_sent' => 1 );
 					$where = array( 'payments_id' => $payment_row->payments_id );

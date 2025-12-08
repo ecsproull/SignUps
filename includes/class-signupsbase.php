@@ -1885,6 +1885,22 @@ class SignUpsBase {
 		}
 	}
 
+	protected function get_session_instructors( $session_id ) {
+		global $wpdb;
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT wp_scw_instructors.instructors_name,
+					wp_scw_instructors.instructors_email
+				FROM wp_scw_instructors
+				LEFT JOIN wp_scw_session_instructors
+				ON wp_scw_instructors.instructors_id = wp_scw_session_instructors.si_instructor_id
+				WHERE wp_scw_session_instructors.si_session_id = %d',
+				$session_id
+			),
+			OBJECT
+		);
+	}
+
 	/**
 	 * Retrieves the data to create a pre-class email.
 	 *
@@ -1981,18 +1997,7 @@ class SignUpsBase {
 			$data->class_contact_lastname  = $signup[0]->signup_contact_lastname;
 			$data->class_contact_email     = $signup[0]->signup_contact_email;
 			$data->class_minimum           = $signup[0]->signup_default_minimum;
-			$data->instructors             = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT wp_scw_instructors.instructors_name,
-						wp_scw_instructors.instructors_email
-					FROM wp_scw_instructors
-					LEFT JOIN wp_scw_session_instructors
-					ON wp_scw_instructors.instructors_id = wp_scw_session_instructors.si_instructor_id
-					WHERE wp_scw_session_instructors.si_session_id = %d',
-					$session->session_id
-				),
-				OBJECT
-			);
+			$data->instructors             = $this->get_session_instructors( $session->session_id );
 
 			$attendees = $wpdb->get_results(
 				$wpdb->prepare(
@@ -2014,6 +2019,54 @@ class SignUpsBase {
 		}
 
 		return $return_values;
+	}
+
+	protected function get_session_instructors_email_body( $session_id, $moved_out = false ) {
+		if ( ! $session_id ) {
+			return null;
+		}
+		global $wpdb;
+
+		$sessions = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT wp_scw_sessions.session_signup_id,
+						wp_scw_sessions.session_start_formatted,
+						wp_scw_sessions.session_slots,
+						wp_scw_signups.signup_name
+				FROM %1s
+				LEFT JOIN wp_scw_signups ON wp_scw_signups.signup_id = wp_scw_sessions.session_signup_id
+				WHERE wp_scw_sessions.session_id = %s',
+				self::SESSIONS_TABLE,
+				$session_id
+			),
+			OBJECT
+		);
+
+		$attendee_count = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*) FROM %1s WHERE attendee_session_id = %d && attendee_balance_owed = 0',
+				self::ATTENDEES_TABLE,
+				(int) $session_id
+			)
+		);
+
+		if ( $sessions && isset( $sessions[0] ) ) {
+			$session = $sessions[0];
+			$body = sprintf(
+				'<p>Your session for %s at %s has a new attendee. There are %d slots and %d are full.</p>',
+				$session->signup_name,
+				$session->session_start_formatted,
+				(int) $session->session_slots,
+				(int) $attendee_count
+			);
+			
+			$results_url = $signup_url = site_url('/reports');
+			$body       .= '<p>You can view the current attendee list here: <a href="' . $results_url . '" target="_blank" rel="noopener" >View Attendee List</a></p>';
+			return $body;
+
+		}
+
+		return null;
 	}
 
 	/**
