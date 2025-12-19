@@ -25,6 +25,9 @@
 
 #selection-table {
 	width: 100%;
+	background: rgba(255, 255, 255, 0.85); /* translucent */
+    border-radius: 16px;
+    padding: 1.5rem;
 }
 
 #usercontent {
@@ -32,10 +35,11 @@
 }
 
 #badge-input {
-	width: 100px;
 	background-color: transparent;
 	height: 39px;
 	border-radius: 8px!important;
+	border-width: 2px;
+	border-color: black;
 }
 
 #rolling-days {
@@ -72,8 +76,8 @@ table#new-member > tbody > tr > td > input {
 
 .button-signup {
 	background-color: transparent!important;
-	color: black!important;
-	font-weight: bold;
+	color: blue!important;
+	font-weight: normal;
 }
 
 .h-65px {
@@ -167,6 +171,7 @@ button.button-signup {
 
 button.button-signup > i > u {
 	color: blue;
+	font-style: normal;
 }
 
 table#signup-select {
@@ -539,4 +544,189 @@ input::-webkit-inner-spin-button {
 	.container {
     	max-width: 100%;
 	}
+}
+
+
+/* Lookup Member Container */
+#lookup-member {
+    max-width: 700px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+    border: 1px solid #000;
+    border-radius: 16px;
+    background-color: #fff;
+}
+
+#get_member_button,
+#logout-button {
+	max-width: 100px !important;
+}
+
+/* Badge Input Row */
+.badge-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+}
+
+.badge-label {
+    font-weight: 500;
+    white-space: nowrap;
+    margin: 0;
+}
+
+.member-badge {
+	max-width: 100px !important;
+    flex: 0 1 150px;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.badge-row button {
+    padding: 8px 20px;
+    white-space: nowrap;
+}
+
+/* Name Inputs Row */
+.name-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.member-first-name,
+.member-last-name {
+    flex: 1;
+    max-width: 180px !important;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    text-align: center;
+}
+
+/* Email Administrator Row */
+.admin-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.admin-row button {
+    padding: 10px 30px;
+}
+
+/* Guest Row */
+.guest-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.guest-text {
+    color: red;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.guest-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+/* Tablet and below (768px and smaller) */
+@media screen and (max-width: 768px) {
+    #lookup-member {
+        padding: 15px;
+        gap: 12px;
+    }
+
+    .badge-row {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .badge-label {
+        flex-basis: 100%;
+        text-align: center;
+    }
+
+    .member-badge {
+        flex: 1 1 auto;
+        min-width: 150px;
+    }
+
+    .badge-row button {
+        flex: 1 1 auto;
+        min-width: 120px;
+    }
+
+    .name-row {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .member-first-name,
+    .member-last-name {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .guest-text {
+        font-size: 1.2rem;
+    }
+}
+
+/* Mobile (480px and smaller) */
+@media screen and (max-width: 480px) {
+    #lookup-member {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .badge-row {
+        flex-direction: column;
+    }
+
+    .member-badge,
+    .badge-row button {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .admin-row button {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .guest-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .guest-text {
+        font-size: 1rem;
+        text-align: center;
+    }
+}
+
+/* Extra small screens (320px and smaller) */
+@media screen and (max-width: 320px) {
+    #lookup-member {
+        padding: 10px;
+    }
+
+    .badge-label,
+    .guest-text {
+        font-size: 0.9rem;
+    }
 }

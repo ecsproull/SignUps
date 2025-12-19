@@ -881,7 +881,7 @@ class SignupSettings extends SignUpsBase {
 	 */
 	private function delete_class( $post ) {
 		global $wpdb;
-		if ( get_site_url() !== 'https://woodclubtest.site' ) {
+		if ( get_site_url() !== 'https://edtest.site' ) {
 			$this->load_signup_selection();
 				return;
 		}

@@ -581,53 +581,55 @@ class SignUpsBase {
 		}
 		?>
 
-		<table id="lookup-member" class="mb-2 table table-bordered mr-auto ml-auto selection-font">
-			<tr>
-				<td class="text-right">Enter Badge#</td>
-				<td class="text-left"><input id="badge-input" class="member-badge" type="number" name="badge_number" 
+		<div id="lookup-member" class="mb-2 mr-auto ml-auto selection-font">
+			<!-- Badge Input Row -->
+			<div class="badge-row">
+				<label for="badge-input" class="badge-label">Enter Badge#</label>
+				<input id="badge-input" class="member-badge" type="number" name="badge_number" 
 					value="<?php echo $return_val ? esc_html( $results->member_badge ) : ''; ?>">
-					<?php
-					if ( ! current_user_can( 'edit_plugins' ) ) {
-						?>
-						<button id="logout-button" class="btn btn-danger rounded"	type="button" name="logout-button"
-						<?php echo is_user_logged_in() ? '' : 'hidden'; ?> >Logout</button>
-						<button type="button" id="get_member_button" class="btn btn-primary rounded"
-						<?php echo is_user_logged_in() ? 'hidden' : ''; ?> >Lookup</button></td>
-						<?php
-					} else {
-						?>
-						<button type="button" id="get_member_button" class="btn btn-primary rounded" >Lookup</button></td>
-						<?php
-					}
+				<?php
+				if ( ! current_user_can( 'edit_plugins' ) ) {
 					?>
-				<td></td>
-			</tr>
-			<tr>
-				<td class="text-right"><input id="first-name" class=" member-first-name" type="text" name="firstname" value=<?php echo $return_val ? esc_html( $results->member_firstname ) : 'First'; ?> required readonly></td>
-				<td  class="text-left"><input id="last-name" class="member-last-name" type="text" name="lastname" value=<?php echo $return_val ? esc_html( $results->member_lastname ) : 'Last'; ?> required readonly></td>
-				<td></td>
-			</tr>
-			<tr>
-				<td colspan=3>
-					<h3 style="text-align: center;">
-						<button class="btn btn-primary rounded" type="submit" name="email_admin" value="ecsproull765@gmail.com">Email Administrator</button>
-						<input type="hidden" name="contact_email" value="ecsproull765@gmail.com" >
-						<input type="hidden" name="contact_name" value="Signup Admin" >
-					</h3>
-				</td>
-			</tr>
+					<button id="logout-button" class="btn btn-danger rounded" type="button" name="logout-button"
+						<?php echo is_user_logged_in() ? '' : 'hidden'; ?> >Logout</button>
+					<button type="button" id="get_member_button" class="btn btn-primary rounded"
+						<?php echo is_user_logged_in() ? 'hidden' : ''; ?> >Lookup</button>
+					<?php
+				} else {
+					?>
+					<button type="button" id="get_member_button" class="btn btn-primary rounded" >Lookup</button>
+					<?php
+				}
+				?>
+			</div>
+
+			<!-- Name Inputs Row -->
+			<div class="name-row">
+				<input id="first-name" class="member-first-name" type="text" name="firstname" 
+					value=<?php echo $return_val ? esc_html( $results->member_firstname ) : 'First'; ?> required readonly>
+				<input id="last-name" class="member-last-name" type="text" name="lastname" 
+					value=<?php echo $return_val ? esc_html( $results->member_lastname ) : 'Last'; ?> required readonly>
+			</div>
+
+			<!-- Email Administrator Row -->
+			<div class="admin-row">
+				<button class="btn btn-primary rounded" type="submit" name="email_admin" value="ecsproull765@gmail.com">Email Administrator</button>
+				<input type="hidden" name="contact_email" value="ecsproull765@gmail.com" >
+				<input type="hidden" name="contact_name" value="Signup Admin" >
+			</div>
+
+			<!-- Guest Row (conditional) -->
 			<?php
 			if ( $signup->signup_guests_allowed && is_user_logged_in() ) {
 				?>
-				<tr>
-					<td colspan=3><h1 style="color:red;">Will you bring a Guest
-						<input id="guest" class="remember-me-chk ml-2" type="checkbox" name="attendee_plus_guest" value=""></h1>
-					</td>
-				</tr>
+				<div class="guest-row">
+					<span class="guest-text">Will you bring a Guest</span>
+					<input id="guest" class="guest-checkbox" type="checkbox" name="attendee_plus_guest" value="">
+				</div>
 				<?php
 			}
 			?>
-		</table>
+		</div>
 		<div id="email"></div>
 		<input id="user_groups" type="hidden" name="user_groups" value="<?php echo esc_html( $user_group ); ?>">
 		<input type="hidden" id="token" name="token">

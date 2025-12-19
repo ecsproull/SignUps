@@ -391,10 +391,11 @@ class ShortCodes extends SignUpsBase {
 					session_contact_name,
 					session_contact_email
 					FROM %1s
-					WHERE session_signup_id = %s
+					WHERE session_signup_id = %s AND session_start_time >= %d
 					ORDER BY session_start_time',
 					self::SESSIONS_TABLE,
-					$signup_id
+					$signup_id,
+					$dt_now->format( 'U' )
 				),
 				OBJECT
 			);
@@ -934,149 +935,149 @@ class ShortCodes extends SignUpsBase {
 						} else {
 							$user_badge = $this->create_user_table( $user_group, $signup_id );
 						}
-						?>
-						<table id="selection-table" class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-125px selection-font"
-							<?php echo null === $user_badge ? 'hidden' : ''; ?> >
-							<?php
-							$sessions_displayed = 0;
-							foreach ( $sessions as $session ) {
-								$now = new DateTime( 'now', $this->date_time_zone );
-								if ( $session->session_start_time < $now->format( 'U' ) ) {
-									continue;
-								}
-								$sessions_displayed++;
-								?>
-								<tr class="submit-row">
-									<td colspan='3'><button id=<?php echo esc_html( 'submit_' . $session->session_id ); ?>
-												class="btn btn-md btn-primary mr-auto ml-auto mt-2 signup-submit"
-												type="submit">Submit</button>
-									</td>
-								</tr>
-								<?php
-								$start_date = new DateTime( $session->session_start_formatted );
-								$end_date   = new DateTime( $session->session_end_formatted );
-								?>
-								<tr id="submit-row" class="date-row">
-									<td class="text-center" colspan="3"> 
-										<?php
-										echo esc_html(
-											$start_date->format( self::DATE_FORMAT ) .
-											' - ' . $start_date->format( self::TIME_FORMAT ) . ' - ' . $end_date->format( self::TIME_FORMAT )
-										);
-										?>
-								</tr>
-								<tr class="attendee-row bg-lg">
-									<td>Session Contact</td>
-									<td><?php $this->create_session_email_link( $signup_email, $signup_contact_name, $signup_name ); ?></td>
-									<td>Select</td>
-								</tr>
-								<input type="hidden" name="add_attendee_class">
-								<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
-								<input type="hidden" name="session_price_id" value="<?php echo esc_html( $session->session_price_id ); ?>">
-								<input type="hidden" name="session_signup_id" value="<?php echo esc_html( $signup_id ); ?>">
-								<input type="hidden" name="paid" value=false>
-								<?php
-								wp_nonce_field( 'signups', 'mynonce' );
 
-								$available_slots = $session->session_slots - count( $attendees[ $session->session_id ] );
-								for ( $i = count( $attendees[ $session->session_id ] ); $i < $session->session_slots; $i++ ) {
+						if ( count( $sessions ) === 0 ) {
+							?>
+							<h2>There are currently no future sessions scheduled for this class.</h2>
+								<h3>To suggest or request a session time contact <?php $this->create_session_email_link( $signup_email, $signup_contact_name, $signup_name ); ?></h3>
+								<button type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary" value="-1" name="signup_home" formnovalidate>Cancel</button>
+							<?php
+						} else {
+							?>
+							<table id="selection-table" class="mb-100px table table-bordered mr-auto ml-auto w-90 mt-125px selection-font"
+								<?php echo null === $user_badge ? 'hidden' : ''; ?> >
+								<?php
+								$sessions_displayed = 0;
+								foreach ( $sessions as $session ) {
+									$now = new DateTime( 'now', $this->date_time_zone );
+									if ( $session->session_start_time < $now->format( 'U' ) ) {
+										continue;
+									}
+									$sessions_displayed++;
 									?>
-									<tr class="attendee-row bg-lightgreen" data-session-id="<?php echo esc_html( $session->session_id ); ?>" >
-										<td>Cost: $<?php echo esc_html( $cost ); ?></td>
-										<td><?php echo esc_html( $signup_name ); ?></td>
-										<td>
-											<input class="ml-auto mr-auto addChk" type="radio" 
-												name="time_slots[]" 
-												value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $end_date->format( self::DATETIME_FORMAT ) . ',' . $signup_name . ',' . $session->session_id . ',' . $cost ); ?>">
+									<tr class="submit-row">
+										<td colspan='3'><button id=<?php echo esc_html( 'submit_' . $session->session_id ); ?>
+													class="btn btn-md btn-primary mr-auto ml-auto mt-2 signup-submit"
+													type="submit">Submit</button>
 										</td>
 									</tr>
 									<?php
-									break;
-								}
-								?>
-								<tr class="attendee-row bg-lg">
-									<td></td>
-									<?php
-									if ( $guests_coming ) {
-										?>
-										<td><b><?php echo esc_html( $available_slots . ' slots open - ' . count( $attendees[ $session->session_id ] ) . ' filled, plus ' . $guests_coming[ $session->session_id ] . ' guests'  ); ?></b></td>
-										<?php
-									} else {
-										?>
-										<td><b><?php echo esc_html( $available_slots . ' slots open - ' . count( $attendees[ $session->session_id ] ) . ' filled' ); ?></b></td>
-										<?php
-									}
+									$start_date = new DateTime( $session->session_start_formatted );
+									$end_date   = new DateTime( $session->session_end_formatted );
 									?>
-									<td></td>
-								</tr>
-								<?php
-								$count = 0;
-								if ( isset( $attendees[ $session->session_id ] ) ) {
-									foreach ( $attendees[ $session->session_id ] as $attendee ) {
-										++$count;
-										?>
-										<tr class="attendee-row <?php echo esc_html( $count > 3 ? $session->session_id : '' ); ?>" <?php echo $count > 3 ? 'hidden' : ''; ?> >
-											<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
-											<td><?php echo esc_html( $attendee->attendee_item ); ?></td>
+									<tr id="submit-row" class="date-row">
+										<td class="text-center" colspan="3"> 
 											<?php
-											if ( '0' === $attendee->attendee_balance_owed ) {
-												$can_move = $attendee->attendee_badge === $user_badge && ! $block_self_move;
-												$paid     = '1' === $attendee->attendee_plus_guest ? 'Member + Guest' : 'Paid';
-												$action   = '0' === $cost ? $paid : 'Move';
-												?>
-												<td class="move <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? '' : 'hidden'; ?> ><?php echo esc_html( $action ); ?>
-													<?php
-													if ( '0' === $cost ) {
-														?>
-														<input class="remove-chk position-relative ml-1" 
-															type="checkbox" name="remove_me[]" value='<?php echo esc_html( $attendee->attendee_id ); ?>' >
-														<?php
-													} else {
-														?>
-															<input class="move_me add-chk position-relative ml-1" 
-																type="checkbox" name="move_me[]" value='<?php echo esc_html( $attendee->attendee_id ); ?>' >
-														<?php
-													}
-													?>
-												</td>
-
-												<td class="paid <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? 'hidden' : ''; ?> ><?php echo esc_html( $paid ); ?></td>
-												<?php
-											} else {
-												?>
-												<td><?php echo esc_html( 'Payment Pending' ); ?></td>
-												<?php
-											}
+											echo esc_html(
+												$start_date->format( self::DATE_FORMAT ) .
+												' - ' . $start_date->format( self::TIME_FORMAT ) . ' - ' . $end_date->format( self::TIME_FORMAT )
+											);
 											?>
+									</tr>
+									<tr class="attendee-row bg-lg">
+										<td>Session Contact</td>
+										<td><?php $this->create_session_email_link( $signup_email, $signup_contact_name, $signup_name ); ?></td>
+										<td>Select</td>
+									</tr>
+									<input type="hidden" name="add_attendee_class">
+									<input type="hidden" name="signup_name" value="<?php echo esc_html( $signup_name ); ?>">
+									<input type="hidden" name="session_price_id" value="<?php echo esc_html( $session->session_price_id ); ?>">
+									<input type="hidden" name="session_signup_id" value="<?php echo esc_html( $signup_id ); ?>">
+									<input type="hidden" name="paid" value=false>
+									<?php
+									wp_nonce_field( 'signups', 'mynonce' );
+
+									$available_slots = $session->session_slots - count( $attendees[ $session->session_id ] );
+									for ( $i = count( $attendees[ $session->session_id ] ); $i < $session->session_slots; $i++ ) {
+										?>
+										<tr class="attendee-row bg-lightgreen" data-session-id="<?php echo esc_html( $session->session_id ); ?>" >
+											<td>Cost: $<?php echo esc_html( $cost ); ?></td>
+											<td><?php echo esc_html( $signup_name ); ?></td>
+											<td>
+												<input class="ml-auto mr-auto addChk" type="radio" 
+													name="time_slots[]" 
+													value="<?php echo esc_html( $start_date->format( self::DATETIME_FORMAT ) . ',' . $end_date->format( self::DATETIME_FORMAT ) . ',' . $signup_name . ',' . $session->session_id . ',' . $cost ); ?>">
+											</td>
 										</tr>
 										<?php
-									}
-								}
-								?>
-								<tr class="attendee-row bg-dark">
-									<td></td>
-									<td></td>
-									<td>
-									<?php
-									if ( $count > 3 ) {
-										?>
-										<button class="btn btn-sm bg-primary mr-auto ml-auto <?php echo esc_html( $session->session_id . '-expand-button' ); ?> expand-button" type='button' 
-											data-button="<?php echo esc_html( $session->session_id ); ?>" >Show All</button>
-										<?php
+										break;
 									}
 									?>
-									</td>
-								</tr>
-								<?php
-							}
+									<tr class="attendee-row bg-lg">
+										<td></td>
+										<?php
+										if ( $guests_coming ) {
+											?>
+											<td><b><?php echo esc_html( $available_slots . ' slots open - ' . count( $attendees[ $session->session_id ] ) . ' filled, plus ' . $guests_coming[ $session->session_id ] . ' guests'  ); ?></b></td>
+											<?php
+										} else {
+											?>
+											<td><b><?php echo esc_html( $available_slots . ' slots open - ' . count( $attendees[ $session->session_id ] ) . ' filled' ); ?></b></td>
+											<?php
+										}
+										?>
+										<td></td>
+									</tr>
+									<?php
+									$count = 0;
+									if ( isset( $attendees[ $session->session_id ] ) ) {
+										foreach ( $attendees[ $session->session_id ] as $attendee ) {
+											++$count;
+											?>
+											<tr class="attendee-row <?php echo esc_html( $count > 3 ? $session->session_id : '' ); ?>" <?php echo $count > 3 ? 'hidden' : ''; ?> >
+												<td> <?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?></td>
+												<td><?php echo esc_html( $attendee->attendee_item ); ?></td>
+												<?php
+												if ( '0' === $attendee->attendee_balance_owed ) {
+													$can_move = $attendee->attendee_badge === $user_badge && ! $block_self_move;
+													$paid     = '1' === $attendee->attendee_plus_guest ? 'Member + Guest' : 'Paid';
+													$action   = '0' === $cost ? $paid : 'Move';
+													?>
+													<td class="move <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? '' : 'hidden'; ?> ><?php echo esc_html( $action ); ?>
+														<?php
+														if ( '0' === $cost ) {
+															?>
+															<input class="remove-chk position-relative ml-1" 
+																type="checkbox" name="remove_me[]" value='<?php echo esc_html( $attendee->attendee_id ); ?>' >
+															<?php
+														} else {
+															?>
+																<input class="move_me add-chk position-relative ml-1" 
+																	type="checkbox" name="move_me[]" value='<?php echo esc_html( $attendee->attendee_id ); ?>' >
+															<?php
+														}
+														?>
+													</td>
 
-							if ( 0 === $sessions_displayed ) {
-								?>
-								<h2>There are currently no future sessions scheduled for this class.</h2>
-								<h3>To suggest or request a session time contact <?php $this->create_session_email_link( $signup_email, $signup_contact_name, $signup_name ); ?></h3>
-								<button type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary" value="-1" name="signup_home" formnovalidate>Cancel</button>
-								<?php
-							} else {
+													<td class="paid <?php echo esc_html( $attendee->attendee_badge ); ?>" <?php echo $can_move ? 'hidden' : ''; ?> ><?php echo esc_html( $paid ); ?></td>
+													<?php
+												} else {
+													?>
+													<td><?php echo esc_html( 'Payment Pending' ); ?></td>
+													<?php
+												}
+												?>
+											</tr>
+											<?php
+										}
+									}
+									?>
+									<tr class="attendee-row bg-dark">
+										<td></td>
+										<td></td>
+										<td>
+										<?php
+										if ( $count > 3 ) {
+											?>
+											<button class="btn btn-sm bg-primary mr-auto ml-auto <?php echo esc_html( $session->session_id . '-expand-button' ); ?> expand-button" type='button' 
+												data-button="<?php echo esc_html( $session->session_id ); ?>" >Show All</button>
+											<?php
+										}
+										?>
+										</td>
+									</tr>
+									<?php
+								}
 								?>
 								<tr class="footer-row">
 									<td><button type="submit" class="btn bth-md mr-auto ml-auto mt-2 bg-primary" value="-1" name="signup_home" formnovalidate>Cancel</button></td>
@@ -1087,12 +1088,12 @@ class ShortCodes extends SignUpsBase {
 										<?php
 									}
 									?>
-								</tr>
-								<?php
-							}
-							?>
+								</tr>		
 							<div id="cancel"></div>
 						</table>
+						<?php
+						}
+						?>
 					</div>
 				</form>
 			</div>

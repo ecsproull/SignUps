@@ -75,8 +75,7 @@ class SignUpsPlugin extends SignUpsBase {
 	 * class in the root of the public user interface. SignupSettings class is the root of the
 	 * administration interface.
 	 */
-	public function __construct() {
-		setcookie( 'signups_scw_cache', 'ignore', time()+3600 );
+	public function __construct() {		setcookie( 'signups_scw_cache', 'ignore', time()+3600 );
 		register_activation_hook( __FILE__, array( new DbSignUpTables(), 'create_db_tables' ) );
 		add_action( 'admin_menu', array( $this, 'signup_plugin_top_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_admin_scripts_and_css' ) );
@@ -95,6 +94,81 @@ class SignUpsPlugin extends SignUpsBase {
 		add_filter( 'nonce_life', array( $this, 'modify_nonce_life' ), 10, 2 );
 		add_filter( 'show_admin_bar', array( $this, 'restrict_admin_bar' ) );
 		update_option( 'signups_clear_cache', '0', '', false );
+
+		//$this->save_uploads();
+		//$this->parse_used_files();
+		//$this->delete_unused_files();
+	}
+
+	public function save_uploads() {
+		$upload_dir = WP_CONTENT_DIR . '/uploads';
+		$rii = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($upload_dir));
+
+		$all_files = [];
+
+		foreach ($rii as $file) {
+			if ($file->isDir()) continue;
+			$path = str_replace(ABSPATH, '', $file->getPathname());
+			$all_files[] = $path;
+		}
+
+		$upload_dir = wp_upload_dir();
+		$path = trailingslashit($upload_dir['basedir']) . 'all_upload_files.json';
+
+		$bites_written = file_put_contents($path, json_encode($all_files, JSON_PRETTY_PRINT));
+		error_log( "Found " . count($all_files) . " files.\n written $bites_written bytes to $path\n	");
+	}
+
+	public function parse_used_files() {
+		$file_path = WP_CONTENT_DIR . '/uploads/db_refs';
+		$input = file_get_contents($file_path);
+
+		$matches = [];
+		$used = [];
+
+		// Match anything like wp-content/uploads/... until a space, quote, or angle bracket
+		preg_match_all(
+			'/wp-content\/uploads\/[^\s"\'<>]+\.(jpg|jpeg|png|gif|webp|pdf|mp4|mp3)/i',
+			$input,
+			$matches
+		);
+
+
+
+		foreach ($matches[0] as $m) {
+			$used[] = strtolower($m);
+		}
+
+		// Remove duplicates and sort for cleaner output
+		$used = array_unique($used);
+		sort($used);
+
+		$upload_dir = wp_upload_dir();
+		$path = trailingslashit($upload_dir['basedir']) . 'referenced_files.txt';
+		file_put_contents($path, implode(PHP_EOL, $used));
+
+	}
+
+	public function delete_unused_files() {
+		$file_path = WP_CONTENT_DIR . '/uploads/all_upload_files.json';
+		// Load all uploaded files
+		$all_files = json_decode(file_get_contents($file_path), true);
+
+		$file_path = WP_CONTENT_DIR . '/uploads/referenced_files.txt';
+		// Load referenced files from text file
+		$used_files = file($file_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+		$used_set = array_flip($used_files);  // fast lookup
+
+		$deleted_count = 0;
+		foreach ($all_files as $file) {
+			if (!isset($used_set[$file])) {
+				unlink($file);  // delete unreferenced file
+				$deleted_count++;
+			}
+		}
+		echo "Deletion complete. Total files deleted: $deleted_count\n";
+
 	}
 
 	/**
