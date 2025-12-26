@@ -3,7 +3,7 @@
         'name' => 'ecsproull/sign-ups',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '40cafa0feea5dd2afaf2b7b51dcbf9c280fe3f56',
+        'reference' => 'ea7b88798d2a17372bb991d13634466ca4e52463',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -22,7 +22,7 @@
         'ecsproull/sign-ups' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '40cafa0feea5dd2afaf2b7b51dcbf9c280fe3f56',
+            'reference' => 'ea7b88798d2a17372bb991d13634466ca4e52463',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
