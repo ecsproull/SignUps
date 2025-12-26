@@ -55,7 +55,19 @@ class SendGridMail extends SignUpsBase {
 		$sendgrid_api_key = get_option( 'signups_sendgrid' ) ? get_option( 'signups_sendgrid' )['sendgrid_api_key'] : '';
 
 		$sendgrid = new \SendGrid( $sendgrid_api_key );
+		
+		// Skip sending emails on non-production servers unless explicitly enabled for testing
+		$is_production = ( isset( $_SERVER['HTTP_HOST'] ) && strpos( $_SERVER['HTTP_HOST'], 'scwwoodshop.com' ) !== false );
+		$force_send    = defined( 'SIGNUPS_FORCE_SEND_EMAIL' ) && SIGNUPS_FORCE_SEND_EMAIL === true;
 
+		if ( ! $is_production && ! $force_send ) {
+			$this->write_log(
+				__FUNCTION__,
+				basename( __FILE__ ),
+				"Email not sent (non-production server). TO: {$email_address} Subject: {$subject}"
+			);
+			return true; // Return true to avoid breaking calling code
+		}
 
 		try {
 			$response = $sendgrid->send($email);
