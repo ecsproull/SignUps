@@ -919,7 +919,7 @@ class ShortCodes extends SignUpsBase {
 		$block_self_move
 	) {
 		?>
-			<div id="session_select" class="text-center mw-800px">
+			<div id="session_select" class="text-center">
 			<h1 class="mb-2"><?php echo esc_html( $signup_name ); ?></h1>
 			<div>
 				<form class="signup_form" method="POST">

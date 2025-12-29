@@ -925,7 +925,7 @@ class SignUpsBase {
 		$one_day_interval = new DateInterval( 'P1D' );
 		$time_exceptions  = $this->create_meeting_exceptions( $start_date, $end_date, $template->template_id );
 		?>
-		<div id="session_select" class="text-center mw-800px">
+		<div id="session_select" class="text-center">
 			<h1 class="mb-2"><b><?php echo esc_html( $signup_name ); ?></b></h1>
 			<div>
 				<div>
@@ -2230,7 +2230,7 @@ class SignUpsBase {
 		$user_group
 	) {
 		?>
-		<div id="session_select" class="text-center mw-800px">
+		<div id="session_select" class="text-center">
 			<h1 class="mb-2"><b><?php echo esc_html( $signup_name ); ?></b></h1>
 			<div>
 				<div>
