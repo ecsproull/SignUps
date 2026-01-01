@@ -839,7 +839,7 @@ class ShortCodes extends SignUpsBase {
 	 */
 	private function create_select_signup_form( $signups, $categories ) {
 		?>
-		<form class='select_signup_form' method="POST">
+		<form class='select_signup_form' method="GET">
 			<div id="usercontent">
 				<div id="signup-select" class="signup-category-list selection-font mb-100px mr-auto ml-auto mt-5">
 					<?php
@@ -1221,7 +1221,7 @@ class ShortCodes extends SignUpsBase {
 				<div><?php echo '$' . esc_html( $signup->signup_cost ) . '.00'; ?></div>
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Contact:</div>
 				<div>
-					<form method="POST">
+					<form method="GET">
 						<?php $this->create_session_email_link( $signup->signup_contact_email, $signup->signup_default_contact_name, $signup->signup_name ); ?>
 						<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 					</form>
@@ -1257,7 +1257,7 @@ class ShortCodes extends SignUpsBase {
 				<div class="text-right pr-2 font-weight-bold text-dark mb-2">Description: </div>
 				<div class="instruct"><?php echo html_entity_decode( $description_object->description_html ); ?></div>
 			</div>
-			<form class="ml-auto mr-auto" method="POST">
+			<form class="ml-auto mr-auto" method="GET">
 				<div class="submit-row-grid mt-4">
 					<div>
 						<button type="submit" class="btn btn-md bg-primary mr-2" value="-1" name="signup_home">Cancel</button>
@@ -1297,8 +1297,9 @@ class ShortCodes extends SignUpsBase {
 	 * @return void
 	 */
 	private function create_email_form( $post ) {
-		$contact_email = $post['contact_email'];
-		$contact_name  = $post['contact_name'];
+
+		$contact_email = isset($post['contact_email'] ) ? $post['contact_email'] : '';
+		$contact_name  = isset($post['contact_name']) ? $post['contact_name'] : '';
 		$class_email   = false;
 		if ( ! current_user_can( 'edit_plugins' ) ) {
 			$contact_email = isset( $post['session_email'] ) ? $post['session_email'] : $post['contact_email'];

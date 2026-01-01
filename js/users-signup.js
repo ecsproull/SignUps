@@ -124,7 +124,8 @@ jQuery(document).ready(function($){
 		grecaptcha.execute($("#token_key").val(), {action: "homepage"}).then(function(token) {
 			$("#token").val(token);
 			if (buttonName == 'continue_signup' ||
-			    buttonName == 'all_done' ) {
+			    buttonName == 'all_done' || 
+				buttonName == 'email_admin') {
 				$("#clicked_item").attr("name", buttonName);
 				$("#clicked_item").val(buttonValue);
 			}
