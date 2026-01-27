@@ -41,6 +41,10 @@ class ShortCodes extends SignUpsBase {
 			if ( isset( $post['signup_home'] ) ) {
 				$this->create_select_signup();
 			} elseif ( isset( $post['continue_signup'] ) ) {
+				if (isset($post['redirect_url']) && !empty($post['redirect_url'])) {
+					wp_safe_redirect( esc_url_raw( $post['redirect_url'] ) );
+					exit;
+				}	
 				if ( ! is_user_logged_in() && ! $this->for_residents( $post['continue_signup'] ) ) {
 					$this->signin( $post['continue_signup'] );
 				} else {
@@ -122,6 +126,10 @@ class ShortCodes extends SignUpsBase {
 					$this->create_rolling_session( get_query_var( 'signup_id' ) );
 				}
 			} else {
+				if ( $post['signup_id'] === '9999' && isset( $post['redirect_to'] ) && ! is_user_logged_in() ) {
+					$this->signin( $post['signup_id'], $post['redirect_to'] );
+					return;
+				}	
 				$this->create_description_form( get_query_var( 'signup_id' ) );
 			}
 		} elseif ( get_query_var( 'unsubscribe' ) ) {

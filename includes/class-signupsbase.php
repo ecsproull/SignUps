@@ -340,6 +340,9 @@ class SignUpsBase {
 	 * @return boolean True for rolling, else false.
 	 */
 	protected function is_rolling_signup( $signup_id ) {
+		if ( $signup_id === '9999' ) {
+			return false;
+		}
 		global $wpdb;
 		$signup = $wpdb->get_row(
 			$wpdb->prepare(
@@ -500,17 +503,20 @@ class SignUpsBase {
 		global $wpdb;
 		$return_val = null;
 		$results    = array( 1 );
+		$signup	 = null;
 
-		$signup = $wpdb->get_row(
-			$wpdb->prepare(
-				'SELECT signup_guests_allowed
-				FROM %1s
-				WHERE signup_id = %s',
-				self::SIGNUPS_TABLE,
-				$signup_id
-			),
-			OBJECT
-		);
+		if ( $signup_id !== '9999' ) {
+			$signup = $wpdb->get_row(
+				$wpdb->prepare(
+					'SELECT signup_guests_allowed
+					FROM %1s
+					WHERE signup_id = %s',
+					self::SIGNUPS_TABLE,
+					$signup_id
+				),
+				OBJECT
+			);
+		}
 
 		if ( ! isset( $_COOKIE['signups_scw_badge'] ) && is_user_logged_in() && ! current_user_can( 'edit_plugins' ) ) {
 			$this->unset_user();
@@ -620,7 +626,7 @@ class SignUpsBase {
 
 			<!-- Guest Row (conditional) -->
 			<?php
-			if ( $signup->signup_guests_allowed && is_user_logged_in() ) {
+			if ( $signup && $signup->signup_guests_allowed && is_user_logged_in() ) {
 				?>
 				<div class="guest-row">
 					<span class="guest-text">Will you bring a Guest</span>
@@ -2201,7 +2207,11 @@ class SignUpsBase {
 	 * @param  mixed $signup_id The id of the signup.
 	 * @return void
 	 */
-	protected function signin( $signup_id ) {
+	protected function signin( $signup_id,  $redirect_url = null ) {
+		if ( $signup_id === '9999' ) {
+			$this->create_signin_form( "Comment Sign In", $signup_id, null, $redirect_url );
+			return;
+		}
 		global $wpdb;
 		$signup = $wpdb->get_row(
 			$wpdb->prepare(
@@ -2227,8 +2237,10 @@ class SignUpsBase {
 	protected function create_signin_form(
 		$signup_name,
 		$signup_id,
-		$user_group
+		$user_group,
+		$redirect_url = null
 	) {
+		$button_text = $redirect_url ? 'Return to Page' : 'Continue To Signup';
 		?>
 		<div id="session_select" class="text-center">
 			<h1 class="mb-2"><b><?php echo esc_html( $signup_name ); ?></b></h1>
@@ -2237,18 +2249,19 @@ class SignUpsBase {
 					<form class="signup_only_form" method="POST">
 						<?php
 						$this->create_user_table( $user_group, $signup_id, null );
-						if ( $this->is_rolling_signup( $signup_id ) ) {
 						?>
-						<button id="continue-to-signup" class="btn btn-success rounded ml-auto mr-auto" type="submit" name="continue_signup" value="<?php echo esc_html( $signup_id ); ?>" hidden>Continue To Signup</button>
+						<button id="continue-to-signup" class="btn btn-success rounded ml-auto mr-auto" type="submit" name="continue_signup" value="<?php echo esc_html( $signup_id ); ?>" hidden><?php echo esc_html( $button_text ); ?></button>
 						<?php
-						} else {
-							?>
-							<button id="continue-to-signup" class="btn btn-success rounded ml-auto mr-auto" type="submit" name="continue_signup" value="<?php echo esc_html( $signup_id ); ?>" hidden>Continue To Signup</button>
-							<?php
-						}
 						wp_nonce_field( 'signups', 'mynonce' );
 						?>
 						<input type="hidden" id="clicked_item" name="" value="">
+						<?php
+						if ( $redirect_url ) {
+							?>
+							<input type="hidden" id="redirect_url" name="redirect_url" value="<?php echo esc_attr( $redirect_url ); ?>">
+							<?php
+						}
+						?>
 					</form>
 				</div>
 			</div>

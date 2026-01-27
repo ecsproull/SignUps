@@ -93,6 +93,12 @@ class SignUpsPlugin extends SignUpsBase {
 		add_filter( 'nonce_user_logged_out', array( $this, 'wpdocs_modify_nonce_for_logged_out_users' ), 10, 2 );
 		add_filter( 'nonce_life', array( $this, 'modify_nonce_life' ), 10, 2 );
 		add_filter( 'show_admin_bar', array( $this, 'restrict_admin_bar' ) );
+		add_filter('login_url', function ($login_url, $redirect) {
+			if ( is_singular() && comments_open() ) {
+				return site_url('/signups?signup_id=9999&redirect_to=' . urlencode( $redirect ) );
+			} 
+			return $login_url;
+		}, 10, 2);
 		update_option( 'signups_clear_cache', '0', '', false );
 
 		//$this->save_uploads();
