@@ -89,6 +89,10 @@ class SignUpsPlugin extends SignUpsBase {
 		add_shortcode( 'scw_payment_success', array( $this->stripe_payments, 'payment_success' ) );
 		add_shortcode( 'scw_payment_canceled', array( $this->stripe_payments, 'payment_canceled' ) );
 		add_shortcode( 'scw_reports', array( $this->reports, 'class_reports' ) );
+
+		add_shortcode('scw_signup_html', array( $this->short_codes, 'signup_description_editor' ) );
+
+
 		add_filter( 'query_vars', array( $this, 'wwp_custom_query_vars_filter' ) );
 		add_filter( 'nonce_user_logged_out', array( $this, 'wpdocs_modify_nonce_for_logged_out_users' ), 10, 2 );
 		add_filter( 'nonce_life', array( $this, 'modify_nonce_life' ), 10, 2 );

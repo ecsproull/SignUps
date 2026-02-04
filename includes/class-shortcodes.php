@@ -1449,4 +1449,59 @@ class ShortCodes extends SignUpsBase {
 			$sgm->send_mail( 'ecsproull765@gmail.com', 'Unsubscribe Failed to Locate Member', $key . ' ' . $badge . ' ip : ' . $ip_address );
 		}
 	}
+
+	public function signup_description_editor($atts) {
+		global $wpdb;
+
+		$atts = shortcode_atts([
+			'signup_id' => 0,
+			'column'    => '',
+		], $atts, 'scw_signup_html');
+
+		$signup_id = (int) $atts['signup_id'];
+		$column    = sanitize_key($atts['column']);
+
+		if ($signup_id <= 0 || empty($column)) {
+			return '<!-- scw_signup_html: missing signup_id or column -->';
+		}
+
+		$table = $wpdb->prefix . 'scw_signup_descriptions';
+
+		/*
+		* Column names cannot be parameterized, so whitelist them.
+		*/
+		$allowed_columns = [
+			'description_html',
+			'description_instructions',
+			// add more columns as needed
+		];
+
+		if (!in_array($column, $allowed_columns, true)) {
+			return '<!-- scw_signup_html: invalid column -->';
+		}
+
+		$sql = $wpdb->prepare(
+			"SELECT `$column` FROM `$table` WHERE description_signup_id = %d LIMIT 1",
+			$signup_id
+		);
+
+		$encoded_html = $wpdb->get_var($sql);
+
+		if ($encoded_html === null) {
+			return '<!-- scw_signup_html: no data found -->';
+		}
+
+		// Decode stored HTML entities
+		$html = html_entity_decode($encoded_html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+		/*
+		* If you fully trust the content:
+		*/
+		return $html;
+
+		/*
+		* If you want WP sanitization instead:
+		* return wp_kses_post($html);
+		*/
+	}
 }
