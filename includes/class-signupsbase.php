@@ -60,6 +60,12 @@ class SignUpsBase {
 	protected const PAYMENTS_TABLE = 'wp_scw_payments';
 
 	/**
+	 * Stripe payment intents table.
+	 * This table holds the Stripe payment intents.
+	 */
+	protected const PAYMENT_INTENTS_TABLE = 'wp_scw_payment_intents';
+
+	/**
 	 * Signup descriptions table.
 	 * Descriptions have three parts. Descriptions, Calendar Description and Instructions.
 	 * All three are held in this table.
@@ -1310,7 +1316,7 @@ class SignUpsBase {
 						);
 
 						if ( $attendee_row->attendee_email !== $member_data->member_email ) {
-							$hacker_message = "Emails don't match";
+							$hacker_message = "Emails don't match " . $attendee_row->attendee_email !== $member_data->member_email;
 						}
 					}
 				}
