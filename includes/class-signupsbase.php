@@ -250,6 +250,7 @@ class SignUpsBase {
 		$log_data['logs_text']          = $text;
 		$log_data['logs_function_name'] = $calling_function;
 		$log_data['logs_file_name']     = $file;
+		$log_data['logs_ip_address']     = $_SERVER['REMOTE_ADDR'] ?? '';
 		$now                            = new DateTime( 'now', $this->date_time_zone );
 		$log_data['logs_date_time']     = $now->format( self::DATETIME_FORMAT );
 		$wpdb->insert( self::LOG_TABLE, $log_data );

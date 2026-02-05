@@ -97,7 +97,7 @@ class StripePayments extends SignUpsBase {
 			http_response_code( 400 );
 			exit();
 		} catch ( \Stripe\Exception\SignatureVerificationException $e ) {
-			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'SignatureVerificationException Message: ' . $e->getMessage() );
+			//$this->write_log( __FUNCTION__, basename( __FILE__ ), 'SignatureVerificationException Message: ' . $e->getMessage() );
 			http_response_code( 400 );
 			exit();
 		}
@@ -123,6 +123,7 @@ class StripePayments extends SignUpsBase {
 				$this->terminate_payment( $event );
 				break;
 			case 'payout.paid':
+			case 'balance.available':
 				break;
 			default:
 		}
@@ -140,14 +141,20 @@ class StripePayments extends SignUpsBase {
 
 		$payment_row = $this->get_payment_row( null, $event_data->id );
 
+		if ( $event_data->amount ) {
+			$event_data->amount = $event_data->amount / 100;
+		}
+
 		$wpdb->query(
 			$wpdb->prepare(
 				"INSERT INTO " . self::PAYMENT_INTENTS_TABLE . "
-				(intent_id, intent_status)
-				VALUES (%s, %s)
-				ON DUPLICATE KEY UPDATE intent_status = VALUES(intent_status)",
+				(intent_id, intent_status, intent_succeeded_at, intent_amount)
+				VALUES (%s, %s, %s, %d)
+				ON DUPLICATE KEY UPDATE intent_status = VALUES(intent_status), intent_succeeded_at = VALUES(intent_succeeded_at), intent_amount = VALUES(intent_amount)",
 				$event_data->id,
-				$event_data->status
+				$event_data->status,
+				current_time( 'mysql' ),
+				$event_data->amount
 			)
 		);
 
@@ -156,6 +163,12 @@ class StripePayments extends SignUpsBase {
 		if ( $payment_row ) {
 			$this->write_event_log( $event, $payment_row, $event_data );
 			$this->finalize_success ( $payment_row->payments_checkout_id );
+		} else {
+			$this->write_log(
+				__FUNCTION__,
+				basename( __FILE__ ),
+				'Payment Intent Succeeded: No payment row found for intent id: ' . $event_data->id
+			);
 		}
 	}
 
@@ -170,18 +183,17 @@ class StripePayments extends SignUpsBase {
 		$event_data  = $event->data->object;
 		$payment_row = $this->get_payment_row( $event_data->id, null );
 		$this->write_event_log( $event, $payment_row, $event_data );
-		
+
 		$wpdb->update(
 			self::PAYMENTS_TABLE,
 			array(
 				'payments_intent_id' => $event_data->payment_intent,
 			),
 			array(
-				'payments_checkout_session_id' => $event_data->id
+				'payments_checkout_id' => $event_data->id
 			)
 		);
-
-		//TODO: This isn't needed and will be remoed. 
+ 
 		$wpdb->update(
 			self::ATTENDEES_TABLE,
 			array(
@@ -189,16 +201,6 @@ class StripePayments extends SignUpsBase {
 			),
 			array(
 				'attendee_checkout_id' => $event_data->id
-			)
-		);
-
-		$wpdb->update(
-			self::PAYMENTS_TABLE,
-			array(
-				'payments_intent_id' => $event_data->payment_intent
-			),
-			array(
-				'payments_checkout_id' => $event_data->id
 			)
 		);
 
@@ -227,6 +229,12 @@ class StripePayments extends SignUpsBase {
 
 	/**
 	 * Handle a terminated payment intent.
+	 * 
+	 * For testing this user these test cards:
+	 * Generic decline	4000 0000 0000 9995
+	 * Insufficient funds	4000 0000 0000 9995
+	 * 3DS authentication failure	4000 0027 6000 3184
+	 * CVC failure	4000 0000 0000 0127
 	 *
 	 * @param  mixed $event The event contains the payment intent object.
 	 * @return void
@@ -240,10 +248,18 @@ class StripePayments extends SignUpsBase {
 			$payment_row = $this->get_payment_row( $event->data->object->id, null );
 
 		} else {
-			$payment_row = $this->get_payment_row( null, $event->data->object->id );
-		}
-
-		if ( ! $payment_row ) {
+			//Nothing to do, record it and move on.
+			$this->write_event_log( $event, $payment_row, $event->data->object );
+			$wpdb->query(
+				$wpdb->prepare(
+					"INSERT INTO " . self::PAYMENT_INTENTS_TABLE . "
+					(intent_id, intent_status)
+					VALUES (%s, %s)
+					ON DUPLICATE KEY UPDATE intent_status = VALUES(intent_status)",
+					$event->data->id,
+					$event->data->status
+				)
+			);
 			return;
 		}
 		
@@ -292,11 +308,16 @@ class StripePayments extends SignUpsBase {
 		);
 
 		if ( $checkout_id === null || $attendee === null ) {
+			$this->write_log(
+				__FUNCTION__,
+				basename( __FILE__ ),
+				'No attendee found for checkout id: ' . $checkout_id
+			);
 			return;
 		}
 
 		if ( (int) $attendee->attendee_balance_owed !== 0 ) {
-			$wpdb->update(
+			$zero_balance = $wpdb->update(
 				self::ATTENDEES_TABLE,
 				array(
 					'attendee_balance_owed' => 0
@@ -306,7 +327,7 @@ class StripePayments extends SignUpsBase {
 				)
 			);
 
-			$wpdb->update(
+			$set_succeeded = $wpdb->update(
 				self::PAYMENTS_TABLE,
 				array(
 					'payments_status' => 'succeeded'
@@ -315,6 +336,20 @@ class StripePayments extends SignUpsBase {
 					'payments_checkout_id' => $checkout_id,
 				)
 			);
+
+			if ( $zero_balance === false || $set_succeeded === false ) {
+				$this->write_log(
+					__FUNCTION__,
+					basename( __FILE__ ),
+					'Failed to finalize payment for checkout id: ' . $checkout_id . ' attendee id: ' . $attendee->attendee_id
+				);
+			} else {
+				$this->write_log(
+					__FUNCTION__,
+					basename( __FILE__ ),
+					'Finalized payment for checkout id: ' . $checkout_id . ' attendee id: ' . $attendee->attendee_id
+				);
+			}
 		}
 	}
 
@@ -566,6 +601,32 @@ class StripePayments extends SignUpsBase {
 			<?php
 		}
 
+		?>
+		<?php
+		$admin_subject = rawurlencode( 'Payment Question' );
+		$admin_body_lines = array(
+			'Badge: ' . $badge_number,
+		);
+
+		if ( $payment_row ) {
+			$payment_row_data = get_object_vars( $payment_row );
+			foreach ( $payment_row_data as $key => $value ) {
+				if ( is_scalar( $value ) || null === $value ) {
+					$admin_body_lines[] = $key . ': ' . ( null === $value ? 'null' : (string) $value );
+				} else {
+					$admin_body_lines[] = $key . ': ' . wp_json_encode( $value );
+				}
+			}
+		} else {
+			$admin_body_lines[] = 'No payment record found.';
+		}
+
+		$admin_body   = rawurlencode( implode( "\n", $admin_body_lines ) );
+		$admin_mailto = 'mailto:ecsproull765@gmail.com?subject=' . $admin_subject . '&body=' . $admin_body;
+		?>
+		<h3><a class="email-button" href="<?php echo esc_url( $admin_mailto ); ?>">Email Administrator</a></h3>
+		<?php
+		
 		if ( $payment_complete && ! $payment_row->payments_email_sent ) {
 			$email = null;
 			if ( (int) $badge_number > 1000 ) {
