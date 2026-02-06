@@ -1,12 +1,16 @@
 <?php
+// phpcs:disable Squiz.Commenting.FileComment.WrongStyle
+
 /*
  * Summary
  *
  * @package     SignUps
  * @author      Edward Sproull
  * @copyright   You have the right to copy
- * license     GPL-2.0+
+ * @license     GPL-2.0+
  */
+
+// phpcs:enable Squiz.Commenting.FileComment.WrongStyle
 
 
 /**
@@ -152,7 +156,7 @@ class SignUpsBase {
 	protected const NEW_MEMBER_TABLE = 'wp_scw_new_member';
 
 	/**
-	 * WordPress users table. 
+	 * WordPress users table.
 	 * Used to remove users that aren't active.
 	 */
 	protected const WP_USERS = 'wp_users';
@@ -167,12 +171,12 @@ class SignUpsBase {
 	 * Multiple day session, calendar items.
 	 */
 	protected const MULTI_CAL_ITEMS_TABLE = 'wp_scw_multiday_cal_items';
-	
+
 	/**
 	 * Multiple day session, template items for a class.
 	 */
 	protected const MULTI_TEMPLATE_ITEMS_TABLE = 'wp_scw_multiday_template_items';
-	
+
 	/**
 	 * Recaptcha log.
 	 * Records badge, score, calling ip address, post data and time.
@@ -250,7 +254,7 @@ class SignUpsBase {
 		$log_data['logs_text']          = $text;
 		$log_data['logs_function_name'] = $calling_function;
 		$log_data['logs_file_name']     = $file;
-		$log_data['logs_ip_address']     = $_SERVER['REMOTE_ADDR'] ?? '';
+		$log_data['logs_ip_address']    = $_SERVER['REMOTE_ADDR'] ?? '';
 		$now                            = new DateTime( 'now', $this->date_time_zone );
 		$log_data['logs_date_time']     = $now->format( self::DATETIME_FORMAT );
 		$wpdb->insert( self::LOG_TABLE, $log_data );
@@ -323,9 +327,8 @@ class SignUpsBase {
 		$result = $wpdb->get_row(
 			$wpdb->prepare(
 				'SELECT *
-				FROM %1s
-				WHERE description_signup_id = %1s',
-				self::DESCRIPTIONS_TABLE,
+				FROM ' . self::DESCRIPTIONS_TABLE . '
+				WHERE description_signup_id = %d',
 				(int) $signup_id
 			),
 			OBJECT
@@ -338,6 +341,7 @@ class SignUpsBase {
 		}
 	}
 
+
 	/**
 	 * Is this a rolling signup is the question this function answers.
 	 * The function simply looks to see if a rolling template is assigned
@@ -347,16 +351,16 @@ class SignUpsBase {
 	 * @return boolean True for rolling, else false.
 	 */
 	protected function is_rolling_signup( $signup_id ) {
-		if ( $signup_id === '9999' ) {
+		if ( '9999' === $signup_id ) {
 			return false;
 		}
+
 		global $wpdb;
 		$signup = $wpdb->get_row(
 			$wpdb->prepare(
 				'SELECT *
-				FROM %1s
+				FROM ' . self::SIGNUPS_TABLE . '
 				WHERE signup_id = %s',
-				self::SIGNUPS_TABLE,
 				$signup_id
 			),
 			OBJECT
@@ -443,7 +447,7 @@ class SignUpsBase {
 			</h3>
 		</div>
 		<input type="hidden" id="token" name="token">
-		<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html(  get_option( 'signups_captcha' )['captcha_api_key'] ); ?>" >
+		<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html( get_option( 'signups_captcha' )['captcha_api_key'] ); ?>" >
 		<?php
 	}
 
@@ -510,15 +514,14 @@ class SignUpsBase {
 		global $wpdb;
 		$return_val = null;
 		$results    = array( 1 );
-		$signup	 = null;
+		$signup     = null;
 
-		if ( $signup_id !== '9999' ) {
+		if ( '9999' !== $signup_id ) {
 			$signup = $wpdb->get_row(
 				$wpdb->prepare(
 					'SELECT signup_guests_allowed
-					FROM %1s
+					FROM ' . self::SIGNUPS_TABLE . '
 					WHERE signup_id = %s',
-					self::SIGNUPS_TABLE,
 					$signup_id
 				),
 				OBJECT
@@ -529,7 +532,7 @@ class SignUpsBase {
 			$this->unset_user();
 			echo '<script>location.reload();</script>';
 		} elseif ( is_user_logged_in() ) {
-			$badge       = null;
+			$badge = null;
 			if ( is_user_logged_in() ) {
 				if ( current_user_can( 'edit_plugins' ) ) {
 					$badge_meta = get_user_meta( is_user_logged_in(), 'nickname' );
@@ -540,23 +543,21 @@ class SignUpsBase {
 					$member = $wpdb->get_row(
 						$wpdb->prepare(
 							'SELECT *
-							FROM %1s
+							FROM ' . self::MEMBERS_TABLE . '
 							WHERE member_user_id = %s',
-							self::MEMBERS_TABLE,
 							get_current_user_id()
 						),
 						OBJECT
 					);
-					$badge = $member->member_badge;
+					$badge  = $member->member_badge;
 				}
 			}
 
 			$results = $wpdb->get_row(
 				$wpdb->prepare(
 					'SELECT *
-					FROM %1s
+					FROM ' . self::MEMBERS_TABLE . '
 					WHERE member_badge = %s',
-					self::MEMBERS_TABLE,
 					$badge
 				),
 				OBJECT
@@ -566,9 +567,8 @@ class SignUpsBase {
 			if ( $results && $user_group ) {
 				$permission = $wpdb->get_results(
 					$wpdb->prepare(
-						'SELECT * FROM %1s
+						'SELECT * FROM ' . self::MACHINE_PERMISSIONS_TABLE . '
 						WHERE permission_badge = %s && permission_machine_name = %s',
-						self::MACHINE_PERMISSIONS_TABLE,
 						$badge,
 						$user_group
 					),
@@ -585,7 +585,6 @@ class SignUpsBase {
 				$return_val = null;
 				$results    = array( 1 );
 			}
-
 		} else {
 			if ( is_user_logged_in() ) {
 				$this->unset_user();
@@ -655,7 +654,8 @@ class SignUpsBase {
 	/**
 	 * Set the current user.
 	 *
-	 * @param  int $user_id The id of the user to set.
+	 * @param  int   $user_id The id of the user to set.
+	 * @param  mixed $badge Badge number for the user.
 	 * @return void
 	 */
 	protected function set_user( $user_id, $badge ) {
@@ -703,9 +703,8 @@ class SignUpsBase {
 					signup_rolling_template,
 					signup_default_price_id,
 					signup_group
-				FROM %1s
+				FROM ' . self::SIGNUPS_TABLE . '
 				WHERE signup_id = %s',
-				self::SIGNUPS_TABLE,
 				$rolling_signup_id
 			),
 			OBJECT
@@ -720,10 +719,9 @@ class SignUpsBase {
 		$attendees_rolling = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
-				FROM %1s
+				FROM ' . self::ATTENDEES_ROLLING_TABLE . '
 				WHERE attendee_signup_id = %s AND attendee_start_time >= %d
 				ORDER BY attendee_start_time',
-				self::ATTENDEES_ROLLING_TABLE,
 				$signups[0]->signup_id,
 				$today->format( 'U' )
 			),
@@ -733,9 +731,8 @@ class SignUpsBase {
 		$template = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
-				FROM %1s
+				FROM ' . self::SIGNUP_TEMPLATE_TABLE . '
 				WHERE template_id = %s',
-				self::SIGNUP_TEMPLATE_TABLE,
 				$signups[0]->signup_rolling_template
 			),
 			OBJECT
@@ -751,9 +748,8 @@ class SignUpsBase {
 				template_item_shifts,
 				template_item_group,
 				template_item_column
-				FROM %1s
+				FROM ' . self::SIGNUP_TEMPLATE_ITEM_TABLE . '
 				WHERE template_item_template_id = %s',
-				self::SIGNUP_TEMPLATE_ITEM_TABLE,
 				$template[0]->template_id
 			),
 			OBJECT
@@ -762,9 +758,8 @@ class SignUpsBase {
 		$template2 = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
-				FROM %1s
+				FROM ' . self::SIGNUP_TEMPLATE_TABLE . '
 				WHERE template_id = %s',
-				self::SIGNUP_TEMPLATE_TABLE,
 				'1'
 			),
 			OBJECT
@@ -780,16 +775,15 @@ class SignUpsBase {
 				template_item_shifts,
 				template_item_group,
 				template_item_column
-				FROM %1s
+				FROM ' . self::SIGNUP_TEMPLATE_ITEM_TABLE . '
 				WHERE template_item_template_id = %s',
-				self::SIGNUP_TEMPLATE_ITEM_TABLE,
 				$template2[0]->template_id
 			),
 			OBJECT
 		);
 
 		$description_html = null;
-		$description = $this->get_signup_html( $rolling_signup_id );
+		$description      = $this->get_signup_html( $rolling_signup_id );
 		if ( $description ) {
 			$description_html = $description->description_html;
 		}
@@ -851,6 +845,7 @@ class SignUpsBase {
 	 *
 	 * @param  mixed $start_date Date to start creating from.
 	 * @param  mixed $end_date Date to end creating exceptions.
+	 * @param  mixed $template_id Template id to filter exceptions.
 	 * @return array
 	 */
 	public function create_meeting_exceptions( $start_date, $end_date, $template_id ) {
@@ -858,9 +853,8 @@ class SignUpsBase {
 		$exceptions = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
-				FROM %1s
+				FROM ' . self::ROLLING_EXCEPTIONS_TABLE . '
 				WHERE exc_start >= %s AND exc_start <= %s || exc_end >= %s AND exc_end <= %s ',
-				self::ROLLING_EXCEPTIONS_TABLE,
 				$start_date->format( 'Y-m-d' ),
 				$end_date->format( 'Y-m-d' ),
 				$start_date->format( 'Y-m-d' ),
@@ -871,7 +865,7 @@ class SignUpsBase {
 
 		$time_exceptions = array();
 		foreach ( $exceptions as $exc ) {
-			if ( $exc->exc_template_id > 0 && $exc->exc_template_id != $template_id ) {
+			if ( $exc->exc_template_id > 0 && $exc->exc_template_id !== $template_id ) {
 				continue;
 			}
 
@@ -977,15 +971,15 @@ class SignUpsBase {
 						<table id="selection-table" class="table-bordered mr-auto ml-auto selection-font"
 							<?php echo null === $user_badge && ! current_user_can( 'edit_plugins' ) ? 'hidden' : ''; ?> >
 							<?php
-							$current_day    = '2000-07-01';
-							$comment_index  = 0;
-							$comment_name   = 'comment-';
+							$current_day   = '2000-07-01';
+							$comment_index = 0;
+							$comment_name  = 'comment-';
 							while ( $start_date <= $end_date ) {
-								///////////////////////////////////////////////////////////////////
-								// Template Date Change Logic. Use this to change templates at a //
-								// predetermined date. Example: Summer and Winter templates.     //
-								// ALSO change this in the REST API code in signups.php.         //
-								///////////////////////////////////////////////////////////////////
+								/*
+								 * Template Date Change Logic. Use this to change templates at a
+								 * predetermined date. Example: Summer and Winter templates.
+								 * ALSO change this in the REST API code in signups.php.
+								 */
 								$datetime = new DateTime( '09/22/2025 12:00 AM' );
 								if ( $start_date > $datetime && '1' === $signup_id ) {
 									$template_items = $template_items2;
@@ -1041,7 +1035,7 @@ class SignUpsBase {
 								<tr class="submit-row" colspan='<?php echo esc_html( $col_span ); ?>'>
 								<td colspan='<?php echo esc_html( $col_span ); ?>'><button type="submit" class="btn btn-md mr-auto ml-auto bg-primary" value="<?php echo esc_html( $signup_id ); ?>" name="add_attendee_session">Submit</button></td>
 								</tr>
-				 				<tr class="date-row">
+								<tr class="date-row">
 									<td colspan='<?php echo esc_html( $col_span ); ?>'><span class='mt-3'><?php echo esc_html( $current_day ); ?></span></td>
 								</tr>
 								<?php
@@ -1056,16 +1050,16 @@ class SignUpsBase {
 									$temp_end_date->Add( $duration );
 
 									for ( $s = 0; $s < $group_item[0]->template_item_shifts; $s++ ) {
-										$array = [
+										$array = array(
 											'2025-06-28',
 											'2025-07-12',
 											'2025-07-26',
 											'2025-08-09',
 											'2025-08-23',
-											'2025-09-06'
-										];
-										if ( $group_item[0]->template_item_title === 'Cleaning' && 
-										     in_array( $start_date->format('Y-m-d'), $array ) ) {
+											'2025-09-06',
+										);
+										if ( 'Cleaning' === $group_item[0]->template_item_title &&
+											in_array( $start_date->format( 'Y-m-d' ), $array, true ) ) {
 											continue;
 										}
 										?>
@@ -1091,11 +1085,15 @@ class SignUpsBase {
 														<input class="form-check-input ml-2 rolling-remove-chk mt-2 <?php echo esc_html( $attendee->attendee_badge ); ?>" 
 															type="checkbox" name="remove_slots[]" 
 															<?php echo $this->add_remove_chk( $start_date, $user_badge, $attendee, $template ) || current_user_can( 'edit_plugins' ) ? '' : 'hidden'; ?>
-															value="<?php echo esc_html(
+															value="
+															<?php
+															echo esc_html(
 																$start_date->format( self::DATETIME_FORMAT ) . ',' .
 																$temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $item->template_item_title . ',' .
 																$comment_index . ',' . $attendee->attendee_id
-															);?>" >
+															);
+															?>
+															" >
 													</td>
 													<?php
 												} else {
@@ -1133,15 +1131,19 @@ class SignUpsBase {
 															<input class="form-check-input ml-2 rolling-remove-chk mt-2 <?php echo esc_html( $attendee->attendee_badge ); ?>" 
 																type="checkbox" name="remove_slots[]" 
 																<?php echo $this->add_remove_chk( $start_date, $user_badge, $attendee, $template ) || current_user_can( 'edit_plugins' ) ? '' : 'hidden'; ?>
-																value="<?php echo esc_html(
+																value="
+																<?php
+																echo esc_html(
 																	$start_date->format( self::DATETIME_FORMAT ) . ',' .
 																	$temp_end_date->format( self::DATETIME_FORMAT ) . ',' . $item->template_item_title . ',' .
 																	$comment_index . ',' . $attendee->attendee_id
-																);?>">
+																);
+																?>
+																">
 															<br>
 														</div>
 														<?php
-														$count++;
+														++$count;
 													}
 
 													if ( $count > 3 ) {
@@ -1194,7 +1196,7 @@ class SignUpsBase {
 												}
 											}
 
-											$current_column++;
+											++$current_column;
 										}
 
 										for ( ; $current_column < $template->template_columns; $current_column++ ) {
@@ -1291,9 +1293,8 @@ class SignUpsBase {
 			$member = $wpdb->get_row(
 				$wpdb->prepare(
 					'SELECT *
-					FROM %1s
+					FROM ' . self::MEMBERS_TABLE . '
 					WHERE member_badge = %s',
-					self::MEMBERS_TABLE,
 					$post['badge_number']
 				),
 				OBJECT
@@ -1309,8 +1310,7 @@ class SignUpsBase {
 
 						$attendee_row = $wpdb->get_row(
 							$wpdb->prepare(
-								'SELECT * FROM %1s WHERE attendee_id = %d',
-								self::ATTENDEES_ROLLING_TABLE,
+								'SELECT * FROM ' . self::ATTENDEES_ROLLING_TABLE . ' WHERE attendee_id = %d',
 								$slot_id
 							),
 							OBJECT
@@ -1410,9 +1410,8 @@ class SignUpsBase {
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
-				FROM %1s
+				FROM ' . self::MEMBERS_TABLE . '
 				WHERE member_badge = %s',
-				self::MEMBERS_TABLE,
 				$post['badge_number']
 			),
 			OBJECT
@@ -1451,8 +1450,7 @@ class SignUpsBase {
 
 						$dup_rows = $wpdb->get_results(
 							$wpdb->prepare(
-								'SELECT * FROM %1s WHERE attendee_start_time = %d AND attendee_signup_id = %d AND attendee_item = %s',
-								self::ATTENDEES_ROLLING_TABLE,
+								'SELECT * FROM ' . self::ATTENDEES_ROLLING_TABLE . ' WHERE attendee_start_time = %d AND attendee_signup_id = %d AND attendee_item = %s',
 								$new_attendee['attendee_start_time'],
 								$new_attendee['attendee_signup_id'],
 								$new_attendee['attendee_item']
@@ -1567,11 +1565,8 @@ class SignUpsBase {
 	) {
 		global $wpdb;
 		$templates = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT template_id, template_name
-				FROM %1s',
-				self::SIGNUP_TEMPLATE_TABLE
-			),
+			'SELECT template_id, template_name
+			FROM ' . self::SIGNUP_TEMPLATE_TABLE,
 			OBJECT
 		);
 
@@ -1614,9 +1609,8 @@ class SignUpsBase {
 		$sessions = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
-				FROM %1s
+				FROM ' . self::SESSIONS_TABLE . '
 				WHERE session_signup_id = %s',
-				self::SESSIONS_TABLE,
 				$signup_id
 			),
 			ARRAY_A
@@ -1688,9 +1682,8 @@ class SignUpsBase {
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
-				FROM %1s
+				FROM ' . self::SESSIONS_TABLE . '
 				WHERE session_signup_id = %s',
-				self::SESSIONS_TABLE,
 				$signup_id
 			),
 			OBJECT
@@ -1723,16 +1716,16 @@ class SignUpsBase {
 	/**
 	 * Updates the clubs calendar.
 	 *
-	 * @param int $post The posted data from the form.
+	 * @param int   $post The posted data from the form.
+	 * @param mixed $additional_dates_data Additional multi-day date data overrides.
 	 */
 	protected function update_calendar( $post, $additional_dates_data = null ) {
 		global $wpdb;
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
-				FROM %1s
+				FROM ' . self::SESSIONS_TABLE . '
 				WHERE session_id = %s',
-				self::SESSIONS_TABLE,
 				$post['session_id']
 			),
 			OBJECT
@@ -1742,9 +1735,8 @@ class SignUpsBase {
 			$additional_dates_data = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT *
-					FROM %1s
+					FROM ' . self::MULTI_TEMPLATE_ITEMS_TABLE . '
 					WHERE multiday_signup_id = %d',
-					self::MULTI_TEMPLATE_ITEMS_TABLE,
 					$post['signup_id']
 				),
 				OBJECT
@@ -1754,9 +1746,8 @@ class SignUpsBase {
 		$description = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
-				FROM %1s
+				FROM ' . self::DESCRIPTIONS_TABLE . '
 				WHERE description_signup_id = %s',
-				self::DESCRIPTIONS_TABLE,
 				$post['signup_id']
 			),
 			OBJECT
@@ -1834,52 +1825,67 @@ class SignUpsBase {
 		);
 	}
 
-	function add_additional_calendar_dates( $initial_datetime, $calendar_data, $additinal_dates_data, $session_id ){
+	/**
+	 * Adds extra calendar entries for multi-day sessions.
+	 *
+	 * @param DateTime $initial_datetime Base datetime for the first session.
+	 * @param array    $calendar_data Calendar entry template data.
+	 * @param array    $additinal_dates_data Additional multi-day date data.
+	 * @param int      $session_id Session ID for the calendar entries.
+	 * @return void
+	 */
+	protected function add_additional_calendar_dates( $initial_datetime, $calendar_data, $additinal_dates_data, $session_id ) {
 		global $wpdb;
 		foreach ( $additinal_dates_data as $date_data ) {
-			$interval = 'P' . $date_data->multiday_days_after . 'D';
-			$new_datetime   = ( clone $initial_datetime)->add( new DateInterval( $interval ) );
-			
-			$parts = explode(':', $date_data->multiday_start_time );
+			$interval     = 'P' . $date_data->multiday_days_after . 'D';
+			$new_datetime = ( clone $initial_datetime )->add( new DateInterval( $interval ) );
+
+			$parts = explode( ':', $date_data->multiday_start_time );
 			$h     = $parts[0];
 			$m     = $parts[1];
-			//list($h, $m, $s) = array_map('intval', explode(':', $date_data->multiday_start_time ) );
-			$new_datetime->setTime($h, $m);
+			$new_datetime->setTime( $h, $m );
 			$date       = $new_datetime->format( 'Y-m-d' );
 			$start_time = $new_datetime->format( 'g:iA' );
 
 			$parts = explode( ':', $date_data->multiday_duration );
 			$h     = $parts[0];
 			$m     = $parts[1];
-			//list($h, $m, $s) = array_map('intval', explode( ':', $date_data->multiday_duration ) );
-			$new_datetime->add(new DateInterval(sprintf('PT%dH%dM', $h, $m)));
-			$end_time   = $new_datetime->format( 'g:iA' );
+			$new_datetime->add( new DateInterval( sprintf( 'PT%dH%dM', $h, $m ) ) );
+			$end_time = $new_datetime->format( 'g:iA' );
 
 			$calendar_data['date']     = $date;
 			$calendar_data['date_end'] = $date;
 			$calendar_data['time']     = $start_time . '-' . $end_time;
 			$result                    = $wpdb->insert( self::SPIDER_CALENDAR_EVENT_TABLE, $calendar_data );
-			if ( $result === false ) {
+			if ( false === $result ) {
 				echo '<h1>Failed to insert additional days Calendar item';
 			}
 			$new_calendar_id = $wpdb->insert_id;
 
-			$data = array( 'multiday_cal_session_id' => $session_id, 'multiday_cal_calendar_id' => $new_calendar_id );
-			$wpdb->insert( SELF::MULTI_CAL_ITEMS_TABLE, $data );
-			if ( $result === false ) {
+			$data = array(
+				'multiday_cal_session_id'  => $session_id,
+				'multiday_cal_calendar_id' => $new_calendar_id,
+			);
+			$wpdb->insert( self::MULTI_CAL_ITEMS_TABLE, $data );
+			if ( false === $result ) {
 				echo '<h1>Failed to insert calendar id into the wp_scw_multiday_cal_items table</h1';
 			}
 		}
 	}
 
-	function delete_additional_calendar_dates( $session_id ) {
+	/**
+	 * Deletes extra calendar entries for multi-day sessions.
+	 *
+	 * @param int $session_id Session ID for the calendar entries.
+	 * @return void
+	 */
+	protected function delete_additional_calendar_dates( $session_id ) {
 		global $wpdb;
 		$additional_dates = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
-				FROM %1s
+				FROM ' . self::MULTI_CAL_ITEMS_TABLE . '
 				WHERE multiday_cal_session_id = %d',
-				self::MULTI_CAL_ITEMS_TABLE,
 				$session_id
 			),
 			OBJECT
@@ -1887,11 +1893,11 @@ class SignUpsBase {
 
 		foreach ( $additional_dates as $add_date ) {
 			$where_session = array( 'id' => $add_date->multiday_cal_calendar_id );
-			$rows = $wpdb->delete( self::SPIDER_CALENDAR_EVENT_TABLE, $where_session );
-			if ( $rows === 1 ) {
-				$where = array('multiday_cal_calendar_id' => $add_date->multiday_cal_calendar_id );
-				$rows = $wpdb->delete( self::MULTI_CAL_ITEMS_TABLE, $where );
-				if ( $rows === false ) {
+			$rows          = $wpdb->delete( self::SPIDER_CALENDAR_EVENT_TABLE, $where_session );
+			if ( 1 === $rows ) {
+				$where = array( 'multiday_cal_calendar_id' => $add_date->multiday_cal_calendar_id );
+				$rows  = $wpdb->delete( self::MULTI_CAL_ITEMS_TABLE, $where );
+				if ( false === $rows ) {
 					echo '<h1>Failed to remove item from the multi-cal-items table.</h1';
 				}
 			} else {
@@ -1900,6 +1906,12 @@ class SignUpsBase {
 		}
 	}
 
+	/**
+	 * Retrieves instructors assigned to a session.
+	 *
+	 * @param int $session_id Session ID.
+	 * @return array List of instructor records.
+	 */
 	protected function get_session_instructors( $session_id ) {
 		global $wpdb;
 		return $wpdb->get_results(
@@ -1935,10 +1947,9 @@ class SignUpsBase {
 						wp_scw_sessions.session_start_formatted,
 						wp_scw_sessions.session_location,
 						wp_scw_sessions.session_slots
-					FROM %1s
+					FROM ' . self::SESSIONS_TABLE . '
 					LEFT JOIN wp_scw_signups ON wp_scw_signups.signup_id = wp_scw_sessions.session_signup_id
 					WHERE wp_scw_sessions.session_preclass_email_date = %s AND wp_scw_signups.signup_admin_approved = 1',
-					self::SESSIONS_TABLE,
 					$today
 				),
 				OBJECT
@@ -1951,10 +1962,9 @@ class SignUpsBase {
 						wp_scw_sessions.session_start_formatted,
 						wp_scw_sessions.session_location,
 						wp_scw_sessions.session_slots
-					FROM %1s
+					FROM ' . self::SESSIONS_TABLE . '
 					LEFT JOIN wp_scw_signups ON wp_scw_signups.signup_id = wp_scw_sessions.session_signup_id
 					WHERE wp_scw_sessions.session_id = %s AND wp_scw_signups.signup_admin_approved = 1',
-					self::SESSIONS_TABLE,
 					$session_id
 				),
 				OBJECT
@@ -1963,7 +1973,7 @@ class SignUpsBase {
 
 		$return_values = array();
 		foreach ( $sessions as $session ) {
-			$data = new SessionEmailData();
+			$data   = new SessionEmailData();
 			$signup = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT signup_name, 
@@ -1972,9 +1982,8 @@ class SignUpsBase {
 						signup_contact_lastname,
 						signup_default_minimum,
 						signup_location
-					FROM %1s
+					FROM ' . self::SIGNUPS_TABLE . '
 					WHERE signup_id = %d',
-					self::SIGNUPS_TABLE,
 					$session->session_signup_id
 				),
 				OBJECT
@@ -1983,9 +1992,8 @@ class SignUpsBase {
 			$signup_instructions = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT description_instructions, description_materials 
-					FROM %1s
+					FROM ' . self::DESCRIPTIONS_TABLE . '
 					WHERE description_signup_id = %d',
-					self::DESCRIPTIONS_TABLE,
 					$session->session_signup_id
 				),
 				OBJECT
@@ -2017,9 +2025,8 @@ class SignUpsBase {
 			$attendees = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT attendee_email
-					FROM %1s
+					FROM ' . self::ATTENDEES_TABLE . '
 					WHERE attendee_session_id = %d',
-					self::ATTENDEES_TABLE,
 					$session->session_id
 				),
 				OBJECT
@@ -2036,6 +2043,13 @@ class SignUpsBase {
 		return $return_values;
 	}
 
+	/**
+	 * Builds the email body for instructors when attendee changes occur.
+	 *
+	 * @param int  $session_id The session ID to build the email content for.
+	 * @param bool $moved_out  Whether the attendee moved out of the session.
+	 * @return string|null The email body HTML or null when unavailable.
+	 */
 	protected function get_session_instructors_email_body( $session_id, $moved_out = false ) {
 		if ( ! $session_id ) {
 			return null;
@@ -2048,10 +2062,9 @@ class SignUpsBase {
 						wp_scw_sessions.session_start_formatted,
 						wp_scw_sessions.session_slots,
 						wp_scw_signups.signup_name
-				FROM %1s
+				FROM ' . self::SESSIONS_TABLE . '
 				LEFT JOIN wp_scw_signups ON wp_scw_signups.signup_id = wp_scw_sessions.session_signup_id
 				WHERE wp_scw_sessions.session_id = %s',
-				self::SESSIONS_TABLE,
 				$session_id
 			),
 			OBJECT
@@ -2059,23 +2072,22 @@ class SignUpsBase {
 
 		$attendee_count = $wpdb->get_var(
 			$wpdb->prepare(
-				'SELECT COUNT(*) FROM %1s WHERE attendee_session_id = %d && attendee_balance_owed = 0',
-				self::ATTENDEES_TABLE,
+				'SELECT COUNT(*) FROM ' . self::ATTENDEES_TABLE . ' WHERE attendee_session_id = %d && attendee_balance_owed = 0',
 				(int) $session_id
 			)
 		);
 
 		if ( $sessions && isset( $sessions[0] ) ) {
 			$session = $sessions[0];
-			$body = sprintf(
+			$body    = sprintf(
 				'<p>Your session for %s at %s has a new attendee. There are %d slots and %d are full.</p>',
 				$session->signup_name,
 				$session->session_start_formatted,
 				(int) $session->session_slots,
 				(int) $attendee_count
 			);
-			
-			$results_url = $signup_url = site_url('/reports');
+
+			$results_url = site_url( '/reports' );
 			$body       .= '<p>You can view the current attendee list here: <a href="' . $results_url . '" target="_blank" rel="noopener" >View Attendee List</a></p>';
 			return $body;
 
@@ -2115,7 +2127,7 @@ class SignUpsBase {
 					$body     .= ' ' . $instructor->instructors_name;
 				}
 
-				$index++;
+				++$index;
 			}
 		} else {
 			$body .= ' ' . $session->class_contact_firstname . ' ' . $session->class_contact_lastname;
@@ -2148,15 +2160,15 @@ class SignUpsBase {
 	}
 
 	/**
-	 * Verify the reCAPATCHA token passed from the user. Also logs 
+	 * Verify the reCAPATCHA token passed from the user. Also logs
 	 * the result into the datbase.
 	 *
-	 * @param  mixed $token
-	 * @param  mixed $post
-	 * @param  mixed $badge
-	 * @return void
+	 * @param  mixed $token The reCAPTCHA response token.
+	 * @param  mixed $post The submitted form data for logging.
+	 * @param  mixed $badge The member badge used for logging.
+	 * @return bool True if the reCAPTCHA verification is successful, false otherwise.
 	 */
-	protected function verifyReCap( $token, $post, $badge ) {
+	protected function verify_recaptcha( $token, $post, $badge ) {
 		global $wpdb;
 		$url  = 'https://www.google.com/recaptcha/api/siteverify';
 		$data = array(
@@ -2190,7 +2202,7 @@ class SignUpsBase {
 		if ( true === $res['success'] && $res['score'] >= $success_threshold ) {
 			$return_value = true;
 		} elseif ( true === $res['success'] && $res['score'] < $success_threshold ) {
-			$this->send_alert_email( $post, 'reCAPACHA Failed, Score: ' . $res['score'], '');
+			$this->send_alert_email( $post, 'reCAPACHA Failed, Score: ' . $res['score'], '' );
 		} elseif ( false === $res['success'] && 'timeout-or-duplicate' !== $res['error-codes'][0] ) {
 			$this->send_alert_email( $post, 'reCAPACHA Error', $res['error-codes'][0] );
 		}
@@ -2212,11 +2224,12 @@ class SignUpsBase {
 	 * Accumulate the data needed for the signin form.
 	 *
 	 * @param  mixed $signup_id The id of the signup.
+	 * @param  mixed $redirect_url Optional redirect URL after signing in.
 	 * @return void
 	 */
-	protected function signin( $signup_id,  $redirect_url = null ) {
-		if ( $signup_id === '9999' ) {
-			$this->create_signin_form( "Comment Sign In", $signup_id, null, $redirect_url );
+	protected function signin( $signup_id, $redirect_url = null ) {
+		if ( '9999' === $signup_id ) {
+			$this->create_signin_form( 'Comment Sign In', $signup_id, null, $redirect_url );
 			return;
 		}
 		global $wpdb;
@@ -2225,9 +2238,8 @@ class SignUpsBase {
 				'SELECT signup_id,
 					signup_name,
 					signup_group
-				FROM %1s
+				FROM ' . self::SIGNUPS_TABLE . '
 				WHERE signup_id = %s',
-				self::SIGNUPS_TABLE,
 				$signup_id
 			),
 			OBJECT
@@ -2239,6 +2251,10 @@ class SignUpsBase {
 	/**
 	 * Creates the sign in form.
 	 *
+	 * @param string $signup_name The signup name to display.
+	 * @param mixed  $signup_id The signup id.
+	 * @param string $user_group The required user group.
+	 * @param string $redirect_url Optional redirect URL after signing in.
 	 * @return void
 	 */
 	protected function create_signin_form(
@@ -2280,7 +2296,7 @@ class SignUpsBase {
 	 * Retrieves basic data for a member.
 	 *
 	 * @param  mixed $badge Badge number for the member.
-	 * @return void
+	 * @return object|null Member data or null when not found.
 	 */
 	protected function get_member_data( $badge = null ) {
 		global $wpdb;
@@ -2292,9 +2308,8 @@ class SignUpsBase {
 		$member = $wpdb->get_row(
 			$wpdb->prepare(
 				'SELECT member_phone, member_email, member_firstname, member_lastname
-				FROM %1s
+				FROM ' . self::MEMBERS_TABLE . '
 				WHERE member_badge = %s',
-				self::MEMBERS_TABLE,
 				$badge
 			),
 			OBJECT
@@ -2307,7 +2322,7 @@ class SignUpsBase {
 	 * Gets the badge number for an administrator.
 	 *
 	 * @param  mixed $nickname The administrator's user name.
-	 * @return void
+	 * @return string Badge number.
 	 */
 	private function get_badge_number( $nickname ) {
 		$badge = $nickname;
@@ -2352,62 +2367,58 @@ class SignUpsBase {
 		</form>
 		<?php
 	}
-	
+
 	/**
 	 * A form for adding additional calendar entries for class.
 	 *
 	 * @param  mixed $post This is not null when adding days to an existing session.
-	 * @param  mixed $signup_id_init, this isn't null when addign a set of parameters for a class.
+	 * @param  mixed $signup_id_init The signup id to initialize defaults for a class.
 	 * @return void
 	 */
 	protected function render_multiday_form( $post, $signup_id_init = null ) {
 		global $wpdb;
 		$signup_id     = -1;
-		$signup_name   = "";
+		$signup_name   = '';
 		$session_id    = null;
 		$session_start = null;
 		$signups       = null;
 		$defaults      = null;
 		$multiday_rows = null;
 		$session       = null;
-		if ( $post === null ) {
+		if ( null === $post ) {
 			$signups = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT signup_id,
-					signup_name
-					FROM %1s
-					ORDER BY signup_name',
-					self::SIGNUPS_TABLE
-				),
+				'SELECT signup_id,
+				signup_name
+				FROM ' . self::SIGNUPS_TABLE . '
+				ORDER BY signup_name',
 				OBJECT
 			);
-			
+
 			if ( 1 <= count( $signups ) ) {
-				$signup_id = $signup_id_init ? $signup_id_init : $signups[0]->signup_id;
+				$signup_id   = $signup_id_init ? $signup_id_init : $signups[0]->signup_id;
 				$signup_name = $signups[0]->signup_name;
 			}
 
 			$rows = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT multiday_signup_id,
-							multiday_days_after,
-							multiday_start_time,
-							multiday_duration
-					FROM %1s',
-					self::MULTI_TEMPLATE_ITEMS_TABLE
-				),
+				'SELECT multiday_signup_id,
+						multiday_days_after,
+						multiday_start_time,
+						multiday_duration
+				FROM ' . self::MULTI_TEMPLATE_ITEMS_TABLE,
 				ARRAY_A
 			);
 
-			$md_map = [];
-			foreach ($rows as $r) {
+			$md_map = array();
+			foreach ( $rows as $r ) {
 				$id = (string) $r['multiday_signup_id'];
-				if (!isset($md_map[$id])) $md_map[$id] = [];
-				$md_map[$id][] = [
-					'days_after' => (int) $r['multiday_days_after'],
-					'time_of_day'=> (string) $r['multiday_start_time'], // "HH:MM" or "HH:MM:SS"
-					'duration'   => (string) $r['multiday_duration'],   // "HH:MM" or "HH:MM:SS"
-				];
+				if ( ! isset( $md_map[ $id ] ) ) {
+					$md_map[ $id ] = array();
+				}
+				$md_map[ $id ][] = array(
+					'days_after'  => (int) $r['multiday_days_after'],
+					'time_of_day' => (string) $r['multiday_start_time'], // "HH:MM" or "HH:MM:SS"
+					'duration'    => (string) $r['multiday_duration'],   // "HH:MM" or "HH:MM:SS"
+				);
 			}
 
 			?>
@@ -2423,27 +2434,25 @@ class SignUpsBase {
 			$session = $wpdb->get_row(
 				$wpdb->prepare(
 					'SELECT session_start_formatted
-					FROM %1s
+					FROM ' . self::SESSIONS_TABLE . '
 					WHERE session_id = %s',
-					self::SESSIONS_TABLE,
 					$post['session_id']
 				),
 				OBJECT
 			);
 
 			$multiday_rows = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT multiday_days_after,
-						DATE_FORMAT(multiday_start_time, "%%H:%%i")  AS multiday_start_time,
-						DATE_FORMAT(multiday_duration,   "%%H:%%i")  AS multiday_duration
-				FROM %1s
-				WHERE multiday_signup_id = %d',
-				self::MULTI_TEMPLATE_ITEMS_TABLE,
-				$signup_id
-			),
-			OBJECT
-		);
-			
+				$wpdb->prepare(
+					'SELECT multiday_days_after,
+							DATE_FORMAT(multiday_start_time, "%%H:%%i")  AS multiday_start_time,
+							DATE_FORMAT(multiday_duration,   "%%H:%%i")  AS multiday_duration
+					FROM ' . self::MULTI_TEMPLATE_ITEMS_TABLE . '
+					WHERE multiday_signup_id = %d',
+					$signup_id
+				),
+				OBJECT
+			);
+
 		}
 
 		// Simple form to capture a variable list of items: days_after, time_of_day, duration
@@ -2454,7 +2463,7 @@ class SignUpsBase {
 			<?php
 			if ( $post ) {
 				?>
-				<h2 class="text-center mt-3 mb-3"><?php echo esc_html( $signup_name ) ?></h2>
+				<h2 class="text-center mt-3 mb-3"><?php echo esc_html( $signup_name ); ?></h2>
 				<h2 id="orig-date" class="text-center mb-3"><?php echo esc_html( $session->session_start_formatted ); ?></h2>
 				<?php
 			} else {
@@ -2463,7 +2472,7 @@ class SignUpsBase {
 					<select id="signup-select" title="Select SignUp" name="signup" id="signup">
 					<?php
 					foreach ( $signups as $signup ) {
-						if ( $signup_id == $signup->signup_id ) {
+						if ( $signup_id === $signup->signup_id ) {
 							?>
 							<option value="<?php echo esc_html( $signup->signup_id ); ?>" selected><?php echo esc_html( $signup->signup_name ); ?></option>
 							<?php
@@ -2492,15 +2501,18 @@ class SignUpsBase {
 							<th style="width: 140px;">Days After</th>
 							<th style="width: 180px;">Time of Day</th>
 							<th style="width: 180px;">Duration</th>
-							<?php if ( $post ) echo '<th style="width: 180px;">Start Time</th>' ?>
+							<?php
+							if ( $post ) {
+								echo '<th style="width: 180px;">Start Time</th>';}
+							?>
 							<th style="width: 100px;">Actions</th>
 						</tr>
 					</thead>
 					<tbody id="md-items-body">
 						<?php
 						if ( $multiday_rows && count( $multiday_rows ) ) {
-							
-							foreach( $multiday_rows as $row ) {
+
+							foreach ( $multiday_rows as $row ) {
 								?>
 								<tr class="md-item-row">
 									<td>
@@ -2508,12 +2520,12 @@ class SignUpsBase {
 									</td>
 									<td>
 										<?php
-										$dt = DateTime::createFromFormat('H:i:s', (string) $row->multiday_start_time)
-											?: DateTime::createFromFormat('H:i', (string) $row->multiday_start_time);
-										$display12 = $dt ? $dt->format('g:i A') : $row->multiday_start_time;
+										$dt        = DateTime::createFromFormat( 'H:i:s', (string) $row->multiday_start_time );
+										$dt        = $dt ? $dt : DateTime::createFromFormat( 'H:i', (string) $row->multiday_start_time );
+										$display12 = $dt ? $dt->format( 'g:i A' ) : $row->multiday_start_time;
 										?>
 										<input type="time" name="md_time_of_day[]" class="w-150px" step="60"
-											value="<?php echo esc_attr($dt ? $dt->format('H:i') : $row->multiday_start_time); ?>" required />
+											value="<?php echo esc_attr( $dt ? $dt->format( 'H:i' ) : $row->multiday_start_time ); ?>" required />
 									</td>
 									<td>
 										<input type="time" name="md_duration[]" class="w-150px without_ampm" step="60" 

@@ -44,14 +44,13 @@ class SignUpsRestApis extends SignUpsBase {
 	/**
 	 * Stripe payments object.
 	 *
-	 *  object
+	 * @var StripePayments
 	 */
 	private $stripe_payments;
 
 	/**
 	 * __construct
 	 * All of routes for the RestFul APIs supported in this class are registered here.
-	 *
 	 */
 	public function __construct() {
 		$this->stripe_payments = new StripePayments();
@@ -220,7 +219,7 @@ class SignUpsRestApis extends SignUpsBase {
 
 		add_action(
 			'rest_api_init',
-			function() {
+			function () {
 				$this->register_route(
 					'scwmembers/v1',
 					'/payments',
@@ -275,15 +274,21 @@ class SignUpsRestApis extends SignUpsBase {
 		);
 	}
 
+	/**
+	 * Testing endpoint.
+	 *
+	 * @param  WP_REST_Request $request The request object.
+	 * @return array
+	 */
 	public function testing( $request ) {
-		return array ('message' => 'hello');
+		return array( 'message' => 'hello' );
 	}
 
 	/**
 	 * Helper function for registering RestFul API routes.
 	 * The routes are the URL used to call the API.
 	 *
-	 * @param  string $namespace The namespace.
+	 * @param  string $name_space The namespace.
 	 * @param  string $route End of the route.
 	 * @param  object $func The endpoint function.
 	 * @param  string $class_inst Instance of the class containing the function.
@@ -291,7 +296,7 @@ class SignUpsRestApis extends SignUpsBase {
 	 * @param  string $method POST, GET....etc.
 	 * @return void
 	 */
-	private function register_route( $namespace, $route, $func, $class_inst, $args, $method ) {
+	private function register_route( $name_space, $route, $func, $class_inst, $args, $method ) {
 		$basic_args = array(
 			'methods'             => $method,
 			'callback'            => array( $class_inst, $func ),
@@ -301,97 +306,112 @@ class SignUpsRestApis extends SignUpsBase {
 		array_merge( $basic_args, $args );
 
 		register_rest_route(
-			$namespace,
+			$name_space,
 			$route,
 			$basic_args
 		);
 	}
 
-	function get_photo( $request ) {
-        global $wpdb;
+	/**
+	 * Get photo endpoint.
+	 *
+	 * @param  WP_REST_Request $request The request object.
+	 * @return WP_REST_Response
+	 */
+	public function get_photo( $request ) {
+		global $wpdb;
 
-        $nonce    = $request->get_header( 'X-WP-Nonce' );
-        $verified = wp_verify_nonce( $nonce, 'wp_rest' );
-        if ( ! $verified ) {
-            return new WP_REST_Response( array( 'error' => 'Unauthorized' ), 401 );
-        }
+		$nonce    = $request->get_header( 'X-WP-Nonce' );
+		$verified = wp_verify_nonce( $nonce, 'wp_rest' );
+		if ( ! $verified ) {
+			return new WP_REST_Response( array( 'error' => 'Unauthorized' ), 401 );
+		}
 
-        $badge = sanitize_text_field( $request->get_param( 'badge' ) );
-        if ( empty( $badge ) || ! preg_match( '/^[0-9]{4}$/', $badge ) ) {
-            return new WP_REST_Response( array( 'error' => 'Invalid badge' ), 400 );
-        }
+		$badge = sanitize_text_field( $request->get_param( 'badge' ) );
+		if ( empty( $badge ) || ! preg_match( '/^[0-9]{4}$/', $badge ) ) {
+			return new WP_REST_Response( array( 'error' => 'Invalid badge' ), 400 );
+		}
 
-        $sql = 'SELECT photo_image FROM ' . self::PHOTO_TABLE . ' WHERE photo_badge = %s LIMIT 1';
-        $image_data = $wpdb->get_var( $wpdb->prepare( $sql, $badge ) );
-        if ( null === $image_data ) {
-            return new WP_REST_Response( array( 'error' => 'Badge Not found' ), 404 );
-        }
+		$sql        = 'SELECT photo_image FROM ' . self::PHOTO_TABLE . ' WHERE photo_badge = %s LIMIT 1';
+		$image_data = $wpdb->get_var( $wpdb->prepare( $sql, $badge ) );
+		if ( null === $image_data ) {
+			return new WP_REST_Response( array( 'error' => 'Badge Not found' ), 404 );
+		}
 
-        // Normalize to raw binary
-        $raw = $image_data;
+		// Normalize to raw binary.
+		$raw = $image_data;
 
-        // Handle data URLs: data:image/...;base64,XXXX
-        if ( strncmp( $raw, 'data:image', 10 ) === 0 ) {
-            if ( preg_match( '/^data:(.*?);base64,(.*)$/s', $raw, $m ) ) {
-                $maybe = base64_decode( $m[2], true );
-                if ( $maybe !== false ) {
-                    $raw  = $maybe;
-                    $mime = $m[1];
-                }
-            }
-        }
+		// Handle data URLs: data:image/...;base64,XXXX.
+		if ( strncmp( $raw, 'data:image', 10 ) === 0 ) {
+			if ( preg_match( '/^data:(.*?);base64,(.*)$/s', $raw, $m ) ) {
+				$maybe = base64_decode( $m[2], true );
+				if ( false !== $maybe ) {
+					$raw  = $maybe;
+					$mime = $m[1];
+				}
+			}
+		}
 
-        // If not a valid image as-is, try base64-decode then re-check
-        if ( ! @getimagesizefromstring( $raw ) ) {
-            $maybe = base64_decode( $raw, true );
-            if ( $maybe !== false && @getimagesizefromstring( $maybe ) ) {
-                $raw = $maybe;
-            }
-        }
+		// If not a valid image as-is, try base64-decode then re-check.
+		if ( ! @getimagesizefromstring( $raw ) ) {
+			$maybe = base64_decode( $raw, true );
+			if ( false !== $maybe && @getimagesizefromstring( $maybe ) ) {
+				$raw = $maybe;
+			}
+		}
 
-        // From here on, serve $raw
-        $image_data = $raw;
+		// From here on, serve $raw.
+		$image_data = $raw;
 
-        // Determine MIME last
-        $mime = 'image/jpeg';
-        if ( function_exists( 'finfo_open' ) ) {
-            $finfo = finfo_open( FILEINFO_MIME_TYPE );
-            if ( $finfo ) {
-                $detected = @finfo_buffer( $finfo, $image_data );
-                if ( $detected ) { $mime = $detected; }
-                finfo_close( $finfo );
-            }
-        } else {
-            $info = @getimagesizefromstring( $image_data );
-            if ( ! empty( $info['mime'] ) ) { $mime = $info['mime']; }
-        }
+		// Determine MIME last.
+		$mime = 'image/jpeg';
+		if ( function_exists( 'finfo_open' ) ) {
+			$finfo = finfo_open( FILEINFO_MIME_TYPE );
+			if ( $finfo ) {
+				$detected = @finfo_buffer( $finfo, $image_data );
+				if ( $detected ) {
+					$mime = $detected; }
+				finfo_close( $finfo );
+			}
+		} else {
+			$info = @getimagesizefromstring( $image_data );
+			if ( ! empty( $info['mime'] ) ) {
+				$mime = $info['mime']; }
+		}
 
-        add_filter(
-            'rest_pre_serve_request',
-            function( $served, $result, $req, $server ) use ( $image_data, $mime, $badge ) {
-                // Clean any previous output to avoid corrupting the binary
-                if ( function_exists('ob_get_length') && ob_get_length() ) {
-                    while ( ob_get_level() ) { @ob_end_clean(); }
-                }
-                nocache_headers();
-                header( 'X-Content-Type-Options: nosniff' );
-                header( 'Content-Type: ' . $mime );
-                // Optionally omit Content-Length to avoid gzip mismatch issues
-                // header( 'Content-Length: ' . strlen( $image_data ) );
-                header( 'Content-Disposition: inline; filename="' . $badge . '"' );
-                echo $image_data;
-                return true;
-            },
-            10,
-            4
-        );
+		add_filter(
+			'rest_pre_serve_request',
+			function ( $served, $result, $req, $server ) use ( $image_data, $mime, $badge ) {
+				// Clean any previous output to avoid corrupting the binary.
+				if ( function_exists( 'ob_get_length' ) && ob_get_length() ) {
+					while ( ob_get_level() ) {
+						@ob_end_clean(); }
+				}
+				nocache_headers();
+				header( 'X-Content-Type-Options: nosniff' );
+				header( 'Content-Type: ' . $mime );
+				// Optionally omit Content-Length to avoid gzip mismatch issues
+				// header( 'Content-Length: ' . strlen( $image_data ) );.
+				header( 'Content-Disposition: inline; filename="' . $badge . '"' );
+				echo $image_data;
+				return true;
+			},
+			10,
+			4
+		);
 
-		 return new WP_REST_Response( null, 200 );
-    }
+		return new WP_REST_Response( null, 200 );
+	}
 
-	function photo_upload( $request ) {
+	/**
+	 * Upload a member photo.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return WP_REST_Response
+	 */
+	public function photo_upload( $request ) {
 		$expected_key = '8c62a157-7ee8-4104-9f91-930eac39fe2f';
-		$key = $request->get_param( 'key' );
+		$key          = $request->get_param( 'key' );
 		if ( $key !== $expected_key ) {
 			return new WP_REST_Response( array( 'error' => 'Invalid key' ), 403 );
 		}
@@ -402,30 +422,36 @@ class SignUpsRestApis extends SignUpsBase {
 		}
 
 		$files = $request->get_file_params();
-		if ( empty( $files['photo'] ) || $files['photo']['error'] !== UPLOAD_ERR_OK ) {
+		if ( empty( $files['photo'] ) || UPLOAD_ERR_OK !== $files['photo']['error'] ) {
 			return new WP_REST_Response( array( 'error' => 'Missing or invalid photo' ), 400 );
 		}
 
-		$tmp = $files['photo']['tmp_name'];
+		$tmp  = $files['photo']['tmp_name'];
 		$data = @file_get_contents( $tmp );
-		if ( $data === false ) {
+		if ( false === $data ) {
 			return new WP_REST_Response( array( 'error' => 'Failed reading uploaded file' ), 500 );
 		}
 
 		global $wpdb;
-		$table = $wpdb->prefix . 'member_rosters'; // adjust to your actual table name
+		$table = $wpdb->prefix . 'member_rosters'; // adjust to your actual table name.
 
-		$updated = $wpdb->update( SELF::PHOTO_TABLE,  array( 'photo_image' => $data ), array('photo_badge' => $badge ) );
+		$updated = $wpdb->update( self::PHOTO_TABLE, array( 'photo_image' => $data ), array( 'photo_badge' => $badge ) );
 
-		if ( $updated === 0 ) {
-			$updated = $wpdb->insert( SELF::PHOTO_TABLE,  array( 'photo_image' => $data, 'photo_badge' => $badge ) );
-			if ( $updated === false ) {
+		if ( 0 === $updated ) {
+			$updated = $wpdb->insert(
+				self::PHOTO_TABLE,
+				array(
+					'photo_image' => $data,
+					'photo_badge' => $badge,
+				)
+			);
+			if ( false === $updated ) {
 				error_log( 'wcpu_store_member_photo_minimal DB error: ' . $wpdb->last_error );
 				return new WP_REST_Response( array( 'error' => 'Database update failed' ), 500 );
 			}
 		}
 
-		if ( $updated === 0 ) {
+		if ( 0 === $updated ) {
 			return new WP_REST_Response( array( 'error' => 'Badge not found' ), 404 );
 		}
 
@@ -434,7 +460,7 @@ class SignUpsRestApis extends SignUpsBase {
 
 	/**
 	 * Get the status of a class for an instructor. When creating the reminder
-	 * emails concerning classes this is used to get the class status. This 
+	 * emails concerning classes this is used to get the class status. This
 	 * information is usually used to inform the instructors of the class.
 	 *
 	 * @param  mixed $request Request data.
@@ -454,9 +480,8 @@ class SignUpsRestApis extends SignUpsBase {
 
 		$sessions = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT * FROM %1s
+				'SELECT * FROM ' . self::SESSIONS_TABLE . '
 				WHERE session_start_formatted LIKE %s',
-				self::SESSIONS_TABLE,
 				$wpdb->esc_like( $date ) . '%'
 			),
 			OBJECT
@@ -497,7 +522,7 @@ class SignUpsRestApis extends SignUpsBase {
 	 */
 	public function search_members( $request ) {
 		global $wpdb;
-		$key      = '9523a157-8ee7-5401-9f91-abccea39fe2f';
+		$key = '9523a157-8ee7-5401-9f91-abccea39fe2f';
 		if ( $request['key'] !== $key || ! current_user_can( 'edit_plugins' ) ) {
 			return new WP_REST_Response( 'Unauthorized.', 401 );
 		}
@@ -506,12 +531,11 @@ class SignUpsRestApis extends SignUpsBase {
 		if ( preg_match( $pattern, $request['text'] ) ) {
 			$results = $wpdb->get_results(
 				$wpdb->prepare(
-					'SELECT * FROM %1s
+					'SELECT * FROM ' . self::MEMBERS_TABLE . '
 					WHERE member_badge LIKE %s OR 
 						member_firstname LIKE %s OR
 						member_lastname LIKE %s OR
 						member_email LIKE %s',
-					self::MEMBERS_TABLE,
 					'%' . $wpdb->esc_like( $request['text'] ) . '%',
 					'%' . $wpdb->esc_like( $request['text'] ) . '%',
 					'%' . $wpdb->esc_like( $request['text'] ) . '%',
@@ -530,16 +554,16 @@ class SignUpsRestApis extends SignUpsBase {
 	 * Used to get the list of attendees of a class or social signup for printing.
 	 *
 	 * @param  mixed $request Posted data that tells the signup session id.
-	 * @return void
+	 * @return array|WP_REST_Response|null
 	 */
 	public function get_attendee_list( $request ) {
-		//Check for nonce, if exists then the call in internal to print the class list.
+		// Check for nonce, if exists then the call in internal to print the class list.
 		global $wpdb;
 		$nonce    = $request->get_header( 'X-WP-Nonce' );
 		$verified = wp_verify_nonce( $nonce, 'wp_rest' );
 		if ( $verified ) {
 			$data_obj = $request->get_body_params();
-			$results = $wpdb->get_results(
+			$results  = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT attendee_firstname,
 						attendee_lastname,
@@ -599,10 +623,10 @@ class SignUpsRestApis extends SignUpsBase {
 	/**
 	 * Get the list of members wishing to unsubscribe from the nag mailer.
 	 * This function is also used to clear the list after they have been unsubscribed.
-	 * The list of who is subscribed and unsubscribed is kept in the shop database. The 
+	 * The list of who is subscribed and unsubscribed is kept in the shop database. The
 	 * nag mailer application updates that list based on the data requested here.
 	 *
-	 * @param  mixed $data
+	 * @param  mixed $data Request payload containing unsubscribe action data.
 	 * @return void
 	 */
 	public function unsubscribe_list( $data ) {
@@ -615,12 +639,9 @@ class SignUpsRestApis extends SignUpsBase {
 
 		if ( 'get' === $data_obj->action ) {
 			$list = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT *
-					FROM %1s
-					WHERE unsubscribe_complete = 0',
-					self::UNSUBSCRIBE_TABLE
-				),
+				'SELECT *
+				FROM ' . self::UNSUBSCRIBE_TABLE . '
+				WHERE unsubscribe_complete = 0',
 				OBJECT
 			);
 
@@ -645,7 +666,7 @@ class SignUpsRestApis extends SignUpsBase {
 	}
 
 	/**
-	 * Gets the monitors for the specified date. Again, this is used by the nag mailer 
+	 * Gets the monitors for the specified date. Again, this is used by the nag mailer
 	 * to get the data for the email.
 	 *
 	 * @param  mixed $request The request data that contains the date of interest.
@@ -654,26 +675,25 @@ class SignUpsRestApis extends SignUpsBase {
 	public function get_monitors( $request ) {
 		global $wpdb;
 		$signup_id = 1;
-		$date        = $request['date'];
-		$pattern     = '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/ms';
+		$date      = $request['date'];
+		$pattern   = '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/ms';
 		if ( preg_match( $pattern, $date ) ) {
 			$date_time = new DateTime( $date );
-			$temp_id = 4;
+			$temp_id   = 4;
 
-			///////////////////////////////////////////////////////////////////
-			// Template Date Change Logic. Use this to change templates at a //
-			// predetermined date. Example: Summer and Winter templates.     //
-			// ALSO change this in the SignupsBase code                      //
-			///////////////////////////////////////////////////////////////////
-			if ( $date_time > new Datetime( "9/21/2025") ) {
+			/*
+			 * Template Date Change Logic. Use this to change templates at a
+			 * predetermined date. Example: Summer and Winter templates.
+			 * ALSO change this in the SignupsBase code.
+			 */
+			if ( $date_time > new Datetime( '9/21/2025' ) ) {
 				$temp_id = 1;
 			}
-			$templates  = $wpdb->get_results(
+			$templates = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT *
-					FROM %1s
+					FROM ' . self::SIGNUP_TEMPLATE_ITEM_TABLE . '
 					WHERE template_item_template_id = %d',
-					self::SIGNUP_TEMPLATE_ITEM_TABLE,
 					$temp_id
 				),
 				OBJECT
@@ -689,11 +709,9 @@ class SignUpsRestApis extends SignUpsBase {
 						wp_scw_rolling_attendees.attendee_item,
 						wp_scw_rolling_attendees.attendee_start_formatted,
 						wp_scw_members.member_email
-					FROM %1s
-					LEFT JOIN %1s ON wp_scw_rolling_attendees.attendee_badge = wp_scw_members.member_badge
+					FROM ' . self::ATTENDEES_ROLLING_TABLE . '
+					LEFT JOIN ' . self::MEMBERS_TABLE . ' ON wp_scw_rolling_attendees.attendee_badge = wp_scw_members.member_badge
 					WHERE attendee_signup_id = %d && attendee_start_formatted LIKE  %s',
-					self::ATTENDEES_ROLLING_TABLE,
-					self::MEMBERS_TABLE,
 					$signup_id,
 					$wpdb->esc_like( $date ) . '%'
 				),
@@ -718,7 +736,7 @@ class SignUpsRestApis extends SignUpsBase {
 								( $exception->template === $template ||
 								'0' === $exception->template ) ) {
 								$start_date = $start_date->add( $duration );
-								$skip_slot = true;
+								$skip_slot  = true;
 								continue;
 							}
 						}
@@ -744,7 +762,7 @@ class SignUpsRestApis extends SignUpsBase {
 									$rolling_slot->email      = $slot_attendees[ $j ]->member_email;
 								}
 
-								$slots[]    = $rolling_slot;
+								$slots[] = $rolling_slot;
 							}
 							$start_date = $start_date->add( $duration );
 						}
@@ -764,7 +782,7 @@ class SignUpsRestApis extends SignUpsBase {
 	 * @param  mixed $request Request from an AJAX call.
 	 * @return void
 	 */
-	public function set_member_cookie( $request) {
+	public function set_member_cookie( $request ) {
 		$nonce    = $request->get_header( 'X-WP-Nonce' );
 		$verified = wp_verify_nonce( $nonce, 'wp_rest' );
 		if ( $verified ) {
@@ -789,7 +807,7 @@ class SignUpsRestApis extends SignUpsBase {
 	 */
 	public function receive_members( $data ) {
 		global $wpdb;
-		$log = true;
+		$log      = true;
 		$key      = '8c62a157-7ee8-4104-9f91-930eac39fe2f';
 		$data_obj = json_decode( $data->get_body(), false );
 		if ( $data_obj->key !== $key ) {
@@ -798,30 +816,26 @@ class SignUpsRestApis extends SignUpsBase {
 
 		try {
 			$all_members = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT *
-					FROM %1s
-					ORDER BY member_badge',
-					self::MEMBERS_TABLE,
-				),
+				'SELECT *
+				FROM ' . self::MEMBERS_TABLE . '
+				ORDER BY member_badge',
 				OBJECT
 			);
 
-			$length   = count( $data_obj->members );
+			$length = count( $data_obj->members );
 			for ( $i = 0; $i < $length; $i++ ) {
 				$member = $wpdb->get_row(
 					$wpdb->prepare(
 						'SELECT *
-						FROM %1s
+						FROM ' . self::MEMBERS_TABLE . '
 						WHERE member_badge = %s',
-						self::MEMBERS_TABLE,
 						$data_obj->members[ $i ]->badge
 					),
 					OBJECT
 				);
 
-				if ( $log  && ! $member ) {
-					$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Member not found : ' .  $data_obj->members[ $i ]->badge );
+				if ( $log && ! $member ) {
+					$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Member not found : ' . $data_obj->members[ $i ]->badge );
 				}
 
 				$data                        = array();
@@ -858,12 +872,7 @@ class SignUpsRestApis extends SignUpsBase {
 			}
 
 			if ( $data_obj->clean_permissions ) {
-				$wpdb->query(
-					$wpdb->prepare(
-						'TRUNCATE TABLE %1s',
-						self::MACHINE_PERMISSIONS_TABLE,
-					)
-				);
+				$wpdb->query( 'TRUNCATE TABLE ' . self::MACHINE_PERMISSIONS_TABLE );
 			}
 
 			$length = count( $data_obj->permissions );
@@ -873,9 +882,8 @@ class SignUpsRestApis extends SignUpsBase {
 				$permission    = $wpdb->get_results(
 					$wpdb->prepare(
 						'SELECT *
-						FROM %1s
+						FROM ' . self::MACHINE_PERMISSIONS_TABLE . '
 						WHERE permission_badge = %s && permission_machine_name = %s',
-						self::MACHINE_PERMISSIONS_TABLE,
 						$machine_badge,
 						$machine_name
 					),
@@ -894,7 +902,6 @@ class SignUpsRestApis extends SignUpsBase {
 				if ( $extra_member->member_user_id ) {
 					if ( get_user_by( 'id', $extra_member->member_user_id ) ) {
 						try {
-							//wp_delete_user( $extra_member->member_user_id );
 							$this->delete_user( $extra_member->member_user_id );
 							$this->write_log( __FUNCTION__, basename( __FILE__ ), 'User deleted, ID : ' . $extra_member->member_user_id );
 						} catch ( Exception $ex ) {
@@ -914,11 +921,8 @@ class SignUpsRestApis extends SignUpsBase {
 			}
 
 			$all_users = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT *
-					FROM %1s',
-					self::WP_USERS,
-				),
+				'SELECT *
+				FROM ' . self::WP_USERS,
 				OBJECT
 			);
 
@@ -927,9 +931,8 @@ class SignUpsRestApis extends SignUpsBase {
 					$member = $wpdb->get_row(
 						$wpdb->prepare(
 							'SELECT *
-							FROM %1s
+							FROM ' . self::MEMBERS_TABLE . '
 							WHERE member_badge = %s',
-							self::MEMBERS_TABLE,
 							$user->user_login
 						),
 						OBJECT
@@ -940,7 +943,6 @@ class SignUpsRestApis extends SignUpsBase {
 					}
 				}
 			}
-
 		} catch ( Exception $e ) {
 			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Exception Msg : ' . $e->getMessage() );
 		}
@@ -950,14 +952,19 @@ class SignUpsRestApis extends SignUpsBase {
 		}
 	}
 
-	private function delete_user ( $user_id ) {
+	/**
+	 * Delete a WordPress user and their user meta records.
+	 *
+	 * @param int $user_id WordPress user ID to delete.
+	 * @return void
+	 */
+	private function delete_user( $user_id ) {
 		global $wpdb;
 		$where = array( 'user_id' => $user_id );
-		$count = $wpdb->delete( SELF::WP_USER_META, $where );
+		$count = $wpdb->delete( self::WP_USER_META, $where );
 
 		$where = array( 'ID' => $user_id );
-		$count = $wpdb->delete( SELF::WP_USERS, $where );
-
+		$count = $wpdb->delete( self::WP_USERS, $where );
 	}
 
 	/**
@@ -965,7 +972,7 @@ class SignUpsRestApis extends SignUpsBase {
 	 * Validation is done elsewhere.
 	 *
 	 * @param  mixed $data unused.
-	 * @return bool	Always returns true.
+	 * @return bool Always returns true.
 	 */
 	public function verify_member_data( $data ) {
 		return true;
@@ -982,10 +989,10 @@ class SignUpsRestApis extends SignUpsBase {
 	public function receive_text( $request ) {
 		global $wpdb;
 		$data   = $request->get_params();
-		$sid    = getenv( "TWILIO_ACCOUNT_SID" );
-		$token  = getenv( "TWILIO_AUTH_TOKEN" );
+		$sid    = getenv( 'TWILIO_ACCOUNT_SID' );
+		$token  = getenv( 'TWILIO_AUTH_TOKEN' );
 		$twilio = new Client( $sid, $token );
-		if ( $data['AccountSid'] !== $sid  || ! $data['From'] ) {
+		if ( $data['AccountSid'] !== $sid || ! $data['From'] ) {
 			return;
 		}
 
@@ -1012,21 +1019,21 @@ class SignUpsRestApis extends SignUpsBase {
 			if ( $all ) {
 				$twilio->messages->create(
 					'+14253513207',
-					[
-						"body" => $data['From'] . ' - ' . $all[0]['Badge'] . ' - ' . $all[0]['FirstName'] . ' - ' . $all[0]['LastName'] . ' - ' . $all[0]['Email'] . ' Msg:' . $data['Body'],
-						"from" => '+16233049716'
-					]
+					array(
+						'body' => $data['From'] . ' - ' . $all[0]['Badge'] . ' - ' . $all[0]['FirstName'] . ' - ' . $all[0]['LastName'] . ' - ' . $all[0]['Email'] . ' Msg:' . $data['Body'],
+						'from' => '+16233049716',
+					)
 				);
 			}
 		}
 	}
-	
+
 	/**
 	 * A validation endpoint that always returns true.
 	 * Validation is done elsewhere.
 	 *
-	 * @param  mixed $data
-	 * @return void
+	 * @param  mixed $data Request data to validate.
+	 * @return bool Always returns true.
 	 */
 	public function verify_phone_number( $data ) {
 		return true;
@@ -1044,35 +1051,33 @@ class SignUpsRestApis extends SignUpsBase {
 	public function get_member( $request ) {
 		$nonce    = $request->get_header( 'X-WP-Nonce' );
 		$verified = wp_verify_nonce( $nonce, 'wp_rest' ) &&
-			( current_user_can( 'edit_plugins' ) || $this->verifyReCap( $request['token'], $request->get_query_params(), $request['badge'] ) );
+			( current_user_can( 'edit_plugins' ) || $this->verify_recaptcha( $request['token'], $request->get_query_params(), $request['badge'] ) );
 		$pattern  = '/^[0-9]{4}$/ms';
 		if ( $verified && preg_match( $pattern, $request['badge'] ) ) {
 			try {
 				global $wpdb;
 				$results = $wpdb->get_results(
 					$wpdb->prepare(
-						'SELECT * FROM %1s
+						'SELECT * FROM ' . self::MEMBERS_TABLE . '
 						WHERE member_badge = %s',
-						self::MEMBERS_TABLE,
 						$request['badge']
 					),
 					OBJECT
 				);
 
-				if ( $results ) {					
+				if ( $results ) {
 					if ( ! current_user_can( 'edit_plugins' ) ) {
 						$this->set_user( $results[0]->member_user_id, $results[0]->member_badge );
 						$results[1] = 1;
 					} else {
 						$results[1] = 0;
 					}
-					
+
 					if ( $request['user-groups'] ) {
 						$permission = $wpdb->get_results(
 							$wpdb->prepare(
-								'SELECT * FROM %1s
+								'SELECT * FROM ' . self::MACHINE_PERMISSIONS_TABLE . '
 								WHERE permission_badge = %s && permission_machine_name = %s',
-								self::MACHINE_PERMISSIONS_TABLE,
 								$request['badge'],
 								$request['user-groups']
 							),

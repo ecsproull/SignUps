@@ -1,6 +1,5 @@
 <?php
-/*
- * Summary
+/**
  * Shortcode class.
  *
  * @package SignUps
@@ -13,7 +12,6 @@ ob_start();
  * The default function create_select_signup creates the landing page for the plugin.
  */
 class ShortCodes extends SignUpsBase {
-
 	/**
 	 * This is the entry function for the user side of the SignUp plugin.
 	 * This function is also called in response to a Form's submit button. The Submit button
@@ -30,26 +28,26 @@ class ShortCodes extends SignUpsBase {
 	 *
 	 * @return void
 	 */
-	public function user_signup( ) {
+	public function user_signup() {
 		$post = wp_unslash( $_POST );
 		if ( 0 === count( $post ) ) {
 			$post = wp_unslash( $_GET );
 		}
-		if ( ( isset( $post['mynonce'] ) && 
-			 wp_verify_nonce( $post['mynonce'], 'signups' ) ) ||
-			 ( is_user_logged_in() && isset( $post['continue_signup'] ) ) ) {
+		if ( ( isset( $post['mynonce'] ) &&
+			wp_verify_nonce( $post['mynonce'], 'signups' ) ) ||
+			( is_user_logged_in() && isset( $post['continue_signup'] ) ) ) {
 			if ( isset( $post['signup_home'] ) ) {
 				$this->create_select_signup();
 			} elseif ( isset( $post['continue_signup'] ) ) {
-				if (isset($post['redirect_url']) && !empty($post['redirect_url'])) {
+				if ( isset( $post['redirect_url'] ) && ! empty( $post['redirect_url'] ) ) {
 					wp_safe_redirect( esc_url_raw( $post['redirect_url'] ) );
 					exit;
-				}	
+				}
 				if ( ! is_user_logged_in() && ! $this->for_residents( $post['continue_signup'] ) ) {
 					$this->signin( $post['continue_signup'] );
 				} else {
 					if ( wp_verify_nonce( $post['mynonce'], 'signups' ) ||
-					     ( isset( $post['token'] ) && $this->verifyReCap( $post['token'], $post, $post['badge_number'] ) ) ) {
+						( isset( $post['token'] ) && $this->verify_recaptcha( $post['token'], $post, $post['badge_number'] ) ) ) {
 							$this->create_signup_form( $post['continue_signup'] );
 					} else {
 						$this->create_select_signup();
@@ -64,8 +62,8 @@ class ShortCodes extends SignUpsBase {
 			} elseif ( isset( $post['rolling_days_new'] ) ) {
 				$this->create_rolling_session( $post['add_attendee_session'], $post['rolling_days_new'] );
 			} elseif ( isset( $post['add_attendee_session'] ) ) {
-				if ( ! isset( $post['token'] ) || ! $this->verifyReCap( $post['token'], $post, $post['badge_number'] ) ) {
-					// Handle the failed case
+				if ( ! isset( $post['token'] ) || ! $this->verify_recaptcha( $post['token'], $post, $post['badge_number'] ) ) {
+					// Handle the failed case.
 					$this->create_select_signup();
 				} elseif ( isset( $post['attendee_identifier'] ) && wp_verify_nonce( $post['attendee_identifier'], 'signups_attendee' ) ) {
 					$this->add_attendee_rolling( $post );
@@ -87,8 +85,8 @@ class ShortCodes extends SignUpsBase {
 				$payments->payment_canceled( $post );
 			} elseif ( isset( $post['signup_id'] ) ) {
 				if ( '-1' === $post['signup_id'] ||
-				    '' === $post['signup_id'] ||
-					! $this->verifyReCap(
+					'' === $post['signup_id'] ||
+					! $this->verify_recaptcha(
 						$post['token'],
 						$post,
 						is_user_logged_in() ? get_user_meta( get_current_user_id(), 'nickname' )[0] : '0000'
@@ -126,10 +124,10 @@ class ShortCodes extends SignUpsBase {
 					$this->create_rolling_session( get_query_var( 'signup_id' ) );
 				}
 			} else {
-				if ( $post['signup_id'] === '9999' && isset( $post['redirect_to'] ) && ! is_user_logged_in() ) {
+				if ( '9999' === $post['signup_id'] && isset( $post['redirect_to'] ) && ! is_user_logged_in() ) {
 					$this->signin( $post['signup_id'], $post['redirect_to'] );
 					return;
-				}	
+				}
 				$this->create_description_form( get_query_var( 'signup_id' ) );
 			}
 		} elseif ( get_query_var( 'unsubscribe' ) ) {
@@ -141,21 +139,20 @@ class ShortCodes extends SignUpsBase {
 			$this->create_select_signup();
 		}
 	}
-	
+
 	/**
 	 * Is the signup open to the residents of SCW.
 	 *
 	 * @param  mixed $signup_id The signup id.
-	 * @return void
+	 * @return bool
 	 */
 	private function for_residents( $signup_id ) {
 		global $wpdb;
 		$signup = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			$wpdb->prepare(
 				'SELECT signup_group
-				FROM %1s
+				FROM ' . self::SIGNUPS_TABLE . '
 				WHERE signup_id = %s',
-				self::SIGNUPS_TABLE,
 				$signup_id
 			),
 			OBJECT
@@ -265,42 +262,33 @@ class ShortCodes extends SignUpsBase {
 	 *
 	 * @return void
 	 */
-	private function create_select_signup( ) {
+	private function create_select_signup() {
 		global $wpdb;
-		$signups    = null;
+		$signups = null;
 		if ( current_user_can( 'edit_plugins' ) ) {
 			$signups = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-				$wpdb->prepare(
-					'SELECT signup_id,
-					signup_name,
-					signup_category
-					FROM %1s
-					ORDER BY signup_order',
-					self::SIGNUPS_TABLE
-				),
+				'SELECT signup_id,
+				signup_name,
+				signup_category
+				FROM ' . self::SIGNUPS_TABLE . '
+				ORDER BY signup_order',
 				OBJECT
 			);
 		} else {
 			$signups = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT signup_id,
-					signup_name,
-					signup_category
-					FROM %1s
-					WHERE signup_admin_approved = 1
-					ORDER BY signup_order',
-					self::SIGNUPS_TABLE
-				),
+				'SELECT signup_id,
+				signup_name,
+				signup_category
+				FROM ' . self::SIGNUPS_TABLE . '
+				WHERE signup_admin_approved = 1
+				ORDER BY signup_order',
 				OBJECT
 			);
 		}
 
 		$categories = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT *
-				FROM %1s',
-				self::SIGNUP_CATEGORY_TABLE
-			),
+			'SELECT *
+			FROM ' . self::SIGNUP_CATEGORY_TABLE,
 			OBJECT
 		);
 
@@ -322,9 +310,8 @@ class ShortCodes extends SignUpsBase {
 		$signups = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
-				FROM %1s
+				FROM ' . self::SIGNUPS_TABLE . '
 				WHERE signup_id = %s',
-				self::SIGNUPS_TABLE,
 				$signup_id
 			),
 			OBJECT
@@ -340,18 +327,15 @@ class ShortCodes extends SignUpsBase {
 			$this->create_rolling_session( $signup_id );
 		} else {
 			$bad_debt = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT attendee_id,
-					attendee_session_id, 
-					attendee_payment_start,
-					attendee_badge,
-					attendee_payment_id,
-					attendee_checkout_id,
-					attendee_new_member_id
-					FROM %1s
-					WHERE 0 < attendee_balance_owed',
-					self::ATTENDEES_TABLE
-				),
+				'SELECT attendee_id,
+				attendee_session_id, 
+				attendee_payment_start,
+				attendee_badge,
+				attendee_payment_id,
+				attendee_checkout_id,
+				attendee_new_member_id
+				FROM ' . self::ATTENDEES_TABLE . '
+				WHERE 0 < attendee_balance_owed',
 				OBJECT
 			);
 
@@ -363,7 +347,7 @@ class ShortCodes extends SignUpsBase {
 				$dt_start = new DateTime( $bd->attendee_payment_start, $this->date_time_zone );
 				$dt_start->add( $five_minutes );
 				if ( $dt_start->format( 'U' ) < $dt_now->format( 'U' ) ) {
-					$payments = new StripePayments();
+					$payments       = new StripePayments();
 					$payment_status = $payments->check_payment_intent( $bd->attendee_payment_id );
 
 					if ( $payment_status ) {
@@ -398,10 +382,9 @@ class ShortCodes extends SignUpsBase {
 					session_price_id,
 					session_contact_name,
 					session_contact_email
-					FROM %1s
+					FROM ' . self::SESSIONS_TABLE . '
 					WHERE session_signup_id = %s AND session_start_time >= %d
 					ORDER BY session_start_time',
-					self::SESSIONS_TABLE,
 					$signup_id,
 					$dt_now->format( 'U' )
 				),
@@ -413,10 +396,9 @@ class ShortCodes extends SignUpsBase {
 				$attendees[ $session->session_id ] = $wpdb->get_results(
 					$wpdb->prepare(
 						'SELECT *
-						FROM %1s
+						FROM ' . self::ATTENDEES_TABLE . '
 						WHERE attendee_session_id = %s
 						AND attendee_email != ""',
-						self::ATTENDEES_TABLE,
 						$session->session_id
 					),
 					OBJECT
@@ -426,10 +408,9 @@ class ShortCodes extends SignUpsBase {
 					$attendee_guests = $wpdb->get_results(
 						$wpdb->prepare(
 							'SELECT *
-							FROM %1s
+							FROM ' . self::ATTENDEES_TABLE . '
 							WHERE attendee_session_id = %s && attendee_plus_guest = 1
 							AND attendee_email != ""',
-							self::ATTENDEES_TABLE,
 							$session->session_id
 						),
 						OBJECT
@@ -471,40 +452,37 @@ class ShortCodes extends SignUpsBase {
 
 			$attendee_result = $wpdb->get_results(
 				$wpdb->prepare(
-					'SELECT * FROM %1s as A
-					LEFT JOIN %1s as S ON A.attendee_session_id = S.session_id
+					'SELECT * FROM ' . self::ATTENDEES_TABLE . ' as A
+					LEFT JOIN ' . self::SESSIONS_TABLE . ' as S ON A.attendee_session_id = S.session_id
 					WHERE S.session_signup_id = %d && A.attendee_badge = %s;',
-					self::ATTENDEES_TABLE,
-					self::SESSIONS_TABLE,
 					$post['session_signup_id'],
 					$post['badge_number']
 				)
 			);
 
 			$old_session_id = $attendee_result ? $attendee_result[0]->attendee_session_id : 0;
-			if ( $old_session_id === intval( $new_session_id ) ) {
+			if ( intval( $new_session_id ) === $old_session_id ) {
 				?>
 					<h1 class=" mt-3">Failed moving session, You are already signed up for that session.</h1>
 				<?php
 				return;
 			}
 
-			$where  = array( 'attendee_id' => $post['move_me'][0] );
-			$data   = array( 'attendee_session_id' => $new_session_id );
+			$where         = array( 'attendee_id' => $post['move_me'][0] );
+			$data          = array( 'attendee_session_id' => $new_session_id );
 			$update_result = $wpdb->update( self::ATTENDEES_TABLE, $data, $where );
 
-			if ( $update_result !== false ) {
+			if ( false !== $update_result ) {
 				$old_instructors = $this->get_session_instructors( $old_session_id );
 				$new_instructors = $this->get_session_instructors( $new_session_id );
-				$instructor_body   = $this->get_session_instructors_email_body( $new_session_id );
+				$instructor_body = $this->get_session_instructors_email_body( $new_session_id );
 
 				if ( $old_session_id ) {
 					$old_session = $wpdb->get_row(
 						$wpdb->prepare(
 							'SELECT session_start_formatted
-							FROM %1s
+							FROM ' . self::SESSIONS_TABLE . '
 							WHERE session_id = %d',
-							self::SESSIONS_TABLE,
 							$old_session_id
 						),
 						OBJECT
@@ -518,8 +496,8 @@ class ShortCodes extends SignUpsBase {
 					$sgm->send_mail( $instructor->instructors_email, 'Attendee Moved to your class', $instructor_body, true );
 				}
 
-				if ( $old_instructors != $new_instructors ) {
-					$instructor_body   = $this->get_session_instructors_email_body( $old_session_id );
+				if ( $old_instructors !== $new_instructors ) {
+					$instructor_body = $this->get_session_instructors_email_body( $old_session_id );
 					if ( $old_session_id ) {
 						$instructor_body .= '<p>This attendee has moved to another session from your ' . $old_session->session_start_formatted . ' session.</p>';
 					}
@@ -542,9 +520,8 @@ class ShortCodes extends SignUpsBase {
 						$attendee = $wpdb->get_row(
 							$wpdb->prepare(
 								'SELECT attendee_email
-								FROM %1s
+								FROM ' . self::ATTENDEES_TABLE . '
 								WHERE attendee_id = %s',
-								self::ATTENDEES_TABLE,
 								$post['move_me'][0]
 							),
 							OBJECT
@@ -574,7 +551,7 @@ class ShortCodes extends SignUpsBase {
 				</div>
 				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 				<input type="hidden" id="token" name="token" value="" >
-				<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html(  get_option( 'signups_captcha' )['captcha_api_key'] ); ?>" >
+				<input type="hidden" id="token_key" name="token_key" value="<?php echo esc_html( get_option( 'signups_captcha' )['captcha_api_key'] ); ?>" >
 				<input type="hidden" id="clicked_item" name="" value="">
 			</form>
 			<?php
@@ -603,7 +580,7 @@ class ShortCodes extends SignUpsBase {
 			foreach ( $post['remove_me'] as $attendee_id ) {
 				$data                = array();
 				$data['attendee_id'] = $attendee_id;
-				$member_removed = $wpdb->delete( self::ATTENDEES_TABLE, $data );
+				$member_removed      = $wpdb->delete( self::ATTENDEES_TABLE, $data );
 			}
 
 			if ( $member_removed ) {
@@ -643,7 +620,6 @@ class ShortCodes extends SignUpsBase {
 			$attendee_phone_email = $this->get_member_data();
 		}
 
-		
 		$qty                                    = 1;
 		$now                                    = new DateTime( 'now', $this->date_time_zone );
 		$slot_parts                             = explode( ',', $post['time_slots'][0] );
@@ -667,7 +643,7 @@ class ShortCodes extends SignUpsBase {
 		$new_attendee['attendee_new_member_id'] = $insert_id;
 
 		if ( $new_attendee['attendee_plus_guest'] ) {
-			$qty++;
+			++$qty;
 		}
 		?>
 		<form method="POST">
@@ -682,16 +658,14 @@ class ShortCodes extends SignUpsBase {
 				<?php
 				$current_session_attendees = $wpdb->get_results(
 					$wpdb->prepare(
-						'SELECT * FROM %1s WHERE attendee_session_id = %d AND attendee_item != "INSTRUCTOR"',
-						self::ATTENDEES_TABLE,
+						'SELECT * FROM ' . self::ATTENDEES_TABLE . ' WHERE attendee_session_id = %d AND attendee_item != "INSTRUCTOR"',
 						$new_attendee['attendee_session_id'],
 					)
 				);
 
 				$available_slots = $wpdb->get_results(
 					$wpdb->prepare(
-						'SELECT session_slots FROM %1s WHERE session_id = %d',
-						self::SESSIONS_TABLE,
+						' SELECT session_slots FROM ' . self::SESSIONS_TABLE . ' WHERE session_id = %d',
 						$new_attendee['attendee_session_id']
 					)
 				);
@@ -704,8 +678,7 @@ class ShortCodes extends SignUpsBase {
 					if ( $new_attendee['attendee_badge'] ) {
 						$signed_up_already = $wpdb->get_results(
 							$wpdb->prepare(
-								'SELECT attendee_badge FROM %1s WHERE attendee_session_id = %d AND attendee_badge = %d',
-								self::ATTENDEES_TABLE,
+								' SELECT attendee_badge FROM ' . self::ATTENDEES_TABLE . ' WHERE attendee_session_id = %d AND attendee_badge = %d',
 								$new_attendee['attendee_session_id'],
 								$new_attendee['attendee_badge']
 							)
@@ -713,11 +686,10 @@ class ShortCodes extends SignUpsBase {
 					} else {
 						$signed_up_already = $wpdb->get_results(
 							$wpdb->prepare(
-								'SELECT * FROM %1s WHERE attendee_session_id = %d AND 
+								' SELECT * FROM ' . self::ATTENDEES_TABLE . ' WHERE attendee_session_id = %d AND 
 									attendee_firstname = %s AND
 									attendee_lastname  = %s AND
 									attendee_phone     = %s',
-								self::ATTENDEES_TABLE,
 								$new_attendee['attendee_session_id'],
 								$new_attendee['attendee_firstname'],
 								$new_attendee['attendee_lastname'],
@@ -753,9 +725,8 @@ class ShortCodes extends SignUpsBase {
 						$signups = $wpdb->get_results(
 							$wpdb->prepare(
 								'SELECT signup_product_id
-								FROM %1s
+								FROM ' . self::SIGNUPS_TABLE . '
 								WHERE signup_id = %d',
-								self::SIGNUPS_TABLE,
 								$post['session_signup_id']
 							),
 							OBJECT
@@ -871,7 +842,7 @@ class ShortCodes extends SignUpsBase {
 							?>
 						</div>
 						<?php
-						$count++;
+						++$count;
 					}
 
 					if ( $count % 4 > 0 ) {
@@ -904,14 +875,16 @@ class ShortCodes extends SignUpsBase {
 	 *
 	 * @see ShortCodes::add_attendee_class()
 	 *
-	 * @param  string $signup_name The class name.
-	 * @param  array  $sessions The list of sessions for the class.
-	 * @param  array  $attendees The list of attendees for the class.
-	 * @param  int    $cost The cost of the signup in dollars.
-	 * @param  int    $signup_id The signup id.
-	 * @param  string $user_group The group that defines who can signup.  CNC, Member...etc.
-	 * @param  string $signup_email The email for the contact person for this signup.
-	 * @param  string $signup_contact_name The name for the contact person for this signup.
+	 * @param  string     $signup_name The class name.
+	 * @param  array      $sessions The list of sessions for the class.
+	 * @param  array      $attendees The list of attendees for the class.
+	 * @param  int        $cost The cost of the signup in dollars.
+	 * @param  int        $signup_id The signup id.
+	 * @param  string     $user_group The group that defines who can signup.  CNC, Member...etc.
+	 * @param  string     $signup_email The email for the contact person for this signup.
+	 * @param  string     $signup_contact_name The name for the contact person for this signup.
+	 * @param  array|null $guests_coming Guest counts keyed by session id.
+	 * @param  bool       $block_self_move Whether self-move is blocked for attendees.
 	 * @return void
 	 */
 	private function create_session_select_form(
@@ -961,7 +934,7 @@ class ShortCodes extends SignUpsBase {
 									if ( $session->session_start_time < $now->format( 'U' ) ) {
 										continue;
 									}
-									$sessions_displayed++;
+									++$sessions_displayed;
 									?>
 									<tr class="submit-row">
 										<td colspan='3'><button id=<?php echo esc_html( 'submit_' . $session->session_id ); ?>
@@ -1016,7 +989,7 @@ class ShortCodes extends SignUpsBase {
 										<?php
 										if ( $guests_coming ) {
 											?>
-											<td><b><?php echo esc_html( $available_slots . ' slots open - ' . count( $attendees[ $session->session_id ] ) . ' filled, plus ' . $guests_coming[ $session->session_id ] . ' guests'  ); ?></b></td>
+											<td><b><?php echo esc_html( $available_slots . ' slots open - ' . count( $attendees[ $session->session_id ] ) . ' filled, plus ' . $guests_coming[ $session->session_id ] . ' guests' ); ?></b></td>
 											<?php
 										} else {
 											?>
@@ -1099,7 +1072,7 @@ class ShortCodes extends SignUpsBase {
 								</tr>		
 							<div id="cancel"></div>
 						</table>
-						<?php
+							<?php
 						}
 						?>
 					</div>
@@ -1154,9 +1127,8 @@ class ShortCodes extends SignUpsBase {
 				signup_schedule_desc,
 				signup_rolling_template,
 				signup_location
-				FROM %1s
+				FROM ' . self::SIGNUPS_TABLE . '
 				WHERE signup_id = %s && signup_admin_approved = 1',
-				self::SIGNUPS_TABLE,
 				$signup_id
 			),
 			OBJECT
@@ -1301,13 +1273,13 @@ class ShortCodes extends SignUpsBase {
 	/**
 	 * Creates the form for sending the an email.
 	 *
-	 * @param mixed   $post  Data from the calling form.
+	 * @param mixed $post  Data from the calling form.
 	 * @return void
 	 */
 	private function create_email_form( $post ) {
 
-		$contact_email = isset($post['contact_email'] ) ? $post['contact_email'] : '';
-		$contact_name  = isset($post['contact_name']) ? $post['contact_name'] : '';
+		$contact_email = isset( $post['contact_email'] ) ? $post['contact_email'] : '';
+		$contact_name  = isset( $post['contact_name'] ) ? $post['contact_name'] : '';
 		$class_email   = false;
 		if ( ! current_user_can( 'edit_plugins' ) ) {
 			$contact_email = isset( $post['session_email'] ) ? $post['session_email'] : $post['contact_email'];
@@ -1416,9 +1388,8 @@ class ShortCodes extends SignUpsBase {
 		$member                         = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
-				FROM %1s
+				FROM ' . self::MEMBERS_TABLE . '
 				where member_email_secret = %s',
-				self::MEMBERS_TABLE,
 				$key
 			),
 			OBJECT

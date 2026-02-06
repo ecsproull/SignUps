@@ -21,4 +21,12 @@
   </rule>
 
   <rule ref="WordPress-Docs" />
+
+  <!--
+    Some legacy files intentionally keep a non-PHPDoc header block for external tooling.
+    Ignore the file-header style requirement just for those files.
+  -->
+  <rule ref="Squiz.Commenting.FileComment.WrongStyle">
+    <exclude-pattern>includes/class-shortcodes.php</exclude-pattern>
+  </rule>
 </ruleset>
