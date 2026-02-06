@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<ruleset name="SignUps">
+  <description>PHPCS ruleset for the SignUps plugin (WordPress Coding Standards).</description>
+
+  <!-- Scan the plugin code -->
+  <file>.</file>
+
+  <!-- Keep noise down -->
+  <exclude-pattern>*/vendor/*</exclude-pattern>
+  <exclude-pattern>*/node_modules/*</exclude-pattern>
+
+  <!-- WordPress Coding Standards -->
+  <rule ref="WordPress-Core">
+    <!--
+      This sniff frequently false-positives when building queries like:
+      "... FROM " . self::TABLE . " WHERE col = %d" and then calling $wpdb->prepare().
+      Table/column identifiers cannot be passed as placeholders, so concatenating
+      a constant/whitelisted table name is the correct and safe approach.
+    -->
+    <exclude name="WordPress.DB.PreparedSQL.NotPrepared" />
+  </rule>
+
+  <rule ref="WordPress-Docs" />
+</ruleset>

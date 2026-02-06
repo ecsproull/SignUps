@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Run PHPCS using a known PHP binary (avoid relying on `php` in PATH).
+export XDEBUG_MODE=off
+exec /usr/bin/php /var/www/wordpress/wp-content/plugins/SignUps/vendor/bin/phpcs "$@"
