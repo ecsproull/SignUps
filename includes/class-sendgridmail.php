@@ -8,7 +8,7 @@
  * license     GPL-2.0+
  */
 
-use \SendGrid\Mail\Mail;
+use SendGrid\Mail\Mail;
 
 /**
  * Helper class for sending email via Twilio SendGrid
@@ -66,39 +66,54 @@ class SendGridMail extends SignUpsBase {
 				basename( __FILE__ ),
 				"Email not sent (non-production server). TO: {$email_address} Subject: {$subject}"
 			);
-			return true; // Return true to avoid breaking calling code
+
+			if ( 'ecsproull765@gmail.com' !== $email_address ) {
+				return true; // Return true to avoid breaking calling code.
+			}
 		}
 
 		try {
-			$response = $sendgrid->send($email);
+			$response = $sendgrid->send( $email );
 			$status   = (int) $response->statusCode();
 			$body     = (string) $response->body();
 
-			if ($status !== 202) {
+			if ( 202 !== $status ) {
 				// Extract SendGrid error details (if JSON)
 				$errors = $body;
-				$json   = json_decode($body, true);
-				if (json_last_error() === JSON_ERROR_NONE && isset($json['errors'])) {
-					$errors = implode('; ', array_map(function ($e) {
-						$parts = [];
-						if (!empty($e['message'])) $parts[] = $e['message'];
-						if (!empty($e['field']))   $parts[] = 'field: '.$e['field'];
-						if (!empty($e['help']))    $parts[] = 'help: '.$e['help'];
-						return implode(' | ', $parts);
-					}, $json['errors']));
+				$json   = json_decode( $body, true );
+				if ( json_last_error() === JSON_ERROR_NONE && isset( $json['errors'] ) ) {
+					$errors = implode(
+						'; ',
+						array_map(
+							function ( $e ) {
+								$parts = array();
+								if ( ! empty( $e['message'] ) ) {
+									$parts[] = $e['message'];
+								}
+								if ( ! empty( $e['field'] ) ) {
+									$parts[] = 'field: ' . $e['field'];
+								}
+								if ( ! empty( $e['help'] ) ) {
+									$parts[] = 'help: ' . $e['help'];
+								}
+								return implode( ' | ', $parts );
+							},
+							$json['errors']
+						)
+					);
 				}
 
 				$this->write_log(
 					__FUNCTION__,
-					basename(__FILE__),
+					basename( __FILE__ ),
 					"SendGrid error status {$status}. TO: {$email_address} Subject: {$subject} Errors: {$errors}"
 				);
 				return false;
 			}
 
 			return true;
-		} catch (\Throwable $e) {
-			$this->write_log(__FUNCTION__, basename(__FILE__), 'Exception sending mail: '.$e->getMessage());
+		} catch ( \Throwable $e ) {
+			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Exception sending mail: ' . $e->getMessage() );
 			return false;
 		}
 	}
