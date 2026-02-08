@@ -104,7 +104,7 @@ class StripePayments extends SignUpsBase {
 			http_response_code( 400 );
 			exit();
 		} catch ( \Stripe\Exception\SignatureVerificationException $e ) {
-			// $this->write_log( __FUNCTION__, basename( __FILE__ ), 'SignatureVerificationException Message: ' . $e->getMessage() );
+			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'SignatureVerificationException Message: ' . $e->getMessage() );
 			http_response_code( 400 );
 			exit();
 		}
@@ -124,8 +124,14 @@ class StripePayments extends SignUpsBase {
 			case 'checkout.session.completed':
 				$this->checkout_session_completed( $event );
 				break;
+			case 'charge.succeeded':
+				$this->charge_succeeded( $event );
+				break;
 			case 'charge.refunded':
 				$this->charge_refunded( $event );
+				break;
+			case 'balance.available':
+				$this->balance_available( $event );
 				break;
 			case 'checkout.session.expired':
 			case 'payment_intent.payment_failed':
@@ -133,11 +139,246 @@ class StripePayments extends SignUpsBase {
 				$this->terminate_payment( $event );
 				break;
 			case 'payout.paid':
-			case 'balance.available':
+				$this->payout_paid( $event );
 				break;
 			default:
 		}
 	}
+
+	/**
+	 * Handle balance available events.
+	 *
+	 * This event is informational (funds are now available in your Stripe balance).
+	 * It's not tied to a specific checkout or intent, so this handler logs the event
+	 * and can be extended for reconciliation or notifications.
+	 *
+	 * @param mixed $event The event contains the balance object.
+	 * @return void
+	 */
+	private function balance_available( $event ) {
+		$balance = isset( $event->data->object ) ? $event->data->object : null;
+		if ( ! $balance || ! isset( $balance->available ) ) {
+			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Balance available event missing balance data.' );
+			return;
+		}
+
+		$total_available = 0;
+		$currency_counts = array();
+		foreach ( $balance->available as $entry ) {
+			$amount           = isset( $entry->amount ) ? (int) $entry->amount : 0;
+			$currency         = isset( $entry->currency ) ? strtoupper( $entry->currency ) : 'UNKNOWN';
+			$total_available += $amount;
+			if ( ! isset( $currency_counts[ $currency ] ) ) {
+				$currency_counts[ $currency ] = 0;
+			}
+			$currency_counts[ $currency ] += $amount;
+		}
+
+		$currency_text = array();
+		foreach ( $currency_counts as $currency => $amount ) {
+			$currency_text[] = $currency . ': ' . $amount;
+		}
+
+		$this->write_log(
+			__FUNCTION__,
+			basename( __FILE__ ),
+			'Balance available. Total: ' . $total_available . ' (minor units). By currency: ' . implode( ', ', $currency_text )
+		);
+	}
+
+	/**
+	 * Handle a successful charge and record fee/net information on the payment row.
+	 *
+	 * @param mixed $event The event contains the charge object.
+	 * @return void
+	 */
+	private function charge_succeeded( $event ) {
+		global $wpdb;
+		$charge = $event->data->object;
+		if ( ! $charge || ! isset( $charge->payment_intent ) ) {
+			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Charge succeeded event missing payment_intent.' );
+			return;
+		}
+
+		$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Charge Success started for charge id: ' . $charge->id );
+
+		$balance_txn_id = isset( $charge->balance_transaction ) ? $charge->balance_transaction : null;
+		$currency       = isset( $charge->currency ) ? strtoupper( $charge->currency ) : null;
+		$gross_amount   = isset( $charge->amount ) ? (int) $charge->amount : 0;
+		$fee_amount     = null;
+		$net_amount     = null;
+
+		if ( ! $balance_txn_id && isset( $charge->id ) ) {
+			try {
+				$stripe       = new \Stripe\StripeClient( $this->stripe_api_secret );
+				$fresh_charge = $stripe->charges->retrieve(
+					$charge->id,
+					array( 'expand' => array( 'balance_transaction' ) )
+				);
+				if ( $fresh_charge && isset( $fresh_charge->balance_transaction ) ) {
+					$balance_txn_id = is_string( $fresh_charge->balance_transaction )
+						? $fresh_charge->balance_transaction
+						: $fresh_charge->balance_transaction->id;
+					if ( ! $currency && isset( $fresh_charge->currency ) ) {
+						$currency = strtoupper( $fresh_charge->currency );
+					}
+					if ( is_object( $fresh_charge->balance_transaction ) ) {
+						$fee_amount = isset( $fresh_charge->balance_transaction->fee ) ? (int) $fresh_charge->balance_transaction->fee : $fee_amount;
+						$net_amount = isset( $fresh_charge->balance_transaction->net ) ? (int) $fresh_charge->balance_transaction->net : $net_amount;
+					}
+				}
+			} catch ( Exception $e ) {
+				$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Failed to refresh charge for balance transaction: ' . $e->getMessage() );
+			}
+		} elseif ( $balance_txn_id ) {
+			try {
+				$stripe = new \Stripe\StripeClient( $this->stripe_api_secret );
+				$bt     = $stripe->balanceTransactions->retrieve( $balance_txn_id, array() );
+				if ( $bt ) {
+					$fee_amount = isset( $bt->fee ) ? (int) $bt->fee : null;
+					$net_amount = isset( $bt->net ) ? (int) $bt->net : null;
+					if ( ! $currency && isset( $bt->currency ) ) {
+						$currency = strtoupper( $bt->currency );
+					}
+				}
+			} catch ( Exception $e ) {
+				$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Failed to fetch balance transaction: ' . $e->getMessage() );
+			}
+		} else {
+			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Charge succeeded but balance transaction is not yet available for charge id: ' . $charge->id );
+		}
+
+		$result = $wpdb->query(
+			$wpdb->prepare(
+				'INSERT INTO ' . self::CHARGES_SUCCEEDED_TABLE . '
+				(charge_id, payment_intent_id, balance_txn_id, gross_amount, fee_amount, net_amount, currency, created_at)
+				VALUES (%s, %s, %s, %d, %d, %d, %s, %s)
+				ON DUPLICATE KEY UPDATE
+					balance_txn_id = VALUES(balance_txn_id),
+					gross_amount = VALUES(gross_amount),
+					fee_amount = VALUES(fee_amount),
+					net_amount = VALUES(net_amount),
+					currency = VALUES(currency),
+					created_at = VALUES(created_at)',
+				$charge->id,
+				$charge->payment_intent,
+				$balance_txn_id,
+				$gross_amount,
+				$fee_amount,
+				$net_amount,
+				$currency,
+				current_time( 'mysql' )
+			)
+		);
+
+		if ( false === $result ) {
+			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Failed to insert/update charge succeeded record for charge id: ' . $charge->id . ' Error: ' . $wpdb->last_error );
+		}
+	}
+
+	/**
+	 * Handle payout paid events and record payout and item details.
+	 *
+	 * @param mixed $event The event contains the payout object.
+	 * @return void
+	 */
+	private function payout_paid( $event ) {
+		global $wpdb;
+		$payout = isset( $event->data->object ) ? $event->data->object : null;
+		if ( ! $payout || ! isset( $payout->id ) ) {
+			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Payout paid event missing payout data.' );
+			return;
+		}
+
+		$currency     = isset( $payout->currency ) ? strtoupper( $payout->currency ) : null;
+		$arrival_date = isset( $payout->arrival_date ) ? gmdate( 'Y-m-d H:i:s', (int) $payout->arrival_date ) : null;
+		$created_at   = isset( $payout->created ) ? gmdate( 'Y-m-d H:i:s', (int) $payout->created ) : current_time( 'mysql' );
+
+		$wpdb->query(
+			$wpdb->prepare(
+				'INSERT INTO ' . self::PAYOUTS_TABLE . '
+				(payout_id, payout_amount, payout_currency, payout_status, payout_arrival_date, payout_created_at)
+				VALUES (%s, %d, %s, %s, %s, %s)
+				ON DUPLICATE KEY UPDATE
+				payout_amount = VALUES(payout_amount),
+				payout_currency = VALUES(payout_currency),
+				payout_status = VALUES(payout_status),
+				payout_arrival_date = VALUES(payout_arrival_date),
+				payout_created_at = VALUES(payout_created_at)',
+				$payout->id,
+				isset( $payout->amount ) ? (int) $payout->amount : 0,
+				$currency,
+				isset( $payout->status ) ? $payout->status : 'paid',
+				$arrival_date,
+				$created_at
+			)
+		);
+
+		try {
+			$stripe = new \Stripe\StripeClient( $this->stripe_api_secret );
+			$txns   = null;
+
+			$can_filter_by_payout = isset( $payout->automatic ) && $payout->automatic;
+			if ( $can_filter_by_payout ) {
+				$txns = $stripe->balanceTransactions->all(
+					array(
+						'payout' => $payout->id,
+						'limit'  => 100,
+					)
+				);
+			} else {
+				$balance_txn_id = isset( $payout->balance_transaction )
+					? ( is_string( $payout->balance_transaction ) ? $payout->balance_transaction : $payout->balance_transaction->id )
+					: null;
+
+				if ( $balance_txn_id ) {
+					$bt   = $stripe->balanceTransactions->retrieve( $balance_txn_id, array() );
+					$txns = (object) array( 'data' => array( $bt ) );
+				} else {
+					$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Manual payout has no balance_transaction; cannot load payout items for payout id: ' . $payout->id );
+					return;
+				}
+			}
+
+			$iterator = method_exists( $txns, 'autoPagingIterator' ) ? $txns->autoPagingIterator() : $txns->data;
+			foreach ( $iterator as $bt ) {
+				$bt_currency = isset( $bt->currency ) ? strtoupper( $bt->currency ) : null;
+				$item_time   = isset( $bt->created ) ? gmdate( 'Y-m-d H:i:s', (int) $bt->created ) : current_time( 'mysql' );
+
+				$charge_id = null;
+				if ( isset( $bt->source ) && is_string( $bt->source ) && 0 === strpos( $bt->source, 'ch_' ) ) {
+					$charge_id = $bt->source;
+				}
+
+				$wpdb->query(
+					$wpdb->prepare(
+						'INSERT INTO ' . self::PAYOUT_ITEMS_TABLE . '
+						(payout_id, charge_id, balance_txn_id, gross_amount, fee_amount, net_amount, currency, created_at)
+						VALUES (%s, %s, %s, %d, %d, %d, %s, %s)
+						ON DUPLICATE KEY UPDATE
+						gross_amount = VALUES(gross_amount),
+						fee_amount = VALUES(fee_amount),
+						net_amount = VALUES(net_amount),
+						currency = VALUES(currency),
+						created_at = VALUES(created_at)',
+						$payout->id,
+						$charge_id,
+						isset( $bt->id ) ? $bt->id : null,
+						isset( $bt->amount ) ? (int) $bt->amount : 0,
+						isset( $bt->fee ) ? (int) $bt->fee : 0,
+						isset( $bt->net ) ? (int) $bt->net : 0,
+						$bt_currency,
+						$item_time
+					)
+				);
+			}
+		} catch ( \Stripe\Exception\InvalidRequestException $e ) {
+			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'InvalidRequestException while loading payout items for payout id: ' . $payout->id . ' Message: ' . $e->getMessage() );
+		} catch ( Exception $e ) {
+			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Failed to load payout balance transactions: ' . $e->getMessage() );
+		}
+	}
+
 
 	/**
 	 * Handle a refunded charge.
@@ -561,7 +802,7 @@ class StripePayments extends SignUpsBase {
 		global $wpdb;
 		\Stripe\Stripe::setApiKey( $this->stripe_api_secret );
 		header( 'Content-Type: application/json' );
-		$signup_domain = $this->stripe_root_url;
+		$signup_domain = home_url( '/signups' );
 		$current_time  = time();
 		$expire_time   = $current_time + ( 31 * 60 );
 
@@ -574,6 +815,26 @@ class StripePayments extends SignUpsBase {
 			return;
 		}
 
+		$success_url = add_query_arg(
+			array(
+				'payment_success' => '1',
+				'attendee_id'     => $attendee_id,
+				'signup_id'       => $signup_id,
+				'badge'           => $badge,
+				'mynonce'         => wp_create_nonce( 'signups' ),
+			),
+			$signup_domain
+		);
+		$cancel_url  = add_query_arg(
+			array(
+				'payment_canceled' => '1',
+				'attendee_id'      => $attendee_id,
+				'signup_id'        => $signup_id,
+				'mynonce'          => wp_create_nonce( 'signups' ),
+			),
+			$signup_domain
+		);
+
 		$checkout_session = \Stripe\Checkout\Session::create(
 			array(
 				'line_items'  => array(
@@ -584,8 +845,8 @@ class StripePayments extends SignUpsBase {
 				),
 				'mode'        => 'payment',
 				'expires_at'  => $expire_time,
-				'success_url' => $signup_domain . '/signups?payment_success=1&attendee_id=' . $attendee_id . '&signup_id=' . $signup_id . '&badge=' . $badge . '&mynonce=' . wp_create_nonce( 'signups' ),
-				'cancel_url'  => $signup_domain . '/signups?payment_canceled=1&attendee_id=' . $attendee_id . '&signup_id=' . $signup_id . '&mynonce=' . wp_create_nonce( 'signups' ),
+				'success_url' => esc_url_raw( $success_url ),
+				'cancel_url'  => esc_url_raw( $cancel_url ),
 			)
 		);
 

@@ -383,9 +383,12 @@ class SignUpsRestApis extends SignUpsBase {
 			'rest_pre_serve_request',
 			function ( $served, $result, $req, $server ) use ( $image_data, $mime, $badge ) {
 				// Clean any previous output to avoid corrupting the binary.
-				if ( function_exists( 'ob_get_length' ) && ob_get_length() ) {
-					while ( ob_get_level() ) {
-						@ob_end_clean(); }
+				if ( ob_get_level() > 0 ) {
+					while ( ob_get_level() > 0 ) {
+						if ( ! ob_end_clean() ) {
+							break;
+						}
+					}
 				}
 				nocache_headers();
 				header( 'X-Content-Type-Options: nosniff' );

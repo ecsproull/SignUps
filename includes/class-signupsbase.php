@@ -70,6 +70,22 @@ class SignUpsBase {
 	protected const PAYMENT_INTENTS_TABLE = 'wp_scw_payment_intents';
 
 	/**
+	 * Stripe payouts table.
+	 */
+	protected const PAYOUTS_TABLE = 'wp_scw_payouts';
+
+	/**
+	 * Stripe payout items table.
+	 */
+	protected const PAYOUT_ITEMS_TABLE = 'wp_scw_payout_items';
+
+	/**
+	 * Charges succeeded table.
+	 * This table holds the Stripe charges that have succeeded.
+	 */
+	protected const CHARGES_SUCCEEDED_TABLE = 'wp_scw_charge_succeeded';
+
+	/**
 	 * Signup descriptions table.
 	 * Descriptions have three parts. Descriptions, Calendar Description and Instructions.
 	 * All three are held in this table.
