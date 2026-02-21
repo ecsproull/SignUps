@@ -127,8 +127,8 @@ class StripePayments extends SignUpsBase {
 			case 'charge.succeeded':
 				$this->charge_succeeded( $event );
 				break;
-			case 'charge.refunded':
-				$this->charge_refunded( $event );
+			case 'refund.created':
+				$this->refund_created( $event );
 				break;
 			case 'balance.available':
 				$this->balance_available( $event );
@@ -142,6 +142,187 @@ class StripePayments extends SignUpsBase {
 				$this->payout_paid( $event );
 				break;
 			default:
+		}
+	}
+
+
+	/**
+	 * Handle refund.created events.
+	 *
+	 * This event fires when a refund is created (full or partial), so we retrieve the
+	 * refund from Stripe (expanded with charge/balance/payment_intent when possible)
+	 * and write a correlated event log entry.
+	 *
+	 * @param mixed $event The Stripe webhook event.
+	 * @return void
+	 */
+	private function refund_created( $event ) {
+		global $wpdb;
+		$refund_id = isset( $event->data->object ) && isset( $event->data->object->id )
+			? $event->data->object->id
+			: null;
+
+		if ( ! $refund_id ) {
+			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Refund created event missing refund id.' );
+			return;
+		}
+
+		try {
+			$stripe = new \Stripe\StripeClient( $this->stripe_api_secret );
+
+			// GET /v1/refunds/{refund_id}.
+			$refund = $stripe->refunds->retrieve(
+				$refund_id,
+				array(
+					'expand' => array(
+						'charge',
+						'balance_transaction',
+						'payment_intent',
+					),
+				)
+			);
+
+			if ( ! $refund || ! isset( $refund->id ) ) {
+				$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Refund retrieve returned empty for refund id: ' . $refund_id );
+				return;
+			}
+
+			$charge_id = null;
+			if ( isset( $refund->charge ) ) {
+				$charge_id = is_string( $refund->charge ) ? $refund->charge : ( isset( $refund->charge->id ) ? $refund->charge->id : null );
+			}
+
+			$payment_intent_id = null;
+			if ( isset( $refund->payment_intent ) ) {
+				$payment_intent_id = is_string( $refund->payment_intent )
+					? $refund->payment_intent
+					: ( isset( $refund->payment_intent->id ) ? $refund->payment_intent->id : null );
+			}
+
+			// If refund doesn't include a payment_intent, try to resolve it from the charge.
+			if ( ! $payment_intent_id && $charge_id ) {
+				try {
+					$charge = $stripe->charges->retrieve( $charge_id, array() );
+					if ( $charge && isset( $charge->payment_intent ) ) {
+						$payment_intent_id = $charge->payment_intent;
+					}
+				} catch ( Exception $e ) {
+					$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Failed to retrieve charge for refund correlation: ' . $e->getMessage() );
+				}
+			}
+
+			$payment_row = $payment_intent_id ? $this->get_payment_row( null, $payment_intent_id ) : null;
+
+			if ( $payment_row && $payment_row->payments_status !== 'refunded' ) {
+				$bt_id      = isset( $refund->balance_transaction ) ? $refund->balance_transaction : null;
+				$bt_obj     = is_object( $bt_id ) ? $bt_id : null;
+				$bt_real_id = is_string( $bt_id ) ? $bt_id : ( $bt_obj && isset( $bt_obj->id ) ? $bt_obj->id : null );
+
+				$gross_amount = null;
+				$fee_amount   = null;
+				$net_amount   = null;
+				$currency     = isset( $refund->currency ) ? strtoupper( $refund->currency ) : null;
+
+				if ( $bt_obj ) {
+					$gross_amount = isset( $bt_obj->amount ) ? (int) $bt_obj->amount : null;
+					$fee_amount   = isset( $bt_obj->fee ) ? (int) $bt_obj->fee : null;
+					$net_amount   = isset( $bt_obj->net ) ? (int) $bt_obj->net : null;
+					if ( isset( $bt_obj->currency ) ) {
+						$currency = strtoupper( $bt_obj->currency );
+					}
+				} elseif ( $bt_real_id ) {
+					try {
+						$bt = $stripe->balanceTransactions->retrieve( $bt_real_id, array() );
+						if ( $bt ) {
+							$gross_amount = isset( $bt->amount ) ? (int) $bt->amount : $gross_amount;
+							$fee_amount   = isset( $bt->fee ) ? (int) $bt->fee : $fee_amount;
+							$net_amount   = isset( $bt->net ) ? (int) $bt->net : $net_amount;
+							if ( isset( $bt->currency ) ) {
+								$currency = strtoupper( $bt->currency );
+							}
+						}
+					} catch ( Exception $e ) {
+						$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Failed to retrieve refund balance_transaction: ' . $e->getMessage() );
+					}
+				}
+
+				// Fallback if balance_transaction data is unavailable: store refund amount as negative.
+				if ( null === $gross_amount ) {
+					$gross_amount = -abs( isset( $refund->amount ) ? (int) $refund->amount : 0 );
+				}
+				if ( null === $fee_amount ) {
+					$fee_amount = 0;
+				}
+				if ( null === $net_amount ) {
+					$net_amount = $gross_amount - $fee_amount;
+				}
+
+				// Store refund as its own row (refund id in charge_id) to avoid overwriting the original ch_... row.
+				$result = $wpdb->query(
+					$wpdb->prepare(
+						'INSERT INTO ' . self::CHARGES_SUCCEEDED_TABLE . '
+						(charge_id, payment_intent_id, balance_txn_id, gross_amount, fee_amount, net_amount, currency, created_at)
+						VALUES (%s, %s, %s, %d, %d, %d, %s, %s)
+						ON DUPLICATE KEY UPDATE
+							balance_txn_id = VALUES(balance_txn_id),
+							gross_amount = VALUES(gross_amount),
+							fee_amount = VALUES(fee_amount),
+							net_amount = VALUES(net_amount),
+							currency = VALUES(currency),
+							created_at = VALUES(created_at)',
+						$refund->id,
+						$payment_intent_id,
+						$bt_real_id,
+						$gross_amount,
+						$fee_amount,
+						$net_amount,
+						$currency,
+						current_time( 'mysql' )
+					)
+				);
+
+				if ( false === $result ) {
+					$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Failed to insert/update refund in charge_succeeded table for refund id: ' . $refund->id . ' Error: ' . $wpdb->last_error );
+				}
+
+				$where = array( 'payments_intent_id' => $payment_intent_id );
+				$data  = array( 'payments_status' => 'refunded' );
+				if ( false === $wpdb->update( self::PAYMENTS_TABLE, $data, $where ) ) {
+					$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Failed to change payment to status = refunded for refund id: ' . $refund->id . ' Error: ' . $wpdb->last_error );
+				}
+
+				$where = array( 'attendee_id' => $payment_row->payments_attendee_id );
+				if ( false === $wpdb->delete( self::ATTENDEES_TABLE, $where ) ) {
+					$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Failed to delete attendee for refund id: ' . $refund->id . ' Error: ' . $wpdb->last_error );
+				}
+			} else {
+				$this->write_log( __FUNCTION__, basename( __FILE__ ), 'No payment row found for refund correlation.' );
+			}
+
+			$log_bits   = array();
+			$log_bits[] = 'Refund retrieved: ' . $refund->id;
+			if ( $charge_id ) {
+				$log_bits[] = 'charge: ' . $charge_id;
+			}
+			if ( $payment_intent_id ) {
+				$log_bits[] = 'intent: ' . $payment_intent_id;
+			}
+			if ( isset( $refund->status ) ) {
+				$log_bits[] = 'status: ' . $refund->status;
+			}
+			if ( isset( $refund->amount ) ) {
+				$log_bits[] = 'amount(minor): ' . (int) $refund->amount;
+			}
+			if ( isset( $refund->currency ) ) {
+				$log_bits[] = 'currency: ' . strtoupper( $refund->currency );
+			}
+
+			$this->write_log( __FUNCTION__, basename( __FILE__ ), implode( '; ', $log_bits ) );
+
+		} catch ( \Stripe\Exception\ApiErrorException $e ) {
+			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Stripe ApiErrorException retrieving refund ' . $refund_id . ': ' . $e->getMessage() );
+		} catch ( Exception $e ) {
+			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Exception retrieving refund ' . $refund_id . ': ' . $e->getMessage() );
 		}
 	}
 
@@ -376,69 +557,6 @@ class StripePayments extends SignUpsBase {
 			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'InvalidRequestException while loading payout items for payout id: ' . $payout->id . ' Message: ' . $e->getMessage() );
 		} catch ( Exception $e ) {
 			$this->write_log( __FUNCTION__, basename( __FILE__ ), 'Failed to load payout balance transactions: ' . $e->getMessage() );
-		}
-	}
-
-
-	/**
-	 * Handle a refunded charge.
-	 *
-	 * Stripe sends `charge.refunded` when a charge is fully refunded.
-	 * This handler is written to be idempotent: it sets the payment status to
-	 * "refunded" and removes the attendee row if present.
-	 *
-	 * @param mixed $event The event contains the charge object.
-	 * @return void
-	 */
-	private function charge_refunded( $event ) {
-		global $wpdb;
-		$charge = $event->data->object;
-
-		$payment_intent_id = isset( $charge->payment_intent ) ? $charge->payment_intent : null;
-		if ( ! $payment_intent_id ) {
-			$this->write_log(
-				__FUNCTION__,
-				basename( __FILE__ ),
-				'Charge refunded but no payment_intent on charge id: ' . ( isset( $charge->id ) ? $charge->id : 'unknown' )
-			);
-			return;
-		}
-
-		$payment_row = $this->get_payment_row( null, $payment_intent_id );
-		$this->write_event_log( $event, $payment_row, $charge );
-
-		if ( ! $payment_row ) {
-			$this->write_log(
-				__FUNCTION__,
-				basename( __FILE__ ),
-				'Charge refunded but no payment row found for intent id: ' . $payment_intent_id
-			);
-			return;
-		}
-
-		$wpdb->update(
-			self::PAYMENTS_TABLE,
-			array(
-				'payments_status' => 'refunded',
-			),
-			array(
-				'payments_intent_id' => $payment_intent_id,
-			)
-		);
-
-		if ( isset( $payment_row->payments_attendee_id ) && $payment_row->payments_attendee_id ) {
-			$wpdb->delete(
-				self::ATTENDEES_TABLE,
-				array(
-					'attendee_id' => (int) $payment_row->payments_attendee_id,
-				)
-			);
-
-			$this->write_log(
-				__FUNCTION__,
-				basename( __FILE__ ),
-				'Attendee was removed from ' . $payment_row->payments_signup_description . ', Payment ID: ' . $payment_row->payments_intent_id
-			);
 		}
 	}
 
