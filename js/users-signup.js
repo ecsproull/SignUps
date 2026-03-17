@@ -36,20 +36,46 @@ jQuery(document).ready(function($){
 			}
 		}).done(function (response) {
 			if (Array.isArray(response) && response.length > 0) {
-                const lines = response.map((item) => {
-                    const last  = item.attendee_lastname ?? '';
-                    const first = item.attendee_firstname ?? '';
-                    const badge = item.attendee_badge ?? '';
-                    const guest = item.attendee_plus_guest ?? 0;
-                    return `${last}, ${first}, ${badge}, ${guest}`;
-                }).join('\n');
+				const uniqueAttendees = response.filter((item, index, arr) => {
+					const key = `${item.attendee_badge ?? ''}|${item.attendee_lastname ?? ''}|${item.attendee_firstname ?? ''}`;
+					return index === arr.findIndex((x) => `${x.attendee_badge ?? ''}|${x.attendee_lastname ?? ''}|${x.attendee_firstname ?? ''}` === key);
+				});
 
-                // Open a simple print view
-                const win = window.open('', '_blank', 'width=800,height=600');
-                win.document.write(`<pre style="font:14px/1.4 monospace; white-space:pre-wrap;">${escapeHtml(lines)}</pre>`);
-                win.document.close();
-                win.focus();
-                win.print();
+				const lines = uniqueAttendees.map((item) => {
+					const last  = item.attendee_lastname ?? '';
+					const first = item.attendee_firstname ?? '';
+					const badge = item.attendee_badge ?? '';
+					const guest = item.attendee_plus_guest ?? 0;
+					return `${last}, ${first}, ${badge}, ${guest}`;
+				}).join('\n');
+
+				const attendeeCards = uniqueAttendees.map((item) => {
+					const last = escapeHtml(item.attendee_lastname ?? '');
+					const first = escapeHtml(item.attendee_firstname ?? '');
+					const badge = escapeHtml(item.attendee_badge ?? '');
+					const photo = item.photo_image ?? '';
+
+					const photoHtml = photo
+						? `<img src="${photo}" alt="${first} ${last}" style="width:120px;height:120px;object-fit:cover;border:1px solid #999;" />`
+						: `<div style="width:120px;height:120px;border:1px solid #999;display:flex;align-items:center;justify-content:center;color:#777;font-size:12px;">No photo</div>`;
+
+					return `<div style="display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #ddd;">
+						${photoHtml}
+						<div>
+							<div style="font-weight:700;font-size:16px;">${last}, ${first}</div>
+							<div style="font-size:14px;">Badge: ${badge}</div>
+						</div>
+					</div>`;
+				}).join('');
+
+				const win = window.open('', '_blank', 'width=900,height=700');
+				win.document.write(`<!doctype html><html><head><title>Attendee List</title></head><body style="font-family:Arial,sans-serif;padding:16px;">`);
+				win.document.write(`<h2 style="margin:0 0 12px 0;">Attendees</h2>`);
+				win.document.write(attendeeCards);
+				win.document.write(`</body></html>`);
+				win.document.close();
+				win.focus();
+				win.print();
 
                 // Optional: also copy to clipboard
                 navigator.clipboard.writeText(lines);

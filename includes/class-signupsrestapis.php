@@ -537,24 +537,33 @@ class SignUpsRestApis extends SignUpsBase {
 		global $wpdb;
 		$nonce    = $request->get_header( 'X-WP-Nonce' );
 		$verified = wp_verify_nonce( $nonce, 'wp_rest' );
-		if ( $verified ) {
-			$data_obj = $request->get_body_params();
-			$results = $wpdb->get_results(
-				$wpdb->prepare(
-					'SELECT attendee_firstname,
-						attendee_lastname,
-						attendee_badge,
-						attendee_plus_guest
-					FROM wp_scw_attendees
-					WHERE attendee_session_id = %d
-					ORDER BY attendee_lastname, attendee_firstname',
-					$data_obj['session_id']
-				),
-				OBJECT
-			);
-
-			return $results;
+		if ( ! $verified ) {
+			return new WP_REST_Response( array( 'error' => 'Unauthorized' ), 401 );
 		}
+
+		$data_obj   = $request->get_body_params();
+		$session_id = isset( $data_obj['session_id'] ) ? absint( $data_obj['session_id'] ) : 0;
+		if ( ! $session_id ) {
+			return new WP_REST_Response( array( 'error' => 'Invalid session id' ), 400 );
+		}
+
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT a.attendee_firstname,
+					a.attendee_lastname,
+					a.attendee_badge,
+					a.attendee_plus_guest,
+					CONCAT("data:image/jpeg;base64,", TO_BASE64(m.photo_image)) AS photo_image
+				FROM wp_scw_attendees AS a
+				LEFT JOIN wp_scw_member_photos AS m ON a.attendee_badge = m.photo_badge
+				WHERE attendee_session_id = %d
+				ORDER BY attendee_lastname, attendee_firstname',
+				$session_id
+			),
+			OBJECT
+		);
+
+		return $results;
 	}
 
 	/**
@@ -983,7 +992,7 @@ class SignUpsRestApis extends SignUpsBase {
 		global $wpdb;
 		$data   = $request->get_params();
 		$sid    = getenv( "TWILIO_ACCOUNT_SID" );
-		$token  = getenv( "TWILIO_AUTH_TOKEN" );
+		$token  = getenv( "TWILIO_AUTH_TOKE" );
 		$twilio = new Client( $sid, $token );
 		if ( $data['AccountSid'] !== $sid  || ! $data['From'] ) {
 			return;
@@ -999,25 +1008,25 @@ class SignUpsRestApis extends SignUpsBase {
 
 		$wpdb->insert( self::TEXT_TABLE, $insert_data );
 
-		$server   = 'WC_SERVER\\SQLEXPRESS';
-		$database = 'WoodClub';
-		$username = 'memberapp';
-		$password = 'member';
-		$handle   = new PDO( "sqlsrv:Server=$server;Database=$database;", $username, $password );
-		$handle->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-		$statement = $handle->prepare( "SELECT Badge, FirstName, LastName, Email from MemberRoster WHERE Phone = '$phone_number'" );
-		$result    = $statement->execute();
-		if ( $result ) {
-			$all = $statement->fetchAll( PDO::FETCH_ASSOC );
-			if ( $all ) {
-				$twilio->messages->create(
-					'+14253513207',
-					[
-						"body" => $data['From'] . ' - ' . $all[0]['Badge'] . ' - ' . $all[0]['FirstName'] . ' - ' . $all[0]['LastName'] . ' - ' . $all[0]['Email'] . ' Msg:' . $data['Body'],
-						"from" => '+16233049716'
-					]
-				);
-			}
+		$member = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT member_badge, member_firstname, member_lastname, member_email
+				FROM %1s
+				WHERE member_phone = %s',
+				self::MEMBERS_TABLE,
+				$phone_number
+			),
+			OBJECT
+		);
+
+		if ( $member ) {
+			$twilio->messages->create(
+				'+14253513207',
+				[
+					"body" => $data['From'] . ' - ' . $member->member_badge . ' - ' . $member->member_firstname . ' - ' . $member->member_lastname . ' - ' . $member->member_email . ' Msg:' . $data['Body'],
+					"from" => '+16233049716'
+				]
+			);
 		}
 	}
 	
