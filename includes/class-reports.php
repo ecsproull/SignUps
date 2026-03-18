@@ -49,6 +49,7 @@ class Reports extends SignUpsBase {
 					wp_scw_attendees.attendee_phone,
 					wp_scw_attendees.attendee_badge,
 					wp_scw_sessions.session_start_formatted,
+					wp_scw_sessions.session_start_time,
 					wp_scw_sessions.session_id,
 					wp_scw_sessions.session_signup_id
 				FROM wp_scw_sessions
@@ -61,11 +62,21 @@ class Reports extends SignUpsBase {
 			OBJECT
 		);
 
+		?>
+		<div style="text-align: center; margin-bottom: 20px;">
+			<button id="show-all-sessions-btn" class="button button-primary">Show All</button>
+		</div>
+		<?php
 		$current_session_date = null;
 		$current_session_id   = null;
+		$now = new DateTime( 'now', $this->date_time_zone );
 		foreach ( $results as $attendee ) {
+			$session_date = new DateTime( '@' . $attendee->session_start_time );
+			$session_date->setTimezone( $this->date_time_zone );
+			$interval = $now->diff( $session_date );
+			$is_hidden = ( $interval->invert === 1 && $interval->days >= 7 );
 			?>
-			<div class="attendees_list">
+			<div class="attendees_list <?php echo $is_hidden ? 'hidden-session' : ''; ?>" <?php echo $is_hidden ? 'hidden' : ''; ?>>
 				<?php
 				if ( $current_session_date !== $attendee->session_start_formatted ) {
 					$current_session_date = $attendee->session_start_formatted;

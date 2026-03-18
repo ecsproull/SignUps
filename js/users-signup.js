@@ -446,6 +446,20 @@ jQuery(document).ready(function($){
 		}
 	})
 
+
+	$("#show-all-sessions-btn").on("click", function() {
+		const $hiddenSessions = $(".hidden-session");
+		const isHidden = $hiddenSessions.first().is("[hidden]");
+
+		if (isHidden) {
+			$hiddenSessions.removeAttr("hidden");
+		} else {
+			$hiddenSessions.attr("hidden", "hidden");
+		}
+
+		$(this).text(isHidden ? "Hide Old" : "Show All");
+	});
+
 	/**
 	 * Currently unused.
 	 */
