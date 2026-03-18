@@ -17,7 +17,6 @@ class InstructorsEditor extends SignUpsBase {
 
 	/**
 	 * __construct
-	 *
 	 */
 	public function __construct() {
 	}
@@ -29,7 +28,7 @@ class InstructorsEditor extends SignUpsBase {
 		$post = wp_unslash( $_POST );
 		if ( isset( $post['mynonce'] ) && wp_verify_nonce( $post['mynonce'], 'signups' ) ) {
 			if ( isset( $post['instructors_submit'] ) ) {
-				$this->instructors_submit( $post);
+				$this->instructors_submit( $post );
 			} else {
 				$this->instructors_input_form( $post );
 			}
@@ -47,10 +46,9 @@ class InstructorsEditor extends SignUpsBase {
 		global $wpdb;
 		$signups = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT signup_name
-				FROM %1s
-				WHERE signup_id = %d",
-				self::SIGNUPS_TABLE,
+				'SELECT signup_name
+				FROM ' . self::SIGNUPS_TABLE . '
+				WHERE signup_id = %d',
 				$post['selected_class']
 			),
 			OBJECT
@@ -58,7 +56,7 @@ class InstructorsEditor extends SignUpsBase {
 
 		$count_instructors = count( $post['instructors_badge'] );
 		for ( $i = 0; $i < $count_instructors; $i++ ) {
-			$data                           = array();
+			$data                            = array();
 			$data['instructors_badge']       = $post['instructors_badge'][ $i ];
 			$data['instructors_name']        = $post['instructors_name'][ $i ];
 			$data['instructors_email']       = $post['instructors_email'][ $i ];
@@ -76,13 +74,12 @@ class InstructorsEditor extends SignUpsBase {
 		}
 
 		if ( isset( $post['instructors_remove'] ) ) {
-			foreach( $post['instructors_remove'] as $inst_id ) {
+			foreach ( $post['instructors_remove'] as $inst_id ) {
 				$wpdb->get_results(
 					$wpdb->prepare(
 						'DELETE
-						FROM %1s
+						FROM ' . self::INSTRUCTORS_TABLE . '
 						WHERE instructors_id = %d',
-						self::INSTRUCTORS_TABLE,
 						$inst_id
 					)
 				);
@@ -90,9 +87,8 @@ class InstructorsEditor extends SignUpsBase {
 				$wpdb->query(
 					$wpdb->prepare(
 						'DELETE
-						FROM %1s
+						FROM ' . self::SESSION_INSTRUCTORS_TABLE . '
 						WHERE si_instructor_id = %d && si_signup_id = %d',
-						self::SESSION_INSTRUCTORS_TABLE,
 						$inst_id,
 						$post['selected_class']
 					)
@@ -111,13 +107,10 @@ class InstructorsEditor extends SignUpsBase {
 	public function instructors_input_form( $post ) {
 		global $wpdb;
 		$signups = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT signup_id, signup_name
-				FROM %1s
+			'SELECT signup_id, signup_name
+				FROM ' . self::SIGNUPS_TABLE . "
 				WHERE signup_rolling_template = '0'
 				ORDER BY signup_name",
-				self::SIGNUPS_TABLE
-			),
 			OBJECT
 		);
 
@@ -130,9 +123,8 @@ class InstructorsEditor extends SignUpsBase {
 		$class_instructors = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT *
-				FROM %1s
+				FROM ' . self::INSTRUCTORS_TABLE . '
 				WHERE instructors_class_id = %d',
-				self::INSTRUCTORS_TABLE,
 				$selected_class_id
 			),
 			OBJECT
@@ -156,12 +148,12 @@ class InstructorsEditor extends SignUpsBase {
 					?>
 				</select>
 			</div>
-			<?php
-			$this->create_lookup_member_table( true );
-			?>
+				<?php
+				$this->create_lookup_member_table( true );
+				?>
 			<input id="first-name" class="member-badge" type="hidden" name="firstname" value="">
 			<div class="text-center mt-4">
-				<input type="button" id="add-instructor" class="btn btn-primary rounded" value='Add Instructor To List'>
+				<input type="button" id="add-instructor" class="btn btn-primary rounded" value='Add Instructor To list'>
 			</div>
 			<div id="inst-list" class="instructor-list mt-3 ml-auto mr-auto">
 				<div>Badge</div>
@@ -182,9 +174,9 @@ class InstructorsEditor extends SignUpsBase {
 							data-role="instructor"
 							data-badge="<?php echo esc_attr( $instructor->instructors_badge ); ?>"
 							data-session="<?php echo esc_attr( '9999' ); ?>"
-							data-popup-id="photo-popup-<?php echo esc_attr( '9999-' . $instructor->instructors_badge ); ?>">
+							data-popup-id="photo-popup-<?php echo esc_attr( '9999 - ' . $instructor->instructors_badge ); ?>">
 						</button>
-						<div id="photo-popup-<?php echo esc_attr( '9999-' . $instructor->instructors_badge ); ?>"
+						<div id="photo-popup-<?php echo esc_attr( '9999 - ' . $instructor->instructors_badge ); ?>"
 							class="member-photo-popup"
 							hidden>
 						</div>
@@ -199,12 +191,12 @@ class InstructorsEditor extends SignUpsBase {
 				?>
 			</div>
 			<input id="reload" type="hidden" name="reload" value="0">
-			<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
+				<?php wp_nonce_field( 'signups', 'mynonce' ); ?>
 			<div class="text-center mt-5">
 				<button class="btn btn-primary" type="submit" name="instructors_submit" 
 						value="instructors" >Submit</button>
 			</div>
 		</form>
-		<?php
+			<?php
 	}
 }
