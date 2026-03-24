@@ -473,7 +473,9 @@ jQuery( document ).ready( function($){
 	 * can you to copy that link. The button click is handled here.
 	 */
 	$("#copy-signup-link").click( function(e) {
-		var copyText = $("#signup-url").text();
+		var copyText = $("#signup-url").attr("data-copy-url") || $("#signup-url").text();
+		copyText = String(copyText).replace(/[\u0000-\u001F\u007F-\u009F\u00A0\u200B-\u200D\uFEFF\s]+/g, '');
+		
 		navigator.clipboard.writeText(copyText);
    });
 
