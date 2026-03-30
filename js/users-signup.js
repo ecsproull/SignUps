@@ -322,12 +322,34 @@ jQuery(document).ready(function($){
 				//checkUsersEdits();
 			} else if (classname.indexOf("Laser") > 0) {
 			
-				var checked = $(".rolling-add-chk:checkbox:checked").length;
-				if (checked > 8) {
+				var checkedValues = $(".rolling-add-chk:checkbox:checked").map(function() {
+					return $(this).val();
+				}).get();
+				var checkedCount = checkedValues.length;
+				if (checkedCount > 7) {
 					$(".rolling-add-chk:checkbox:not(:checked)").attr("disabled", true);
 				} else {
 					$(".rolling-add-chk:checkbox:not(:checked)").attr("disabled", false);
 				}
+
+				checkedValues.forEach(function(val) {
+					var arr = val.split(",");
+					var checked = true;
+					$(".rolling-add-chk").each(function(i, e) {
+						if ($(this).val() === val) {
+							return true;
+						}
+						var x = $(this).val().split(",");
+						if (x[0] == arr[0]) {
+							if (checked) {
+								$(this).attr("disabled", true);
+							} else {
+								$(this).attr("disabled", false);
+							}
+						}
+					});
+				});
+
 			} else {
 				var arr = val.split(",");
 				var checked = x.currentTarget.checked;
