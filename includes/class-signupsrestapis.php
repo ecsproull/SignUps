@@ -166,6 +166,20 @@ class SignUpsRestApis extends SignUpsBase {
 			function () {
 				$this->register_route(
 					'scwmembers/v1',
+					'/new_member',
+					'get_new_member',
+					$this,
+					array(),
+					WP_REST_Server::READABLE
+				);
+			}
+		);
+
+		add_action(
+			'rest_api_init',
+			function () {
+				$this->register_route(
+					'scwmembers/v1',
 					'/attendees',
 					'get_attendee_list',
 					$this,
@@ -588,6 +602,53 @@ class SignUpsRestApis extends SignUpsBase {
 				$session_id
 			),
 			OBJECT
+		);
+
+		return $results;
+	}
+
+
+	/**
+	 * Used to get data for new members
+	 *
+	 * @param  mixed $request Posted data that tells the new members row id.
+	 * @return array|WP_REST_Response|null
+	 */
+	public function get_new_member( $request ) {
+		global $wpdb;
+
+		// Retrieve the "new_id" parameter from the REST request.
+		$new_id = ( $request instanceof WP_REST_Request ) ? $request->get_param( 'new_id' ) : null;
+		$new_id = is_string( $new_id ) ? trim( $new_id ) : $new_id;
+
+		if ( null === $new_id || '' === $new_id ) {
+			// If "new_id" is not provided, return a REST error response.
+			return new WP_REST_Response(
+				array(
+					'error'   => 'missing_parameter',
+					'message' => 'The "new_id" parameter is required.',
+				),
+				400
+			);
+		}
+
+		if ( ! preg_match( '/^\d{3,4}$/', (string) $new_id ) ) {
+			return new WP_REST_Response(
+				array(
+					'error'   => 'invalid_parameter',
+					'message' => 'The "new_id" parameter must be 3 or 4 digits.',
+				),
+				400
+			);
+		}
+
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT *
+				FROM  wp_scw_new_member
+				WHERE new_member_id = %s',
+				$new_id
+			)
 		);
 
 		return $results;
