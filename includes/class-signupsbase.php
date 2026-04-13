@@ -990,14 +990,16 @@ class SignUpsBase {
 							$current_day   = '2000-07-01';
 							$comment_index = 0;
 							$comment_name  = 'comment-';
+							$temp_template = $template_items;
 							while ( $start_date <= $end_date ) {
+								$template_items = $temp_template;
 								/*
 								 * Template Date Change Logic. Use this to change templates at a
 								 * predetermined date. Example: Summer and Winter templates.
 								 * ALSO change this in the REST API code in signups.php.
 								 */
-								$datetime = new DateTime( '09/22/2025 12:00 AM' );
-								if ( $start_date > $datetime && '1' === $signup_id ) {
+								$datetime = new DateTime( '05/11/2026 12:00 AM' );
+								if ( $start_date < $datetime && '1' === $signup_id ) {
 									$template_items = $template_items2;
 								}
 

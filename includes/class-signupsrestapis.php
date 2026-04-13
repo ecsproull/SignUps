@@ -752,15 +752,15 @@ class SignUpsRestApis extends SignUpsBase {
 		$pattern   = '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/ms';
 		if ( preg_match( $pattern, $date ) ) {
 			$date_time = new DateTime( $date );
-			$temp_id   = 4;
+			$temp_id   = 1;
 
 			/*
 			 * Template Date Change Logic. Use this to change templates at a
 			 * predetermined date. Example: Summer and Winter templates.
 			 * ALSO change this in the SignupsBase code.
 			 */
-			if ( $date_time > new Datetime( '9/21/2025' ) ) {
-				$temp_id = 1;
+			if ( $date_time > new Datetime( '5/11/2026' ) ) {
+				$temp_id = 4;
 			}
 			$templates = $wpdb->get_results(
 				$wpdb->prepare(
