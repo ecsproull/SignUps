@@ -1956,9 +1956,11 @@ class SignUpsBase {
 		$sessions = null;
 
 		if ( ! $session_id ) {
-			$dt       = new DateTime( 'now', new DateTimeZone( 'America/Phoenix' ) );
-			$today    = $dt->format( self::DATE_FORMAT2 );
-			$sessions = $wpdb->get_results(
+			$dt             = new DateTime( 'now', new DateTimeZone( 'America/Phoenix' ) );
+			$today          = $dt->format( self::DATE_FORMAT2 );
+			$one_week_start = (int) ( clone $dt )->setTime( 0, 0, 0 )->add( new DateInterval( 'P7D' ) )->format( 'U' );
+			$one_week_end   = (int) ( clone $dt )->setTime( 0, 0, 0 )->add( new DateInterval( 'P8D' ) )->format( 'U' );
+			$sessions       = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT wp_scw_sessions.session_id,
 						wp_scw_sessions.session_signup_id,
@@ -1967,8 +1969,12 @@ class SignUpsBase {
 						wp_scw_sessions.session_slots
 					FROM ' . self::SESSIONS_TABLE . '
 					LEFT JOIN wp_scw_signups ON wp_scw_signups.signup_id = wp_scw_sessions.session_signup_id
-					WHERE wp_scw_sessions.session_preclass_email_date = %s AND wp_scw_signups.signup_admin_approved = 1',
-					$today
+					WHERE wp_scw_signups.signup_admin_approved = 1
+						AND (wp_scw_sessions.session_preclass_email_date = %s
+							OR (wp_scw_sessions.session_start_time >= %d AND wp_scw_sessions.session_start_time < %d))',
+					$today,
+					$one_week_start,
+					$one_week_end
 				),
 				OBJECT
 			);

@@ -490,16 +490,22 @@ class SignUpsRestApis extends SignUpsBase {
 			return new WP_REST_Response( 'Nice Try.', 401 );
 		}
 
-		$dt       = new DateTime( 'now', new DateTimeZone( 'America/Phoenix' ) );
-		$interval = DateInterval::createFromDateString( '2 days' );
-		$dt->add( $interval );
-		$date = $dt->format( self::DATE_FORMAT3 );
+		$dt         = new DateTime( 'now', new DateTimeZone( 'America/Phoenix' ) );
+		$day_start  = ( clone $dt )->setTime( 0, 0, 0 );
+		$day2_start = (int) ( clone $day_start )->add( new DateInterval( 'P2D' ) )->format( 'U' );
+		$day2_end   = (int) ( clone $day_start )->add( new DateInterval( 'P3D' ) )->format( 'U' );
+		$day7_start = (int) ( clone $day_start )->add( new DateInterval( 'P7D' ) )->format( 'U' );
+		$day7_end   = (int) ( clone $day_start )->add( new DateInterval( 'P8D' ) )->format( 'U' );
 
 		$sessions = $wpdb->get_results(
 			$wpdb->prepare(
 				'SELECT * FROM ' . self::SESSIONS_TABLE . '
-				WHERE session_start_formatted LIKE %s',
-				$wpdb->esc_like( $date ) . '%'
+				WHERE (session_start_time >= %d AND session_start_time < %d)
+					OR (session_start_time >= %d AND session_start_time < %d)',
+				$day2_start,
+				$day2_end,
+				$day7_start,
+				$day7_end
 			),
 			OBJECT
 		);
