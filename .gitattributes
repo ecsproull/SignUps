@@ -2,7 +2,7 @@
 # We intentionally do NOT enforce line endings inside vendor/ to avoid huge diffs.
 
 # Default behavior: let git detect text files.
-* text=auto
+* text=auto eol=lf
 
 # Enforce LF for project source.
 *.php text eol=lf
