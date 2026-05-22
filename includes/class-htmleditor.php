@@ -1,23 +1,23 @@
 <?php
-/*
+/**
  * Summary
+ * Database class.
  *
  * @package     SignUps
  * @author      Edward Sproull
  * @copyright   You have the right to copy
- * license     GPL-2.0+
+ * @license     GPL-2.0+
  */
 
-
 /**
- * HtmlEditor is used for editing the Description, Instructions and Calendar Description.
- * It is accessed via the admin menu item named Descriptions.
+ * Manages the map settings including adding places to the map.
  */
 class HtmlEditor extends SignUpsBase {
 
 	/**
 	 * __construct
 	 *
+	 * @return void
 	 */
 	public function __construct() {
 	}
@@ -95,6 +95,7 @@ class HtmlEditor extends SignUpsBase {
 				$this->create_description_section( $description_object )
 				?>
 				<div class="mt-2">
+					<!-- button type="button" id="display-html" class="btn bt-md btn-primary mr-auto ml-auto mt-2">Preview</button -->
 					<input class="btn bt-md btn-primary mr-auto ml-auto mt-2" type="submit" value="Submit" name="submit_html">
 				</div> 
 				<?php

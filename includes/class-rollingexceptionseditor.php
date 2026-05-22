@@ -20,6 +20,7 @@ class RollingExceptionsEditor extends SignUpsBase {
 
 	/**
 	 * __construct
+	 *
 	 */
 	public function __construct() {
 	}
@@ -34,6 +35,7 @@ class RollingExceptionsEditor extends SignUpsBase {
 		if ( isset( $_POST['mynonce'] ) && wp_verify_nonce( $post['mynonce'], 'signups' ) ) {
 			unset( $post['mynonce'] );
 			$this->submit_exceptions( $post );
+			
 		} else {
 			$this->load_exceptions_form();
 		}
@@ -69,7 +71,7 @@ class RollingExceptionsEditor extends SignUpsBase {
 		}
 
 		if ( isset( $post['exc_delete'] ) ) {
-			foreach ( $post['exc_delete'] as $item ) {
+			foreach( $post['exc_delete'] as $item ) {
 				$where = array( 'exc_id' => $item );
 				$wpdb->delete( self::ROLLING_EXCEPTIONS_TABLE, $where );
 			}

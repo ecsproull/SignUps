@@ -1,6 +1,9 @@
 <?php
 /**
- * TimeException class.
+ * Summary
+ * Database class.
+ *
+ * @package SignUps
  */
 
 /**
@@ -10,20 +13,20 @@ class TimeException {
 	/**
 	 * Template that it pertains to.
 	 *
-	 *  mixed
+	 * @var mixed
 	 */
 	public $template;
 	/**
 	 * Reason for the exception.
 	 *
-	 *  mixed
+	 * @var mixed
 	 */
 	public $reason;
 
 	/**
 	 * Begin time
 	 *
-	 *  mixed
+	 * @var mixed
 	 */
 
 	public $begin;
@@ -31,14 +34,14 @@ class TimeException {
 	/**
 	 * End time
 	 *
-	 *  mixed
+	 * @var mixed
 	 */
 	public $end;
 
 	/**
 	 * End time
 	 *
-	 *  mixed
+	 * @var mixed
 	 */
 	public $delete;
 }

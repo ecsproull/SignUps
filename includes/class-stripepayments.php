@@ -261,15 +261,15 @@ class StripePayments extends SignUpsBase {
 				$result = $wpdb->query(
 					$wpdb->prepare(
 						'INSERT INTO ' . self::CHARGES_SUCCEEDED_TABLE . '
-                        (charge_id, payment_intent_id, balance_txn_id, gross_amount, fee_amount, net_amount, currency, created_at)
-                        VALUES (%s, %s, %s, %d, %d, %d, %s, %s)
-                        ON DUPLICATE KEY UPDATE
-                            balance_txn_id = VALUES(balance_txn_id),
-                            gross_amount = VALUES(gross_amount),
-                            fee_amount = VALUES(fee_amount),
-                            net_amount = VALUES(net_amount),
-                            currency = VALUES(currency),
-                            created_at = VALUES(created_at)',
+						(charge_id, payment_intent_id, balance_txn_id, gross_amount, fee_amount, net_amount, currency, created_at)
+						VALUES (%s, %s, %s, %d, %d, %d, %s, %s)
+						ON DUPLICATE KEY UPDATE
+							balance_txn_id = VALUES(balance_txn_id),
+							gross_amount = VALUES(gross_amount),
+							fee_amount = VALUES(fee_amount),
+							net_amount = VALUES(net_amount),
+							currency = VALUES(currency),
+							created_at = VALUES(created_at)',
 						$refund->id,
 						$payment_intent_id,
 						$bt_real_id,
@@ -432,15 +432,15 @@ class StripePayments extends SignUpsBase {
 		$result = $wpdb->query(
 			$wpdb->prepare(
 				'INSERT INTO ' . self::CHARGES_SUCCEEDED_TABLE . '
-                (charge_id, payment_intent_id, balance_txn_id, gross_amount, fee_amount, net_amount, currency, created_at)
-                VALUES (%s, %s, %s, %d, %d, %d, %s, %s)
-                ON DUPLICATE KEY UPDATE
-                    balance_txn_id = VALUES(balance_txn_id),
-                    gross_amount = VALUES(gross_amount),
-                    fee_amount = VALUES(fee_amount),
-                    net_amount = VALUES(net_amount),
-                    currency = VALUES(currency),
-                    created_at = VALUES(created_at)',
+				(charge_id, payment_intent_id, balance_txn_id, gross_amount, fee_amount, net_amount, currency, created_at)
+				VALUES (%s, %s, %s, %d, %d, %d, %s, %s)
+				ON DUPLICATE KEY UPDATE
+					balance_txn_id = VALUES(balance_txn_id),
+					gross_amount = VALUES(gross_amount),
+					fee_amount = VALUES(fee_amount),
+					net_amount = VALUES(net_amount),
+					currency = VALUES(currency),
+					created_at = VALUES(created_at)',
 				$charge->id,
 				$charge->payment_intent,
 				$balance_txn_id,
@@ -478,14 +478,14 @@ class StripePayments extends SignUpsBase {
 		$wpdb->query(
 			$wpdb->prepare(
 				'INSERT INTO ' . self::PAYOUTS_TABLE . '
-                (payout_id, payout_amount, payout_currency, payout_status, payout_arrival_date, payout_created_at)
-                VALUES (%s, %d, %s, %s, %s, %s)
-                ON DUPLICATE KEY UPDATE
-                payout_amount = VALUES(payout_amount),
-                payout_currency = VALUES(payout_currency),
-                payout_status = VALUES(payout_status),
-                payout_arrival_date = VALUES(payout_arrival_date),
-                payout_created_at = VALUES(payout_created_at)',
+				(payout_id, payout_amount, payout_currency, payout_status, payout_arrival_date, payout_created_at)
+				VALUES (%s, %d, %s, %s, %s, %s)
+				ON DUPLICATE KEY UPDATE
+				payout_amount = VALUES(payout_amount),
+				payout_currency = VALUES(payout_currency),
+				payout_status = VALUES(payout_status),
+				payout_arrival_date = VALUES(payout_arrival_date),
+				payout_created_at = VALUES(payout_created_at)',
 				$payout->id,
 				isset( $payout->amount ) ? (int) $payout->amount : 0,
 				$currency,
@@ -534,14 +534,14 @@ class StripePayments extends SignUpsBase {
 				$wpdb->query(
 					$wpdb->prepare(
 						'INSERT INTO ' . self::PAYOUT_ITEMS_TABLE . '
-                        (payout_id, charge_id, balance_txn_id, gross_amount, fee_amount, net_amount, currency, created_at)
-                        VALUES (%s, %s, %s, %d, %d, %d, %s, %s)
-                        ON DUPLICATE KEY UPDATE
-                        gross_amount = VALUES(gross_amount),
-                        fee_amount = VALUES(fee_amount),
-                        net_amount = VALUES(net_amount),
-                        currency = VALUES(currency),
-                        created_at = VALUES(created_at)',
+						(payout_id, charge_id, balance_txn_id, gross_amount, fee_amount, net_amount, currency, created_at)
+						VALUES (%s, %s, %s, %d, %d, %d, %s, %s)
+						ON DUPLICATE KEY UPDATE
+						gross_amount = VALUES(gross_amount),
+						fee_amount = VALUES(fee_amount),
+						net_amount = VALUES(net_amount),
+						currency = VALUES(currency),
+						created_at = VALUES(created_at)',
 						$payout->id,
 						$charge_id,
 						isset( $bt->id ) ? $bt->id : null,
@@ -579,9 +579,9 @@ class StripePayments extends SignUpsBase {
 		$wpdb->query(
 			$wpdb->prepare(
 				'INSERT INTO ' . self::PAYMENT_INTENTS_TABLE . '
-                (intent_id, intent_status, intent_succeeded_at, intent_amount)
-                VALUES (%s, %s, %s, %d)
-                ON DUPLICATE KEY UPDATE intent_status = VALUES(intent_status), intent_succeeded_at = VALUES(intent_succeeded_at), intent_amount = VALUES(intent_amount)',
+				(intent_id, intent_status, intent_succeeded_at, intent_amount)
+				VALUES (%s, %s, %s, %d)
+				ON DUPLICATE KEY UPDATE intent_status = VALUES(intent_status), intent_succeeded_at = VALUES(intent_succeeded_at), intent_amount = VALUES(intent_amount)',
 				$event_data->id,
 				$event_data->status,
 				current_time( 'mysql' ),
@@ -645,8 +645,8 @@ class StripePayments extends SignUpsBase {
 		$intent_row = $wpdb->get_row(
 			$wpdb->prepare(
 				'SELECT *
-                FROM ' . self::PAYMENT_INTENTS_TABLE . '
-                WHERE intent_id = %s',
+				FROM ' . self::PAYMENT_INTENTS_TABLE . '
+				WHERE intent_id = %s',
 				$event_data->payment_intent
 			),
 			OBJECT
@@ -706,9 +706,9 @@ class StripePayments extends SignUpsBase {
 			$wpdb->query(
 				$wpdb->prepare(
 					'INSERT INTO ' . self::PAYMENT_INTENTS_TABLE . '
-                    (intent_id, intent_status)
-                    VALUES (%s, %s)
-                    ON DUPLICATE KEY UPDATE intent_status = VALUES(intent_status)',
+					(intent_id, intent_status)
+					VALUES (%s, %s)
+					ON DUPLICATE KEY UPDATE intent_status = VALUES(intent_status)',
 					$event->data->id,
 					$event->data->status
 				)
@@ -719,9 +719,9 @@ class StripePayments extends SignUpsBase {
 		$bad_debt = $wpdb->get_row(
 			$wpdb->prepare(
 				'SELECT	attendee_payment_id,
-                attendee_new_member_id
-                FROM ' . self::ATTENDEES_TABLE . '
-                WHERE 0 < attendee_balance_owed AND attendee_id = %d',
+				attendee_new_member_id
+				FROM ' . self::ATTENDEES_TABLE . '
+				WHERE 0 < attendee_balance_owed AND attendee_id = %d',
 				$payment_row->payments_attendee_id
 			),
 			OBJECT
@@ -753,8 +753,8 @@ class StripePayments extends SignUpsBase {
 		$attendee = $wpdb->get_row(
 			$wpdb->prepare(
 				'SELECT	*
-                FROM ' . self::ATTENDEES_TABLE . '
-                WHERE attendee_checkout_id = %s',
+				FROM ' . self::ATTENDEES_TABLE . '
+				WHERE attendee_checkout_id = %s',
 				$checkout_id
 			),
 			OBJECT
@@ -772,11 +772,11 @@ class StripePayments extends SignUpsBase {
 		$updated = $wpdb->query(
 			$wpdb->prepare(
 				'UPDATE ' . self::ATTENDEES_TABLE . ' AS a
-                JOIN ' . self::PAYMENTS_TABLE . '  AS p
-                ON p.payments_checkout_id = a.attendee_checkout_id
-                SET a.attendee_balance_owed = 0,
-                    p.payments_status = %s
-                WHERE a.attendee_checkout_id = %s && a.attendee_balance_owed > 0',
+				JOIN ' . self::PAYMENTS_TABLE . '  AS p
+				ON p.payments_checkout_id = a.attendee_checkout_id
+				SET a.attendee_balance_owed = 0,
+					p.payments_status = %s
+				WHERE a.attendee_checkout_id = %s && a.attendee_balance_owed > 0',
 				'succeeded',
 				$checkout_id
 			)
@@ -814,8 +814,8 @@ class StripePayments extends SignUpsBase {
 			$payment_row = $wpdb->get_row(
 				$wpdb->prepare(
 					'SELECT *
-                    FROM ' . self::PAYMENTS_TABLE . '
-                    WHERE payments_checkout_id = %s',
+					FROM ' . self::PAYMENTS_TABLE . '
+					WHERE payments_checkout_id = %s',
 					$checkout_id,
 				),
 				OBJECT
@@ -824,8 +824,8 @@ class StripePayments extends SignUpsBase {
 			$payment_row = $wpdb->get_row(
 				$wpdb->prepare(
 					'SELECT *
-                    FROM ' . self::PAYMENTS_TABLE . '
-                    WHERE payments_intent_id = %s',
+					FROM ' . self::PAYMENTS_TABLE . '
+					WHERE payments_intent_id = %s',
 					$payment_intent_id,
 				),
 				OBJECT
@@ -1043,8 +1043,8 @@ class StripePayments extends SignUpsBase {
 		$payment_row = $wpdb->get_row(
 			$wpdb->prepare(
 				'SELECT payments_id, payments_intent_id, payments_signup_description, payments_status, payments_attendee_id, payments_email_sent
-                FROM ' . self::PAYMENTS_TABLE . '
-                WHERE payments_attendee_id = %s',
+				FROM ' . self::PAYMENTS_TABLE . '
+				WHERE payments_attendee_id = %s',
 				$attendee_id
 			),
 			OBJECT
@@ -1116,7 +1116,7 @@ class StripePayments extends SignUpsBase {
 				$results = $wpdb->get_results(
 					$wpdb->prepare(
 						'SELECT * FROM ' . self::MEMBERS_TABLE . '
-                        WHERE member_badge = %s',
+						WHERE member_badge = %s',
 						$badge_number
 					),
 					OBJECT
@@ -1127,7 +1127,7 @@ class StripePayments extends SignUpsBase {
 				$results = $wpdb->get_results(
 					$wpdb->prepare(
 						'SELECT * FROM ' . self::NEW_MEMBER_TABLE . '
-                        WHERE new_member_id = %s',
+						WHERE new_member_id = %s',
 						$badge_number
 					),
 					OBJECT
@@ -1139,7 +1139,7 @@ class StripePayments extends SignUpsBase {
 			$attendee = $wpdb->get_row(
 				$wpdb->prepare(
 					'SELECT attendee_session_id FROM ' . self::ATTENDEES_TABLE . '
-                    WHERE attendee_id = %s',
+					WHERE attendee_id = %s',
 					$payment_row->payments_attendee_id
 				),
 				OBJECT
@@ -1196,8 +1196,8 @@ class StripePayments extends SignUpsBase {
 			$bad_debt = $wpdb->get_row(
 				$wpdb->prepare(
 					'SELECT	attendee_checkout_id
-                    FROM ' . self::ATTENDEES_TABLE . '
-                    WHERE 0 < attendee_balance_owed && attendee_id = %s',
+					FROM ' . self::ATTENDEES_TABLE . '
+					WHERE 0 < attendee_balance_owed && attendee_id = %s',
 					$payment_id
 				),
 				OBJECT

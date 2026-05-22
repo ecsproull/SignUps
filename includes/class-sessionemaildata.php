@@ -1,104 +1,105 @@
 <?php
-/*
+/**
  * Summary
- * Data to send out notification about an upcoming classes.
+ * Data to send out notificiation about an upcomming class.
  *
- * @package SignUps
+ * @package signups
  */
 
 /**
- * Data only class for session email data.
+ * Data class.
  *
+ * @package SignUps
  */
 class SessionEmailData {
 	/**
 	 * Class Title.
 	 *
-	 *  string
+	 * @var mixed
 	 */
 	public $class_title;
 
 	/**
 	 * Class Location.
 	 *
-	 *  string
+	 * @var mixed
 	 */
 	public $class_location;
 
 	/**
 	 * Formatted date and time of the class.
 	 *
-	 *  string
+	 * @var mixed
 	 */
 	public $date_time_formatted;
 
 	/**
 	 * First name of the class contact.
 	 *
-	 *  string
+	 * @var mixed
 	 */
 	public $class_contact_firstname;
 
 	/**
 	 * Last name of the class contact.
 	 *
-	 *  string
+	 * @var mixed
 	 */
 	public $class_contact_lastname;
 
 	/**
 	 * Email of the class contact.
 	 *
-	 *  string
+	 * @var mixed
 	 */
 	public $class_contact_email;
 
 	/**
 	 * Minimum number to have the class.
 	 *
-	 *  int
+	 * @var mixed
 	 */
 	public $class_minimum;
 
 	/**
 	 * Maximum students per sessions.
 	 *
-	 *  int
+	 * @var mixed
 	 */
 	public $class_slots;
 
 	/**
 	 * Class signup id.
 	 *
-	 *  int
+	 * @var mixed
 	 */
 	public $class_signup_id;
 
 	/**
 	 * List of the attendees email addresses
 	 *
-	 *  array,string
+	 * @var mixed
 	 */
 	public $attendees;
 
 	/**
 	 * List of instructors name and email addresses.
 	 *
-	 *  array,string
+	 * @var mixed
 	 */
 	public $instructors;
 
 	/**
 	 * List of instructors name and email addresses.
 	 *
-	 *  array,string
+	 * @var mixed
 	 */
 	public $class_instructions;
 
 	/**
 	 * List of instructors name and email addresses.
 	 *
-	 *  array,string
+	 * @var mixed
 	 */
 	public $class_materials;
 }

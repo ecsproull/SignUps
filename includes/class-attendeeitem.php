@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Summary
  * Database class.
  *
@@ -7,7 +7,7 @@
  */
 
 /**
- * Mirror of the database wp_scw_attendees table.
+ * Mirror of the database Class object.
  * Used for creating new attendee items to be added to the DB.
  */
 class AttendeeItem {
@@ -15,70 +15,70 @@ class AttendeeItem {
 	/**
 	 * The primary key.
 	 *
-	 * Int.
+	 * @var attendee_id.
 	 */
 	public $attendee_id;
 
 	/**
 	 * The session id.
 	 *
-	 * int
+	 * @var attendee_session_id.
 	 */
 	public $attendee_session_id;
 
 	/**
 	 * Email.
 	 *
-	 * string
+	 * @var attendee_email.
 	 */
 	public $attendee_email;
 
 	/**
 	 * Phone Number.
-	 * 
-	 * string
+	 *
+	 * @var attendee_phone.
 	 */
 	public $attendee_phone;
 
 	/**
 	 * Amount Paid.
-	 * 
-	 * string
+	 *
+	 * @var attendee_paid_amount.
 	 */
 	public $attendee_paid_amount;
 
 	/**
 	 * Last name.
-	 * 
-	 * string
+	 *
+	 * @var attendee_lastname.
 	 */
 	public $attendee_lastname;
 
 	/**
 	 * First name.
-	 * 
-	 * string
+	 *
+	 * @var attendee_firstname.
 	 */
 	public $attendee_firstname;
 
 	/**
 	 * Item.
-	 * 
-	 * string
+	 *
+	 * @var attendee_item.
 	 */
 	public $attendee_item;
 
 	/**
 	 * Badge.
-	 * 
-	 * string
+	 *
+	 * @var attendee_badge.
 	 */
 	public $attendee_badge;
 
 	/**
 	 * Secret.
-	 * 
-	 * string
+	 *
+	 * @var attendee_Secret.
 	 */
 	public $attendee_secret;
 }

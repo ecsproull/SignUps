@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Summary
  * Database class.
  *
@@ -7,7 +7,7 @@
  */
 
 /**
- * Mirror of the database wp_scw_signups table.
+ * Mirror of the database Class object.
  * Used for creating new signup items to be added to the DB.
  */
 class ClassItem {
@@ -15,63 +15,63 @@ class ClassItem {
 	/**
 	 * The primary key.
 	 *
-	 *  int
+	 * @var signup_id.
 	 */
 	public $signup_id;
 
 	/**
 	 * The name or title of the class.
 	 *
-	 *  string
+	 * @var signup_name.
 	 */
 	public $signup_name;
 
 	/**
 	 * Contact email.
 	 *
-	 *  string
+	 * @var signup_contact_email.
 	 */
 	public $signup_contact_email;
 
 	/**
 	 * Class location.
 	 *
-	 *  string
+	 * @var signup_location.
 	 */
 	public $signup_location;
 
 	/**
-	 * Url for the description.
+	 * Contact email..
 	 *
-	 *  string
+	 * @var signup_description_url.
 	 */
 	public $signup_description_url;
 
 	/**
-	 * Thumbnail location.
+	 * Contact email..
 	 *
-	 *  string
+	 * @var signup_contact_email.
 	 */
 	public $signup_thumbnail_url;
 
 	/**
 	 * Class cost.
 	 *
-	 *  int
+	 * @var signup_cost.
 	 */
 	public $signup_cost;
 
 	/**
 	 * Class size. Number of slots available.
 	 *
-	 *  int
+	 * @var signup_default_slots.
 	 */
 	public $signup_default_slots;
 
 	/**
-	 * Rolling template id or zero if not a rolling class.
+	 * Class is a continuing signup.
 	 *
-	 *  int
+	 * @var signup_rolling_template.
 	 */
 	public $signup_rolling_template;
 }

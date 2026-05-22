@@ -1,11 +1,13 @@
 <?php
-/*
+/**
+ * Summary
+ * Database class.
  *
  * @package SignUps
  */
 
 /**
- * Mirror of the database wp_scw_sessions object.
+ * Mirror of the database Session object.
  * Used for creating new sessions to be added to the DB.
  */
 class SessionItem {
@@ -23,56 +25,56 @@ class SessionItem {
 	/**
 	 * Session id.
 	 *
-	 *  int
+	 * @var session_id.
 	 */
 	public $session_id;
 
 	/**
 	 * Id of the class that this session belongs to.
 	 *
-	 *  int
+	 * @var session_signup_id.
 	 */
 	public $session_signup_id;
 
 	/**
 	 * Contact email for the session.
 	 *
-	 *  string
+	 * @var session_contact_email.
 	 */
 	public $session_contact_email;
 
 	/**
 	 * Name of the person in charge of this session.
 	 *
-	 *  string
+	 * @var session_contact_name.
 	 */
 	public $session_contact_name;
 
 	/**
 	 * Session start time formatted.
 	 *
-	 *  string
+	 * @var session_start_formatted.
 	 */
 	public $session_start_formatted;
 
 	/**
-	 * Session end time formatted.
+	 * Session end time formatted..
 	 *
-	 *  string
+	 * @var session_end_formatted.
 	 */
 	public $session_end_formatted;
 
 	/**
 	 * Session location.
 	 *
-	 * 	public  string
+	 * @var session_location.
 	 */
 	public $session_location;
 
 	/**
 	 * Deprecated! this was to represent the SignupGenisus id.
 	 *
-	 *  int
+	 * @var session_sig_slotitemid.
 	 */
 	public $session_sig_slotitemid;
 
@@ -80,56 +82,56 @@ class SessionItem {
 	 * Number of slots in this session.
 	 * This can vary from the default number of slots for the class.
 	 *
-	 *  int
+	 * @var session_slots.
 	 */
 	public $session_slots;
 
 	/**
 	 * Minimum number of required attendees.
 	 *
-	 *  int
+	 * @var signup_default_minimum.
 	 */
 	public $signup_default_minimum;
 
 	/**
 	 * Session item name
 	 *
-	 * 	string
+	 * @var session_item.
 	 */
 	public $session_item;
 
 	/**
 	 * Default start time specified in the signup
 	 *
-	 * string
+	 * @var session_time_of_day.
 	 */
 	public $session_time_of_day;
 
 	/**
 	 * Default duration specified in the signup
 	 *
-	 *  public  string
+	 * @var session_default_duration.
 	 */
 	public $session_duration;
 
 	/**
 	 * Default number of days between a session
 	 *
-	 *  int
+	 * @var session_default_days_between_sessions.
 	 */
 	public $session_days_between_sessions;
 
 	/**
 	 * Default days of the month. String to be parsed by PHP DateTime.
 	 *
-	 * string
+	 * @var session_default_day_of_month.
 	 */
 	public $session_day_of_month;
 
 	/**
 	 * Database id for the calendar item.
 	 *
-	 *  int
+	 * @var session_default_day_of_month.
 	 */
 	public $session_calendar_id;
 
@@ -137,7 +139,7 @@ class SessionItem {
 	 * Scheduling descriptions. Overrides the automatically
 	 * generated schedule description.
 	 *
-	 *  string
+	 * @var signup_schedule_desc.
 	 */
 	public $signup_schedule_desc;
 }

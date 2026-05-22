@@ -87,10 +87,8 @@ class SignupSettings extends SignUpsBase {
 
 	function send_notifications( $post ) {
 		$sgm = new SendGridMail();
-		if ( isset( $post['notify_recipients'] ) ) {
-			foreach( $post['notify_recipients'] as $email ) {
-				$sgm->send_mail( $email, $post['subject'], $post['notify_message'], true);
-			}
+		foreach( $post['notify_recipients'] as $email ) {
+			$sgm->send_mail( $email, $post['subject'], $post['notify_message'], true);
 		}
 
 		if ( isset( $post['repost_signup_id'] ) && $post['repost_signup_id'] ) {
@@ -883,7 +881,7 @@ class SignupSettings extends SignUpsBase {
 	 */
 	private function delete_class( $post ) {
 		global $wpdb;
-		if ( get_site_url() !== 'https://edtest.site' ) {
+		if ( get_site_url() !== 'https://woodclubtest.site' ) {
 			$this->load_signup_selection();
 				return;
 		}
@@ -2047,7 +2045,7 @@ class SignupSettings extends SignUpsBase {
 				<div class="text-right">
 					<button type="button" id="copy-signup-link" class="btn btn-secondary mr-2 mt-2">Copy URL</button>
 				</div>
-				<div id="signup-url" class="mt-3">
+				<div id="signup-url" class="mt-3" data-copy-url="<?php echo esc_attr( $signup_url ); ?>">
 					<?php
 					echo esc_html( $signup_url );
 					?>

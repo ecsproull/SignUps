@@ -75,7 +75,7 @@ class SignUpsPlugin extends SignUpsBase {
 	 * class in the root of the public user interface. SignupSettings class is the root of the
 	 * administration interface.
 	 */
-	public function __construct() {		setcookie( 'signups_scw_cache', 'ignore', time()+3600 );
+	public function __construct() {
 		register_activation_hook( __FILE__, array( new DbSignUpTables(), 'create_db_tables' ) );
 		add_action( 'admin_menu', array( $this, 'signup_plugin_top_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_admin_scripts_and_css' ) );

@@ -1,12 +1,12 @@
 <?php
-/*
+/**
  * Summary
  * Database class.
  *
  * @package     SignUps
  * @author      Edward Sproull
  * @copyright   You have the right to copy
- * license     GPL-2.0+
+ * @license     GPL-2.0+
  */
 
 /**
@@ -22,12 +22,13 @@ class RollingTemplatesEditor extends SignUpsBase {
 	/**
 	 * __construct
 	 *
+	 * @return void
 	 */
 	public function __construct() {
 	}
 
 	/**
-	 * Entry point for the editor.
+	 * load_products_editor
 	 *
 	 * @return void
 	 */

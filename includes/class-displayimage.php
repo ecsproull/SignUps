@@ -14,30 +14,31 @@
  */
 class DisplayImage extends SignUpsBase {
 
-	/** Render the image page */
-	public function render_image_page() {
-		global $wpdb;
-		$badge = '4038';
-		$row   = $wpdb->get_row(
+    public function render_image_page() {
+        global $wpdb;
+        $badge = '4038';
+        $row = $wpdb->get_row(
 			$wpdb->prepare(
 				'SELECT *
-				FROM ' . self::PHOTO_TABLE . '
+				FROM %1s
 				where photo_badge = %s',
+				self::PHOTO_TABLE,
 				$badge
 			),
 			OBJECT
 		);
-		$data  = $row->photo_image;
-		$mime  = ! empty( $row->photo_mime ) ? $row->photo_mime : 'image/jpeg';
+        $data = $row->photo_image;
+        $mime = ! empty( $row->photo_mime ) ? $row->photo_mime : 'image/jpeg';
 
-		// base64 encode and produce data URL.
-		$b64 = base64_encode( $data );
-		$src = 'data:' . esc_attr( $mime ) . ';base64,' . $b64;
+        // base64 encode and produce data URL
+        $b64 = base64_encode( $data );
+        $src = 'data:' . esc_attr( $mime ) . ';base64,' . $b64;
 
-		?>
-		<img src=<?php echo $src; ?> alt='Ed' width='180' height='200'>
-		<?php
-	}
+        ?>
+       <img src=<?php echo $src; ?> alt='Ed' width='180' height='200'>
+       <?php 
+    }
 }
 
 
+ 
