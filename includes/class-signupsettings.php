@@ -2271,7 +2271,7 @@ class SignupSettings extends SignUpsBase {
 
 				<div class="text-right mr-2"><label>End Repeat Date:</label></div>
 				<div><input type="date" class="w-250px" name="session_end_repeat"
-					value="<?php echo esc_attr( $data->session_end_repeat ); ?>"></div>
+					value="<?php echo esc_attr( property_exists( $data, 'session_end_repeat' ) ? $data->session_end_repeat : '' ); ?>"></div>
 
 				<div class="text-right mr-2"><label>Save Settings:</label></div>
 				<div><input type="checkbox" class="save-settings" name="save_session_settings"
