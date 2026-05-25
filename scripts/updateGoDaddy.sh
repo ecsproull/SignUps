@@ -11,7 +11,10 @@ fi
 
 LOCAL="/var/www/wordpress/wp-content/plugins/SignUps/"
 REMOTE="scwwoodshop:~/public_html/wp-content/plugins/SignUps/"
+MESSAGE="Updating $REMOTE"
 
+printf "\n%s\n""${MESSAGE}js"
+printf "\n%s\n"
 rsync -rvc $DRYRUN \
     --delete \
     --itemize-changes \
@@ -19,6 +22,8 @@ rsync -rvc $DRYRUN \
     "$LOCAL/js/" \
     "$REMOTE/js/"
 
+printf "\n%s\n""${MESSAGE}css"
+printf "\n%s\n"
 rsync -rvc $DRYRUN \
     --delete \
     --itemize-changes \
@@ -26,6 +31,8 @@ rsync -rvc $DRYRUN \
     "$LOCAL/css/" \
     "$REMOTE/css/"
 
+printf "\n%s\n""${MESSAGE}img"
+printf "\n%s\n"
 rsync -rvc $DRYRUN \
     --delete \
     --itemize-changes \
@@ -33,6 +40,8 @@ rsync -rvc $DRYRUN \
     "$LOCAL/img/" \
     "$REMOTE/img/"
 
+printf "\n%s\n""${MESSAGE}includes"
+printf "\n%s\n"
 rsync -rvc $DRYRUN \
     --delete \
     --itemize-changes \
@@ -40,6 +49,8 @@ rsync -rvc $DRYRUN \
     "$LOCAL/includes/" \
     "$REMOTE/includes/"
 
+printf "\n%s\n""${MESSAGE}class-signupsplugin.php"
+printf "\n%s\n"
 rsync -rvc $DRYRUN \
     --itemize-changes \
     \
