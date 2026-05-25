@@ -23,3 +23,7 @@ DROP TRIGGER del_att;
 DROP TRIGGER ins_rol_att;
 DROP TRIGGER upd_rol_att;
 DROP TRIGGER del_rol_att;
+
+DROP TABLE wp_spidercalendar_calendar;
+DROP TABLE wp_spidercalendar_theme;
+DROP TABLE wp_spidercalendar_widget_theme;

@@ -86,9 +86,11 @@ class SignupSettings extends SignUpsBase {
 	}
 
 	function send_notifications( $post ) {
-		$sgm = new SendGridMail();
-		foreach( $post['notify_recipients'] as $email ) {
-			$sgm->send_mail( $email, $post['subject'], $post['notify_message'], true);
+		if ( isset( $post['notify_recipients'] ) ) {
+			$sgm = new SendGridMail();
+			foreach( $post['notify_recipients'] as $email ) {
+				$sgm->send_mail( $email, $post['subject'], $post['notify_message'], true);
+			}
 		}
 
 		if ( isset( $post['repost_signup_id'] ) && $post['repost_signup_id'] ) {

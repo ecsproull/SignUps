@@ -379,15 +379,24 @@ jQuery( document ).ready( function($){
 		});
 	}
 
+	function getDataTransfer( evt ) {
+		return evt.dataTransfer || ( evt.originalEvent && evt.originalEvent.dataTransfer ) || null;
+	}
+
 	/**
 	 * Handles the drag start event when an admin drags a member from one session another session.
 	 */
 	var lastDragSessionId = -1;
 	$( ".drag-row").on( 'dragstart', function(evt) {
+		let dataTransfer = getDataTransfer( evt );
+		if ( !dataTransfer ) {
+			return;
+		}
+
 		let arr =  evt.target.dataset['dragable'].split(',');
-		evt.originalEvent.dataTransfer.setData( "attendee_id", arr[0] );
-		evt.originalEvent.dataTransfer.setData( "session_id", arr[1] );
-		evt.originalEvent.dataTransfer.setData( "check_box_value",  evt.target.dataset['dragable'] );
+		dataTransfer.setData( "attendee_id", arr[0] );
+		dataTransfer.setData( "session_id", arr[1] );
+		dataTransfer.setData( "check_box_value",  evt.target.dataset['dragable'] );
 		lastDragSessionId = arr[1];
 	})
 
@@ -396,7 +405,7 @@ jQuery( document ).ready( function($){
 	 */
 	$( ".add-attendee-row").on( 'dragover', function(evt) {
 		if (evt.currentTarget.dataset['sessionId'] != lastDragSessionId ) {
-			evt.originalEvent.preventDefault();
+			evt.preventDefault();
 		}
 	})
 
@@ -404,14 +413,19 @@ jQuery( document ).ready( function($){
 	 * Handles the drop event when dragging and dropping a member into a new session of a class.
 	 */
 	$( ".add-attendee-row").on( 'drop', function(evt) {
+		let dataTransfer = getDataTransfer( evt );
+		if ( !dataTransfer ) {
+			return;
+		}
+
 		if (confirm( "Confirm Attendee Move") ) {
 			$(":checkbox").prop( "checked", false );
 			evt.currentTarget.querySelector("input").checked = true;
-			let selector = "input[value='" + evt.originalEvent.dataTransfer.getData( "check_box_value" ) + "']";
+			let selector = "input[value='" + dataTransfer.getData( "check_box_value" ) + "']";
 			let origin_checkbox = $( selector );
 			origin_checkbox.prop("checked", true);
 
-			let from_slot = evt.originalEvent.dataTransfer.getData( "session_id" );
+			let from_slot = dataTransfer.getData( "session_id" );
 			let to_slot = evt.currentTarget.dataset['sessionId'];
 			let selector2 = "#move_to" + from_slot;
 			let move_to = $(selector2);
