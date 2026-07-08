@@ -392,6 +392,7 @@ class ShortCodes extends SignUpsBase {
 			);
 
 			$attendee_guests_count = $signups[0]->signup_guests_allowed ? array() : null;
+			$attendees             = [];
 			foreach ( $sessions as $session ) {
 				$attendees[ $session->session_id ] = $wpdb->get_results(
 					$wpdb->prepare(

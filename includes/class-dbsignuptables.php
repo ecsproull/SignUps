@@ -348,5 +348,17 @@ class DbSignUpTables {
 				  ) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4;"
 			);
 		}
+
+
+		if ( $wpdb->get_var( 'SHOW TABLES LIKE "wp_scw_member_photos"' ) !== 'wp_scw_member_photos' ) {
+			$wpdb->query(
+				"CREATE TABLE `wp_scw_member_photos` (
+					`photo_id` int unsigned NOT NULL AUTO_INCREMENT,
+					`photo_image` mediumblob NOT NULL,
+					`photo_badge` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+					PRIMARY KEY (`photo_id`)
+				) ENGINE=InnoDB AUTO_INCREMENT=4924 DEFAULT CHARSET=utf8mb4;"
+			);
+		} 
 	}
 }

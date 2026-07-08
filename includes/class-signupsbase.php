@@ -1554,12 +1554,12 @@ class SignUpsBase {
 	 * @param  mixed $subject The alert subject.
 	 * @return void
 	 */
-	protected function send_alert_email( $post, $subject ) {
+	protected function send_alert_email( $post, $subject, $body = '' ) {
 		$sgm        = new SendGridMail();
 		$ip_address = isset( $_SERVER['REMOTE_ADDR'] ) ? wp_unslash( $_SERVER['REMOTE_ADDR'] ) : 'No Ip Address';
 		$body1      = '<br><br> Calling IP Address: ' . $ip_address . '<br>';
 		$body1     .= 'Host Root : ' . get_site_url() . '<br>';
-		$body1     .= '<pre>' . htmlspecialchars( wp_json_encode( $post, JSON_PRETTY_PRINT ), ENT_QUOTES, 'UTF-8' ) . '</pre>';
+		$body1     .= '<pre>' . htmlspecialchars( wp_json_encode( $post, JSON_PRETTY_PRINT ), ENT_QUOTES, 'UTF-8' ) . '<br> Response body: <br> ' . esc_html( $body )  . '</pre>';
 		$sgm->send_mail( 'ecsproull765@gmail.com', $subject, $body1 );
 		$sgm->send_mail( 'tschmidtsw@gmail.com', $subject, $body1 );
 	}
@@ -2194,26 +2194,10 @@ class SignUpsBase {
 	 */
 	protected function verify_recaptcha( $token, $post, $badge ) {
 		global $wpdb;
-		$url  = 'https://www.google.com/recaptcha/api/siteverify';
-		$data = array(
-			'secret'   => get_option( 'signups_captcha' )['captcha_api_secret'],
-			'response' => $token,
-			'remoteip' => $_SERVER['REMOTE_ADDR'],
-		);
-
-		$options = array(
-			'http' => array(
-				'header'  => 'Content-type: application/x-www-form-urlencoded\r\n',
-				'method'  => 'POST',
-				'content' => http_build_query( $data ),
-			),
-		);
 
 		$return_value = false;
-		$context      = stream_context_create( $options );
-		$response     = file_get_contents( $url, false, $context );
-		$res          = json_decode( $response, true );
 
+		// Remove sensitive data before logging/emailing.
 		if ( isset( $post['token'] ) ) {
 			$post['token'] = 'removed';
 		}
@@ -2222,25 +2206,124 @@ class SignUpsBase {
 			$post['token_key'] = 'removed';
 		}
 
-		$success_threshold = 0.3;
-		if ( true === $res['success'] && $res['score'] >= $success_threshold ) {
-			$return_value = true;
-		} elseif ( true === $res['success'] && $res['score'] < $success_threshold ) {
-			$this->send_alert_email( $post, 'reCAPACHA Failed, Score: ' . $res['score'], '' );
-		} elseif ( false === $res['success'] && 'timeout-or-duplicate' !== $res['error-codes'][0] ) {
-			$this->send_alert_email( $post, 'reCAPACHA Error', $res['error-codes'][0] );
+		$response = wp_remote_post(
+			'https://www.google.com/recaptcha/api/siteverify',
+			array(
+				'timeout' => 10,
+				'body'    => array(
+					'secret'   => get_option( 'signups_captcha' )['captcha_api_secret'],
+					'response' => $token,
+					'remoteip' => $_SERVER['REMOTE_ADDR'] ?? '',
+				),
+			)
+		);
+
+		// Default response in case something goes wrong.
+		$res = array(
+			'success'    => false,
+			'score'      => -1,
+			'action'     => '',
+			'hostname'   => '',
+			'error-codes'=> array(),
+		);
+
+		$body = wp_remote_retrieve_body( $response );
+		$json = json_decode( $body, true );
+
+		if ( is_array( $json ) ) {
+			$res = $json;
+		} else {
+			$res['error-codes'][] = 'invalid-json';
+			$res['http-code']     = wp_remote_retrieve_response_code( $response );
+			$res['body']          = $body;
+
+			$this->send_alert_email(
+				$post,
+				'reCAPTCHA JSON Error',
+				'Filed getting JSON body so I have nothing to report.'
+			);
 		}
 
-		$date = new DateTimeImmutable( 'now', new DateTimeZone( 'America/Phoenix' ) );
+		$details = print_r(
+			array(
+				'google_body_raw' => $body ?? '',
+				'google_response' => $res,
+				'http_code' => $http_code ?? '',
+				'remote_ip' => $_SERVER['REMOTE_ADDR'] ?? '',
+				'badge' => $badge,
+			),
+			true
+		);
+
+
+		if ( is_wp_error( $response ) ) {
+
+			$res['error-codes'][] = 'wp_remote_post';
+			$res['wp_error']      = $response->get_error_message();
+
+			$this->send_alert_email(
+				$post,
+				'reCAPTCHA Transport Error',
+				$details
+			);
+
+		}
+
+		$success_threshold = 0.20;
+
+		$success = ! empty( $res['success'] );
+		$score   = $res['score'] ?? -1;
+		$action  = $res['action'] ?? '';
+		$errors  = $res['error-codes'] ?? array();
+
+		if (
+			$success &&
+			$score >= $success_threshold
+		) {
+
+			$return_value = true;
+
+		} elseif ( $success && $score < $success_threshold ) {
+
+			$this->send_alert_email(
+				$post,
+				'reCAPTCHA Failed, Score: ' . $score,
+				$details
+			);
+
+		} elseif ( $success && $action !== $badge ) {
+
+			$this->send_alert_email(
+				$post,
+				'reCAPTCHA Action Mismatch',
+				$details
+			);
+
+		} elseif ( ! in_array( 'timeout-or-duplicate', $errors, true ) ) {
+
+			$this->send_alert_email(
+				$post,
+				'reCAPTCHA Error',
+				$details
+			);
+		}
+
+		$date = new DateTimeImmutable(
+			'now',
+			new DateTimeZone( 'America/Phoenix' )
+		);
+
 		$data = array(
 			'captcha_badge'      => $badge,
-			'captcha_score'      => isset( $res['score'] ) ? $res['score'] : -1,
+			'captcha_score'      => $score,
 			'captcha_post'       => wp_json_encode( $post ),
-			'captcha_ip_address' => $_SERVER['REMOTE_ADDR'],
+			'captcha_response'   => wp_json_encode( $res ),   // <-- new DB column
+			'captcha_ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
 			'captcha_time'       => $date->format( self::DATETIME_FORMAT ),
 		);
 
 		$wpdb->insert( self::RECAPTCHA_LOG, $data );
+
 		return $return_value;
 	}
 
