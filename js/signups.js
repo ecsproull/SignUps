@@ -679,6 +679,22 @@ jQuery( document ).ready( function($){
 			$("." + data + "-expand-button").html("Show All");
 		}
 	});
+
+	/**
+	 * Toggle visibility of sessions older than 30 days when the
+	 * "Show all" checkbox is toggled.
+	 */
+	$( '#show_all_sessions' ).on('change', function() {
+		if ( this.checked ) {
+			$( 'tr[data-old-session="1"]' ).each(function() {
+				$(this).removeAttr('hidden');
+			});
+		} else {
+			$( 'tr[data-old-session="1"]' ).each(function() {
+				$(this).attr('hidden','hidden');
+			});
+		}
+	});
 });
 
 jQuery(function ($) {

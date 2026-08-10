@@ -310,35 +310,23 @@ class SignUpsPlugin extends SignUpsBase {
 
 		$captcha_keys = get_option( 'signups_captcha' );
 
-		wp_register_style( 'signup_bs_style', plugin_dir_url( __FILE__ ) . 'bootstrap/css/bootstrap.min.css', array(), 1 );
-		wp_enqueue_style( 'signup_bs_style' );
+		wp_enqueue_style( 'signup_bs_style', plugin_dir_url( __FILE__ ) . 'bootstrap/css/bootstrap.min.css', array(), 1 );
 		
 		$ver_styles = filemtime( plugin_dir_path( __FILE__ ) . 'css/style.css' );
-		wp_register_style( 'signup_style', plugin_dir_url( __FILE__ ) . 'css/style.css', array(), $ver_styles );
-		wp_enqueue_style( 'signup_style' );
+		wp_enqueue_style( 'signup_style', plugin_dir_url( __FILE__ ) . 'css/style.css', array(), $ver_styles );
 		
 		$ver_user_styles = filemtime( plugin_dir_path( __FILE__ ) . 'css/users-styles.css' );
-		wp_register_style( 'user_signup_style', plugin_dir_url( __FILE__ ) . 'css/users-styles.css', array(), $ver_user_styles );
-		wp_enqueue_style( 'user_signup_style' );
-		
+		wp_enqueue_style( 'user_signup_style', plugin_dir_url( __FILE__ ) . 'css/users-styles.css', array(), $ver_user_styles );
 		wp_enqueue_script( 'jquery' );
-		
-		wp_register_script( 'recap', 'https://www.google.com/recaptcha/api.js?render=' . $captcha_keys['captcha_api_key'], array(), '1.0.0.0', false );
-		wp_enqueue_script( 'recap' );
+		wp_enqueue_script( 'recap', 'https://www.google.com/recaptcha/api.js?render=' . $captcha_keys['captcha_api_key'], array(), '1.0.0.0', false );
 		
 		$ver_common_js = filemtime( plugin_dir_path( __FILE__ ) . 'js/common.js' );
-		wp_register_script( 'signup_common_script', plugin_dir_url( __FILE__ ) . 'js/common.js', __FILE__, array( 'jquery' ), $ver_common_js, false );
-		wp_enqueue_script( 'signup_common_script' );
+		wp_enqueue_script( 'signup_common_script', plugin_dir_url( __FILE__ ) . 'js/common.js', array( 'jquery' ), $ver_common_js, false );
 		
 		$ver_js = filemtime( plugin_dir_path( __FILE__ ) . 'js/signups.js' );
-		wp_register_script( 'signup_member_script', plugin_dir_url( __FILE__ ) . 'js/signups.js', __FILE__, array( 'jquery' ), $ver_js, false );
-		wp_enqueue_script( 'signup_member_script' );
-		
-		wp_register_script( 'signup_cookie_script', plugin_dir_url( __FILE__ ) . 'cookie/node_modules/js-cookie/dist/js.cookie.min.js', array( 'jquery' ), '3.0.5', false );
-		wp_enqueue_script( 'signup_cookie_script' );
-
-		wp_register_script( 'signup_ckeditor', 'https://cdn.ckeditor.com/ckeditor5/41.2.1/super-build/ckeditor.js', array(), '1.0.0.0', false );
-		wp_enqueue_script( 'signup_ckeditor' );
+		wp_enqueue_script( 'signup_member_script', plugin_dir_url( __FILE__ ) . 'js/signups.js', array( 'jquery' ), $ver_js, false );
+		wp_enqueue_script( 'signup_cookie_script', plugin_dir_url( __FILE__ ) . 'cookie/node_modules/js-cookie/dist/js.cookie.min.js', array( 'jquery' ), '3.0.5', false );
+		wp_enqueue_script( 'signup_ckeditor', 'https://cdn.ckeditor.com/ckeditor5/41.2.1/super-build/ckeditor.js', array(), '1.0.0.0', false );
 		
 		wp_localize_script(
 			'signup_member_script',
@@ -373,28 +361,22 @@ class SignUpsPlugin extends SignUpsBase {
 
 		$captcha_keys = get_option( 'signups_captcha' );
 
-		wp_register_style( 'signup_bs_style', plugin_dir_url( __FILE__ ) . 'bootstrap/css/bootstrap.min.css', array(), 1 );
-		wp_enqueue_style( 'signup_bs_style' );
+		wp_enqueue_style( 'signup_bs_style', plugin_dir_url( __FILE__ ) . 'bootstrap/css/bootstrap.min.css', array(), 1 );
 		
 		$ver_user_styles = filemtime( plugin_dir_path( __FILE__ ) . 'css/users-styles.css' );
-		wp_register_style( 'signup_style', plugin_dir_url( __FILE__ ) . 'css/users-styles.css', array(), $ver_user_styles );
-		wp_enqueue_style( 'signup_style' );
+		wp_enqueue_style( 'signup_style', plugin_dir_url( __FILE__ ) . 'css/users-styles.css', array(), $ver_user_styles );
 		
 		wp_enqueue_style( 'wp-jquery-ui-dialog' );
 		
-		wp_register_script( 'signup_cookie_script', plugin_dir_url( __FILE__ ) . 'cookie/node_modules/js-cookie/dist/js.cookie.min.js', array( 'jquery' ), '3.0.5', false );
-		wp_enqueue_script( 'signup_cookie_script' );
+		wp_enqueue_script( 'signup_cookie_script', plugin_dir_url( __FILE__ ) . 'cookie/node_modules/js-cookie/dist/js.cookie.min.js', array( 'jquery' ), '3.0.5', false );
 
-		wp_register_script( 'recap', 'https://www.google.com/recaptcha/api.js?render=' . $captcha_keys['captcha_api_key'], array(), '1.0.0.0', false );
-		wp_enqueue_script( 'recap' );
+		wp_enqueue_script( 'recap', 'https://www.google.com/recaptcha/api.js?render=' . $captcha_keys['captcha_api_key'], array(), '1.0.0.0', false );
 		
 		$ver_common_js = filemtime( plugin_dir_path( __FILE__ ) . 'js/common.js' );
-		wp_register_script( 'signup_common_script', plugin_dir_url( __FILE__ ) . 'js/common.js', __FILE__, array( 'jquery' ), $ver_common_js, false );
-		wp_enqueue_script( 'signup_common_script' );
+		wp_enqueue_script( 'signup_common_script', plugin_dir_url( __FILE__ ) . 'js/common.js', array( 'jquery' ), $ver_common_js, false );
 		
 		$ver_users_js = filemtime( plugin_dir_path( __FILE__ ) . 'js/users-signup.js' );
-		wp_register_script( 'signup_member_script', plugin_dir_url( __FILE__ ) . 'js/users-signup.js', array( 'jquery', 'jquery-ui-dialog', 'signup_cookie_script' ), $ver_users_js, false );
-		wp_enqueue_script( 'signup_member_script' );
+		wp_enqueue_script( 'signup_member_script', plugin_dir_url( __FILE__ ) . 'js/users-signup.js', array( 'jquery', 'jquery-ui-dialog', 'signup_cookie_script' ), $ver_users_js, false );
 		
 		wp_localize_script(
 			'signup_member_script',
