@@ -21,6 +21,14 @@
  * Domain Path: /languages
  */
 declare(strict_types=1);
+
+/**
+ * Bump this whenever add_plugin_caps() changes so plugins_loaded() re-applies
+ * the capabilities on an already-active install without requiring a
+ * deactivate/reactivate.
+ */
+define( 'SIGNUPS_CAPS_VERSION', '3' );
+
 require_once 'vendor/autoload.php';
 require_once 'includes/class-signupsbase.php';
 require_once 'includes/class-signupsrestapis.php';
@@ -77,6 +85,7 @@ class SignUpsPlugin extends SignUpsBase {
 	 */
 	public function __construct() {
 		register_activation_hook( __FILE__, array( new DbSignUpTables(), 'create_db_tables' ) );
+		register_activation_hook( __FILE__, array( $this, 'add_plugin_caps' ) );
 		add_action( 'admin_menu', array( $this, 'signup_plugin_top_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_admin_scripts_and_css' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'add_users_scripts_and_css' ) );
@@ -108,6 +117,20 @@ class SignUpsPlugin extends SignUpsBase {
 		//$this->save_uploads();
 		//$this->parse_used_files();
 		//$this->delete_unused_files();
+	}
+
+	/**
+	 * Grants the manage_signups_plugin capability to the editor and administrator
+	 * roles. Runs once on plugin activation.
+	 */
+	public function add_plugin_caps() {
+		$editor = get_role( 'editor' );
+		$editor->add_cap( 'manage_signups_plugin' );
+		$editor->remove_cap( 'manage_my_plugin' );
+
+		$admin = get_role( 'administrator' );
+		$admin->add_cap( 'manage_signups_plugin' );
+		$admin->remove_cap( 'manage_my_plugin' );
 	}
 
 	public function save_uploads() {
@@ -188,7 +211,7 @@ class SignUpsPlugin extends SignUpsBase {
 	 * @return void
 	 */
 	public function restrict_admin_bar( $show ) {
-		return current_user_can( 'edit_plugins' ) ? true : false;
+		return current_user_can( 'manage_signups_plugin' ) ? true : false;
 	}
 
 	/**
@@ -237,6 +260,11 @@ class SignUpsPlugin extends SignUpsBase {
 			WP_Optimize()->get_page_cache()->purge();
 			$this->set_clear_cache( '0' );
 		}
+
+		if ( get_option( 'signups_caps_version' ) !== SIGNUPS_CAPS_VERSION ) {
+			$this->add_plugin_caps();
+			update_option( 'signups_caps_version', SIGNUPS_CAPS_VERSION );
+		}
 	}
 
 	/**
@@ -260,18 +288,20 @@ class SignUpsPlugin extends SignUpsBase {
 
 	/**
 	 * Adds the main menu item and set of submenu items for the plugin.
-	 * This menu is available only to the administrators.
+	 * Available to administrators and to editors granted the
+	 * manage_signups_plugin capability, except for Settings which stays
+	 * restricted to manage_options (and, currently, the ecsproull login).
 	 */
 	public function signup_plugin_top_menu() {
-		add_menu_page( '', 'SignUps', 'manage_options', 'sign_ups', array( new SignupSettings(), 'signup_settings_page' ), plugin_dir_url( __FILE__ ) . 'img/frenchie.bmp' );
-		add_submenu_page( 'sign_ups', '', '', 'manage_options', 'sign_ups', '' );
-		add_submenu_page( 'sign_ups', 'Html Editor', 'Descriptions', 'manage_options', 'html_editor', array( new HtmlEditor(), 'load_html_editor' ) );
-		add_submenu_page( 'sign_ups', 'Rolling Templates Editor', 'Rolling Templates', 'manage_options', 'template_editor', array( new RollingTemplatesEditor(), 'load_templates_editor' ) );
-		add_submenu_page( 'sign_ups', 'Rolling Exceptions Editor', 'Exceptions', 'manage_options', 'exceptions_editor', array( new RollingExceptionsEditor(), 'load_exceptions_editor' ) );
-		add_submenu_page( 'sign_ups', 'Payments Report', 'Payments Report', 'manage_options', 'payments_report', array( new PaymentsReview(), 'review_payments' ) );
-		add_submenu_page( 'sign_ups', 'Instructors', 'Instructors', 'manage_options', 'instructors_editor', array( new InstructorsEditor(), 'instructors_editor' ) );
-		add_submenu_page( 'sign_ups', 'Multi Day Templates', 'Multi Day Templates', 'manage_options', 'multi-session-templates', array( new MultiDayTemplates, 'render_admin_page' ) );
-		add_submenu_page( 'sign_ups', 'Display Image', 'Display Image', 'manage_options', 'display-image', array( new DisplayImage, 'render_image_page' ) );
+		add_menu_page( '', 'SignUps', 'manage_signups_plugin', 'sign_ups', array( new SignupSettings(), 'signup_settings_page' ), plugin_dir_url( __FILE__ ) . 'img/frenchie.bmp' );
+		add_submenu_page( 'sign_ups', '', '', 'manage_signups_plugin', 'sign_ups', '' );
+		add_submenu_page( 'sign_ups', 'Html Editor', 'Descriptions', 'manage_signups_plugin', 'html_editor', array( new HtmlEditor(), 'load_html_editor' ) );
+		add_submenu_page( 'sign_ups', 'Rolling Templates Editor', 'Rolling Templates', 'manage_signups_plugin', 'template_editor', array( new RollingTemplatesEditor(), 'load_templates_editor' ) );
+		add_submenu_page( 'sign_ups', 'Rolling Exceptions Editor', 'Exceptions', 'manage_signups_plugin', 'exceptions_editor', array( new RollingExceptionsEditor(), 'load_exceptions_editor' ) );
+		add_submenu_page( 'sign_ups', 'Payments Report', 'Payments Report', 'manage_signups_plugin', 'payments_report', array( new PaymentsReview(), 'review_payments' ) );
+		add_submenu_page( 'sign_ups', 'Instructors', 'Instructors', 'manage_signups_plugin', 'instructors_editor', array( new InstructorsEditor(), 'instructors_editor' ) );
+		add_submenu_page( 'sign_ups', 'Multi Day Templates', 'Multi Day Templates', 'manage_signups_plugin', 'multi-session-templates', array( new MultiDayTemplates, 'render_admin_page' ) );
+		add_submenu_page( 'sign_ups', 'Display Image', 'Display Image', 'manage_signups_plugin', 'display-image', array( new DisplayImage, 'render_image_page' ) );
 
 		$current_user    = wp_get_current_user();
 		if ( 'ecsproull' === $current_user->user_login ) {

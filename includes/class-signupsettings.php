@@ -11,8 +11,9 @@
 
 /**
  * Admin page for the signups plugin. Contains the functions for editing the signups.
- * IMPORTANT: Everything in this class is called by an administrator and the term
- * "user" will always be an administrator.
+ * IMPORTANT: Everything in this class is called by a user with the manage_signups_plugin
+ * capability (administrators, and editors granted that capability) and the term
+ * "user" will always refer to such a user.
  */
 class SignupSettings extends SignUpsBase {
 
@@ -24,7 +25,7 @@ class SignupSettings extends SignUpsBase {
 	 */
 	public function signup_settings_page() {
 		$post = wp_unslash( $_POST );
-		if ( isset( $_POST['mynonce'] ) && wp_verify_nonce( $post['mynonce'], 'signups' ) && current_user_can( 'edit_plugins' ) ) {
+		if ( isset( $_POST['mynonce'] ) && wp_verify_nonce( $post['mynonce'], 'signups' ) && current_user_can( 'manage_signups_plugin' ) ) {
 			unset( $post['mynonce'] );
 			unset( $post['_wp_http_referer'] );
 			if ( isset( $post['submit_class'] ) ) {

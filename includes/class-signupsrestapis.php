@@ -557,7 +557,7 @@ class SignUpsRestApis extends SignUpsBase {
 	public function search_members( $request ) {
 		global $wpdb;
 		$key = '9523a157-8ee7-5401-9f91-abccea39fe2f';
-		if ( $request['key'] !== $key || ! current_user_can( 'edit_plugins' ) ) {
+		if ( $request['key'] !== $key || ! current_user_can( 'manage_signups_plugin' ) ) {
 			return new WP_REST_Response( 'Unauthorized.', 401 );
 		}
 
@@ -1141,7 +1141,7 @@ class SignUpsRestApis extends SignUpsBase {
 	public function get_member( $request ) {
 		$nonce    = $request->get_header( 'X-WP-Nonce' );
 		$verified = wp_verify_nonce( $nonce, 'wp_rest' ) &&
-			( current_user_can( 'edit_plugins' ) || $this->verify_recaptcha( $request['token'], $request->get_query_params(), $request['badge'] ) );
+			( current_user_can( 'manage_signups_plugin' ) || $this->verify_recaptcha( $request['token'], $request->get_query_params(), $request['badge'] ) );
 		$pattern  = '/^[0-9]{4}$/ms';
 		if ( $verified && preg_match( $pattern, $request['badge'] ) ) {
 			try {
@@ -1156,7 +1156,7 @@ class SignUpsRestApis extends SignUpsBase {
 				);
 
 				if ( $results ) {
-					if ( ! current_user_can( 'edit_plugins' ) ) {
+					if ( ! current_user_can( 'manage_signups_plugin' ) ) {
 						$this->set_user( $results[0]->member_user_id, $results[0]->member_badge );
 						$results[1] = 1;
 					} else {

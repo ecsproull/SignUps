@@ -18,7 +18,7 @@ class MultiDayTemplates extends SignUpsBase {
     
     public function render_admin_page() {
 		$post = wp_unslash( $_POST );
-		if ( isset( $_POST['mynonce'] ) && wp_verify_nonce( $post['mynonce'], 'signups' ) && current_user_can( 'edit_plugins' ) ) {
+		if ( isset( $_POST['mynonce'] ) && wp_verify_nonce( $post['mynonce'], 'signups' ) && current_user_can( 'manage_signups_plugin' ) ) {
 			unset( $post['mynonce'] );
 			unset( $post['_wp_http_referer'] );
 			if ( isset( $post['submit_multiday'] ) ) {
@@ -28,7 +28,7 @@ class MultiDayTemplates extends SignUpsBase {
             } else {
                 $this->load_signup_selection();
             }
-        } elseif ( current_user_can( 'edit_plugins' ) ) {
+        } elseif ( current_user_can( 'manage_signups_plugin' ) ) {
             $this->render_page();
         }
     }

@@ -265,7 +265,7 @@ class ShortCodes extends SignUpsBase {
 	private function create_select_signup() {
 		global $wpdb;
 		$signups = null;
-		if ( current_user_can( 'edit_plugins' ) ) {
+		if ( current_user_can( 'manage_signups_plugin' ) ) {
 			$signups = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 				'SELECT signup_id,
 				signup_name,
@@ -1282,7 +1282,7 @@ class ShortCodes extends SignUpsBase {
 		$contact_email = isset( $post['contact_email'] ) ? $post['contact_email'] : '';
 		$contact_name  = isset( $post['contact_name'] ) ? $post['contact_name'] : '';
 		$class_email   = false;
-		if ( ! current_user_can( 'edit_plugins' ) ) {
+		if ( ! current_user_can( 'manage_signups_plugin' ) ) {
 			$contact_email = isset( $post['session_email'] ) ? $post['session_email'] : $post['contact_email'];
 			$contact_name  = isset( $post['session_name'] ) ? $post['session_name'] : $post['contact_name'];
 			$class_email   = true;

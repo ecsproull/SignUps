@@ -544,13 +544,13 @@ class SignUpsBase {
 			);
 		}
 
-		if ( ! isset( $_COOKIE['signups_scw_badge'] ) && is_user_logged_in() && ! current_user_can( 'edit_plugins' ) ) {
+		if ( ! isset( $_COOKIE['signups_scw_badge'] ) && is_user_logged_in() && ! current_user_can( 'manage_signups_plugin' ) ) {
 			$this->unset_user();
 			echo '<script>location.reload();</script>';
 		} elseif ( is_user_logged_in() ) {
 			$badge = null;
 			if ( is_user_logged_in() ) {
-				if ( current_user_can( 'edit_plugins' ) ) {
+				if ( current_user_can( 'manage_signups_plugin' ) ) {
 					$badge_meta = get_user_meta( is_user_logged_in(), 'nickname' );
 					if ( $badge_meta ) {
 						$badge = $this->get_badge_number( $badge_meta[0] );
@@ -594,7 +594,7 @@ class SignUpsBase {
 
 			if ( $results && $permission ) {
 				$return_val = $results->member_badge;
-				if ( ! current_user_can( 'edit_plugins' ) ) {
+				if ( ! current_user_can( 'manage_signups_plugin' ) ) {
 					$this->set_user( $results->member_user_id, $results->member_badge );
 				}
 			} else {
@@ -616,7 +616,7 @@ class SignUpsBase {
 				<input id="badge-input" class="member-badge" type="number" name="badge_number" 
 					value="<?php echo $return_val ? esc_html( $results->member_badge ) : ''; ?>">
 				<?php
-				if ( ! current_user_can( 'edit_plugins' ) ) {
+				if ( ! current_user_can( 'manage_signups_plugin' ) ) {
 					?>
 					<button id="logout-button" class="btn btn-danger rounded" type="button" name="logout-button"
 						<?php echo is_user_logged_in() ? '' : 'hidden'; ?> >Logout</button>
@@ -695,7 +695,7 @@ class SignUpsBase {
 	 * @return void
 	 */
 	protected function unset_user() {
-		if ( ! current_user_can( 'edit_plugins' ) ) {
+		if ( ! current_user_can( 'manage_signups_plugin' ) ) {
 			wp_logout();
 		}
 	}
@@ -955,14 +955,14 @@ class SignUpsBase {
 					<form class="signup_form" method="POST">
 						<?php
 						$user_badge = null;
-						if ( ! current_user_can( 'edit_plugins' ) ) {
+						if ( ! current_user_can( 'manage_signups_plugin' ) ) {
 							$user_badge = $this->create_user_table( $user_group, $signup_id );
 							?>
 							<div class="text-left mb-2 html-font"><?php echo html_entity_decode( $description ); ?></div>
 							<?php
 						}
 
-						if ( null === $user_badge && ! current_user_can( 'edit_plugins' ) ) {
+						if ( null === $user_badge && ! current_user_can( 'manage_signups_plugin' ) ) {
 							?>
 							</form>
 							</div>
@@ -985,7 +985,7 @@ class SignUpsBase {
 						</div>
 
 						<table id="selection-table" class="table-bordered mr-auto ml-auto selection-font"
-							<?php echo null === $user_badge && ! current_user_can( 'edit_plugins' ) ? 'hidden' : ''; ?> >
+							<?php echo null === $user_badge && ! current_user_can( 'manage_signups_plugin' ) ? 'hidden' : ''; ?> >
 							<?php
 							$current_day   = '2000-07-01';
 							$comment_index = 0;
@@ -1102,7 +1102,7 @@ class SignUpsBase {
 														<?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?>
 														<input class="form-check-input ml-2 rolling-remove-chk mt-2 <?php echo esc_html( $attendee->attendee_badge ); ?>" 
 															type="checkbox" name="remove_slots[]" 
-															<?php echo $this->add_remove_chk( $start_date, $user_badge, $attendee, $template ) || current_user_can( 'edit_plugins' ) ? '' : 'hidden'; ?>
+															<?php echo $this->add_remove_chk( $start_date, $user_badge, $attendee, $template ) || current_user_can( 'manage_signups_plugin' ) ? '' : 'hidden'; ?>
 															value="
 															<?php
 															echo esc_html(
@@ -1148,7 +1148,7 @@ class SignUpsBase {
 															<?php echo esc_html( $attendee->attendee_firstname . ' ' . $attendee->attendee_lastname ); ?>
 															<input class="form-check-input ml-2 rolling-remove-chk mt-2 <?php echo esc_html( $attendee->attendee_badge ); ?>" 
 																type="checkbox" name="remove_slots[]" 
-																<?php echo $this->add_remove_chk( $start_date, $user_badge, $attendee, $template ) || current_user_can( 'edit_plugins' ) ? '' : 'hidden'; ?>
+																<?php echo $this->add_remove_chk( $start_date, $user_badge, $attendee, $template ) || current_user_can( 'manage_signups_plugin' ) ? '' : 'hidden'; ?>
 																value="
 																<?php
 																echo esc_html(
@@ -1237,7 +1237,7 @@ class SignUpsBase {
 							<input id="template_days_to_cancel" type="hidden" name="template_days_to_cancel" 
 								value="<?php echo esc_html( $template->template_days_to_cancel ); ?>">
 							<?php
-							if ( current_user_can( 'edit_plugins' ) ) {
+							if ( current_user_can( 'manage_signups_plugin' ) ) {
 								?>
 								<input type="hidden" name="is_admin" value="true">
 								<?php
@@ -1307,7 +1307,7 @@ class SignUpsBase {
 			</tr>
 		<?php
 
-		if ( ! current_user_can( 'edit_plugins' ) ) {
+		if ( ! current_user_can( 'manage_signups_plugin' ) ) {
 			$member = $wpdb->get_row(
 				$wpdb->prepare(
 					'SELECT *
@@ -1402,7 +1402,7 @@ class SignUpsBase {
 			}
 		}
 
-		if ( current_user_can( 'edit_plugins' ) ) {
+		if ( current_user_can( 'manage_signups_plugin' ) ) {
 			?>
 			</table>
 			<?php
